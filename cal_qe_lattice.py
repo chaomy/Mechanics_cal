@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-15 16:53:21
+# @Last Modified time: 2017-06-15 16:56:50
 
 import os
 import numpy as np
@@ -107,12 +107,15 @@ class cal_lattice(gn_config.bcc,
                                                 dirname))
         return
 
-    def plt_ecut(self):
+    def clc_ecut(self):
         dirlist = glob.glob("dir-*")
-        for i in range(len(dirlist)):
-            print dirlist[i][-2:]
-            # (engy, stress) = self.qe_get_energy_stress()
-
+        npts = len(dirlist)
+        ecutlist = np.zeros(npts)
+        engylist = np.zeros(npts)
+        for i in range(npts):
+            ecutlist[i] = int(dirlist[i][-2:])
+            (engylist[i], stress) = self.qe_get_energy_stress()
+        np.loadtxt('ecut.txt', [ecutlist, engylist])
         return
 
     def loop_run(self):
@@ -182,5 +185,5 @@ if __name__ == '__main__':
     elif options.mtype.lower() == 'run':
         drv.loop_run()
 
-    elif options.mtype.lower() == 'pltcut':
-        drv.plt_ecut()
+    elif options.mtype.lower() == 'clccut':
+        drv.clc_ecut()
