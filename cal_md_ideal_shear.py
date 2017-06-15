@@ -604,4 +604,4 @@ if __name__ == '__main__':
         drv.gn_primitive_lmps(tag='qe')
 
     if options.mtype.lower() == 'iqe':
-        print drv.qe_relax(False)
+        print drv.qe_relax(given=False)
