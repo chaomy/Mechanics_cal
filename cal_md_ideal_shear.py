@@ -591,17 +591,14 @@ if __name__ == '__main__':
     if options.mtype.lower() == 'ivasp':
         drv.vasp_relax()
 
-    if options.mtype.lower() == 'iqe':
-        drv.qe_relax()
-
     if options.mtype.lower() == 'ilmp':
         drv.loop_shear_lmp()
+
+    if options.mtype.lower() == 'iqe':
+        print drv.qe_relax(given=False)
 
     if options.mtype.lower() == 'sub':
         drv.loop_sub()
 
     if options.mtype.lower() == 'gnqe':
         drv.gn_primitive_lmps(tag='qe')
-
-    if options.mtype.lower() == 'iqe':
-        print drv.qe_relax(given=False)
