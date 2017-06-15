@@ -247,9 +247,6 @@ class cal_bcc_ideal_shear(get_data.get_data,
             self.set_pbs(dirname, data[i][0])
         return
 
-    def loop_prep_qe_given(self):
-        return
-
     def loop_prep_qe(self):
         npts = self.npts
         for i in range(npts):
@@ -301,7 +298,6 @@ class cal_bcc_ideal_shear(get_data.get_data,
         print res
         print res.fun
         print res.x
-
         data[0] = delta
         data[1] = res.fun
         data[2:] = res.x
@@ -318,7 +314,6 @@ class cal_bcc_ideal_shear(get_data.get_data,
         else:
             delta = data
             x0 = np.array([0.98, 1.01, 1., 0.0, 0.0])
-
         data = np.zeros(7)
         res = minimize(self.runvasp, x0, delta,
                        method='Nelder-Mead',
@@ -375,7 +370,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
         new_strain = basis.transpose() * strain * basis
         self.gn_primitive_lmps(new_strain, 'qe')
         os.system("mpirun pw.x < qe.in > qe.out")
-        (engy, stress, vol) = self.qe_energy_stress_vol()
+        (engy, stress) = self.qe_get_energy_stress('qe.out')
         print engy
         return engy
 
@@ -384,10 +379,8 @@ class cal_bcc_ideal_shear(get_data.get_data,
         strain = np.mat([[x[0], 0.0, 0.0],
                          [-delta, x[1], 0.0],
                          [x[3], x[4], x[2]]])
-
         new_strain = basis.transpose() * strain * basis
         self.gn_primitive_lmps(new_strain, 'vasp')
-
         os.system("mpirun vasp > vasp.log")
         (engy, stress, vol) = self.vasp_energy_stress_vol()
         print engy
@@ -411,11 +404,9 @@ class cal_bcc_ideal_shear(get_data.get_data,
 
         spl = InterpolatedUnivariateSpline(data[:, 0], data[:, 1], k=3)
         splder1 = spl.derivative()
-
         for i in range(len(data)):
             # append the stress to the last column
             data[i, -1] = splder1(data[i, 0]) * convunit / data[i, 2]
-
         print data
         np.savetxt("stress.txt", data)
         return
@@ -600,6 +591,9 @@ if __name__ == '__main__':
     if options.mtype.lower() == 'ivasp':
         drv.vasp_relax()
 
+    if options.mtype.lower() == 'iqe':
+        drv.qe_relax()
+
     if options.mtype.lower() == 'ilmp':
         drv.loop_shear_lmp()
 
@@ -610,4 +604,4 @@ if __name__ == '__main__':
         drv.gn_primitive_lmps(tag='qe')
 
     if options.mtype.lower() == 'iqe':
-        print drv.qe_get_energy_stress('qe.out')
+        print drv.qe_relax(False)
