@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-15 16:02:40
+# @Last Modified time: 2017-06-15 16:28:30
 
 import os
 import numpy as np
@@ -107,11 +107,17 @@ class cal_lattice(gn_config.bcc,
                                                 dirname))
         return
 
+    def plt_ecut(self):
+        print self.qe_get_energy_stress()
+        return
+
     def loop_run(self):
         dirlist = glob.glob("dir-*")
         for dirname in dirlist:
+            print dirname
             os.chdir(dirname)
-            os.system("mpirun -n 24 pw.x < qe.in > qe.out")
+            if not os.path.isfile('qe.out'):
+                os.system("mpirun -n 24 pw.x < qe.in > qe.out")
             os.chdir(self.root)
         return
 
