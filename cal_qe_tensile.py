@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-14 22:08:10
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-14 22:12:08
+# @Last Modified time: 2017-06-14 22:53:58
 # encoding: utf-8
 import os
 import re
@@ -24,6 +24,7 @@ __all__ = ['QEtensile',
 
 
 class QEtensile(object):
+
     def __init__(self,
                  Element,
                  AtomMass,
@@ -586,7 +587,6 @@ def loop_potentials():
         os.chdir(RootDir)
     return
 
-
 def calculate(PotentialN):
     Potentialist = ['WRe.0-05.fhi.UPF',
                     'WRe.0-1.fhi.UPF',
@@ -626,6 +626,7 @@ parser.add_option("-d", "--direction",
                   nargs=6, type="int",
                   help=" x y z yz xz xy",
                   default="1")
+
 parser.add_option("-e",
                   "--element",
                   dest="Element",
@@ -650,5 +651,8 @@ parser.add_option("-l", "--lattice_constant",
 if __name__ == "__main__":
     # loop_potentials()
     calculate(4)
-    if options.mtype.lower() == 'prepqe': 
-        self.calculation()
+    if options.mtype.lower() == 'prepqe':
+        calculation()
+
+    if options.mtype.lower() == 'clc':
+        loop_clc_output()
