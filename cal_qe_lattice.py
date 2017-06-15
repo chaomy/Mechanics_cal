@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-15 16:44:32
+# @Last Modified time: 2017-06-15 16:53:21
 
 import os
 import numpy as np
@@ -108,7 +108,11 @@ class cal_lattice(gn_config.bcc,
         return
 
     def plt_ecut(self):
-        print self.qe_get_energy_stress()
+        dirlist = glob.glob("dir-*")
+        for i in range(len(dirlist)):
+            print dirlist[i][-2:]
+            # (engy, stress) = self.qe_get_energy_stress()
+
         return
 
     def loop_run(self):
