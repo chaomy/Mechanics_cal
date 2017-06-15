@@ -222,14 +222,14 @@ class cal_bcc_ideal_shear(get_data.get_data,
         print res.x
         return
 
-    def set_pbs(self, dirname, delta):
+    def set_pbs(self, dirname, delta, opt='vasp'):
         self.set_nnodes(1)
         self.set_ppn(12)
         self.set_job_title("%s" % (dirname))
         self.set_wall_time(50)
         self.set_main_job("""
-        python ~/My_cal/Mechnical_cal/cal_md_ideal_shear.py  -t  ivasp
-                          """)
+        python ~/My_cal/Mechnical_cal/cal_md_ideal_shear.py  -t  i{}
+                          """.format(opt))
         self.write_pbs(od=False)
         os.system("mv va.pbs %s" % (dirname))
         return
@@ -255,7 +255,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
             self.mymkdir(dirname)
             os.system("echo {} > strain.txt".format(delta))
             os.system("mv strain.txt {}".format(dirname))
-            self.set_pbs(dirname, delta)
+            self.set_pbs(dirname, delta, opt='qe')
         return
 
     def loop_prep_vasp(self):
