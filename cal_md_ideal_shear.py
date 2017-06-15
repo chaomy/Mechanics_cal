@@ -255,7 +255,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
             self.mymkdir(dirname)
             os.system("echo {} > strain.txt".format(delta))
             os.system("mv strain.txt {}".format(dirname))
-            os.system("{} {}".format(self.pot['file'], dirname))
+            os.system("cp {} {}".format(self.pot['file'], dirname))
             self.set_pbs(dirname, delta, opt='qe')
         return
 
