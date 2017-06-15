@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-15 15:50:06
+# @Last Modified time: 2017-06-15 16:02:40
 
 import os
 import numpy as np
@@ -12,6 +12,7 @@ import md_pot_data
 import gn_config
 import get_data
 import output_data
+import glob
 from optparse import OptionParser
 from scipy import interpolate
 
@@ -32,6 +33,7 @@ class cal_lattice(gn_config.bcc,
         self.element = self.pot['element']
         self.mass = self.pot['mass']
         self.kpnts = [43, 43, 43]
+        self.root = os.getcwd()
         return
 
     def cal_bcc_lattice(self):
@@ -105,6 +107,14 @@ class cal_lattice(gn_config.bcc,
                                                 dirname))
         return
 
+    def loop_run(self):
+        dirlist = glob.glob("dir-*")
+        for dirname in dirlist:
+            os.chdir(dirname)
+            os.system("mpirun -n 24 pw.x < qe.in > qe.out")
+            os.chdir(self.root)
+        return
+
     def gn_qe_bcc_lattice_infile(self, atoms):
         self.set_thr('1.0D-6')
         with open('qe.in', 'w') as fid:
@@ -158,3 +168,6 @@ if __name__ == '__main__':
 
     elif options.mtype.lower() == 'bcc':
         drv.cal_bcc_lattice()
+
+    elif options.mtype.lower() == 'run':
+        drv.loop_run()
