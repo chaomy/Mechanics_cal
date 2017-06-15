@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-15 16:28:30
+# @Last Modified time: 2017-06-15 16:44:32
 
 import os
 import numpy as np
@@ -177,3 +177,6 @@ if __name__ == '__main__':
 
     elif options.mtype.lower() == 'run':
         drv.loop_run()
+
+    elif options.mtype.lower() == 'pltcut':
+        drv.plt_ecut()
