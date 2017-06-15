@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-14 22:08:10
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-14 22:53:58
+# @Last Modified time: 2017-06-15 00:54:14
 # encoding: utf-8
 import os
 import re
@@ -589,11 +589,11 @@ def loop_potentials():
 
 def calculate(PotentialN):
     Potentialist = ['WRe.0-05.fhi.UPF',
-                    'WRe.0-1.fhi.UPF',
+                    'WRe.0-10.fhi.UPF',
                     'WRe.0-15.fhi.UPF',
-                    'WRe.0-2.fhi.UPF',
+                    'WRe.0-20.fhi.UPF',
                     'WRe.0-25.fhi.UPF',
-                    'WRe.0-5.fhi.UPF']
+                    'WRe.0-50.fhi.UPF']
 
     LatticeList = [5.98753,
                    5.98281,
