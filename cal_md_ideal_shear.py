@@ -227,8 +227,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
         self.set_ppn(12)
         self.set_job_title("%s" % (dirname))
         self.set_wall_time(50)
-        self.set_main_job("""
-        python ~/My_cal/Mechnical_cal/cal_md_ideal_shear.py  -t  i{}
+        self.set_main_job("""cal_md_ideal_shear.py  -t  i{}
                           """.format(opt))
         self.write_pbs(od=False)
         os.system("mv va.pbs %s" % (dirname))
