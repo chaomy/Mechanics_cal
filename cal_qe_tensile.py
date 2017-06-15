@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-14 22:08:10
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-15 00:54:14
+# @Last Modified time: 2017-06-15 15:29:48
 # encoding: utf-8
 import os
 import re
@@ -14,17 +14,8 @@ import copy
 
 __version__ = 0.01
 __author__ = 'Chaoming Yang'
-__all__ = ['QEtensile',
-           'getM', 'getSij', 'get_data',
-           'updateStrain',
-           'gnInfile_O', 'gnInfile_T',
-           'output',
-           'loopcalculate',
-           'loop_potentials', 'calculate']
-
 
 class QEtensile(object):
-
     def __init__(self,
                  Element,
                  AtomMass,

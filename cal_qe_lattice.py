@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
-# @Last Modified by:   yangchaoming
-# @Last Modified time: 2017-06-13 21:43:03
+# @Last Modified by:   chaomy
+# @Last Modified time: 2017-06-15 15:50:06
 
 import os
 import numpy as np
@@ -91,27 +91,22 @@ class cal_lattice(gn_config.bcc,
                         stress)
         return
 
-    # to be changed
-    def loop_energyCutoff(self):
-        for energyCut in range(40, 50):
-            latticeList = []
-            energy = []
-            stress = []
-            for i in range(-25, 25):
-                alat = self.alat0 + i * 0.005
-                latticeList.append(float(alat))
-                data = self.get_data()
-                energy.append(data[0])
-                stress.append(data[1])
-            self.output(alat,
-                        energyCut,
-                        energy,
-                        stress)
+    def loop_ecut(self):
+        bcc_drv = gn_config.bcc(self.pot)
+        bcc_drv.set_lattce_constant(self.alat0)
+        for ecut in range(30, 50):
+            self.set_ecut('{}'.format(ecut))
+            dirname = 'dir-ecut-{}'.format(ecut)
+            self.mymkdir(dirname)
+            atoms = bcc_drv.set_bcc_primitive((1, 1, 1))
+            self.gn_qe_bcc_lattice_infile(atoms)
+            os.system('mv qe.in {}'.format(dirname))
+            os.system('cp $POTDIR/{} {}'.format(self.pot['file'],
+                                                dirname))
         return
 
     def gn_qe_bcc_lattice_infile(self, atoms):
         self.set_thr('1.0D-6')
-        self.set_ecut('38')
         with open('qe.in', 'w') as fid:
             fid = self.qe_write_control(fid, atoms)
             fid = self.qe_write_system(fid, atoms)
@@ -155,8 +150,8 @@ if __name__ == '__main__':
     if options.mtype.lower() == 'kpoints':
         drv.loop_kpoints()
 
-    elif options.mtype.lower() == 'energycut':
-        drv.loop_energyCutoff()
+    elif options.mtype.lower() == 'ecut':
+        drv.loop_ecut()
 
     elif options.mtype.lower() == 'pot':
         drv.loop_pots()

@@ -116,7 +116,7 @@ class vasp_dislocation(gn_config.bcc, gn_config.fcc, gn_config.hcp,
         e2 = np.array([-1., 1., 0])
         e3 = np.array([0.5, 0.5, 0.5])
 
-        ### 3, 5;   5, 9;  7, 11
+        # 3, 5;   5, 9;  7, 11
         r, s = 7, 11
         v1 = r * e1
         v2 = 0.5 * (r * e1 + s * e2) + 0.5 * e3
@@ -161,17 +161,17 @@ class vasp_dislocation(gn_config.bcc, gn_config.fcc, gn_config.hcp,
 
     def cal_dislocations(self):
         m_direction = [[1, -2, 1], [1, 0, -1], [1, 1, 1]]
-        ############ generate config    ############
+        # generate config #
         self.set_lattce_constant(self._lattice_constant)
         self.set_element('W')
         self.write_bcc_convention(m_direction, (5, 6, 3))
 
-        ############ Intro single screw ############
+        #       Intro single screw          #
         self.intro_single_screw()
         return
 
     ############################################
-    ############ generate config    ############
+    # generate config #
     ############################################
 
     def parepare_screw_dipo_with_solutes(self):
