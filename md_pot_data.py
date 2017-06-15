@@ -110,7 +110,7 @@ class qe_pot:
                    'latticebohr': 5.94977,
                    'latbcc': 3.1485,
                    'mass': 183.95835,
-                   'file': 'WRe.0-05.fhi.UPF'}
+                   'file': 'WRe.0-50.fhi.UPF'}
 
     vca_W75Re25 = {'element': 'W',
                    'lattice': 3.158786,
@@ -123,7 +123,7 @@ class qe_pot:
                    'lattice':  3.16097001649,
                    'latticebohr': 5.97337,
                    'mass': 184.313400,
-                   'file': 'WRe.0-2.fhi.UPF'}
+                   'file': 'WRe.0-20.fhi.UPF'}
 
     vca_W85Re15 = {'element': 'W',
                    'lattice': 3.1634677319,
@@ -135,7 +135,7 @@ class qe_pot:
                    'lattice': 3.16596544737,
                    'latticebohr': 5.98281,
                    'mass':  184.0767,
-                   'file': 'WRe.0-1.fhi.UPF'}
+                   'file': 'WRe.0-10.fhi.UPF'}
 
     vca_W95Re05 = {'file': 'WRe.0-05.fhi.UPF'}
 
