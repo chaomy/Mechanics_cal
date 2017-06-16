@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-15 16:58:50
+# @Last Modified time: 2017-06-15 17:06:43
 
 import os
 import numpy as np
@@ -118,7 +118,7 @@ class cal_lattice(gn_config.bcc,
             ecutlist[i] = int(dirlist[i][-2:])
             (engylist[i], stress) = self.qe_get_energy_stress()
             os.chdir(self.root)
-        np.loadtxt('ecut.txt', [ecutlist, engylist])
+        np.savetxt('ecut.txt', [ecutlist, engylist])
         return
 
     def loop_run(self):
