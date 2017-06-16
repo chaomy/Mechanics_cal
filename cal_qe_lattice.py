@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-15 17:06:43
+# @Last Modified time: 2017-06-15 17:15:30
 
 import os
 import numpy as np
@@ -13,6 +13,7 @@ import gn_config
 import get_data
 import output_data
 import glob
+import plt_drv
 from optparse import OptionParser
 from scipy import interpolate
 
@@ -22,13 +23,15 @@ class cal_lattice(gn_config.bcc,
                   gn_config.hcp,
                   get_data.get_data,
                   output_data.output_data,
-                  gn_qe_inputs.gn_qe_infile):
+                  gn_qe_inputs.gn_qe_infile,
+                  plt_drv.plt_drv):
 
     def __init__(self, inpot=None):
         self.pot = md_pot_data.qe_pot.vca_W75Re25
         output_data.output_data.__init__(self)
         get_data.get_data.__init__(self)
         gn_qe_inputs.gn_qe_infile.__init__(self, self.pot)
+        plt_drv.plt_drv.__init__(self)
         self.alat0 = self.pot['lattice']
         self.element = self.pot['element']
         self.mass = self.pot['mass']
@@ -121,6 +124,17 @@ class cal_lattice(gn_config.bcc,
         np.savetxt('ecut.txt', [ecutlist, engylist])
         return
 
+    def plt_ecut(self):
+        [ecut, engy] = np.loadtxt('ecut.txt')
+        print np.argsort(ecut)
+        # Strain_Sxx = Strain_Sxx.transpose()[Strain_Sxx[0, :].argsort()]
+        engy = engy[np.argsort(ecut)]
+        self.set_111plt()
+        self.set_keys()
+        self.ax.plot(np.sort(ecut), engy)
+        self.fig.savefig('ecut.png')
+        return
+
     def loop_run(self):
         dirlist = glob.glob("dir-*")
         for dirname in dirlist:
@@ -190,3 +204,6 @@ if __name__ == '__main__':
 
     elif options.mtype.lower() == 'clccut':
         drv.clc_ecut()
+
+    elif options.mtype.lower() == 'pltcut':
+        drv.plt_ecut()
