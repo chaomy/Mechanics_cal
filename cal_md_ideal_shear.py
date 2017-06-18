@@ -370,7 +370,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
         new_strain = basis.transpose() * strain * basis
         self.gn_primitive_lmps(new_strain, 'qe')
         os.system("mpirun pw.x < qe.in > qe.out")
-        (engy, stress) = self.qe_get_energy_stress('qe.out')
+        (engy, vol, stress) = self.qe_get_energy_stress('qe.out')
         print engy
         return engy
 
@@ -385,6 +385,18 @@ class cal_bcc_ideal_shear(get_data.get_data,
         (engy, stress, vol) = self.vasp_energy_stress_vol()
         print engy
         return engy
+
+    def qe_loop_stress(self):
+        npts = self.npts
+        data = np.ndarray([npts, 4])
+        for i in range(npts):
+            dirname = "dir-{:03d}".format(i)
+            os.chdir(dirname)
+            (engy, vol, stress) = self.qe_get_energy_stress('qe.out')
+            print(engy, vol)
+            #raw = np.loadtxt("ishear.txt")
+            os.chdir(self.root)
+        return
 
     def vasp_loop_stress(self):
         npts = self.npts
@@ -558,6 +570,9 @@ if __name__ == '__main__':
 
     if options.mtype.lower() == 'vastress':
         drv.vasp_loop_stress()
+
+    if options.mtype.lower() == 'qestress':
+        drv.qe_loop_stress()
 
     if options.mtype.lower() == 'lmpstress':
         drv.convert_stress()

@@ -138,6 +138,7 @@ class lmps_neb_tools(get_data.get_data,
         sshdir = "$FLUX:/home/chaomy/{}".format(mydir)
         os.system("scp init_restart  final.coord  ../dummy.lammps.ADP {}".format(sshdir))
         os.system("rm ./Final_custom/dump.custom.*")
+        os.system("rm dummp.custom.*")
         return
 
     def change_index(self):
@@ -160,7 +161,8 @@ class lmps_neb_tools(get_data.get_data,
 
         for i in range(nlogs):
             mfile = "log.lammps.%d" % (i)
-            neb_energy.append(self.md_get_final_energy_e(mfile))
+            print mfile
+            neb_energy.append(self.md_get_final_energy(mfile))
 
         neb_energy = np.array(neb_energy)
         neb_energy -= np.min(neb_energy)

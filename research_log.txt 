@@ -4,3 +4,28 @@ Jun 16
 2, What do we do when we have v = f(sigma) 
 
 3, : 
+
+Jun 17 
+1, Using analytic function to fit the parameters 
+
+=> pair functions phi = use gljm 
+
+=> transfer function  rho = use Mishin 
+
+=> embedding function  
+	(a) FS 
+	(b) universal (ref: Analytic embedded atom method model for bcc metals) 
+
+=> dipole angular term  u = 
+	(a) try tersoff_pot  
+
+=> quadrupole term w = 
+	(a) try tersoff_pot 
+
+
+# test cutoff 
+0, evo1 cutoff 5.19 
+1, evo2 cutoff 5.29 
+2, evo3 cutoff 5.41 
+3, evo4 cutoff 5.52 
+4, evo5 cutoff 5.61  

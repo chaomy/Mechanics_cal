@@ -24,7 +24,6 @@ import matplotlib.pylab as plt
 from scipy.interpolate import InterpolatedUnivariateSpline
 from optparse import OptionParser
 import ase.lattice
-import md_pot_data
 import gn_config
 import get_data
 import Intro_vasp
@@ -97,12 +96,16 @@ class md_reaction_coordinate(gn_config.bcc,
                      new_atoms,
                      format='cfg')
 
-        ##### state final #####
-        poscar_atoms = ase.io.read("./state_final/lmp_init.cfg", format='cfg')
-        atoms_tobe_changed2 = ase.io.read("./state_final/W.0.cfg", format='cfg')
-        map_list = self.map_atoms_list(poscar_atoms, atoms_tobe_changed2)
+        # state final #
+        poscar_atoms = ase.io.read("./state_final/lmp_init.cfg",
+                                   format='cfg')
+        atoms_tobe_changed2 = ase.io.read("./state_final/W.0.cfg",
+                                          format='cfg')
+        map_list = self.map_atoms_list(poscar_atoms,
+                                       atoms_tobe_changed2)
 
-        new_atoms2 = self.sort_atoms(atoms_tobe_changed2, map_list)
+        new_atoms2 = self.sort_atoms(atoms_tobe_changed2,
+                                     map_list)
 
         ase.io.write("peierls_final.cfg",
                      new_atoms2,
@@ -125,12 +128,11 @@ class md_reaction_coordinate(gn_config.bcc,
         atoms = ase.lattice.cubic.BodyCenteredCubic(directions=[e1, e2, e3],
                                                     latticeconstant=self._alat,
                                                     size=(n,  t,  m),
-                                                    symbol='Nb',
+                                                    symbol=self.pot['element'],
                                                     pbc=(1, 1, 1))
 
-        ################  add shiftment to the supercell ###################
+        # add shiftment to the supercell #
         atoms = self.mddis_drv.cut_half_atoms_new(atoms, "cutz")
-
         supercell = atoms.get_cell()
         strain = np.mat([[1.0, 0.0, 0.0],
                          [0.0, 1.0, 0.0],
@@ -150,7 +152,8 @@ class md_reaction_coordinate(gn_config.bcc,
         c1 = [(sx) * unitx, (sy + 1. / 3.) * unity]
         c2 = [(sx + ix) * unitx, (sy + 2. / 3.) * unity]
         center = [c1, c2]
-        atoms = self.mddis_drv.intro_dipole_screw_atoms_LMP(atoms, center=center,
+        atoms = self.mddis_drv.intro_dipole_screw_atoms_LMP(atoms,
+                                                            center=center,
                                                             lattice=self._alat)
         self.write_lmp_config_data(atoms, "init.txt")
 
@@ -158,7 +161,8 @@ class md_reaction_coordinate(gn_config.bcc,
         c1 = [(sx + movex) * unitx, (sy + 1. / 3.) * unity]
         c2 = [(sx + ix + movex) * unitx, (sy + 2. / 3.) * unity]
         center = [c1, c2]
-        atoms = self.mddis_drv.intro_dipole_screw_atoms_LMP(atoms2, center=center,
+        atoms = self.mddis_drv.intro_dipole_screw_atoms_LMP(atoms2,
+                                                            center=center,
                                                             lattice=self._alat)
         self.write_lmp_config_data(atoms, "final.txt")
         # self.write_lmp_coords(atoms, "final.coord")
@@ -241,16 +245,14 @@ class md_reaction_coordinate(gn_config.bcc,
             os.chdir(self.root_dir)
         return
 
-    ###########################################################
-    #################  reaction coordinate method #############
-    ###########################################################
+    #  reaction coordinate method #
     def peierls(self):
         lattice = 3.143390
         e1 = np.array([1.,   1.,  -2.])
         e2 = np.array([-1.,  1.,   0])
         e3 = np.array([0.5,  0.5,  0.5])
 
-        ### 3, 5;   5, 9;  7, 11
+        # 3, 5;   5, 9;  7, 11
         r, s = 7,  11
         v1 = r * e1
         v2 = 0.5 * (r * e1 + s * e2) + 0.5 * e3
@@ -271,7 +273,7 @@ class md_reaction_coordinate(gn_config.bcc,
             os.system("cp  ./w_eam4.fs  %s" % (dir_name))
             os.chdir(dir_name)
 
-            ############ generate config    ############
+            # generate config #
             atoms = self.set_bcc_convention([v1, v2, v3],
                                             (r, 1, 1))  # z periodic 12
             atoms2 = atoms.copy()
@@ -283,7 +285,8 @@ class md_reaction_coordinate(gn_config.bcc,
                          atoms2,
                          "cfg")
             s = i * delta
-            atoms = self.intro_dipole_screw_atoms(atoms, lattice, move_x=None, input_s=s)
+            atoms = self.intro_dipole_screw_atoms(
+                atoms, lattice, move_x=None, input_s=s)
             atoms = self.cut_half_atoms(atoms)
 
             ase.io.write("lmp_init.cfg",
@@ -381,7 +384,8 @@ class md_reaction_coordinate(gn_config.bcc,
             neb_energy.append(self.md_get_final_energy_e(mfile))
         neb_energy = np.array(neb_energy)
         neb_energy -= np.min(neb_energy)
-        # neb_energy *= (1. / 4.)     # dislocation dipole (count how many burgers vector)
+        # neb_energy *= (1. / 4.)     # dislocation dipole (count how many
+        # burgers vector)
         disp = np.linspace(0.0, self._burger, len(neb_energy))
         data = np.array([disp, neb_energy])
         np.savetxt('pengy.txt', data)
