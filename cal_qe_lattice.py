@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-17 22:13:54
+# @Last Modified time: 2017-06-17 23:09:25
 
 import os
 import numpy as np
@@ -52,6 +52,8 @@ class cal_lattice(gn_config.bcc,
             atoms = bcc_drv.set_bcc_primitive((1, 1, 1))
             self.gn_qe_bcc_lattice_infile(atoms)
             os.system("mv qe.in {}".format(dirname))
+            os.system('cp $POTDIR/{} {}'.format(self.pot['file'],
+                                                dirname))
         return
 
     def loop_pots(self):
@@ -120,15 +122,15 @@ class cal_lattice(gn_config.bcc,
         np.savetxt('{}.txt'.format(tag), [ecutlist, engylist])
         return
 
-    def plt_ecut(self):
-        [ecut, engy] = np.loadtxt('ecut.txt')
+    def plt_data(self, tag='ecut'):
+        [ecut, engy] = np.loadtxt('{}.txt'.format(tag))
         print np.argsort(ecut)
         # Strain_Sxx = Strain_Sxx.transpose()[Strain_Sxx[0, :].argsort()]
         engy = engy[np.argsort(ecut)]
         self.set_111plt()
         self.set_keys()
         self.ax.plot(np.sort(ecut), engy)
-        self.fig.savefig('ecut.png')
+        self.fig.savefig('{}.png'.format(tag))
         return
 
     def loop_run(self):
@@ -205,4 +207,7 @@ if __name__ == '__main__':
         drv.clc_data(tag='kpts')
 
     elif options.mtype.lower() == 'pltcut':
-        drv.plt_ecut()
+        drv.plt_data(tag='ecut')
+
+    elif options.mtype.lower() == 'pltkpts':
+        drv.plt_data(tag='kpts')
