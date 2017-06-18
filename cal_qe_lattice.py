@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-15 17:15:30
+# @Last Modified time: 2017-06-17 21:30:42
 
 import os
 import numpy as np
@@ -77,23 +77,19 @@ class cal_lattice(gn_config.bcc,
                                          file_name='lat.txt')
         return
 
-    # to be changed
     def loop_kpoints(self):
-        for kpoint in range(33, 36):
-            latticeList = []
-            energy = []
-            stress = []
-            for i in range(-15, 15):
-                alat = self.alat0 + i * 0.004
-                latticeList.append(alat)
-                self.gnInfile(alat, kpoint)
-                data = self.get_data()
-                energy.append(data[0])
-                stress.append(data[1])
-            self.output(latticeList,
-                        kpoint,
-                        energy,
-                        stress)
+        bcc_drv = gn_config.bcc(self.pot)
+        bcc_drv.set_lattce_constant(self.alat0)
+        self.set_ecut('{}'.format(48))
+        for kpts in range(32, 50):
+            self.set_kpnts((kpts, kpts, kpts))
+            dirname = 'dir-kpt-{}'.format(kpts)
+            self.mymkdir(dirname)
+            atoms = bcc_drv.set_bcc_primitive((1, 1, 1))
+            self.gn_qe_bcc_lattice_infile(atoms)
+            os.system('mv qe.in {}'.format(dirname))
+            os.system('cp $POTDIR/{} {}'.format(self.pot['file'],
+                                                dirname))
         return
 
     def loop_ecut(self):
@@ -187,7 +183,7 @@ if __name__ == '__main__':
     (options, args) = parser.parse_args()
     drv = cal_lattice()
 
-    if options.mtype.lower() == 'kpoints':
+    if options.mtype.lower() == 'kpts':
         drv.loop_kpoints()
 
     elif options.mtype.lower() == 'ecut':

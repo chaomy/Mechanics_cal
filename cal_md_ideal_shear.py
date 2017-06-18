@@ -371,7 +371,6 @@ class cal_bcc_ideal_shear(get_data.get_data,
         self.gn_primitive_lmps(new_strain, 'qe')
         os.system("mpirun pw.x < qe.in > qe.out")
         (engy, vol, stress) = self.qe_get_energy_stress('qe.out')
-        print engy
         return engy
 
     def runvasp(self, x, delta):
@@ -388,20 +387,31 @@ class cal_bcc_ideal_shear(get_data.get_data,
 
     def qe_loop_stress(self):
         npts = self.npts
+        convunit = unitconv.ustress['evA3toGpa']
+        # conveng = unitconv.uengy['rytoeV']
         data = np.ndarray([npts, 4])
         for i in range(npts):
             dirname = "dir-{:03d}".format(i)
             os.chdir(dirname)
-            print self.qe_get_energy_stress('qe.out')
-            #raw = np.loadtxt("ishear.txt")
+            (engy, vol, stress) = self.qe_get_energy_stress('qe.out')
+            raw = np.loadtxt("ishear.txt")
             os.chdir(self.root)
+            vol = vol * (unitconv.ulength['BohrtoA']**3)
+            data[i, 0] = raw[0]
+            data[i, 1] = raw[1]
+            data[i, 2] = vol
+        spl = InterpolatedUnivariateSpline(data[:, 0], data[:, 1], k=3)
+        splder1 = spl.derivative()
+        for i in range(len(data)):
+            data[i, -1] = splder1(data[i, 0]) * convunit / data[i, 2]
+        print data
+        np.savetxt('stress.txt', data)
         return
 
     def vasp_loop_stress(self):
         npts = self.npts
         data = np.ndarray([npts, 4])
         convunit = unitconv.ustress['evA3toGpa']
-
         for i in range(npts):
             dirname = "dir-{:03d}".format(i)
             os.chdir(dirname)
