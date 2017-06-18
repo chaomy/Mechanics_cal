@@ -16,20 +16,23 @@ Jun 17
 	(a) FS 
 	(b) universal (ref: Analytic embedded atom method model for bcc metals) 
 
-=> dipole angular term  u = 
-	(a) try tersoff_pot  
+=> dipole angular term   
+	(a) try tersoff_pot 
 
 => quadrupole term w = 
 	(a) try tersoff_pot 
 
+2, 
+	# test cutoff 
+	0, evo1 cutoff 5.19 
 
-# test cutoff 
-0, evo1 cutoff 5.19 
+	1, evo2 cutoff 5.29  = 
+	2, evo3 cutoff 5.41  = 
 
-1, evo2 cutoff 5.29  = 
-2, evo3 cutoff 5.41  = 
+	3, evo4 cutoff 5.52 
+	4, evo5 cutoff 5.61  bad  
 
-3, evo4 cutoff 5.52 
-4, evo5 cutoff 5.61  bad  
+	between 5.29 to 5.49 !!! 
 
-between 5.29 to 5.49 !!! 
+3,  
+	calculate w lattice constant, and ideal shear
