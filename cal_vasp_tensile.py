@@ -264,6 +264,7 @@ class vasp_itensile(gn_config.bcc,
 
         lattice = 3.322404
         sqrt2_lattice = np.sqrt(2) * lattice
+        
 
         for j in range(21):
             #  TP  #

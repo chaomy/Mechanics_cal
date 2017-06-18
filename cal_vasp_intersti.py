@@ -248,8 +248,6 @@ class vasp_inters(gn_config.bcc,
     def monos(self,
               tag='read'):
         lat = self.lat
-
-        #  strain = [1.24, 1.0263, 0.8227]
         #  strain = [1.26, 1.0196, 0.8153]
         strain = [1.28, 1.0106, 0.81]
 
@@ -272,7 +270,7 @@ class vasp_inters(gn_config.bcc,
 
         elif tag == "read":
             atoms = ase.io.read("POSCAR", format='vasp')
-            style = 'op'
+            style = 'tp'
             if style == 'op':
                 atoms = atoms.repeat((4, 3, 3))  # OP
             elif style == 'tp':
@@ -286,10 +284,9 @@ class vasp_inters(gn_config.bcc,
         elif tag == "vac":
             atoms = self.set_bcc_convention([e1, e2, e3], (5, 5, 5))
             atoms.pop(150)
-
+        #  add strain
         #  atoms = self.volume_conserving_ortho_strain_atoms(0.03, atoms)
         #  atoms = self.volume_conserving_mono_strain_atoms(0.03, atoms)
-
         ###################################################################
         # add perturbation
         ###################################################################
@@ -443,6 +440,3 @@ if __name__ == '__main__':
 
     if options.mtype.lower() == "surf":
         drv.surf('read')
-
-# -2510.60919368   mig
-# -2510.53396459
