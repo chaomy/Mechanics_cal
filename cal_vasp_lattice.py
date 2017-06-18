@@ -61,10 +61,8 @@ class cal_lattice(gn_config.bcc,
 
     def interpolate_lattice(self, filename):
         data = np.loadtxt(filename)
-
-        lattice = data[:, 0]
+        lattice = np.abs(data[:, 0])
         energy = data[:, 1]
-
         InterPoints = np.linspace(lattice[0], lattice[-1], 101)
         f = interp1d(lattice, energy)
         Ynew = f(InterPoints)

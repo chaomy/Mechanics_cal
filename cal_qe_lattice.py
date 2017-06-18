@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-18 15:40:31
+# @Last Modified time: 2017-06-18 15:42:31
 
 import os
 import numpy as np
@@ -135,12 +135,12 @@ class cal_lattice(gn_config.bcc,
             (energy, vol, stress) = self.qe_get_energy_stress('qe.out')
             cellmtx = self.qe_get_cell('qe.in')
             if (tag == 'fcc') or (tag == 'bcc'):
-                data[cnt, 0] = 2*cellmtx[0, 0]
+                data[cnt, 0] = 2*cellmtx[0, 1]
                 data[cnt, 1] = (energy)
             cnt += 1
             os.chdir(self.root)
         print data
-        np.savetxt('lat.txt', data)
+        np.savetxt('lat.dat', data)
         return
 
     def plt_data(self, tag='ecut'):
