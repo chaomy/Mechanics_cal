@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-18 15:37:44
+# @Last Modified time: 2017-06-18 15:40:31
 
 import os
 import numpy as np
@@ -232,3 +232,6 @@ if __name__ == '__main__':
 
     elif options.mtype.lower() == 'pltkpts':
         drv.plt_data(tag='kpts')
+
+    elif options.mtype.lower() == 'clclat':
+        drv.clc_lattice()
