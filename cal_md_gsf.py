@@ -111,8 +111,8 @@ class cal_md_gsf(gn_config.bcc,
                                        [0, 0, 1],
                                        [1, 1, 0]]
             atoms = \
-             self.set_bcc_convention(in_direction=self._surface_direction,
-                                            in_size=(1, 1, 14))
+                self.set_bcc_convention(in_direction=self._surface_direction,
+                                        in_size=(1, 1, 14))
             for i in range(12):
                 atoms.pop()
             return atoms
@@ -122,8 +122,8 @@ class cal_md_gsf(gn_config.bcc,
                                        [1, -1, 2],
                                        [1, 1, 0]]
             atoms = \
-            self.set_bcc_convention(in_direction=self._surface_direction,
-                                            in_size=(1, 2, 14))
+                self.set_bcc_convention(in_direction=self._surface_direction,
+                                        in_size=(1, 2, 14))
             for i in range(48):
                 atoms.pop()
             return atoms
@@ -133,8 +133,8 @@ class cal_md_gsf(gn_config.bcc,
                                        [0, -1, 1],
                                        [2, 1, 1]]
             atoms = \
-            self.set_bcc_convention(in_direction=self._surface_direction,
-                                            in_size=(1, 1, 14))
+                self.set_bcc_convention(in_direction=self._surface_direction,
+                                        in_size=(1, 1, 14))
             for i in range(12):
                 atoms.pop()
             return atoms
@@ -144,8 +144,8 @@ class cal_md_gsf(gn_config.bcc,
                                        [-1, 1, 0],
                                        [1, 1, 1]]
             atoms = \
-            self.set_bcc_convention(in_direction=self._surface_direction,
-                                            in_size=(1, 1, 14))
+                self.set_bcc_convention(in_direction=self._surface_direction,
+                                        in_size=(1, 1, 14))
             for i in range(24):
                 atoms.pop()
             return atoms
@@ -155,8 +155,8 @@ class cal_md_gsf(gn_config.bcc,
                                        [-1, 1, 2],
                                        [1, 1, 1]]
             atoms = \
-            self.set_bcc_convention(in_direction=self._surface_direction,
-                                            in_size=(1, 1, 14))
+                self.set_bcc_convention(in_direction=self._surface_direction,
+                                        in_size=(1, 1, 14))
             for i in range(24):
                 atoms.pop()
             return atoms
@@ -166,8 +166,8 @@ class cal_md_gsf(gn_config.bcc,
                                        [-1, 1, 2],
                                        [1, 1, 1]]
             atoms = \
-             self.set_bcc_convention(in_direction=self._surface_direction,
-                                            in_size=(1, 1, 12))
+                self.set_bcc_convention(in_direction=self._surface_direction,
+                                        in_size=(1, 1, 12))
             for i in range(12):
                 atoms.pop()
             return atoms
