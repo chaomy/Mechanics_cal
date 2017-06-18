@@ -74,11 +74,16 @@ class cal_md_gsf(gn_config.bcc,
         self.set_lattce_constant(self._surface_lattice_constant)
         self.set_element(self._surface_element)
         self.set_config_file_format("lmp")
+        self.set_relax_type()
         self.sample_gsf_num = 21
         self.disp_delta = 1. / (self.sample_gsf_num - 1)
         self.config_file = "lmp_init.txt"
 
         self.root_dir = os.getcwd()
+        return
+
+    def set_relax_type(self, relaxtag='relaxed'):
+        self.relaxtag = relaxtag
         return
 
     def set_md_gsf_potential(self, in_potential):
@@ -94,8 +99,9 @@ class cal_md_gsf(gn_config.bcc,
             self._surface_direction = [[1, 0, 0],
                                        [0, 1, 0],
                                        [0, 0, 1]]
-            atoms = self.set_bcc_convention(in_direction=self._surface_direction,
-                                            in_size=(1, 1, 18))
+            atoms = \
+                self.set_bcc_convention(in_direction=self._surface_direction,
+                                        in_size=(1, 1, 18))
             for i in range(8):
                 atoms.pop()
             return atoms
@@ -104,7 +110,8 @@ class cal_md_gsf(gn_config.bcc,
             self._surface_direction = [[-1, 1, 0],
                                        [0, 0, 1],
                                        [1, 1, 0]]
-            atoms = self.set_bcc_convention(in_direction=self._surface_direction,
+            atoms = \
+             self.set_bcc_convention(in_direction=self._surface_direction,
                                             in_size=(1, 1, 14))
             for i in range(12):
                 atoms.pop()
@@ -114,7 +121,8 @@ class cal_md_gsf(gn_config.bcc,
             self._surface_direction = [[-1, 1, 1],
                                        [1, -1, 2],
                                        [1, 1, 0]]
-            atoms = self.set_bcc_convention(in_direction=self._surface_direction,
+            atoms = \
+            self.set_bcc_convention(in_direction=self._surface_direction,
                                             in_size=(1, 2, 14))
             for i in range(48):
                 atoms.pop()
@@ -124,7 +132,8 @@ class cal_md_gsf(gn_config.bcc,
             self._surface_direction = [[-1, 1, 1],
                                        [0, -1, 1],
                                        [2, 1, 1]]
-            atoms = self.set_bcc_convention(in_direction=self._surface_direction,
+            atoms = \
+            self.set_bcc_convention(in_direction=self._surface_direction,
                                             in_size=(1, 1, 14))
             for i in range(12):
                 atoms.pop()
@@ -134,7 +143,8 @@ class cal_md_gsf(gn_config.bcc,
             self._surface_direction = [[1, 1, -2],
                                        [-1, 1, 0],
                                        [1, 1, 1]]
-            atoms = self.set_bcc_convention(in_direction=self._surface_direction,
+            atoms = \
+            self.set_bcc_convention(in_direction=self._surface_direction,
                                             in_size=(1, 1, 14))
             for i in range(24):
                 atoms.pop()
@@ -144,7 +154,8 @@ class cal_md_gsf(gn_config.bcc,
             self._surface_direction = [[1, 1, 0],
                                        [-1, 1, 2],
                                        [1, 1, 1]]
-            atoms = self.set_bcc_convention(in_direction=self._surface_direction,
+            atoms = \
+            self.set_bcc_convention(in_direction=self._surface_direction,
                                             in_size=(1, 1, 14))
             for i in range(24):
                 atoms.pop()
@@ -154,7 +165,8 @@ class cal_md_gsf(gn_config.bcc,
             self._surface_direction = [[1, 1, 0],
                                        [-1, 1, 2],
                                        [1, 1, 1]]
-            atoms = self.set_bcc_convention(in_direction=self._surface_direction,
+            atoms = \
+             self.set_bcc_convention(in_direction=self._surface_direction,
                                             in_size=(1, 1, 12))
             for i in range(12):
                 atoms.pop()
@@ -245,7 +257,8 @@ class cal_md_gsf(gn_config.bcc,
 
     def plot_multi_gsf_curv(self,
                             potlist,
-                            typelist):
+                            typelist,
+                            fname='gsf_compare.png'):
         pltdrv = plt_drv.plt_drv()
         pltdrv.set_keys()
         pltdrv.set_211plt((8, 6))
@@ -256,29 +269,35 @@ class cal_md_gsf(gn_config.bcc,
             filename = "gsf_{}_{}.txt".format(pottype,
                                               typelist[0])
             pltlabel = "{}".format(pottype)
-            pltylabel = r"$\gamma$[{}]({}) [eV/$\AA^2$]".format(typelist[0][:3],
-                                                                typelist[0][-3:])
+            pltylabel = \
+                r"$\gamma$[{}]({}) [eV/$\AA^2$]".format(typelist[0][:3],
+                                                        typelist[0][-3:])
             data = np.loadtxt(filename)
             pltdrv.ax1.plot(data[:, 0], data[:, 1],
-                            linestyle=pltdrv.line[np.mod(cnt, pltdrv.linetype)],
+                            linestyle=pltdrv.line[
+                                np.mod(cnt, pltdrv.linetype)],
                             color=pltdrv.color[np.mod(15 * cnt, 50)],
-                            marker=pltdrv.markers[np.mod(cnt, pltdrv.markerstype)],
+                            marker=pltdrv.markers[
+                                np.mod(cnt, pltdrv.markerstype)],
                             label=pltlabel)
             pltdrv.ax1.legend(**pltdrv.legendarg)
             pltdrv.ax1.get_legend()
             pltdrv.ax1.set_ylabel(pltylabel,
-                                  {'fontsize': (pltdrv.myfontsize - 3)})   # (110): -110  (11-2) -110
+                                  {'fontsize': (pltdrv.myfontsize - 3)})  # (110): -110  (11-2) -110
 
             filename = "gsf_{}_{}.txt".format(pottype,
                                               typelist[1])
             pltlabel = "{}".format(pottype)
-            pltylabel = r"$\gamma$[{}]({}) [eV/$\AA^2$]".format(typelist[1][:3],
-                                                                typelist[1][-3:])
+            pltylabel = \
+                r"$\gamma$[{}]({}) [eV/$\AA^2$]".format(typelist[1][:3],
+                                                        typelist[1][-3:])
             data = np.loadtxt(filename)
             pltdrv.ax2.plot(data[:, 0], data[:, 1],
-                            linestyle=pltdrv.line[np.mod(cnt, pltdrv.linetype)],
+                            linestyle=pltdrv.line[
+                                np.mod(cnt, pltdrv.linetype)],
                             color=pltdrv.color[np.mod(15 * cnt, 50)],
-                            marker=pltdrv.markers[np.mod(cnt, pltdrv.markerstype)],
+                            marker=pltdrv.markers[
+                                np.mod(cnt, pltdrv.markerstype)],
                             label=pltlabel)
             pltdrv.ax2.set_xlabel("normalized displacement along $[{}]$".format(self._gsf_surface_type[:3]),
                                   {'fontsize': (pltdrv.myfontsize - 3)})   # (110): -110  (11-2) -110
@@ -288,10 +307,10 @@ class cal_md_gsf(gn_config.bcc,
             pltdrv.ax2.legend(**pltdrv.legendarg)
             pltdrv.ax2.get_legend()
 
-        plt.savefig("gsf_compare.png", **pltdrv.figsave)
+        plt.savefig(fname, **pltdrv.figsave)
         return
 
-    def plot_multi_type_gsf_curv(self, typelist):
+    def plot_multi_type_gsf_curv(self, typelist, fname='gsf_compare.png'):
         pltdrv = plt_drv.plt_drv()
         pltdrv.set_keys()
         pltdrv.set_111plt((8, 4))
@@ -306,7 +325,8 @@ class cal_md_gsf(gn_config.bcc,
             pltdrv.ax.plot(data[:, 0], data[:, 1],
                            linestyle=pltdrv.line[np.mod(cnt, pltdrv.linetype)],
                            color=pltdrv.color[np.mod(12 * cnt, 50)],
-                           marker=pltdrv.markers[np.mod(cnt, pltdrv.markerstype)],
+                           marker=pltdrv.markers[
+                               np.mod(cnt, pltdrv.markerstype)],
                            label=pltlabel)
             cnt += 1
             pltdrv.ax.legend(**pltdrv.legendarg)
@@ -314,7 +334,7 @@ class cal_md_gsf(gn_config.bcc,
                    {'fontsize': (pltdrv.myfontsize)})   # (110): -110  (11-2) -110
         plt.ylabel("stacking fault energy $[eV/\AA^{2}]$",
                    {'fontsize': (pltdrv.myfontsize)})   # (110): -110  (11-2) -110
-        plt.savefig("gsf_compare.png", **pltdrv.figsave)
+        plt.savefig(fname, **pltdrv.figsave)
         return
 
     # trans dft to md
@@ -370,7 +390,6 @@ if __name__ == '__main__':
                       default="prp_r")
     (options, args) = parser.parse_args()
     drv = cal_md_gsf(gsf_surface_type='111_211')
-
     if options.mtype.lower() == 'prep':
         drv.md_single_dir_gsf()
 
@@ -392,16 +411,28 @@ if __name__ == '__main__':
         typelist = ['111_211', '111_110']
         drv.plot_multi_type_gsf_curv(typelist)
 
-    elif options.mtype.lower() == 'auto':
+    elif options.mtype.lower() == 'relaxed':
         potlist = ['adp', 'pbe']
         typelist = ['111_211', '111_110']
+        drv.set_relax_type('relaxed')
+        for gsftype in typelist:
+            drv.set_gsf_surface_type(gsftype)
+            drv.md_single_dir_gsf()
+            drv.multi_thread_gsf()
+            drv.collect_gsf_energy()
+        drv.plot_multi_gsf_curv(potlist, typelist, 'gsf_relaxed.png')
+
+    elif options.mtype.lower() == 'unrelaxed':
+        potlist = ['adp', 'pbe']
+        typelist = ['111_211', '111_110']
+        drv.set_relax_type('unrelaxed')
         for gsftype in typelist:
             drv.set_gsf_surface_type(gsftype)
             drv.md_single_dir_gsf()
             drv.multi_thread_gsf()
             drv.collect_gsf_energy()
         #  drv.plot_multi_type_gsf_curv(typelist)
-        drv.plot_multi_gsf_curv(potlist, typelist)
+        drv.plot_multi_gsf_curv(potlist, typelist, 'gsf_unrelaxed.png')
 
 ###################################################################
     #  def loop_md_gsf_surface(self):
