@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-17 21:30:42
+# @Last Modified time: 2017-06-17 21:35:33
 
 import os
 import numpy as np
@@ -153,7 +153,6 @@ class cal_lattice(gn_config.bcc,
             fid = self.qe_write_kpts(fid, self.kpnts)
             fid.close()
         return
-
 
 def find_lattice(self,
                  Lattice_column,

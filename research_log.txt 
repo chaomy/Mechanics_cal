@@ -25,7 +25,11 @@ Jun 17
 
 # test cutoff 
 0, evo1 cutoff 5.19 
-1, evo2 cutoff 5.29 
-2, evo3 cutoff 5.41 
+
+1, evo2 cutoff 5.29  = 
+2, evo3 cutoff 5.41  = 
+
 3, evo4 cutoff 5.52 
-4, evo5 cutoff 5.61  
+4, evo5 cutoff 5.61  bad  
+
+between 5.29 to 5.49 !!! 
