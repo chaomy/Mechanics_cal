@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-18 15:42:31
+# @Last Modified time: 2017-06-18 15:53:57
 
 import os
 import numpy as np
@@ -27,7 +27,7 @@ class cal_lattice(gn_config.bcc,
                   plt_drv.plt_drv):
 
     def __init__(self, inpot=None):
-        self.pot = md_pot_data.qe_pot.vca_W75Re25
+        self.pot = md_pot_data.qe_pot.pbe_w
         output_data.output_data.__init__(self)
         get_data.get_data.__init__(self)
         gn_qe_inputs.gn_qe_infile.__init__(self, self.pot)
@@ -35,7 +35,7 @@ class cal_lattice(gn_config.bcc,
         self.alat0 = self.pot['lattice']
         self.element = self.pot['element']
         self.mass = self.pot['mass']
-        self.kpnts = [43, 43, 43]
+        self.kpnts = [46, 46, 46]
         self.root = os.getcwd()
         return
 
