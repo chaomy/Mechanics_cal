@@ -392,8 +392,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
         for i in range(npts):
             dirname = "dir-{:03d}".format(i)
             os.chdir(dirname)
-            (engy, vol, stress) = self.qe_get_energy_stress('qe.out')
-            print(engy, vol)
+            print self.qe_get_energy_stress('qe.out')
             #raw = np.loadtxt("ishear.txt")
             os.chdir(self.root)
         return
