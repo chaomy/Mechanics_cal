@@ -109,7 +109,8 @@ class vasp_itensile(gn_config.bcc,
             (energy, stress, vol) = self.vasp_energy_stress_vol()
 
             outstr = "%.6f %.6f %.6f %.6f %.6f %.6f %.6f" % (energy,
-                                                             stress[0], stress[1], stress[2],
+                                                             stress[0], stress[
+                                                                 1], stress[2],
                                                              stress[3], stress[4], stress[5])
             print outstr
 
@@ -145,9 +146,12 @@ class vasp_itensile(gn_config.bcc,
     def relative_to_cell(self, rel_pos, base):
         pos = [0, 0, 0]
 
-        pos[0] = rel_pos[0] * base[0, 0] + rel_pos[1] * base[0, 1] + rel_pos[2] * base[0, 2]
-        pos[1] = rel_pos[0] * base[1, 0] + rel_pos[1] * base[1, 1] + rel_pos[2] * base[1, 2]
-        pos[2] = rel_pos[0] * base[2, 0] + rel_pos[1] * base[2, 1] + rel_pos[2] * base[2, 2]
+        pos[0] = rel_pos[0] * base[0, 0] + rel_pos[1] * \
+            base[0, 1] + rel_pos[2] * base[0, 2]
+        pos[1] = rel_pos[0] * base[1, 0] + rel_pos[1] * \
+            base[1, 1] + rel_pos[2] * base[1, 2]
+        pos[2] = rel_pos[0] * base[2, 0] + rel_pos[1] * \
+            base[2, 1] + rel_pos[2] * base[2, 2]
 
         return pos
 
@@ -262,7 +266,7 @@ class vasp_itensile(gn_config.bcc,
         sqrt2_lattice = np.sqrt(2) * lattice
 
         for j in range(21):
-            ###############  TP  ##############
+            #  TP  #
             dirnameT = "FitStrainsTP/dir-%.3f-%.3d" % (strain, j)
 
             os.chdir(dirnameT)
@@ -278,7 +282,7 @@ class vasp_itensile(gn_config.bcc,
             base_listT.append(base)
             os.chdir(self.root_dir)
 
-            ###############  OP  ##############
+            #  OP  #
             dirnameO = "FitStrainsOP/dir-%.3f-%.3d" % (strain, j)
             os.chdir(dirnameO)
             (energy, stress, base) = self.read_Strain_stress()
@@ -288,9 +292,9 @@ class vasp_itensile(gn_config.bcc,
             sxx_listO[j] = stress[0]
 
             strss_listO.append(stress)
-            base[0, :] = base[0, :] / lattice;
-            base[1, :] = base[1, :] / sqrt2_lattice;
-            base[2, :] = base[2, :] / sqrt2_lattice;
+            base[0, :] = base[0, :] / lattice
+            base[1, :] = base[1, :] / sqrt2_lattice
+            base[2, :] = base[2, :] / sqrt2_lattice
 
             base_listO.append(base)
             os.chdir(self.root_dir)
@@ -304,7 +308,7 @@ class vasp_itensile(gn_config.bcc,
 
         plt.savefig("strain-%.3f.png" % (strain))
 
-        ####### be careful the units in VASP is kbar ######
+        # be careful the units in VASP is kbar #
         with open("log-%.3f" % (strain), "w") as fid:
             fid.write("    if (strain == %.3f){\n" % (strain))
 
@@ -329,14 +333,18 @@ class vasp_itensile(gn_config.bcc,
         temp.opathStressV[3]=  %10.8f; temp.opathStressV[4] =  %10.8f; temp.opathStressV[5]=  %10.8f;
 
         genItenlist.push_back(temp);
-        """ % (
-                    base_listT[i][0, 0], base_listT[i][0, 1], base_listT[i][0, 2],
-                    base_listT[i][1, 0], base_listT[i][1, 1], base_listT[i][1, 2],
-                    base_listT[i][2, 0], base_listT[i][2, 1], base_listT[i][2, 2],
+        """ % (base_listT[i][0, 0], base_listT[i][0, 1], base_listT[i][0, 2],
+                    base_listT[i][1, 0], base_listT[
+                        i][1, 1], base_listT[i][1, 2],
+                    base_listT[i][2, 0], base_listT[
+                        i][2, 1], base_listT[i][2, 2],
 
-                    base_listO[i][0, 0], base_listO[i][0, 1], base_listO[i][0, 2],
-                    base_listO[i][1, 0], base_listO[i][1, 1], base_listO[i][1, 2],
-                    base_listO[i][2, 0], base_listO[i][2, 1], base_listO[i][2, 2],
+                    base_listO[i][0, 0], base_listO[
+                        i][0, 1], base_listO[i][0, 2],
+                    base_listO[i][1, 0], base_listO[
+                        i][1, 1], base_listO[i][1, 2],
+                    base_listO[i][2, 0], base_listO[
+                        i][2, 1], base_listO[i][2, 2],
 
                     engy_listT[i],
                     strss_listT[i][0], strss_listT[i][1], strss_listT[i][2],
