@@ -35,6 +35,7 @@ except ImportError:
 
 
 class cal_bcc_schmid(object):
+
     def __init__(self, pot=None):
         if pot is None:
             self.pot = md_pot_data.md_pot.Nb_eam

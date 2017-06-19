@@ -39,15 +39,13 @@ class cal_bcc_ideal_shear(get_data.get_data,
                           plt_drv.plt_drv):
 
     def __init__(self):
-        self.pot = md_pot_data.qe_pot.vca_W50Re50
-
+        self.pot = md_pot_data.qe_pot.pbe_w
         gn_pbs.gn_pbs.__init__(self)
         plt_drv.plt_drv.__init__(self)
         self.alat = self.pot['lattice']
 
         self.npts = 20
         self.delta = 0.02
-
         shd111p211 = {'e1': np.array([1., 1., 1.]),
                       'e2': np.array([1., 1., -2.]),
                       'e3': np.array([-1., 1., 0.])}
@@ -226,7 +224,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
         self.set_nnodes(1)
         self.set_ppn(12)
         self.set_job_title("%s" % (dirname))
-        self.set_wall_time(50)
+        self.set_wall_time(70)
         self.set_main_job("""cal_md_ideal_shear.py  -t  i{}
                           """.format(opt))
         self.write_pbs(od=False)
@@ -254,7 +252,8 @@ class cal_bcc_ideal_shear(get_data.get_data,
             self.mymkdir(dirname)
             os.system("echo {} > strain.txt".format(delta))
             os.system("mv strain.txt {}".format(dirname))
-            os.system("cp {} {}".format(self.pot['file'], dirname))
+            os.system('cp $POTDIR/{} {}'.format(self.pot['file'],
+                                                dirname))
             self.set_pbs(dirname, delta, opt='qe')
         return
 
@@ -294,7 +293,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
         data = np.zeros(7)
         res = minimize(self.runqe, x0, delta,
                        method='Nelder-Mead',
-                       options={'xtol': 1e-3, 'disp': True})
+                       options={'disp': True})
         print res
         print res.fun
         print res.x
