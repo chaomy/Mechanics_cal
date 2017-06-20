@@ -94,27 +94,41 @@ class cal_md_bcc_basic(gn_config.hcp,
             os.system("mv out.dat  out.dat.%03d" % (dim))
         return
 
-    def cal_lattice(self):
+    def cal_lattice(self, potname='pot.dat'):
         pot = md_pot_data.md_pot.Nb_adp
         os.system("lmp_mpi -i in.bcc_adp")
         data = np.loadtxt("out.txt")
         pot['latbcc'], pot['ebcc'] = data[0], data[1]
-
         os.system("lmp_mpi -i in.fcc_adp")
         data = np.loadtxt("out.txt")
         pot['latfcc'], pot['efcc'] = data[0], data[1]
-
         os.system("lmp_mpi -i in.hcp_adp")
         data = np.loadtxt("out.txt")
         pot['ahcp'], pot['chcp'], pot['ehcp'] = data[0], data[1], data[2]
 
         print 'fcc', pot['efcc'] - pot['ebcc']
         print 'hcp', pot['ehcp'] - pot['ebcc']
-
         print 'latbcc', pot['latbcc']
         print 'latfcc', pot['latfcc']
         pot['lattice'] = pot['latbcc']
-        self.dump_data('pot.dat', pot)
+        self.pot = pot
+        self.dump_data(potname, pot)
+        return
+
+    def loop_rcut_lattice(self):
+        npts = 6
+        data = np.ndarray([npts, 2])
+        for i in range(npts):
+            rcut = 5.17 + 0.015 * i
+            dirname = 'dir-%5.4f' % (rcut)
+            print dirname
+            os.system("cp looprcut/{}/dummy.lamm*  .".format(dirname))
+            potname = 'pot_%5.4f_lat'%(rcut)
+            self.cal_lattice(potname)
+            data[i, 0] = rcut
+            data[i, 1] = self.pot['efcc'] - self.pot['ebcc']
+        print data
+        np.savetxt('rcut_ebcc2fcc.txt', data)
         return
 
     def cal_delta_energy(self):
@@ -143,3 +157,6 @@ if __name__ == '__main__':
 
     if options.mtype.lower() == 'phasetrans':
         drv.cal_delta_energy()
+
+    if options.mtype.lower() == 'looprcut':
+        drv.loop_rcut_lattice()
