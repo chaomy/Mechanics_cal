@@ -62,3 +62,12 @@ Jun 18
 	
 4, prepare you Al dislocation dyanmics data (Precipiates) [one figure] with eplanation. 
 5, WRe50 dislocation core; the calculation was stopped before finish.
+
+Jun 19 
+1, => Fit the average length besed on model (eqn(3)) to the dd simulation (based on 1 and 2)  
+2, => use new mobility function to fit the results 
+3, => after check the convergence => r = 5.29 is the most properly cutoff 
+---> thinki about modifies the potential !!!!! 
+4, => in order to calculate the correct scale of Peierls Potential barrier => the cutoff has 
+to be at least 5.20 A !!!!!!  (smaller cutoff you can never get correct peierls barrier) 
+that means we must include 3nd neighbor of FCC lattice structure. 
