@@ -22,7 +22,7 @@ import os
 import numpy as np
 import ase.lattice
 import md_pot_data
-import drv_plt
+import plt_drv
 
 try:
     import atomman as am
@@ -41,7 +41,8 @@ class cal_md_bcc_basic(gn_config.hcp,
                        gn_config.fcc,
                        get_data.get_data,
                        gn_pbs.gn_pbs,
-                       gn_lmp_infile.gn_md_infile):
+                       gn_lmp_infile.gn_md_infile,
+                       plt_drv.plt_drv):
 
     def __init__(self):
         gn_lmp_infile.gn_md_infile.__init__(self)
@@ -53,10 +54,10 @@ class cal_md_bcc_basic(gn_config.hcp,
                                                                      [0, 1, 0],
                                                                      [0, 0, 1]],
                                                          latticeconstant=self._lat,
-                                                         #  latticeconstant= 3.32247,
                                                          size=(1, 1, 1),
                                                          symbol=self._element,
                                                          pbc=(1, 1, 1))
+        plt_drv.plt_drv.__init__(self)
         self.root = os.getcwd()
         return
 
@@ -116,7 +117,7 @@ class cal_md_bcc_basic(gn_config.hcp,
         self.dump_data(potname, pot)
         return
 
-    def loop_rcut_lattice(self):
+    def loop_rcut_engy(self):
         npts = 7
         data = np.ndarray([npts, 2])
         for i in range(npts):
@@ -124,12 +125,21 @@ class cal_md_bcc_basic(gn_config.hcp,
             dirname = 'dir-%5.4f' % (rcut)
             print dirname
             os.system("cp looprcut/{}/dummy.lamm*  .".format(dirname))
-            potname = 'pot_%5.4f_lat'%(rcut)
+            potname = 'pot_%5.4f_lat' % (rcut)
             self.cal_lattice(potname)
             data[i, 0] = rcut
             data[i, 1] = self.pot['efcc'] - self.pot['ebcc']
         print data
         np.savetxt('rcut_ebcc2fcc.txt', data)
+        return
+
+    def plt_rcut_energy(self):
+        data = np.loadtxt('rcut_ebcc2fcc.txt')
+        self.set_keys()
+        self.set_111plt()
+        self.ax.plot(data[:, 0], data[:, 1],
+                     **self.pltkwargs)
+        self.fig.savefig('rcut_ebcc2fcc.png')
         return
 
     def cal_delta_energy(self):
@@ -160,4 +170,7 @@ if __name__ == '__main__':
         drv.cal_delta_energy()
 
     if options.mtype.lower() == 'looprcut':
-        drv.loop_rcut_lattice()
+        drv.loop_rcut_engy()
+
+    if options.mtype.lower() == 'pltrcut':
+        drv.plt_rcut_energy()
