@@ -119,13 +119,13 @@ class cal_md_bcc_basic(gn_config.hcp,
         return
 
     def loop_rcut_engy(self):
-        npts = 7
+        npts = 16
         data = np.ndarray([npts, 2])
         for i in range(npts):
-            rcut = 5.17 + 0.015 * i
+            rcut = 5.1500 + 0.01 * i
             dirname = 'dir-%5.4f' % (rcut)
             print dirname
-            os.system("cp looprcut/{}/dummy.lamm*  .".format(dirname))
+            os.system("cp engy1000/{}/dummy.lamm*  .".format(dirname))
             potname = 'pot_%5.4f_lat' % (rcut)
             self.cal_lattice(potname)
             data[i, 0] = rcut
@@ -136,18 +136,16 @@ class cal_md_bcc_basic(gn_config.hcp,
 
     def plt_rcut_energy(self):
         data = np.loadtxt('rcut_ebcc2fcc.txt')
-        plt.rc('xtick', labelsize=self.myfontsize-2)
-        plt.rc('ytick', labelsize=self.myfontsize-2)
+        plt.rc('xtick', labelsize=self.myfontsize - 2)
+        plt.rc('ytick', labelsize=self.myfontsize - 2)
         self.set_keys()
         self.set_111plt()
         self.ax.plot(data[:, 0], data[:, 1],
                      **self.pltkwargs)
         self.ax.set_xlabel('cutoff radius (A)',
-            {'fontsize':self.myfontsize})
+                           {'fontsize': self.myfontsize})
         self.ax.set_ylabel('fcc - bcc (meV / atom)',
-            {'fontsize':self.myfontsize})
-        # for tick in self.ax.xaxis.get_ticklabels():
-        #     tick.set_fontsize(self.myfontsize-3)
+                           {'fontsize': self.myfontsize})
         self.fig.savefig('rcut_ebcc2fcc.png', **self.figsave)
         return
 

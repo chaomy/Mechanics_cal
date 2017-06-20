@@ -436,11 +436,11 @@ class md_reaction_coordinate(gn_config.bcc,
     def loop_rcut(self):
         import cal_md_neb
         drvneb = cal_md_neb.lmps_neb_tools()
-        npt = 7
+        npt = 10
         for i in range(npt):
-            rcut = 5.17 + 0.015 * i
+            rcut = 5.18 + 0.01 * i
             dirname = 'dir-%5.4f' % (rcut)
-            os.system("cp ../looprcut/{}/dummy.lamm*  .".format(dirname))
+            os.system("cp ../engy1000/{}/dummy.lamm*  .".format(dirname))
             potname = 'pot_%5.4f_lat' % (rcut)
             self.pot = self.load_data('../{}'.format(potname))
             drv.dipole_peierls_barrier()
