@@ -23,6 +23,7 @@ import numpy as np
 import ase.lattice
 import md_pot_data
 import plt_drv
+import matplotlib.pyplot as plt
 
 try:
     import atomman as am
@@ -135,11 +136,19 @@ class cal_md_bcc_basic(gn_config.hcp,
 
     def plt_rcut_energy(self):
         data = np.loadtxt('rcut_ebcc2fcc.txt')
+        plt.rc('xtick', labelsize=self.myfontsize-2)
+        plt.rc('ytick', labelsize=self.myfontsize-2)
         self.set_keys()
         self.set_111plt()
         self.ax.plot(data[:, 0], data[:, 1],
                      **self.pltkwargs)
-        self.fig.savefig('rcut_ebcc2fcc.png')
+        self.ax.set_xlabel('cutoff radius (A)',
+            {'fontsize':self.myfontsize})
+        self.ax.set_ylabel('fcc - bcc (meV / atom)',
+            {'fontsize':self.myfontsize})
+        # for tick in self.ax.xaxis.get_ticklabels():
+        #     tick.set_fontsize(self.myfontsize-3)
+        self.fig.savefig('rcut_ebcc2fcc.png', **self.figsave)
         return
 
     def cal_delta_energy(self):
