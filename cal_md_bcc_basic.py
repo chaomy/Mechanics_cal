@@ -22,6 +22,7 @@ import os
 import numpy as np
 import ase.lattice
 import md_pot_data
+import drv_plt
 
 try:
     import atomman as am
@@ -116,7 +117,7 @@ class cal_md_bcc_basic(gn_config.hcp,
         return
 
     def loop_rcut_lattice(self):
-        npts = 6
+        npts = 7
         data = np.ndarray([npts, 2])
         for i in range(npts):
             rcut = 5.17 + 0.015 * i
