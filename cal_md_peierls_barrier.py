@@ -130,7 +130,6 @@ class md_reaction_coordinate(gn_config.bcc,
                                                     size=(n,  t,  m),
                                                     symbol=self.pot['element'],
                                                     pbc=(1, 1, 1))
-
         # add shiftment to the supercell #
         atoms = self.mddis_drv.cut_half_atoms_new(atoms, "cutz")
         supercell = atoms.get_cell()
@@ -156,7 +155,6 @@ class md_reaction_coordinate(gn_config.bcc,
                                                             center=center,
                                                             lattice=self._alat)
         self.write_lmp_config_data(atoms, "init.txt")
-
         movex = 1.0
         c1 = [(sx + movex) * unitx, (sy + 1. / 3.) * unity]
         c2 = [(sx + ix + movex) * unitx, (sy + 2. / 3.) * unity]
@@ -436,6 +434,22 @@ class md_reaction_coordinate(gn_config.bcc,
         print np.max(stress)
         return
 
+    def loop_rcut(self):
+        import cal_md_neb
+        drvneb = cal_md_neb.lmps_neb_tools()
+        npt = 6
+        for i in range(npt):
+            rcut = 5.17 + 0.015 * i
+            dirname = 'dir-%5.4f' % (rcut)
+            os.system("cp ../looprcut/{}/dummy.lamm*  .".format(dirname))
+            potname = 'pot_%5.4f_lat' % (rcut)
+            self.pot = self.load_data('../{}'.format(potname))
+            drv.dipole_peierls_barrier()
+            drvneb.create_final_screw()
+            os.system("mpirun -n 16 lmp_mpi -i in.neb_dislocation_dipole -p 16x1")
+            drvneb.read_lmp_log_file(figname='fig.{}.png'.format(rcut))
+        return
+
     def record(self):
         init_nofix = [-2047.73032095]
         init_fix = [-2047.73032095]
@@ -485,6 +499,9 @@ if __name__ == "__main__":
     elif options.mtype.lower() == 'cmp':
         drv.plot_multi_peierls_barrier()
 
-    #  job.collect_peierls_energy();
+    elif options.mtype.lower() == 'looprcut':
+        drv.loop_rcut()
+
+    #  job.collect_peierls_energy()
     #  drv.peierls()
-    #  job.multi_thread_minimize();
+    #  job.multi_thread_minimize()

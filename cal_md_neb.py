@@ -150,23 +150,20 @@ class lmps_neb_tools(get_data.get_data,
             os.system("mv ./log.lammps.%d  log.lammps.0%d" % (i, i))
         return
 
-    def read_lmp_log_file(self):
+    def read_lmp_log_file(self, figname='neb.png'):
         mydir = os.getcwd().split('/')[-1]
         sshdir = "$FLUX:/home/chaomy/{}".format(mydir)
-        os.system("scp {}/log.lammps.* .".format(sshdir))
-
+        # os.system("scp {}/log.lammps.* .".format(sshdir))
         file_list = glob.glob("log.lammps.*")
         nlogs = len(file_list)
         neb_energy = []
-
         for i in range(nlogs):
             mfile = "log.lammps.%d" % (i)
             print mfile
             neb_energy.append(self.md_get_final_energy(mfile))
-
         neb_energy = np.array(neb_energy)
         neb_energy -= np.min(neb_energy)
-        self.plot_neb_energy(neb_energy)
+        self.plot_neb_energy(neb_energy, figname)
         return
 
     def read_screen(self):
@@ -201,10 +198,9 @@ class lmps_neb_tools(get_data.get_data,
         neb_energy = neb_energy - np.min(neb_energy)
         return neb_energy
 
-    def plot_neb_energy(self, neb_energy):
+    def plot_neb_energy(self, neb_energy, figname='neb.png'):
         fig = plt.figure(figsize=(8, 4))
         ax = fig.add_subplot(111)
-
         ax.get_xaxis().get_major_formatter().set_useOffset(False)
 
         x = np.linspace(0, 1, len(neb_energy))
@@ -226,9 +222,8 @@ class lmps_neb_tools(get_data.get_data,
 
         plt.yticks(size=19)
         plt.xticks(size=19)
-        plt.savefig("neb.png",
+        plt.savefig(figname,
                     bbox_inches='tight', pad_inches=0.03)
-
         # dump the data #
         fid = open("pickle_data", 'w')
         A = pc.Pickler(fid)
