@@ -239,7 +239,6 @@ class md_reaction_coordinate(gn_config.bcc,
             self.write_lmp_config_data(atoms_init, filename_data)
             if not os.path.isdir("cfg"):
                 os.mkdir("cfg")
-
             os.chdir(self.root_dir)
         return
 
@@ -437,7 +436,7 @@ class md_reaction_coordinate(gn_config.bcc,
     def loop_rcut(self):
         import cal_md_neb
         drvneb = cal_md_neb.lmps_neb_tools()
-        npt = 6
+        npt = 7
         for i in range(npt):
             rcut = 5.17 + 0.015 * i
             dirname = 'dir-%5.4f' % (rcut)
@@ -447,7 +446,7 @@ class md_reaction_coordinate(gn_config.bcc,
             drv.dipole_peierls_barrier()
             drvneb.create_final_screw()
             os.system("mpirun -n 16 lmp_mpi -i in.neb_dislocation_dipole -p 16x1")
-            drvneb.read_lmp_log_file(figname='fig.{}.png'.format(rcut))
+            drvneb.read_lmp_log_file(figname='fig.%5.4f.png' % (rcut))
         return
 
     def record(self):
