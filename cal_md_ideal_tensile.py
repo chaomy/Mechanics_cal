@@ -20,29 +20,29 @@ import os
 import ase
 import ase.io
 import ase.lattice
-import ase.lattice.cubic as cubic
-import glob 
+import glob
 import gn_pbs
 import numpy as np
 import gn_config
 import get_data
 import plt_drv
 from scipy.optimize import minimize
-from scipy.interpolate import InterpolatedUnivariateSpline
-import md_pot_data
+# import md_pot_data
+from md_pot_data import unitconv
 
 
 class cal_bcc_ideal_tensile(get_data.get_data,
                             gn_pbs.gn_pbs,
                             plt_drv.plt_drv):
-    def __init__(self):
-        self.pot = md_pot_data.md_pot.Nb_adp
 
+    def __init__(self):
+        self.pot = self.load_data('../pot.dat')
+        # self.pot = md_pot_data.md_pot.Nb_adp
         gn_pbs.gn_pbs.__init__(self)
         plt_drv.plt_drv.__init__(self)
         self.alat = self.pot['lattice']
 
-        self.npts = 15
+        self.npts = 25 
         self.delta = 0.02
 
         e1 = np.array([1., 0., 0.])
@@ -111,14 +111,14 @@ class cal_bcc_ideal_tensile(get_data.get_data,
         return
 
     def loop_tensile_lmp(self):
-        x0 = np.array([1., 1.])
+        x0 = np.array([0.91, 1.11])
         npts = self.npts
         data = np.ndarray([npts, 4])
         for i in range(npts):
             delta = self.delta * i
             res = minimize(self.runlmp, x0, delta,
                            method='Nelder-Mead',
-                           options={'fatol': 5e-4, 'disp': True})
+                           options={'disp': True})
             x0 = res.x
             print res
             data[i][0] = (delta)
@@ -132,7 +132,6 @@ class cal_bcc_ideal_tensile(get_data.get_data,
         strain = np.mat([[1.0 + delta, 0.0,  0.0],
                          [0.0,  x[0],  0.0],
                          [0.0,  0.0,  x[1]]])
-
         new_strain = basis.transpose() * strain * basis
         self.gn_primitive_lmps(new_strain, 'vasp')
         os.system("mpirun vasp > vasp.log")
@@ -162,7 +161,6 @@ class cal_bcc_ideal_tensile(get_data.get_data,
         bas = np.mat([[-0.5, 0.5, 0.5],
                       [0.5, -0.5, 0.5],
                       [0.5, 0.5, -0.5]])
-
         ##########################################################
         # very important (vasp add strain is basis right time strain)
         ##########################################################
@@ -175,13 +173,11 @@ class cal_bcc_ideal_tensile(get_data.get_data,
                               cell=cell,
                               pbc=[1, 1, 1])
             ase.io.write("POSCAR", images=atoms, format='vasp')
-
         if tag == 'lmp':
             # convert to lammps data style
             lmp_bas = bas * strain
             lmp_bas = self.configdrv.lmp_change_box(lmp_bas)
             cell = alat * lmp_bas
-
             pos = np.array([[0, 0, 0]])
             file_name = 'init.txt'
             atom_num = 1
@@ -197,7 +193,6 @@ class cal_bcc_ideal_tensile(get_data.get_data,
                            % (cell[1, 0],
                               cell[2, 0],
                               cell[2, 1]))
-
                 fout.write("Atoms\n")
                 fout.write("\n")
                 for i in range(atom_num):
@@ -281,21 +276,45 @@ class cal_bcc_ideal_tensile(get_data.get_data,
     def plt_energy_stress(self):
         raw = np.loadtxt("istress.txt")
         raw = raw[raw[:, 0].argsort()]
-        print raw 
-
+        print raw
         self.set_keys()
         self.set_211plt()
-
-        # energy 
+        # energy
         self.ax1.plot(raw[:, 0], (raw[:, 1] - raw[0, 1]),
                       label='engy',
                       **self.pltkwargs)
-
-        self.ax2.plot(raw[:, 0], -(raw[:, 4] - raw[0, 4]),
+        self.ax2.plot(raw[:, 0], (raw[:, 4] - raw[0, 4]),
                       label='stress',
                       **self.pltkwargs)
-
         self.fig.savefig("istress.png", **self.figsave)
+        return
+
+    def convert_stress(self):
+        from scipy.interpolate import InterpolatedUnivariateSpline
+        raw = np.loadtxt("ishear.txt")
+        data = np.zeros((len(raw),
+                         len(raw[0]) + 1))
+        data[:, :-1] = raw
+        convunit = unitconv.ustress['evA3toGpa']
+        vol = np.zeros(len(raw))
+        vperf = 0.5 * self.alat**3
+        strmat = np.zeros([3, 3])
+        for i in range(len(raw)):
+            strmat[0, 0], strmat[1, 1], strmat[2, 2] = \
+                1 + raw[i, 0], raw[i, 2], raw[i, 3]
+            strmat = np.mat(strmat)
+            vol[i] = vperf * np.linalg.det(strmat)
+        tag = 'interp'
+        if tag == 'interp':
+            # interpolate
+            spl = InterpolatedUnivariateSpline(raw[:, 0], raw[:, 1], k=1)
+            splder1 = spl.derivative()
+            for i in range(len(raw)):
+                # append the stress to the last column
+                print "vol", vol[i]
+                data[i, -1] = splder1(raw[i, 0]) * convunit / vol[i]
+        print data
+        np.savetxt("istress.txt", data)
         return
 
 
@@ -335,4 +354,5 @@ if __name__ == '__main__':
         drv.loop_collect_vasp()
 
     if options.mtype.lower() == 'plt':
+        drv.convert_stress()
         drv.plt_energy_stress()

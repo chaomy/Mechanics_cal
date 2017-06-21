@@ -1,4 +1,5 @@
 Jun 16 
+
 1, Do we need to remove the outliers 
 
 2, What do we do when we have v = f(sigma) 
@@ -71,3 +72,7 @@ Jun 19
 4, => in order to calculate the correct scale of Peierls Potential barrier => the cutoff has 
 to be at least 5.20 A !!!!!!  (smaller cutoff you can never get correct peierls barrier) 
 that means we must include 3nd neighbor of FCC lattice structure. 
+
+Jun 20
+1, extrapolate along emF to see whether we can remove the singularity
+As I extrapolate of emF, the energy curve of TP becomes nicer. 

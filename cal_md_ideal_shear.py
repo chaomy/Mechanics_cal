@@ -168,11 +168,6 @@ class cal_bcc_ideal_shear(get_data.get_data,
                     fout.write("%d  1  %12.7f %12.7f %12.7f\n"
                                % (i + 1, pos[i, 0], pos[i, 1], pos[i, 2]))
             fout.close()
-
-        #  atoms = ase.Atoms('Nb',
-            #  positions=[[0, 0, 0]],
-            #  cell=cell,
-            #  pbc=[1, 1, 1])
         return
 
     def shear_twin_path(self):
@@ -430,21 +425,19 @@ class cal_bcc_ideal_shear(get_data.get_data,
         print data
         np.savetxt("stress.txt", data)
         return
-
     ##########################################################
     # calculate derivative of energy to get stress
     ##########################################################
+
     def convert_stress(self):
         raw = np.loadtxt("ishear.txt")
         data = np.zeros((len(raw),
                          len(raw[0]) + 1))
-
         data[:, :-1] = raw
         convunit = unitconv.ustress['evA3toGpa']
         vol = np.zeros(len(raw))
         vperf = 0.5 * self.alat**3
         strmat = np.zeros([3, 3])
-
         for i in range(len(raw)):
             strmat[0, 0], strmat[1, 1], strmat[2, 2] = \
                 raw[i, 2], raw[i, 3], raw[i, 4]
@@ -452,7 +445,6 @@ class cal_bcc_ideal_shear(get_data.get_data,
                 raw[i, 0], raw[i, 5], raw[i, 6]
             strmat = np.mat(strmat)
             vol[i] = vperf * np.linalg.det(strmat)
-
         tag = 'interp'
         if tag == 'interp':
             # interpolate
@@ -525,7 +517,6 @@ class cal_bcc_ideal_shear(get_data.get_data,
         self.set_pltkargs()
         plt.rc('xtick', labelsize=self.mlabelsize)
         plt.rc('ytick', labelsize=self.mlabelsize)
-
         for i in range(len(potlist)):
             pot = potlist[i]
             fname = 'stress.txt.{}'.format(pot)
