@@ -383,7 +383,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
         npts = self.npts
         convunit = unitconv.ustress['evA3toGpa']
         # conveng = unitconv.uengy['rytoeV']
-        data = np.ndarray([npts, 4])
+        data = np.ndarray([npts, 3])
         for i in range(npts):
             dirname = "dir-{:03d}".format(i)
             print dirname
@@ -396,11 +396,11 @@ class cal_bcc_ideal_shear(get_data.get_data,
                 data[i, 0] = raw[0]
                 data[i, 1] = raw[1]
                 data[i, 2] = vol
-        spl = InterpolatedUnivariateSpline(data[:, 0], data[:, 1], k=3)
-        splder1 = spl.derivative()
-        for i in range(len(data)):
-            data[i, -1] = splder1(data[i, 0]) * convunit / data[i, 2]
-        print data
+        # spl = InterpolatedUnivariateSpline(data[:, 0], data[:, 1], k=3)
+        # splder1 = spl.derivative()
+        # for i in range(len(data)):
+        #     data[i, -1] = splder1(data[i, 0]) * convunit / data[i, 2]
+        # print data
         np.savetxt('stress.txt', data)
         return
 
