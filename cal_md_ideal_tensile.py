@@ -15,7 +15,6 @@
 #
 ###################################################################
 
-from optparse import OptionParser
 import os
 import ase
 import ase.io
@@ -26,9 +25,10 @@ import numpy as np
 import gn_config
 import get_data
 import plt_drv
+import md_pot_data
 from scipy.optimize import minimize
-# import md_pot_data
 from md_pot_data import unitconv
+from optparse import OptionParser
 
 
 class cal_bcc_ideal_tensile(get_data.get_data,
@@ -41,7 +41,6 @@ class cal_bcc_ideal_tensile(get_data.get_data,
         gn_pbs.gn_pbs.__init__(self)
         plt_drv.plt_drv.__init__(self)
         self.alat = self.pot['lattice']
-
         self.npts = 25
         self.delta = 0.02
 
@@ -88,7 +87,6 @@ class cal_bcc_ideal_tensile(get_data.get_data,
         dirlist = glob.glob("dir-*")
         npts = len(dirlist)
         data = np.ndarray([npts, 10])
-
         for i in range(npts):
             #  dirname = "dir-{:03d}".format(i)
             dirname = dirlist[i]
@@ -98,12 +96,6 @@ class cal_bcc_ideal_tensile(get_data.get_data,
             raw = np.loadtxt("ishear.txt")
             (engy, stress, vol) = self.vasp_energy_stress_vol()
             os.chdir(self.root)
-
-            #  data[i, 0] = raw[0]
-            #  data[i, 1] = raw[1]
-            #  data[i, 2] = raw[2]
-            #  data[i, 3] = raw[3]
-
             data[i, 0:4] = raw
             data[i, 4:] = stress.transpose()
 
@@ -201,15 +193,6 @@ class cal_bcc_ideal_tensile(get_data.get_data,
             fout.close()
         return
 
-    def loop_sub(self):
-        npts = self.npts
-        for i in range(npts):
-            dirname = "dir-{:03d}".format(i)
-            os.chdir(dirname)
-            os.system("qsub va.pbs")
-            os.chdir(self.root)
-        return
-
     def vasp_relax(self, given=True):
         data = np.loadtxt("strain.txt")
         if given is True:
@@ -249,9 +232,7 @@ class cal_bcc_ideal_tensile(get_data.get_data,
             delta = self.delta * i
             dirname = "dir-{:03d}".format(i)
             self.mymkdir(dirname)
-            os.system("cp KPOINTS {}".format(dirname))
-            os.system("cp INCAR   {}".format(dirname))
-            os.system("cp POTCAR  {}".format(dirname))
+
             os.system("echo {} > strain.txt".format(delta))
             os.system("mv strain.txt {}".format(dirname))
             self.set_pbs(dirname, delta)
@@ -331,7 +312,6 @@ if __name__ == '__main__':
 
     (options, args) = parser.parse_args()
     drv = cal_bcc_ideal_tensile()
-
     if options.mtype.lower() == 'ilmp':
         drv.loop_tensile_lmp()
 

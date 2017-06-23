@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-18 15:53:57
+# @Last Modified time: 2017-06-23 01:47:59
 
 import os
 import numpy as np
@@ -15,6 +15,7 @@ import output_data
 import glob
 import plt_drv
 from optparse import OptionParser
+from scipy.interpolate import InterpolatedUnivariateSpline
 from scipy import interpolate
 
 
@@ -143,14 +144,15 @@ class cal_lattice(gn_config.bcc,
         np.savetxt('lat.dat', data)
         return
 
-    def plt_data(self, tag='ecut'):
-        [ecut, engy] = np.loadtxt('{}.txt'.format(tag))
-        print np.argsort(ecut)
-        # Strain_Sxx = Strain_Sxx.transpose()[Strain_Sxx[0, :].argsort()]
-        engy = engy[np.argsort(ecut)]
+    def plt_data(self, tag='ecut', data=None):
+        if data is None: 
+            [val, engy] = np.loadtxt('{}.txt'.format(tag))
+        else: 
+            [val, engy] = data[:, 0], data[:, 1]
+        engy = engy[np.argsort(val)]
         self.set_111plt()
         self.set_keys()
-        self.ax.plot(np.sort(ecut), engy)
+        self.ax.plot(np.sort(val), engy)
         self.fig.savefig('{}.png'.format(tag))
         return
 
@@ -178,19 +180,15 @@ class cal_lattice(gn_config.bcc,
         return
 
 
-def find_lattice(self,
-                 Lattice_column,
-                 energy):
-    Leftpoint = Lattice_column[0]
-    Rightpoint = Lattice_column[-1]
-    InterPoints = np.linspace(Leftpoint,
-                              Rightpoint,
-                              201)
-    f = interpolate.UnivariateSpline(Lattice_column[:],
-                                     energy[:], s=0)(InterPoints)
-    i = np.argmin(f)
-    return InterPoints[i - 1]
-
+    def find_lattice(self, data=None):
+        if data is None: 
+            data = np.loadtxt('lat.txt') 
+            data[:, 0] = np.abs(data[:, 0])  # in case 
+        interps = np.linspace(data[0, 0], data[-1, 0], 201)
+        print interps
+        spl = InterpolatedUnivariateSpline(data[:, 0], data[:, 1])
+        print "min lat", interps[np.argmin(spl(interps))]
+        return data
 
 if __name__ == '__main__':
     usage = "usage:%prog [options] arg1 [options] arg2"
@@ -227,11 +225,15 @@ if __name__ == '__main__':
     elif options.mtype.lower() == 'clckpts':
         drv.clc_data(tag='kpts')
 
+    elif options.mtype.lower() == 'clclat':
+        drv.clc_lattice()
+
     elif options.mtype.lower() == 'pltcut':
         drv.plt_data(tag='ecut')
 
     elif options.mtype.lower() == 'pltkpts':
         drv.plt_data(tag='kpts')
 
-    elif options.mtype.lower() == 'clclat':
-        drv.clc_lattice()
+    elif options.mtype.lower() == 'pltlat':
+        data = drv.find_lattice() 
+        drv.plt_data(tag='lat', data=data)
