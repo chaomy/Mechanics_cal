@@ -245,10 +245,9 @@ class cal_bcc_ideal_shear(get_data.get_data,
 
     def loop_prep_qe_restart(self): 
         raw = np.mat(np.loadtxt("ishear.txt")) 
-        for i in range(20):
+        for i in range(len(raw)):
             dirname = "dir-{:03d}".format(i)
             self.mymkdir(dirname)
-            print raw[0]
             np.savetxt("restart.txt", raw[i])
             os.system("mv restart.txt {}".format(dirname))
             os.system('cp $POTDIR/{}  {}'.format(self.pot['file'],
@@ -514,8 +513,9 @@ class cal_bcc_ideal_shear(get_data.get_data,
         dirlist = glob.glob("dir-*") 
         data = np.ndarray([len(dirlist), 7])
         for i in range(len(dirlist)): 
-            dirname = dirlist[i]
-            raw = np.loadtxt("{}/ishear.txt".format(dirname))
+            dirname = "dir-{:03d}".format(i)
+            if os.path.isdir(dirname): 
+                raw = np.loadtxt("{}/ishear.txt".format(dirname))
             data[i, :] = raw
         np.savetxt('ishear.txt', data)
         return
