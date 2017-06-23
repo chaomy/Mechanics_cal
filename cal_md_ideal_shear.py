@@ -15,7 +15,6 @@
 #
 ###################################################################
 
-from optparse import OptionParser
 import os
 import ase
 import ase.io
@@ -27,11 +26,12 @@ import gn_pbs
 import get_data
 import plt_drv
 import matplotlib.pylab as plt
+import md_pot_data
+import gn_qe_inputs
+from optparse import OptionParser
 from scipy.optimize import minimize
 from scipy.interpolate import InterpolatedUnivariateSpline
 from md_pot_data import unitconv
-import md_pot_data
-import gn_qe_inputs
 
 
 class cal_bcc_ideal_shear(get_data.get_data,
@@ -599,7 +599,7 @@ if __name__ == '__main__':
         drv.loop_shear_lmp()
 
     if options.mtype.lower() == 'iqe':
-        print drv.qe_relax(given=False)
+        print drv.qe_relax()
 
     if options.mtype.lower() == 'sub':
         drv.loop_sub()
