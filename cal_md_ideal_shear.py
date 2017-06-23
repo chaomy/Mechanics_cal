@@ -126,7 +126,6 @@ class cal_bcc_ideal_shear(get_data.get_data,
                               positions=[[0, 0, 0]],
                               cell=cell,
                               pbc=[1, 1, 1])
-
             ase.io.write("POSCAR", images=atoms, format='vasp')
 
         if tag == 'qe':
@@ -224,16 +223,26 @@ class cal_bcc_ideal_shear(get_data.get_data,
         os.system("mv va.pbs %s" % (dirname))
         return
 
-    def loop_prep_vasp_given(self):
+    def loop_prep_vasp(self):
+        npts = self.npts
+        for i in range(npts):
+            delta = self.delta * i
+            dirname = "dir-{:03d}".format(i)
+            self.mymkdir(dirname)
+            os.system("echo {} > strain.txt".format(delta))
+            self.copy_inputs(dirname, 'KPOINTS',
+                             'INCAR', 'POTCAR', 'strain.txt')
+            self.set_pbs(dirname, delta)
+        return
+
+    def loop_prep_vasp_restart(self):
         data = np.loadtxt("ishear.txt")
         for i in range(len(data)):
             dirname = "dir-{:03d}".format(i)
             self.mymkdir(dirname)
-            os.system("cp KPOINTS {}".format(dirname))
-            os.system("cp INCAR   {}".format(dirname))
-            os.system("cp POTCAR  {}".format(dirname))
-            np.savetxt("strain.txt", data[i])
-            os.system("mv strain.txt {}".format(dirname))
+            np.savetxt("restart.txt", data[i])
+            self.copy_inputs(dirname, 'KPOINTS',
+                             'INCAR', 'POTCAR', 'restart.txt')
             self.set_pbs(dirname, data[i][0])
         return
 
@@ -250,20 +259,6 @@ class cal_bcc_ideal_shear(get_data.get_data,
             self.set_pbs(dirname, delta, opt='qe')
         return
 
-    def loop_prep_vasp(self):
-        npts = self.npts
-        for i in range(npts):
-            delta = self.delta * i
-            dirname = "dir-{:03d}".format(i)
-            self.mymkdir(dirname)
-            os.system("cp KPOINTS {}".format(dirname))
-            os.system("cp INCAR   {}".format(dirname))
-            os.system("cp POTCAR  {}".format(dirname))
-            os.system("echo {} > strain.txt".format(delta))
-            os.system("mv strain.txt {}".format(dirname))
-            self.set_pbs(dirname, delta)
-        return
-
     def loop_sub(self):
         npts = self.npts
         for i in range(npts):
@@ -273,47 +268,39 @@ class cal_bcc_ideal_shear(get_data.get_data,
             os.chdir(self.root)
         return
 
-    def qe_relax(self, given=True):
-        data = np.loadtxt("strain.txt")
-        if given is True:
+    def load_input_params(self):
+        if os.path.isfile('restart.txt'):
+            data = np.loadtxt("restart.txt")
             delta = data[0]
             x0 = data[-5:]
             print delta
             print x0
         else:
+            data = np.loadtxt("strain.txt")
             delta = data
             x0 = np.array([1., 1., 1., 0.0, 0.0])
+        return (delta, x0)
+
+    def qe_relax(self):
+        (delta, x0) = self.load_input_params()
         data = np.zeros(7)
         res = minimize(self.runqe, x0, delta,
                        method='Nelder-Mead',
                        options={'disp': True})
         print res
-        print res.fun
-        print res.x
         data[0] = delta
         data[1] = res.fun
         data[2:] = res.x
         np.savetxt("ishear.txt", data)
         return
 
-    def vasp_relax(self, given=True):
-        data = np.loadtxt("strain.txt")
-        if given is True:
-            delta = data[0]
-            x0 = data[-5:]
-            print delta
-            print x0
-        else:
-            delta = data
-            x0 = np.array([0.98, 1.01, 1., 0.0, 0.0])
+    def vasp_relax(self):
+        (delta, x0) = self.load_input_params()
         data = np.zeros(7)
         res = minimize(self.runvasp, x0, delta,
                        method='Nelder-Mead',
                        options={'xtol': 1e-3, 'disp': True})
         print res
-        print res.fun
-        print res.x
-
         data[0] = delta
         data[1] = res.fun
         data[2:] = res.x
@@ -363,6 +350,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
         self.gn_primitive_lmps(new_strain, 'qe')
         os.system("mpirun pw.x < qe.in > qe.out")
         (engy, vol, stress) = self.qe_get_energy_stress('qe.out')
+        print engy
         return engy
 
     def runvasp(self, x, delta):
@@ -415,7 +403,6 @@ class cal_bcc_ideal_shear(get_data.get_data,
             atoms = ase.io.read("CONTCAR", format='vasp')
             raw = np.loadtxt("ishear.txt")
             os.chdir(self.root)
-
             data[i, 0] = raw[0]
             data[i, 1] = raw[1]
             data[i, 2] = np.linalg.det(atoms.get_cell())
@@ -428,10 +415,10 @@ class cal_bcc_ideal_shear(get_data.get_data,
         print data
         np.savetxt("stress.txt", data)
         return
+
     ##########################################################
     # calculate derivative of energy to get stress
     ##########################################################
-
     def convert_stress(self):
         raw = np.loadtxt("ishear.txt")
         data = np.zeros((len(raw),
@@ -596,8 +583,8 @@ if __name__ == '__main__':
     if options.mtype.lower() == 'cmp':
         drv.plt_energy_stress_cmp()
 
-    if options.mtype.lower() == 'given':
-        drv.loop_prep_vasp_given()
+    if options.mtype.lower() == 'restart':
+        drv.loop_prep_vasp_restart()
 
     if options.mtype.lower() == 'vaspprep':
         drv.loop_prep_vasp()

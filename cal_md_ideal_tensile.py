@@ -220,14 +220,11 @@ class cal_bcc_ideal_tensile(get_data.get_data,
         else:
             delta = data
             x0 = np.array([1., 1.])
-
         data = np.zeros(4)
         res = minimize(self.runvasp, x0, delta,
                        method='Nelder-Mead',
                        options={'fatol': 5e-4, 'disp': True})
         print res
-        print res.fun
-        print res.x
         data[0] = delta
         data[1] = res.fun
         data[2:] = res.x

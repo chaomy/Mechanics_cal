@@ -1,5 +1,4 @@
-:Jun 16 
-
+Jun 16 
 1, Do we need to remove the outliers 
 
 2, What do we do when we have v = f(sigma) 
@@ -76,3 +75,8 @@ that means we must include 3nd neighbor of FCC lattice structure.
 Jun 20
 1, extrapolate along emF to see whether we can remove the singularity
 As I extrapolate of emF, the energy curve of TP becomes nicer. 
+
+Jun 22 
+1, collect some W potential DATA for fitting 
+
+2, 
