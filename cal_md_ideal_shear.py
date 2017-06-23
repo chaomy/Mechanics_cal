@@ -28,7 +28,7 @@ import plt_drv
 import matplotlib.pylab as plt
 import md_pot_data
 import gn_qe_inputs
-import glob 
+import glob
 from optparse import OptionParser
 from scipy.optimize import minimize
 from scipy.interpolate import InterpolatedUnivariateSpline
@@ -243,15 +243,15 @@ class cal_bcc_ideal_shear(get_data.get_data,
             self.set_pbs(dirname, data[i][0])
         return
 
-    def loop_prep_qe_restart(self): 
-        raw = np.mat(np.loadtxt("ishear.txt")) 
+    def loop_prep_qe_restart(self):
+        raw = np.mat(np.loadtxt("ishear.txt"))
         for i in range(len(raw)):
             dirname = "dir-{:03d}".format(i)
             self.mymkdir(dirname)
             np.savetxt("restart.txt", raw[i])
             os.system("mv restart.txt {}".format(dirname))
             os.system('cp $POTDIR/{}  {}'.format(self.pot['file'],
-                                                dirname))
+                                                 dirname))
             self.set_pbs(dirname, raw[i][0], opt='qe')
         return
 
@@ -509,12 +509,12 @@ class cal_bcc_ideal_shear(get_data.get_data,
                           'marker': '<'}]
         return
 
-    def clc_data(self): 
+    def clc_data(self):
         npts = self.npts
         data = np.ndarray([npts, 7])
-        for i in range(npts): 
+        for i in range(npts):
             dirname = "dir-{:03d}".format(i)
-            if os.path.isdir(dirname): 
+            if os.path.isdir(dirname):
                 raw = np.loadtxt("{}/ishear.txt".format(dirname))
             data[i, :] = raw
         np.savetxt('ishear.txt', data)
@@ -577,7 +577,8 @@ if __name__ == '__main__':
     if options.mtype.lower() == 'clclmp':
         drv.md_ideal_shear('clc', 'lmp')
 
-    if options.mtype.lower() == 'clcqe':
+    if options.mtype.lower() == 'clcqe' or
+    options.mtype.lower() == 'qeclc':
         drv.clc_data()
 
     if options.mtype.lower() == 'vastress':
