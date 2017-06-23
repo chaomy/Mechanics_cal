@@ -42,7 +42,7 @@ class cal_bcc_ideal_tensile(get_data.get_data,
         plt_drv.plt_drv.__init__(self)
         self.alat = self.pot['lattice']
 
-        self.npts = 25 
+        self.npts = 25
         self.delta = 0.02
 
         e1 = np.array([1., 0., 0.])
