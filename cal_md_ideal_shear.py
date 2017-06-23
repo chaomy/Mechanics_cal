@@ -510,9 +510,9 @@ class cal_bcc_ideal_shear(get_data.get_data,
         return
 
     def clc_data(self): 
-        dirlist = glob.glob("dir-*") 
-        data = np.ndarray([len(dirlist), 7])
-        for i in range(len(dirlist)): 
+        npts = self.npts
+        data = np.ndarray([npts, 7])
+        for i in range(npts): 
             dirname = "dir-{:03d}".format(i)
             if os.path.isdir(dirname): 
                 raw = np.loadtxt("{}/ishear.txt".format(dirname))
