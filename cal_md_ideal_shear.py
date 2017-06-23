@@ -43,7 +43,6 @@ class cal_bcc_ideal_shear(get_data.get_data,
         gn_pbs.gn_pbs.__init__(self)
         plt_drv.plt_drv.__init__(self)
         self.alat = self.pot['lattice']
-
         self.npts = 20
         self.delta = 0.02
         shd111p211 = {'e1': np.array([1., 1., 1.]),
@@ -53,7 +52,6 @@ class cal_bcc_ideal_shear(get_data.get_data,
         shd111p110 = {'e1': np.array([1., 1., 1.]),
                       'e2': np.array([1., -1, 0]),
                       'e3': np.array([1, 1., -2])}
-
         shtype = '110'
         if shtype == '211':
             e1 = shd111p211['e1']
@@ -379,29 +377,32 @@ class cal_bcc_ideal_shear(get_data.get_data,
         print engy
         return engy
 
-    def qe_loop_stress(self):
+    def qe_loop_stress(self, opt='clc'):
         npts = self.npts
         convunit = unitconv.ustress['evA3toGpa']
         # conveng = unitconv.uengy['rytoeV']
         data = np.ndarray([npts, 3])
-        for i in range(npts):
-            dirname = "dir-{:03d}".format(i)
-            print dirname
-            if os.path.isdir(dirname):
-                os.chdir(dirname)
-                (engy, vol, stress) = self.qe_get_energy_stress('qe.out')
-                raw = np.loadtxt("ishear.txt")
-                os.chdir(self.root)
-                vol = vol * (unitconv.ulength['BohrtoA']**3)
-                data[i, 0] = raw[0]
-                data[i, 1] = raw[1]
-                data[i, 2] = vol
-        # spl = InterpolatedUnivariateSpline(data[:, 0], data[:, 1], k=3)
-        # splder1 = spl.derivative()
-        # for i in range(len(data)):
-        #     data[i, -1] = splder1(data[i, 0]) * convunit / data[i, 2]
-        # print data
-        np.savetxt('stress.txt', data)
+        if opt == 'clc':
+            for i in range(npts):
+                dirname = "dir-{:03d}".format(i)
+                print dirname
+                if os.path.isdir(dirname):
+                    os.chdir(dirname)
+                    (engy, vol, stress) = self.qe_get_energy_stress('qe.out')
+                    raw = np.loadtxt("ishear.txt")
+                    os.chdir(self.root)
+                    vol = vol * (unitconv.ulength['BohrtoA']**3)
+                    data[i, 0] = raw[0]
+                    data[i, 1] = raw[1]
+                    data[i, 2] = vol
+            np.savetxt('stress.txt', data)
+        elif opt is 'stress':
+            data = np.loadtxt('stress.txt')
+            spl = InterpolatedUnivariateSpline(data[:, 0], data[:, 1], k=3)
+            splder1 = spl.derivative()
+            for i in range(len(data)):
+                data[i, -1] = splder1(data[i, 0]) * convunit / data[i, 2]
+            print data
         return
 
     def vasp_loop_stress(self):
@@ -573,7 +574,7 @@ if __name__ == '__main__':
         drv.vasp_loop_stress()
 
     if options.mtype.lower() == 'qestress':
-        drv.qe_loop_stress()
+        drv.qe_loop_stress(opt='stress')
 
     if options.mtype.lower() == 'lmpstress':
         drv.convert_stress()
