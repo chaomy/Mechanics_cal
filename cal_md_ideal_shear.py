@@ -380,7 +380,8 @@ class cal_bcc_ideal_shear(get_data.get_data,
         return engy
 
     def qe_loop_stress(self):
-        npts = self.npts
+        # npts = self.npts
+        npts = 11
         convunit = unitconv.ustress['evA3toGpa']
         # conveng = unitconv.uengy['rytoeV']
         data = np.ndarray([npts, 4])
