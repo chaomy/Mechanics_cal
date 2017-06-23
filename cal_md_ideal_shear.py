@@ -28,6 +28,7 @@ import plt_drv
 import matplotlib.pylab as plt
 import md_pot_data
 import gn_qe_inputs
+import glob 
 from optparse import OptionParser
 from scipy.optimize import minimize
 from scipy.interpolate import InterpolatedUnivariateSpline
