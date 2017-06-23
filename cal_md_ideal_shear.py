@@ -575,7 +575,7 @@ if __name__ == '__main__':
         drv.md_ideal_shear('clc', 'lmp')
 
     if options.mtype.lower() == 'clcqe':
-        drv.md_ideal_shear('clc', 'qe')
+        drv.clc_data()
 
     if options.mtype.lower() == 'vastress':
         drv.vasp_loop_stress()
