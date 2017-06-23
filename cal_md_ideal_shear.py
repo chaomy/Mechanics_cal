@@ -39,7 +39,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
                           plt_drv.plt_drv):
 
     def __init__(self):
-        self.pot = md_pot_data.qe_pot.pbe_w
+        self.pot = md_pot_data.qe_pot.vca_W75Re25
         gn_pbs.gn_pbs.__init__(self)
         plt_drv.plt_drv.__init__(self)
         self.alat = self.pot['lattice']
@@ -57,18 +57,15 @@ class cal_bcc_ideal_shear(get_data.get_data,
             e1 = shd111p211['e1']
             e2 = shd111p211['e2']
             e3 = shd111p211['e3']
-
         elif shtype == '110':
             e1 = shd111p110['e1']
             e2 = shd111p110['e2']
             e3 = shd111p110['e3']
-
         e1 = e1 / np.linalg.norm(e1)
         e2 = e2 / np.linalg.norm(e2)
         e3 = e3 / np.linalg.norm(e3)
 
         self.basis = np.mat([e1, e2, e3])
-
         get_data.get_data.__init__(self)
         self.va_prim = np.mat([[-0.5, 0.5, 0.5],
                                [0.5, -0.5, 0.5],
@@ -94,7 +91,6 @@ class cal_bcc_ideal_shear(get_data.get_data,
                                         pbc=(1, 1, 1))
 
         ase.io.write("POSCAR_perf", images=atoms, format='vasp')
-
         # add strain
         atoms.set_cell((strain * atoms.get_cell()))
         pos = np.mat(atoms.get_positions())
@@ -244,6 +240,18 @@ class cal_bcc_ideal_shear(get_data.get_data,
             self.copy_inputs(dirname, 'KPOINTS',
                              'INCAR', 'POTCAR', 'restart.txt')
             self.set_pbs(dirname, data[i][0])
+        return
+
+    def loop_prep_qe_restart(self): 
+        data = np.loadtxt("ishear.txt")
+        for i in range(len(data)):
+            dirname = "dir-{:03d}".format(i)
+            self.mymkdir(dirname)
+            np.savetxt("restart.txt", data[i])
+            os.system("mv strain.txt {}".format(dirname))
+            os.system('cp $POTDIR/{} {}'.format(self.pot['file'],
+                                                dirname))
+            self.set_pbs(dirname, delta, opt='qe')
         return
 
     def loop_prep_qe(self):
@@ -500,6 +508,15 @@ class cal_bcc_ideal_shear(get_data.get_data,
                           'marker': '<'}]
         return
 
+    def clc_data(self): 
+        dirlist = os.getcwd("dir-*") 
+        data = np.ndarray([len(dirlist), 7])
+        for i in range(dirlist): 
+            raw = np.loadtxt("{}/ishear.txt")
+            data[i, :] = raw[0]
+        np.savetxt('ishear.txt', data)
+        return
+
     def plt_energy_stress_cmp(self):
         potlist = ['adp', 'pbe']
         self.set_211plt(mfigsize=(8.5, 4.3), lim=True)
@@ -557,6 +574,9 @@ if __name__ == '__main__':
     if options.mtype.lower() == 'clclmp':
         drv.md_ideal_shear('clc', 'lmp')
 
+    if options.mtype.lower() == 'clcqe':
+        drv.md_ideal_shear('clc', 'qe')
+
     if options.mtype.lower() == 'vastress':
         drv.vasp_loop_stress()
 
@@ -585,6 +605,9 @@ if __name__ == '__main__':
 
     if options.mtype.lower() == 'restart':
         drv.loop_prep_vasp_restart()
+
+    if options.mtype.lower() == 'qerestart':
+        drv.loop_prep_qe_restart()
 
     if options.mtype.lower() == 'vaspprep':
         drv.loop_prep_vasp()
