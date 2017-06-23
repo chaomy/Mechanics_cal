@@ -577,8 +577,8 @@ if __name__ == '__main__':
     if options.mtype.lower() == 'clclmp':
         drv.md_ideal_shear('clc', 'lmp')
 
-    if options.mtype.lower() == 'clcqe' or
-    options.mtype.lower() == 'qeclc':
+    if options.mtype.lower() == 'clcqe' or \
+            options.mtype.lower() == 'qeclc':
         drv.clc_data()
 
     if options.mtype.lower() == 'vastress':
