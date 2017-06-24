@@ -28,7 +28,6 @@ import plt_drv
 import matplotlib.pylab as plt
 import md_pot_data
 import gn_qe_inputs
-import glob
 from optparse import OptionParser
 from scipy.optimize import minimize
 from scipy.interpolate import InterpolatedUnivariateSpline
@@ -165,7 +164,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
         return
 
     def shear_twin_path(self):
-        e1 = 0.5 * np.array([-1, 1,  1])
+        e1 = 0.5 * np.array([-1, 1, 1])
         e2 = 0.5 * np.array([1, -1, 1])
         e3 = 0.5 * np.array([1, 1, -1])
 

@@ -17,7 +17,6 @@
 
 import Intro as Intr
 import os
-import glob
 import shutil
 import numpy as np
 import md_pot_data
@@ -202,15 +201,8 @@ class md_crack(lmp_change_configs.lmp_change_configs):
                                         (2 * b12 + b66) / (2 * b11)))
         Gg = 2 * self.surfaceE
         ToMpaSqrtM = np.power(10, -1.5)
-        Kg = ToMpaSqrtM * np.sqrt(Gg / BB)
-        print Kg
-        return Kg
-
-    def rename_cfg(self, stress):
-        filelist = glob.glob("cfg/Nb*.cfg")
-        for f in filelist:
-            fname = "cfg/%10.9f.cfg" % (1e-2 * stress)
-            shutil.move(f, fname)
+        self.crackcoeff.Kg = ToMpaSqrtM * np.sqrt(Gg / BB)
+        self.crackcoeff.KK = self.crackcoeff.Kg
         return
 
     def get_coeffs(self):
@@ -247,26 +239,12 @@ class md_crack(lmp_change_configs.lmp_change_configs):
             # os.system("rm crackxyz/*")
         return
 
-    def repeat_static(self, Num):
-        M = Intr.MD_ChangeBox()
-        os.system("python gnStructure.py")
-        execuable = "mpirun -n 8 lmp_mpi -in"
-        Kg = self.cal_scalarB()
-        self.get_coeffs()
-        KK = Kg + 0.005 * Num
-        M.Intro_Crack('cfg', KK, p1, p2, q1, q2, u1, u2)
-        os.system("mkdir repeat_cfg")
-        os.system("%s in.repeat" % (execuable))
-        return
-
     def md_crack(self):
-        M = Intr.MD_ChangeBox()
         execuable = "mpirun lmp_mpi -in"
         os.system("python gnStructure.py")
-        Kg = self.cal_scalarB()
-        p1, p2, q1, q2, u1, u2 = self.get_coeffs()
-        M.Intro_Crack('cfg', Kg, p1, p2, q1, q2, u1, u2)
-        os.system("%s in.read" % (execuable))
+        self.cal_scalarB()
+        self.get_coeffs()
+        self.Intro_Crack('cfg', self.crackcoeff)
         return
 
     def stat_crack_continue(self):
@@ -295,9 +273,4 @@ class md_crack(lmp_change_configs.lmp_change_configs):
 
 if __name__ == "__main__":
     N = MD_crack()
-   # N.stat_crack()
-   # N.md_crack()
-    N.repeat_static(100)
-   # print N.cal_scalarB()
-   # N.get_coeffs()
-   # N.Test_init()
+    N.stat_crack()

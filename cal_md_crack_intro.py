@@ -2,13 +2,11 @@
 # encoding: utf-8
 import glob
 import re
-import ase
 import numpy as np
 import matplotlib.pylab as plt
 from mpi4py import MPI
 import gn_config
 import sys
-import os
 
 
 class md_crack_intro(object):
@@ -28,23 +26,6 @@ class md_crack_intro(object):
         a = alat / Ly0
         pi = self.pi
         xc, yc = 0.2, 0.5
-        # for i in range(AtomNumber):
-        #     if z[i] < 0.3 and z[i] > -0.01:
-        #         if x[i] < xc and y[i] - yc < 0.01:
-        #             xnew.append(float(x[i]))
-        #             ynew.append(float(y[i]))
-        #             znew.append(float(z[i]))
-        #             coordN.append(coord1[i])
-        #             atomidN.append(atomid[i])
-        #             energyN.append(energy[i])
-        #             print "delete"
-        #         else:
-        #             xnew.append(float(x[i]))
-        #             ynew.append(float(y[i]))
-        #             znew.append(float(z[i]))
-        #             coordN.append(coord1[i])
-        #             atomidN.append(atomid[i])
-        #             energyN.append(energy[i])
         stress = 5.0
         k1 = stress * np.sqrt(self.pi * alat)
         Pratio = 0.333
