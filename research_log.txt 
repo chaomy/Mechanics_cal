@@ -73,4 +73,4 @@ As I extrapolate of emF, the energy curve of TP becomes nicer.
 Jun 22 
 1, collect some W potential DATA for fitting 
 
-2, 
+2, Add v0 !!!!  v = v0 + M * sigma + sqrt(alpha * rho) 
