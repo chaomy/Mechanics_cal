@@ -74,3 +74,11 @@ Jun 22
 1, collect some W potential DATA for fitting 
 
 2, Add v0 !!!!  v = v0 + M * sigma + sqrt(alpha * rho) 
+
+
+Jun 23 
+1, Fix the smearing then do the Kpoints test !!!!!! 
+
+2, in qe => first use scf calculation => band calculation 
+
+

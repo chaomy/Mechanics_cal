@@ -618,7 +618,6 @@ class md_dislocation(gn_config.bcc,
             self.set_job_title("W-%s-T%d" % (stress, temp))
             self.set_main_job("mpirun lmp_linux -in in.md_addforce  > screen.log ")
             self.write_pbs()
-
             self.gn_md_add_force(temp, stress)
 
             #  os.system("qsub va.pbs");

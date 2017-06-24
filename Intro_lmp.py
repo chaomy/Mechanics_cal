@@ -10,7 +10,8 @@ class lmp_change_configs(object):
     def __init__(self):
         return
 
-    def Intro_Crack(self, crackprams,
+    def Intro_Crack(self,
+                    crackprams,
                     center=None,
                     atoms=None,
                     configname=None):

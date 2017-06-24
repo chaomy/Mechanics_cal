@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-23 01:47:59
+# @Last Modified time: 2017-06-24 12:06:03
 
 import os
 import numpy as np
@@ -16,7 +16,6 @@ import glob
 import plt_drv
 from optparse import OptionParser
 from scipy.interpolate import InterpolatedUnivariateSpline
-from scipy import interpolate
 
 
 class cal_lattice(gn_config.bcc,
@@ -84,7 +83,8 @@ class cal_lattice(gn_config.bcc,
         bcc_drv = gn_config.bcc(self.pot)
         bcc_drv.set_lattce_constant(self.alat0)
         self.set_ecut('{}'.format(48))
-        for kpts in range(32, 50):
+        self.set_degauss('0.02D0')
+        for kpts in range(32, 48):
             self.set_kpnts((kpts, kpts, kpts))
             dirname = 'dir-kpt-{}'.format(kpts)
             self.mymkdir(dirname)
@@ -136,7 +136,7 @@ class cal_lattice(gn_config.bcc,
             (energy, vol, stress) = self.qe_get_energy_stress('qe.out')
             cellmtx = self.qe_get_cell('qe.in')
             if (tag == 'fcc') or (tag == 'bcc'):
-                data[cnt, 0] = 2*cellmtx[0, 1]
+                data[cnt, 0] = 2 * cellmtx[0, 1]
                 data[cnt, 1] = (energy)
             cnt += 1
             os.chdir(self.root)
@@ -145,9 +145,9 @@ class cal_lattice(gn_config.bcc,
         return
 
     def plt_data(self, tag='ecut', data=None):
-        if data is None: 
+        if data is None:
             [val, engy] = np.loadtxt('{}.txt'.format(tag))
-        else: 
+        else:
             [val, engy] = data[:, 0], data[:, 1]
         engy = engy[np.argsort(val)]
         self.set_111plt()
@@ -179,11 +179,10 @@ class cal_lattice(gn_config.bcc,
             fid.close()
         return
 
-
     def find_lattice(self, data=None):
-        if data is None: 
-            data = np.loadtxt('lat.txt') 
-            data[:, 0] = np.abs(data[:, 0])  # in case 
+        if data is None:
+            data = np.loadtxt('lat.txt')
+            data[:, 0] = np.abs(data[:, 0])  # in case
         interps = np.linspace(data[0, 0], data[-1, 0], 201)
         print interps
         spl = InterpolatedUnivariateSpline(data[:, 0], data[:, 1])
@@ -204,7 +203,7 @@ if __name__ == '__main__':
     (options, args) = parser.parse_args()
     drv = cal_lattice()
 
-    if options.mtype.lower() == 'kpts':
+    if options.mtype.lower() in ['kpts', 'prepkpts', 'loopkpts']:
         drv.loop_kpoints()
 
     elif options.mtype.lower() == 'ecut':
@@ -235,5 +234,5 @@ if __name__ == '__main__':
         drv.plt_data(tag='kpts')
 
     elif options.mtype.lower() == 'pltlat':
-        data = drv.find_lattice() 
+        data = drv.find_lattice()
         drv.plt_data(tag='lat', data=data)
