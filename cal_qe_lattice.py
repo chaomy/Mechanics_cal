@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-24 12:06:03
+# @Last Modified time: 2017-06-24 12:19:00
 
 import os
 import numpy as np
@@ -27,7 +27,7 @@ class cal_lattice(gn_config.bcc,
                   plt_drv.plt_drv):
 
     def __init__(self, inpot=None):
-        self.pot = md_pot_data.qe_pot.pbe_w
+        self.pot = md_pot_data.qe_pot.vca_W75Re25
         output_data.output_data.__init__(self)
         get_data.get_data.__init__(self)
         gn_qe_inputs.gn_qe_infile.__init__(self, self.pot)
@@ -84,6 +84,7 @@ class cal_lattice(gn_config.bcc,
         bcc_drv.set_lattce_constant(self.alat0)
         self.set_ecut('{}'.format(48))
         self.set_degauss('0.02D0')
+        self.set_disk_io('none')
         for kpts in range(32, 48):
             self.set_kpnts((kpts, kpts, kpts))
             dirname = 'dir-kpt-{}'.format(kpts)
