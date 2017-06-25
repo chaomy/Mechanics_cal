@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-25 01:16:15
+# @Last Modified time: 2017-06-25 10:59:23
 
 import os
 import numpy as np
@@ -11,6 +11,7 @@ import gn_qe_inputs
 import md_pot_data
 import gn_config
 import get_data
+import gn_pbs
 import output_data
 import glob
 import plt_drv
@@ -24,12 +25,14 @@ class cal_lattice(gn_config.bcc,
                   get_data.get_data,
                   output_data.output_data,
                   gn_qe_inputs.gn_qe_infile,
-                  plt_drv.plt_drv):
+                  plt_drv.plt_drv,
+                  gn_pbs.gn_pbs):
 
     def __init__(self, inpot=None):
-        self.pot = md_pot_data.qe_pot.vca_W75Re25
+        self.pot = md_pot_data.qe_pot.pbe_w
         output_data.output_data.__init__(self)
         get_data.get_data.__init__(self)
+        gn_pbs.gn_pbs.__init__(self)
         gn_qe_inputs.gn_qe_infile.__init__(self, self.pot)
         plt_drv.plt_drv.__init__(self)
         self.alat0 = self.pot['lattice']
@@ -79,11 +82,22 @@ class cal_lattice(gn_config.bcc,
                                          file_name='lat.txt')
         return
 
+    def loop_degauss(self):
+        degauss0 = 0.02
+        for i in range(7):
+            degauss = degauss0 + 0.005 * i
+            self.set_degauss('{}D0'.format(degauss))
+            mdir = 'degauss{:4.3f}'.format(degauss)
+            self.mymkdir(mdir)
+            self.loop_kpoints()
+            self.set_pbs(mdir)
+            os.system('mv dir-* {}'.format(mdir))
+        return
+
     def loop_kpoints(self):
         bcc_drv = gn_config.bcc(self.pot)
         bcc_drv.set_lattce_constant(self.alat0)
         self.set_ecut('{}'.format(48))
-        self.set_degauss('0.05D0')
         self.set_disk_io('none')
         for kpts in range(32, 50):
             self.set_kpnts((kpts, kpts, kpts))
@@ -99,7 +113,7 @@ class cal_lattice(gn_config.bcc,
     def loop_ecut(self):
         bcc_drv = gn_config.bcc(self.pot)
         bcc_drv.set_lattce_constant(self.alat0)
-        for ecut in range(30, 50):
+        for ecut in range(28, 52):
             self.set_ecut('{}'.format(ecut))
             dirname = 'dir-ecut-{}'.format(ecut)
             self.mymkdir(dirname)
@@ -157,6 +171,18 @@ class cal_lattice(gn_config.bcc,
         self.fig.savefig('{}.png'.format(tag))
         return
 
+    def loop_clc_data(self, opt):
+        degauss0 = 0.02
+        for i in range(7):
+            degauss = degauss0 + 0.005 * i
+            self.set_degauss('{}D0'.format(degauss))
+            mdir = 'degauss{:4.3f}'.format(degauss)
+            print mdir
+            os.chdir(mdir)
+            self.collect_data(opt=opt)
+            os.chdir(self.root)
+        return
+
     def loop_plt_data(self):
         dirlist = glob.glob('degau*')
         self.set_111plt()
@@ -187,7 +213,6 @@ class cal_lattice(gn_config.bcc,
     def gn_qe_bcc_lattice_infile(self, atoms):
         self.set_thr('1.0D-6')
         self.set_degauss('0.04D0')
-        self.set_kpnts((42, 42, 42))
         with open('qe.in', 'w') as fid:
             fid = self.qe_write_control(fid, atoms)
             fid = self.qe_write_system(fid, atoms)
@@ -209,6 +234,18 @@ class cal_lattice(gn_config.bcc,
         print "min lat", interps[np.argmin(spl(interps))]
         return data
 
+    def set_pbs(self, dirname, od=False):
+        self.set_nnodes(2)
+        self.set_ppn(12)
+        self.set_job_title("%s" % (dirname))
+        self.set_wall_time(8)
+        self.set_main_job("""
+mpirun  pw.x  < qe.in > qe.out
+                        """)
+        self.write_pbs(od=od)
+        os.system("mv va.pbs %s" % (dirname))
+        return
+
 if __name__ == '__main__':
     usage = "usage:%prog [options] arg1 [options] arg2"
     parser = OptionParser(usage=usage)
@@ -225,6 +262,9 @@ if __name__ == '__main__':
 
     if options.mtype.lower() in ['kpts', 'prepkpts', 'loopkpts']:
         drv.loop_kpoints()
+
+    if options.mtype.lower() in ['degauss']:
+        drv.loop_degauss()
 
     elif options.mtype.lower() == 'ecut':
         drv.loop_ecut()
@@ -255,6 +295,10 @@ if __name__ == '__main__':
     elif options.mtype.lower() in ['pltkpts', 'pltecut']:
         tag = options.mtype.lower()[3:]
         drv.plt_data(tag=tag)
+
+    elif options.mtype.lower() in ['loopclc']:
+        tag = options.mtype.lower()[4:]
+        drv.loop_clc_data(opt=tag)
 
     elif options.mtype.lower() in ['loopplt']:
         drv.loop_plt_data()
