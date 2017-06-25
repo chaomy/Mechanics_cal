@@ -127,7 +127,7 @@ class md_reaction_coordinate(gn_config.bcc,
 
         atoms = ase.lattice.cubic.BodyCenteredCubic(directions=[e1, e2, e3],
                                                     latticeconstant=self._alat,
-                                                    size=(n,  t,  m),
+                                                    size=(n, t, m),
                                                     symbol=self.pot['element'],
                                                     pbc=(1, 1, 1))
         # add shiftment to the supercell #
@@ -450,12 +450,12 @@ class md_reaction_coordinate(gn_config.bcc,
         return
 
     def record(self):
-        init_nofix = [-2047.73032095]
-        init_fix = [-2047.73032095]
-        init_fix = [-2031.95617241]
-        final_fix = [-2034.69835008]
-        init_nofix = [-2031.95617241]
-        final_nofix = [-2038.13741398]
+        # init_nofix = [-2047.73032095]
+        # init_fix = [-2047.73032095]
+        # init_fix = [-2031.95617241]
+        # final_fix = [-2034.69835008]
+        # init_nofix = [-2031.95617241]
+        # final_nofix = [-2038.13741398]
         return
 
     def convert_dump_to_poscar(self):
@@ -464,7 +464,6 @@ class md_reaction_coordinate(gn_config.bcc,
         print initfile, finalfile
         initatoms = ase.io.read(initfile, format='lammps-dump')
         finalatoms = ase.io.read(finalfile, format='lammps-dump')
-
         ase.io.write("POSCAR00", images=initatoms, format='vasp')
         ase.io.write("POSCAR01", images=finalatoms, format='vasp')
         return

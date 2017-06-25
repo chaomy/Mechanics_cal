@@ -89,9 +89,9 @@ class md_dislocation(gn_config.bcc,
         return
 
     def fcc_screw_dipo(self):
-        e1 = np.array([-2,    -1.,  1.])
-        e2 = np.array([1.,   -1.,  1.0])
-        e3 = np.array([0.0,  1.0,  1.0])
+        e1 = np.array([-2, -1., 1.])
+        e2 = np.array([1., -1., 1.0])
+        e3 = np.array([0.0, 1.0, 1.0])
 
         self.set_lattce_constant(4.05000)
         self.set_element('Al')
@@ -158,7 +158,8 @@ class md_dislocation(gn_config.bcc,
         self.set_element('W')
         print v1, v2, v3
 
-        atoms = self.set_bcc_convention([v1, v2, v3], (r, 1, 10))  # z periodic 12
+        atoms = self.set_bcc_convention(
+            [v1, v2, v3], (r, 1, 10))  # z periodic 12
 
         ############  generate pure  ###############
         atoms2 = atoms.copy()
@@ -250,7 +251,8 @@ class md_dislocation(gn_config.bcc,
         H = np.sqrt(2. / 3.0) * self._alat
 
         h = 0.0 * H
-        atoms = self.intro_kink_screw_dislocations(atoms, (xc1, yc1), (xc1 + H, yc1), h, 1. / 4.)
+        atoms = self.intro_kink_screw_dislocations(
+            atoms, (xc1, yc1), (xc1 + H, yc1), h, 1. / 4.)
 
         ase.io.write("lmp_init.cfg",
                      atoms,
@@ -317,7 +319,7 @@ class md_dislocation(gn_config.bcc,
                                                      'Nye_tensor',
                                                      index=[1, i],
                                                      cmap='bwr')[0]
-        print ('burgers vector estimate = ', int_sum)
+        print('burgers vector estimate = ', int_sum)
         return
 
         ############################################################
@@ -328,8 +330,7 @@ class md_dislocation(gn_config.bcc,
         # y  1  1  1
         # z  1 -1  0
         ############################################################
-    def modified_cal_disp_dipo(self, movex=0.0):
-        torient = 'y'
+    def modified_cal_disp_dipo(self, movex=0.0, torient='y'):
         if torient == 'y':
             e1 = 1. / 3. * np.array([1., 1., -2.])
             e2 = np.array([0.5, 0.5, 0.5])
@@ -345,11 +346,10 @@ class md_dislocation(gn_config.bcc,
 
         atoms = Cubic.BodyCenteredCubic(directions=[e1, e2, e3],
                                         latticeconstant=self._alat,
-                                        size=(n,  t,  m),
+                                        size=(n, t, m),
                                         symbol=self._element,
                                         pbc=(1, 1, 1))
 
-        ################  add shiftment to the supercell ###################
         atoms = self.cut_half_atoms_new(atoms, "cutz")
 
         supercell = atoms.get_cell()
@@ -422,17 +422,14 @@ class md_dislocation(gn_config.bcc,
         return
 
     def cal_single_edge_dislocations(self):
-        e1 = np.array([1.,  1.,  1.])
-        e2 = np.array([-1., 1.,  0.])
+        e1 = np.array([1., 1., 1.])
+        e2 = np.array([-1., 1., 0.])
         e3 = np.array([-1., -1., 2.])
 
         self.set_lattce_constant(self._alat)
         self.set_element('W')
 
-        #  use for real data
         atoms = self.set_bcc_convention([e1, e2, e3], (80, 60, 5))  # 5
-
-        #  atoms = self.set_bcc_convention([e1, e2, e3], (40, 30, 1))
 
         atoms = self.cut_y_normal_atoms(atoms)
         atoms = self.intro_dipole_edge_with_image_atoms(atoms)
@@ -451,14 +448,15 @@ class md_dislocation(gn_config.bcc,
         return
 
     def cal_single_screw_dislocatoins(self):
-        e1 = np.array([-1.,  1.,  0])
-        e2 = np.array([1.,   1., -2])
-        e3 = np.array([0.5,  0.5,  0.5])
+        e1 = np.array([-1., 1., 0])
+        e2 = np.array([1.,  1., -2])
+        e3 = np.array([0.5, 0.5, 0.5])
 
         self.set_lattce_constant(self._alat)
         self.set_element('Nb')
 
-        atoms = self.set_bcc_convention([e1, e2, e3], (20, 20, 10))  # z periodic 12
+        atoms = self.set_bcc_convention(
+            [e1, e2, e3], (20, 20, 10))  # z periodic 12
 
         atoms = self.cut_y_normal_atoms(atoms)
         ase.io.write("lmp_perf.xyz",
@@ -538,7 +536,8 @@ class md_dislocation(gn_config.bcc,
 
         self.set_lattce_constant(self._alat)
         self.set_element('Nb')
-        atoms = self.set_bcc_convention([e1, e2, e3], (80, 50, 12))  # z periodic 12
+        atoms = self.set_bcc_convention(
+            [e1, e2, e3], (80, 50, 12))  # z periodic 12
 
         atoms = self.intro_single_screw_atoms(atoms)
         self.write_lmp_config_data(atoms)
@@ -557,8 +556,10 @@ class md_dislocation(gn_config.bcc,
         self.set_lattce_constant(self._alat)
         self.set_element('W')
 
-        #  atoms = self.set_bcc_convention([e1, e2, e3], (60, 40, 3))  # z peri 18
-        atoms = self.set_bcc_convention([e1, e2, e3], (60, 40, 80))  # z peri 18
+        # atoms = self.set_bcc_convention([e1, e2, e3], (60, 40, 3))  # z peri
+        # 18
+        atoms = self.set_bcc_convention(
+            [e1, e2, e3], (60, 40, 80))  # z peri 18
 
         atoms = self.intro_single_screw_atoms(atoms)
 
@@ -616,7 +617,8 @@ class md_dislocation(gn_config.bcc,
             self.set_nnodes(1)
             self.set_wall_time(90)
             self.set_job_title("W-%s-T%d" % (stress, temp))
-            self.set_main_job("mpirun lmp_linux -in in.md_addforce  > screen.log ")
+            self.set_main_job(
+                "mpirun lmp_linux -in in.md_addforce  > screen.log ")
             self.write_pbs()
             self.gn_md_add_force(temp, stress)
 
