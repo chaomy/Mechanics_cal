@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-25 11:36:56
+# @Last Modified time: 2017-06-25 13:36:05
 
 import os
 import numpy as np
@@ -177,7 +177,10 @@ class cal_lattice(gn_config.bcc,
             degauss = degauss0 + 0.005 * i
             mdir = 'degauss{:4.3f}'.format(degauss)
             print mdir
-            os.system("cp {}/kpts.txt kpts_{:4.3f}.txt".format(mdir, degauss))
+            os.chdir(mdir)
+            self.clc_data(tag='kpts')
+            os.system("cp kpts.txt ../kpts_{:4.3f}.txt".format(degauss))
+            os.chdir(self.root_dir)
         return
 
     def loop_plt_data(self):
