@@ -35,9 +35,13 @@ except ImportError:
     print "error during import"
 
 
-class vasp_dislocation(gn_config.bcc, gn_config.fcc, gn_config.hcp,
-                       get_data.get_data, gn_kpoints.gn_kpoints,
-                       gn_incar.gn_incar, gn_pbs.gn_pbs,
+class vasp_dislocation(gn_config.bcc,
+                       gn_config.fcc,
+                       gn_config.hcp,
+                       get_data.get_data,
+                       gn_kpoints.gn_kpoints,
+                       gn_incar.gn_incar,
+                       gn_pbs.gn_pbs,
                        Intro_vasp.vasp_change_box):
 
     def __init__(self, structure='bcc'):
@@ -136,7 +140,6 @@ class vasp_dislocation(gn_config.bcc, gn_config.fcc, gn_config.hcp,
         atoms = self.intro_dipole_screw_atoms(atoms)
         atoms = self.cut_half_atoms(atoms)
 
-        ############ Intro dipole screw ############
         #  self.intro_dipole_screw()
 
         self.write_poscar(atoms)

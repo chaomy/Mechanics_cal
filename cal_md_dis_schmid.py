@@ -82,7 +82,6 @@ class cal_bcc_schmid(object):
         C11 = uc.set_in_units(self.pot['C11'], 'GPa')
         C12 = uc.set_in_units(self.pot['C12'], 'GPa')
         C44 = uc.set_in_units(self.pot['C44'], 'GPa')
-
         if tag == '[110]':
             axes = np.array([[-1, 0, 1],
                              [1, -2, 1],
