@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-25 11:04:52
+# @Last Modified time: 2017-06-25 11:10:59
 
 import os
 import numpy as np
@@ -175,12 +175,11 @@ class cal_lattice(gn_config.bcc,
         degauss0 = 0.02
         for i in range(7):
             degauss = degauss0 + 0.005 * i
-            self.set_degauss('{}D0'.format(degauss))
             mdir = 'degauss{:4.3f}'.format(degauss)
             print mdir
-            os.chdir(mdir)
-            self.clc_data(tag=opt)
-            os.chdir(self.root)
+            # os.chdir(mdir)
+            # self.clc_data(tag=opt)
+            # os.chdir(self.root)
         return
 
     def loop_plt_data(self):
