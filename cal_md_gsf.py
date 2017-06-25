@@ -22,7 +22,6 @@ import numpy as np
 from multiprocessing import Pool
 from optparse import OptionParser
 import matplotlib.pylab as plt
-from md_pot_data import md_pot
 import plt_drv
 
 try:

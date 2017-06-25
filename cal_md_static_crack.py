@@ -17,7 +17,6 @@
 
 import Intro as Intr
 import os
-import shutil
 import numpy as np
 import md_pot_data
 import cal_compliance_constants as CAL

@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-24 12:48:52
+# @Last Modified time: 2017-06-25 01:16:15
 
 import os
 import numpy as np
@@ -35,7 +35,7 @@ class cal_lattice(gn_config.bcc,
         self.alat0 = self.pot['lattice']
         self.element = self.pot['element']
         self.mass = self.pot['mass']
-        self.kpnts = [46, 46, 46]
+        self.kpnts = [42, 42, 42]
         self.root = os.getcwd()
         return
 
@@ -83,9 +83,9 @@ class cal_lattice(gn_config.bcc,
         bcc_drv = gn_config.bcc(self.pot)
         bcc_drv.set_lattce_constant(self.alat0)
         self.set_ecut('{}'.format(48))
-        self.set_degauss('0.02D0')
+        self.set_degauss('0.05D0')
         self.set_disk_io('none')
-        for kpts in range(32, 48):
+        for kpts in range(32, 50):
             self.set_kpnts((kpts, kpts, kpts))
             dirname = 'dir-kpt-{}'.format(kpts)
             self.mymkdir(dirname)
@@ -157,6 +157,23 @@ class cal_lattice(gn_config.bcc,
         self.fig.savefig('{}.png'.format(tag))
         return
 
+    def loop_plt_data(self):
+        dirlist = glob.glob('degau*')
+        self.set_111plt()
+        self.set_keys()
+        for mdir in dirlist:
+            tag = mdir[-4:]
+            os.chdir(mdir)
+            data = np.loadtxt('kpts.txt')
+            print tag
+            print len(data[0])
+            data[1] = data[1][np.argsort(data[0])]
+            self.ax.plot(np.sort(data[0]), data[1], label=tag)
+            self.ax.legend()
+            os.chdir(self.root)
+        self.fig.savefig('fig-default.png')
+        return
+
     def loop_run(self):
         dirlist = glob.glob("dir-*")
         for dirname in dirlist:
@@ -169,6 +186,8 @@ class cal_lattice(gn_config.bcc,
 
     def gn_qe_bcc_lattice_infile(self, atoms):
         self.set_thr('1.0D-6')
+        self.set_degauss('0.04D0')
+        self.set_kpnts((42, 42, 42))
         with open('qe.in', 'w') as fid:
             fid = self.qe_write_control(fid, atoms)
             fid = self.qe_write_system(fid, atoms)
@@ -176,7 +195,7 @@ class cal_lattice(gn_config.bcc,
             fid = self.qe_write_cell(fid, atoms.get_cell())
             fid = self.qe_write_species(fid, atoms, self.pot)
             fid = self.qe_write_pos(fid, atoms)
-            fid = self.qe_write_kpts(fid, self.kpnts)
+            fid = self.qe_write_kpts(fid)
             fid.close()
         return
 
@@ -219,21 +238,23 @@ if __name__ == '__main__':
     elif options.mtype.lower() == 'run':
         drv.loop_run()
 
-    elif options.mtype.lower() == 'clccut':
-        drv.clc_data(tag='ecut')
-
-    elif options.mtype.lower() == 'clckpts':
-        drv.clc_data(tag='kpts')
+    elif options.mtype.lower() in ['clcecut', 'clckpts']:
+        tag = options.mtype.lower()[3:]
+        drv.clc_data(tag=tag)
 
     elif options.mtype.lower() == 'clclat':
         drv.clc_lattice()
 
-    elif options.mtype.lower() == 'pltcut':
+    elif options.mtype.lower() == 'pltecut':
         drv.plt_data(tag='ecut')
-
-    elif options.mtype.lower() == 'pltkpts':
-        drv.plt_data(tag='kpts')
 
     elif options.mtype.lower() == 'pltlat':
         data = drv.find_lattice()
         drv.plt_data(tag='lat', data=data)
+
+    elif options.mtype.lower() in ['pltkpts', 'pltecut']:
+        tag = options.mtype.lower()[3:]
+        drv.plt_data(tag=tag)
+
+    elif options.mtype.lower() in ['loopplt']:
+        drv.loop_plt_data()
