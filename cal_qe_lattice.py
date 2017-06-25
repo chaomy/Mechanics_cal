@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-25 11:04:02
+# @Last Modified time: 2017-06-25 11:04:52
 
 import os
 import numpy as np
@@ -179,7 +179,7 @@ class cal_lattice(gn_config.bcc,
             mdir = 'degauss{:4.3f}'.format(degauss)
             print mdir
             os.chdir(mdir)
-            self.clc_data(opt=opt)
+            self.clc_data(tag=opt)
             os.chdir(self.root)
         return
 
