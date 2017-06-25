@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-25 11:15:18
+# @Last Modified time: 2017-06-25 11:36:56
 
 import os
 import numpy as np
@@ -181,19 +181,16 @@ class cal_lattice(gn_config.bcc,
         return
 
     def loop_plt_data(self):
-        dirlist = glob.glob('degau*')
+        filelist = glob.glob('kpts_*')
         self.set_111plt()
         self.set_keys()
-        for mdir in dirlist:
-            tag = mdir[-4:]
-            os.chdir(mdir)
-            data = np.loadtxt('kpts.txt')
+        for mfile in filelist:
+            data = np.loadtxt(mfile)
+            tag = mfile[5:-4]
             print tag
-            print len(data[0])
             data[1] = data[1][np.argsort(data[0])]
             self.ax.plot(np.sort(data[0]), data[1], label=tag)
             self.ax.legend()
-            os.chdir(self.root)
         self.fig.savefig('fig-default.png')
         return
 
@@ -209,7 +206,6 @@ class cal_lattice(gn_config.bcc,
 
     def gn_qe_bcc_lattice_infile(self, atoms):
         self.set_thr('1.0D-6')
-        self.set_degauss('0.04D0')
         with open('qe.in', 'w') as fid:
             fid = self.qe_write_control(fid, atoms)
             fid = self.qe_write_system(fid, atoms)
