@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-25 11:02:31
+# @Last Modified time: 2017-06-25 11:04:02
 
 import os
 import numpy as np
@@ -296,8 +296,8 @@ if __name__ == '__main__':
         tag = options.mtype.lower()[3:]
         drv.plt_data(tag=tag)
 
-    elif options.mtype.lower() in ['loopkpts', 'loopecut']:
-        tag = options.mtype.lower()[4:]
+    elif options.mtype.lower() in ['loopclckpts', 'loopclcecut']:
+        tag = options.mtype.lower()[7:]
         drv.loop_clc_data(opt=tag)
 
     elif options.mtype.lower() in ['loopplt']:
