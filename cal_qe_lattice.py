@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-25 10:59:23
+# @Last Modified time: 2017-06-25 11:02:31
 
 import os
 import numpy as np
@@ -179,7 +179,7 @@ class cal_lattice(gn_config.bcc,
             mdir = 'degauss{:4.3f}'.format(degauss)
             print mdir
             os.chdir(mdir)
-            self.collect_data(opt=opt)
+            self.clc_data(opt=opt)
             os.chdir(self.root)
         return
 
@@ -296,7 +296,7 @@ if __name__ == '__main__':
         tag = options.mtype.lower()[3:]
         drv.plt_data(tag=tag)
 
-    elif options.mtype.lower() in ['loopclc']:
+    elif options.mtype.lower() in ['loopkpts', 'loopecut']:
         tag = options.mtype.lower()[4:]
         drv.loop_clc_data(opt=tag)
 
