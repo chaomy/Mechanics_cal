@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-25 18:04:45
+# @Last Modified time: 2017-06-25 19:10:22
 
 import os
 import numpy as np
@@ -101,6 +101,9 @@ class cal_lattice(gn_config.bcc,
                 os.system('mv dir-* {}'.format(mdir))
             elif opt == 'sub':
                 self.goandsub(mdir, self.root)
+            elif opt == 'clc':
+                os.system("cp {}/kpts.txt kpts_{:4.3f}.txt".format(mdir,
+                                                                   degauss))
         return
 
     def loop_kpoints(self):

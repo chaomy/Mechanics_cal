@@ -589,8 +589,7 @@ if __name__ == "__main__":
     #  calculate the mobility of screw dislocation by MD
     #  N.cal_non_periodic_screw_xdislocation()
     #  N.static_add_stress();
-
     #  prepare md input files
     #  N.prepare_md_dislocation()
     #  prepare md input files
-    #  N.loop_write_pbs();
+    #  N.loop_write_pbs()
