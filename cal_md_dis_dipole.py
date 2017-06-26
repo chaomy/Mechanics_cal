@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-25 17:14:14
+# @Last Modified time: 2017-06-25 17:29:00
 
 import ase
 import ase.io
@@ -12,14 +12,16 @@ import md_pot_data
 import tool_elastic_constants
 import stroh_solve
 import ase.lattice
-import atomman as am
+# import atomman as am
 import cal_md_dislocation
 
 
 class cal_dis_dipole(object):
 
-    def __init__(self):
-        self.pot = md_pot_data.qe_pot.vca_W75Re25
+    def __init__(self, pot=None):
+        if pot is None:
+            pot = md_pot_data.qe_pot.vca_W75Re25
+        self.pot = pot
         self.mddis_drv = cal_md_dislocation.md_dislocation(self.pot)
         return
 
@@ -50,6 +52,12 @@ class cal_dis_dipole(object):
         atoms.set_cell(supercell)
         return atoms
 
+    def print_dis_constants(self, stroh):
+        print "K tensor", stroh.K_tensor
+        print "K (biKijbj)", stroh.K_coeff, "eV/A"
+        print "pre-ln alpha = biKijbj/4pi", stroh.preln, "ev/A"
+        return
+
     def bcc_screw_dipole_configs_alongz(self, sizen=1):
         c = tool_elastic_constants.elastic_constants(C11=self.pot['C11'],
                                                      C12=self.pot['C12'],
@@ -57,29 +65,30 @@ class cal_dis_dipole(object):
         axes = np.array([[1, 1, -2],
                          [-1, 1, 0],
                          [1, 1, 1]])
+
         burgers = self.pot['lattice'] / 2 * np.array([1., 1., 1.])
         stroh = stroh_solve.Stroh(c, burgers, axes=axes)
-        amstroh = am.defect.Stroh(c, burgers, axes=axes)
-        print "K tensor", stroh.K_tensor, amstroh.K_tensor
-        print "K (biKijbj)", stroh.K_coeff, amstroh.K_coeff, "eV/A"
-        print "pre-ln alpha = biKijbj/4pi", stroh.preln, amstroh.preln, "ev/A"
+
         atoms = self.set_dipole_box()
+        atoms_perf = atoms.copy()
         pos = atoms.get_positions()
 
         unitx = np.sqrt(6) / 3. * self.pot['lattice']
         unity = np.sqrt(2) / 2. * self.pot['lattice']
+
         sx = 10.0 * sizen
         sy = 5 * sizen
         ix = 10.5 * sizen
         c1 = [(sx) * unitx, (sy + 1. / 3.) * unity]
         c2 = [(sx + ix) * unitx, (sy + 2. / 3.) * unity]
+
         shiftc1 = np.ones(np.shape(pos)) * np.array([c1[0], c1[1], 0.0])
         shiftc2 = np.ones(np.shape(pos)) * np.array([c2[0], c2[1], 0.0])
         disp1 = stroh.displacement(pos - shiftc1)
         disp2 = stroh.displacement(pos - shiftc2)
         atoms.set_positions(pos + np.real(disp1) - np.real(disp2))
         # ase.io.write('POSCAR', atoms, format='vasp')
-        return atoms
+        return (atoms, atoms_perf)
 
 if __name__ == '__main__':
     drv = cal_dis_dipole()

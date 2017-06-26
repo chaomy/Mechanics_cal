@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-25 13:36:05
+# @Last Modified time: 2017-06-25 17:50:17
 
 import os
 import numpy as np
@@ -202,8 +202,7 @@ class cal_lattice(gn_config.bcc,
         for dirname in dirlist:
             print dirname
             os.chdir(dirname)
-            if not os.path.isfile('qe.out'):
-                os.system("mpirun -n 24 pw.x < qe.in > qe.out")
+            os.system("mpirun -n 24 pw.x < qe.in > qe.out")
             os.chdir(self.root)
         return
 

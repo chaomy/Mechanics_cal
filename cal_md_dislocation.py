@@ -553,16 +553,16 @@ if __name__ == "__main__":
 
     N = md_dislocation()
 
-    #### static calculate the kink pair migration barrier by neb method ####
+    # static calculate the kink pair migration barrier by neb method #
     if options.mtype == "nebkink":
-        #----- nano particle only Peierdic along z ------ #
+        # nano particle only Peierdic along z #
         N.cal_kink_pair_neb_pre()
 
     if options.mtype == "kink":
         N.intro_kink_pair()
 
     if options.mtype == "modify":
-        #### ouptut the rotated dipole configuration ####
+        # ouptut the rotated dipole configuration #
         N.modified_cal_disp_dipo()
 
     if options.mtype.lower() == "hcpedge":
@@ -585,10 +585,6 @@ if __name__ == "__main__":
 
     if options.mtype.lower() == 'ani':
         N.cal_ani_dis()
-
-    #  N.cal_dipo_dislocations()
-    #  N.cal_disp_dipo_lisa()
-    #  N.prepare_md_dislocation()
 
     #  calculate the mobility of screw dislocation by MD
     #  N.cal_non_periodic_screw_xdislocation()

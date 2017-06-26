@@ -38,17 +38,20 @@ class qe_dislocation(get_data.get_data,
                      cal_md_dis_dipole.cal_dis_dipole):
 
     def __init__(self):
-        self.pot = md_pot_data.qe_pot.vca_W50Re50
+        self.pot = md_pot_data.qe_pot.vca_W75Re25
         get_data.get_data.__init__(self)
-        gn_qe_inputs.gn_qe_infile.__init__(self, self.pot)
         gn_pbs.gn_pbs.__init__(self)
         gn_config.bcc.__init__(self, self.pot)
-        cal_md_dis_dipole.cal_dis_dipole(self, self.pot)
+        gn_qe_inputs.gn_qe_infile.__init__(self, self.pot)
+        cal_md_dis_dipole.cal_dis_dipole.__init__(self, self.pot)
         return
 
     def gn_qe_screw_dipole_bcc(self):
-        atoms = self.bcc_screw_dipole_configs_alongz()
-        self.gn_infile_dipole_screw_atoms(atoms)
+        (dis_atoms, perf_atoms) = self.bcc_screw_dipole_configs_alongz()
+        self.gn_infile_dipole_screw_atoms(dis_atoms)
+        # output poscar as backup
+        ase.io.write('dis_poscar', dis_atoms, format='vasp')
+        ase.io.write('perf_poscar', perf_atoms, format='vasp')
         return
 
     def gn_infile_dipole_screw_atoms(self,
@@ -71,11 +74,9 @@ class qe_dislocation(get_data.get_data,
                           in_tag="easy_easy",
                           input_s=0.0,
                           movex=0.0):
-
         e1 = 1. / 3. * np.array([1., 1., -2.])
         e2 = 1. / 2. * np.array([-1., 1., 0])
         e3 = np.array([0.5, 0.5, 0.5])
-
         n = 7
         m = 11
         atoms = self.set_bcc_convention([e1, e2, e3],
@@ -98,9 +99,7 @@ class qe_dislocation(get_data.get_data,
         os.system("cp POSCAR new_perf.vasp")
         self.write_poscar(atoms)
         os.system("cp POSCAR POSCAR_init")
-
         self.gn_infile_dipole_screw_atoms(atoms)
-
         return (atoms_perf, atoms)
 
 
@@ -115,5 +114,5 @@ if __name__ == '__main__':
     (options, args) = parser.parse_args()
 
     drv = qe_dislocation()
-    if options.mtype.lower() == 'dipole':
+    if options.mtype.lower() in ['dipole', 'dp']:
         drv.gn_qe_screw_dipole_bcc()
