@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-25 19:10:22
+# @Last Modified time: 2017-06-25 19:12:01
 
 import os
 import numpy as np
@@ -270,7 +270,7 @@ if __name__ == '__main__':
     if options.mtype.lower() in ['kpts', 'prepkpts', 'loopkpts']:
         drv.loop_kpoints()
 
-    if options.mtype.lower() in ['degauss_prep', 'degauss_sub']:
+    if options.mtype.lower() in ['degauss_prep', 'degauss_sub', 'degauss_clc']:
         drv.loop_degauss(opt=options.mtype.lower().split('_')[-1])
 
     elif options.mtype.lower() == 'ecut':
