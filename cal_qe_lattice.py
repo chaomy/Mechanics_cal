@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-26 09:26:53
+# @Last Modified time: 2017-06-26 10:04:53
 
 import os
 import numpy as np
@@ -213,8 +213,8 @@ class cal_lattice(gn_config.bcc,
             os.chdir(self.root_dir)
         return
 
-    def loop_plt_data(self):
-        filelist = glob.glob('kpts_*')
+    def loop_plt_data(self, tag='kpts'):
+        filelist = glob.glob('{}_*'.format(tag))
         self.set_111plt()
         self.set_keys()
         for mfile in filelist:
@@ -238,6 +238,9 @@ class cal_lattice(gn_config.bcc,
 
     def gn_qe_bcc_lattice_infile(self, atoms):
         self.set_thr('1.0D-6')
+        self.set_ecut('48')
+        self.set_kpnts('44')
+        self.set_degauss('0.03D0')
         with open('qe.in', 'w') as fid:
             fid = self.qe_write_control(fid, atoms)
             fid = self.qe_write_system(fid, atoms)
@@ -331,5 +334,6 @@ if __name__ == '__main__':
         tag = options.mtype.lower()[7:]
         drv.loop_clc_data(opt=tag)
 
-    elif options.mtype.lower() in ['loopplt']:
-        drv.loop_plt_data()
+    elif options.mtype.lower() in ['loopplt_kpts', 'loopplt_ecut']:
+        tag = options.mtype.lower().split('_')[-1]
+        drv.loop_plt_data(tag)
