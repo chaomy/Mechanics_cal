@@ -36,14 +36,15 @@ class cal_bcc_ideal_tensile(get_data.get_data,
 
     def grab_engy(self):
         npts = 26
-        data = np.ndarray([npts, 8])
+        data = np.ndarray([npts, 9])
         for i in range(26):
             dirname = "dir-{:03d}".format(i)
             print dirname
             os.chdir(dirname)
+            delta = 0.01 * i
             engy, stress, vol = self.vasp_energy_stress_vol()
-            (data[i, 0], data[i, 1:7], data[i, -1]) = \
-                engy, stress.transpose(), vol
+            (data[i, 0], data[i, 1], data[i, 2:8], data[i, -1]) = \
+                delta, engy, stress.transpose(), vol
             os.chdir(self.root_dir)
         print data
         np.savetxt("iten.txt", data)
