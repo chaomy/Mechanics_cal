@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-26 13:43:05
+# @Last Modified time: 2017-06-26 13:44:07
 
 import os
 import numpy as np
@@ -186,7 +186,7 @@ class cal_lattice(gn_config.bcc,
             cnt += 1
             os.chdir(self.root)
         print data
-        np.savetxt('lat.dat', data)
+        np.savetxt('lat.txt', data)
         return
 
     def plt_data(self, tag='ecut', data=None):
