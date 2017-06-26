@@ -54,8 +54,7 @@ class cal_bcc_ideal_tensile(get_data.get_data,
         data = np.loadtxt("iten.txt")
         self.set_keys()
         self.set_111plt()
-        xlist = np.arange(0, 0.25, 0.01)
-        self.ax.plot(xlist, data[:25, 0])
+        self.ax.plot(data[:, 0], data[:, 1])
         self.fig.savefig("istress.png", **self.figsave)
         return
 

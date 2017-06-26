@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-26 10:11:40
+# @Last Modified time: 2017-06-26 13:43:05
 
 import os
 import numpy as np
@@ -29,7 +29,7 @@ class cal_lattice(gn_config.bcc,
                   gn_pbs.gn_pbs):
 
     def __init__(self, inpot=None):
-        self.pot = md_pot_data.qe_pot.pbe_w
+        self.pot = md_pot_data.qe_pot.vca_W75Re25
         output_data.output_data.__init__(self)
         get_data.get_data.__init__(self)
         gn_pbs.gn_pbs.__init__(self)
