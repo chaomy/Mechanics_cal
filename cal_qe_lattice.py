@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-25 19:30:33
+# @Last Modified time: 2017-06-25 19:31:26
 
 import os
 import numpy as np
@@ -131,7 +131,7 @@ class cal_lattice(gn_config.bcc,
             self.set_kpnts((i, i, i))
             self.loop_ecut()
             self.set_pbs(mdir)
-            os.chdir(os.pardir())
+            os.chdir(os.pardir)
         return
 
     def loop_ecut(self):
