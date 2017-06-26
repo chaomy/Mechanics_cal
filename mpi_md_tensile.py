@@ -38,6 +38,7 @@ __all__ = ['md_tensile']
 def unwrap_self_run_lammps(arg, **kwarg):
     return md_loop_tensile.lammps_job(*arg, **kwarg)
 
+
 class md_tensile(get_data.get_data,
                  output_data.output_data,
                  gn_lmp_infile.gn_md_infile):
@@ -53,7 +54,6 @@ class md_tensile(get_data.get_data,
 
         self.element = element
         self.lattice_constant = lattice_constant
-        ###  be careful ###
         self.set_lattice_constant()
 
         self.size = size
@@ -238,9 +238,9 @@ Transform(3,3) = 1
         #  "float") + Correct_strain
 
         Transformed_strain = M.transpose() * self.strainmtx * M
-        Base_vector = np.matrix([[1,        0,          0],
-                                 [0,    np.sqrt(2), 	0],
-                                 [0,        0, np.sqrt(2)]])
+        Base_vector = np.matrix([[1, 0, 0],
+                                 [0, np.sqrt(2), 0],
+                                 [0, 0, np.sqrt(2)]])
 
         Transposed_Base = Transformed_strain * Base_vector
         xsize = size[0]
@@ -307,7 +307,7 @@ Transform(3,3) = 1
                               ZDirection[i]))
         fout.close()
         os.system("cp lattice.txt lattice_%5.3f.txt" % (delta))
-        ########### generate cfg #########################
+        # generate cfg #
         XXDirection, YYDirection, ZZDirection = [], [], []
         for z in range(zsize):
             for y in range(ysize):
@@ -372,6 +372,7 @@ Transform(3,3) = 1
 
 
 class md_loop_tensile(md_tensile):
+
     def __init__(self,
                  element='Nb',
                  lattice_constant=3.30,
@@ -469,12 +470,10 @@ class md_loop_tensile(md_tensile):
 
         if os.path.isfile(output_data_file):
             os.system(": > %s" % (output_data_file))
-        #### main function ############
-
+        # main function #
         Correct_strain = np.mat([[0, 0, 0],
                                  [0, 0, 0],
                                  [0, 0, 0]], "float")
-
         md_tensile.__init__(self,
                             self._element,
                             self._lattice_constant,
@@ -502,7 +501,7 @@ class md_loop_tensile(md_tensile):
             #  os.system("cat lattice.txt >> backup.txt")
             os.system("%s > Log_MD" % (self._flux_exe))
 
-            ### lx, ly, lz ###
+            # lx, ly, lz #
             self.lx, self.ly, self.lz = self.md_get_lx_ly_lz_from_Log("Log_MD")
 
             self.stress_original = self.md_get_stress()
@@ -519,7 +518,7 @@ class md_loop_tensile(md_tensile):
                 self.output_md_tensile(delta)
                 break
             else:
-                #### update strain ####
+                # update strain #
                 print "Sij = ", self.Sij[0, 1], self.Sij[0, 2]
 
                 if abs(stress[1]) > self._stress_ThrValue:

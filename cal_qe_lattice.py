@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-25 19:34:04
+# @Last Modified time: 2017-06-26 09:14:53
 
 import os
 import numpy as np
@@ -123,15 +123,18 @@ class cal_lattice(gn_config.bcc,
                                                 dirname))
         return
 
-    def loop_kpoints_ecut(self):
+    def loop_kpoints_ecut(self, opt='clc'):
         for i in range(43, 50):
             kpts = i
             mdir = 'kpts_{:02}'.format(kpts)
             self.mymkdir(mdir)
             os.chdir(mdir)
-            self.set_kpnts((i, i, i))
-            self.loop_ecut()
-            self.set_pbs(mdir)
+            if opt == 'prep':
+                self.set_kpnts((i, i, i))
+                self.loop_ecut()
+                self.set_pbs(mdir)
+            elif opt == 'clc':
+                self.clc_data(tag='ecut')
             os.chdir(os.pardir)
         return
 

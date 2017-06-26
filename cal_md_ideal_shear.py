@@ -484,17 +484,25 @@ class cal_bcc_ideal_shear(get_data.get_data,
         stssvect[5] = stssmtx[2, 1]
         return stssvect
 
-    def plt_energy_stress(self):
-        raw = np.loadtxt("stress.txt")
+    def cmp_plt(self):
         self.set_keys()
         self.set_211plt()
+        self.plt_energy_stress(fname='stress_0.00.txt')
+        self.plt_energy_stress(fname='stress_0.25.txt')
+        self.fig.savefig("istress.png", **self.figsave)
+        return
+
+    def plt_energy_stress(self, fname='stress.txt', set=False):
+        if set is True:
+            self.set_keys()
+            self.set_211plt()
+        raw = np.loadtxt(fname)
         self.ax1.plot(raw[:, 0], (raw[:, 1] - raw[0, 1]),
                       label='engy',
                       **self.pltkwargs)
         self.ax2.plot(raw[:, 0], (raw[:, -1] - raw[0, -1]),
                       label='stress',
                       **self.pltkwargs)
-        self.fig.savefig("istress.png", **self.figsave)
         return
 
     def set_pltkargs(self):
@@ -564,17 +572,13 @@ if __name__ == '__main__':
     (options, args) = parser.parse_args()
 
     drv = cal_bcc_ideal_shear()
-    if options.mtype.lower() == 'runvasp':
-        drv.md_ideal_shear('run', 'vasp')
+    if options.mtype.lower() in ['run_vasp', 'run_lmp']:
+        opt = options.mtype.lower().split('_')[-1]
+        drv.md_ideal_shear('run', opt)
 
-    if options.mtype.lower() == 'runlmp':
-        drv.md_ideal_shear('run', 'lmp')
-
-    if options.mtype.lower() == 'clcvasp':
-        drv.md_ideal_shear('clc', 'vasp')
-
-    if options.mtype.lower() == 'clclmp':
-        drv.md_ideal_shear('clc', 'lmp')
+    if options.mtype.lower() in ['clc_vasp', 'clc_lmp']:
+        opt = options.mtype.lower().split('_')[-1]
+        drv.md_ideal_shear('clc', opt)
 
     if options.mtype.lower() == 'clcqe' or \
             options.mtype.lower() == 'qeclc':
@@ -602,6 +606,9 @@ if __name__ == '__main__':
         if not os.path.isfile("stress.txt"):
             drv.convert_stress()
         drv.plt_energy_stress()
+
+    if options.mtype.lower() == 'cmpplt':
+        drv.cmp_plt()
 
     if options.mtype.lower() == 'cmp':
         drv.plt_energy_stress_cmp()

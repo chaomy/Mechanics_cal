@@ -55,7 +55,6 @@ class cal_add_strain(object):
     def _add_volumeric_strain(self, atoms, delta):
         cell = np.mat(atoms.get_cell())
         positions = np.mat(atoms.get_positions())
-
         strain = np.mat([[1 + delta, 0, 0],
                          [0, 1 + delta, 0],
                          [0, 0, 1 + delta]], "float")
