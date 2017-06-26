@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-26 09:22:39
+# @Last Modified time: 2017-06-26 09:24:38
 
 import os
 import numpy as np
@@ -135,6 +135,8 @@ class cal_lattice(gn_config.bcc,
                 self.set_pbs(mdir)
             elif opt == 'clc':
                 self.clc_data(tag='ecut')
+            elif opt == 'dat':
+                os.system("cp ecut.txt ../ecut_{:02}.txt".format(kpts))
             os.chdir(self.root)
         return
 
