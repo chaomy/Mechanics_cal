@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-25 19:12:01
+# @Last Modified time: 2017-06-25 19:29:04
 
 import os
 import numpy as np
@@ -120,6 +120,18 @@ class cal_lattice(gn_config.bcc,
             os.system('mv qe.in {}'.format(dirname))
             os.system('cp $POTDIR/{} {}'.format(self.pot['file'],
                                                 dirname))
+        return
+
+    def loop_kpoints_ecut(self):
+        for i in range(43, 48):
+            kpts = i
+            mdir = 'kpts_{:02}'.format(kpts)
+            self.mymkdir(mdir)
+            os.chdir(mdir)
+            self.set_kpnts((i, i, i))
+            self.loop_ecut()
+            self.set_pbs(mdir)
+            os.chdir(os.pardir())
         return
 
     def loop_ecut(self):
