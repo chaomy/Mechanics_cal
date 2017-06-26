@@ -59,7 +59,7 @@ class cal_cij(gn_config.bcc,
 
         self._cij_lattice_constant = lattice_constant
         self._cij_element = in_element
-        self.cij_type_list = ['c11', 'c12', 'c44']  # default
+        self.cij_type_list = ['c11', 'c12', 'c44']
         self.cij_type = 'c11'
         self._surface_kpoints = in_kpoints
         self._structure = in_structure
@@ -231,7 +231,8 @@ class cal_cij(gn_config.bcc,
                 (energy, volume) = self.vasp_energy_stress_vol_quick()
                 os.chdir(self.root_dir)
 
-                self.output_delta_energy(delta, energy, file_name=out_file_name)
+                self.output_delta_energy(delta, energy,
+                                         file_name=out_file_name)
                 if j == 0:
                     self.output_equilibrium(energy=energy,
                                             volume=volume)
@@ -305,7 +306,6 @@ if __name__ == "__main__":
 
     #  A.set_volume_energy0()
     #  A.obtain_cij_old()
-
     #  c12 = 0.25 * C11plus2C12 + 0.75 * C11minusC12
     #  c11 = 0.25 * C11plus2C12 - 0.25 * C11minusC12
     #  c44 = float(get_cxx("c44",Lattice_constant,delta_increment,nt,E0)) * (1./4.) * inv_V0  * unit_conversion1
