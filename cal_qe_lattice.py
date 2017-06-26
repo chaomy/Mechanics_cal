@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-26 13:44:07
+# @Last Modified time: 2017-06-26 13:53:16
 
 import os
 import numpy as np
@@ -38,7 +38,7 @@ class cal_lattice(gn_config.bcc,
         self.alat0 = self.pot['lattice']
         self.element = self.pot['element']
         self.mass = self.pot['mass']
-        self.kpnts = [42, 42, 42]
+        self.kpnts = [44, 44, 44]
         self.root = os.getcwd()
         return
 
