@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-25 17:57:03
+# @Last Modified time: 2017-06-25 18:03:10
 
 import os
 import numpy as np
@@ -82,16 +82,25 @@ class cal_lattice(gn_config.bcc,
                                          file_name='lat.txt')
         return
 
-    def loop_degauss(self):
+    def goandsub(self, dirname, rootdir):
+        os.chdir(dirname)
+        os.system('qsub va.pbs')
+        os.chdir(rootdir)
+        return
+
+    def loop_degauss(self, opt='prep'):
         degauss0 = 0.02
         for i in range(7):
             degauss = degauss0 + 0.005 * i
-            self.set_degauss('{}D0'.format(degauss))
             mdir = 'degauss{:4.3f}'.format(degauss)
-            self.mymkdir(mdir)
-            self.loop_kpoints()
-            self.set_pbs(mdir)
-            os.system('mv dir-* {}'.format(mdir))
+            if opt == 'prep':
+                self.set_degauss('{}D0'.format(degauss))
+                self.mymkdir(mdir)
+                self.loop_kpoints()
+                self.set_pbs(mdir)
+                os.system('mv dir-* {}'.format(mdir))
+            elif opt == 'sub':
+                self.goandsub(mdir, self.root)
         return
 
     def loop_kpoints(self):
