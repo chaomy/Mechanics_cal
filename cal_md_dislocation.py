@@ -105,13 +105,11 @@ class md_dislocation(gn_config.bcc,
                                         pbc=(1, 1, 1))
 
         movex = 0.0  # -np.sqrt(6.)/3. * self._alat
-
         ase.io.write("lmp_perf.cfg",
                      atoms,
                      "cfg")
 
         atoms = self.intro_dipole_screw_atoms(atoms)
-
         ase.io.write("lmp_init.cfg",
                      atoms,
                      "cfg")
@@ -139,98 +137,6 @@ class md_dislocation(gn_config.bcc,
 
         self.write_lmp_config_data(atoms)
         os.system("cp ./lmp_init.txt ../MgNd_2NNmeam")
-        return
-
-    def cal_dipo_dislocations(self):
-        ##### do not use it ####
-        e1 = np.array([1.,   1.,  -2.])
-        e2 = np.array([-1.,  1.,   0])
-        e3 = np.array([0.5,  0.5,  0.5])
-
-        ### 3, 5;   5, 9;  7, 11
-        r, s = 7,  11
-        v1 = r * e1
-        v2 = 0.5 * (r * e1 + s * e2) + 0.5 * e3
-        v3 = e3
-
-        ############ generate config    ############
-        self.set_lattce_constant(self._alat)
-        self.set_element('W')
-        print v1, v2, v3
-
-        atoms = self.set_bcc_convention(
-            [v1, v2, v3], (r, 1, 10))  # z periodic 12
-
-        ############  generate pure  ###############
-        atoms2 = atoms.copy()
-        atoms2 = self.cut_half_atoms(atoms2)
-
-        ase.io.write("lmp_perf.cfg",
-                     atoms2,
-                     "cfg")
-
-        movex = 0.  # np.sqrt(6.)/3. * self._alat;
-
-        atoms = self.intro_dipole_screw_atoms(atoms,
-                                              self._alat,
-                                              move_x=movex)
-
-        atoms = self.cut_half_atoms(atoms)
-        atoms.wrap(pbc=[1, 1, 1])
-
-        ase.io.write("lmp_init.cfg",
-                     atoms,
-                     "cfg")
-
-        self.write_lmp_config_data(atoms)
-        self.gn_md_minimize_cfg("lmp_init.txt",
-                                "./w_eam4.fs",
-                                "W",
-                                fix=True)
-        return
-
-        #  atoms = self.intro_kink_screw_dislocations(atoms,
-        #  (xc1, yc1),
-        #  (xc1 + H, yc1),
-        #  h, tilpnt, 1)
-
-        #  atoms = self.intro_kink_screw_dislocations(atoms,
-        #  (xc2, yc2),
-        #  (xc2 + H, yc2),
-        #  h, tilpnt, -1)
-
-        #  elif (i < (npt2 - 1)):
-        #  h = 0.5 * H
-        #  tilpnt = 1. / (3. + i - npt1)
-        #  atoms = self.intro_kink_screw_dislocations(atoms,
-        #  (xc1, yc1),
-        #  (xc1 + H, yc1),
-        #  h, tilpnt, 1)
-
-        #  atoms = self.intro_kink_screw_dislocations(atoms,
-        #  (xc2, yc2),
-        #  (xc2 + H, yc2),
-        #  h, tilpnt, -1)
-
-        #  else:
-        #  atoms = self.intro_kink_screw_dislocations(atoms,
-        #  (xc1 + H, yc1),
-        #  (xc1 + H, yc1),
-        #  0, tilpnt, 1)
-
-        #  atoms = self.intro_kink_screw_dislocations(atoms,
-        #  (xc2 + H, yc2),
-        #  (xc2 + H, yc2),
-        #  0, tilpnt, -1)
-
-        #  ###### Be careful which file lammps reads ######
-        #  fname = "init_%d.data" % (i + 1)
-        #  coordn = "coord_%d" % (i + 1)
-        #  self.write_lmp_config_data(atoms, file_name=fname)
-        #  self.write_lmp_coords(atoms, file_name=coordn)
-
-        #  elif tag == 'perf':
-        #  self.write_lmp_config_data(atoms, 'lmp_init.txt')
         return
 
         ############################################################
@@ -323,7 +229,6 @@ class md_dislocation(gn_config.bcc,
         return
 
         ############################################################
-        # Sun Mar 26 12:59:59 2017
         # since lammmps can only use  xy xz yz
         # new x is old y ; new y is old z ; new z is old x
         # x  1  1 -2
@@ -338,49 +243,37 @@ class md_dislocation(gn_config.bcc,
 
         self.set_lattce_constant(self._alat)
         self.set_element('W')
-
         sizen = 1
         n = 7 * sizen
         m = 11 * sizen
         t = 1
-
         atoms = Cubic.BodyCenteredCubic(directions=[e1, e2, e3],
                                         latticeconstant=self._alat,
                                         size=(n, t, m),
                                         symbol=self._element,
                                         pbc=(1, 1, 1))
-
         atoms = self.cut_half_atoms_new(atoms, "cutz")
-
         supercell = atoms.get_cell()
         strain = np.mat([[1.0, 0.0, 0.0],
                          [0.0, 1.0, 0.0],
                          [0.5, 0.5, 1.0]])
-
         supercell = strain * supercell
         atoms.set_cell(supercell)
-
         atoms2 = atoms.copy()
-
         unitx = np.sqrt(6) / 3. * self._alat
         unity = np.sqrt(2) / 2. * self._alat
-
         c1 = [(10 + movex) * unitx, (5 + 1. / 3.) * unity]
         c2 = [(10 + 10.5 + movex) * unitx, (5 + 2. / 3.) * unity]
         center = [c1, c2]
-
         atoms = self.intro_dipole_screw_atoms_LMP(atoms, center=center,
                                                   lattice=self._alat)
         self.write_lmp_config_data(atoms)
-
         ase.io.write("lmp_perf_modified.cfg",
                      atoms2,
                      "cfg")
-
         ase.io.write("lmp_dis.cfg",
                      atoms,
                      "cfg")
-
         os.system("mv lmp_perf_modified.cfg output")
         os.system("mv lmp_dis.cfg output")
         return atoms
@@ -395,7 +288,7 @@ class md_dislocation(gn_config.bcc,
         v2 = 0.5 * n * e1 + m * e2 + (0.5 - 1. / (6 * m)) * e3
         v3 = e3
 
-        print v1, v2,  v3
+        print v1, v2, v3
 
         v1 = np.round(v1, decimals=0)
         v2 = np.round(v2, decimals=0)
@@ -403,18 +296,13 @@ class md_dislocation(gn_config.bcc,
 
         self.set_lattce_constant(self._alat)
         self.set_element('Nb')
-        print v1, v2,  v3
+        print v1, v2, v3
 
         atoms = Cubic.BodyCenteredCubic(directions=[v1, v2, v3],
                                         latticeconstant=3.0,
                                         size=(n, 1, 1),
                                         symbol='Nb',
                                         pbc=(1, 1, 1))
-
-        #  atoms = self.set_bcc_convention([v1, v2, v3], (1, 1, 1))  # z periodic 12
-        #  print atoms
-        #  atoms = self.intro_dipole_screw_atoms(atoms)
-
         ase.io.write("lmp_init.xyz",
                      atoms,
                      "xyz")
@@ -449,7 +337,7 @@ class md_dislocation(gn_config.bcc,
 
     def cal_single_screw_dislocatoins(self):
         e1 = np.array([-1., 1., 0])
-        e2 = np.array([1.,  1., -2])
+        e2 = np.array([1., 1., -2])
         e3 = np.array([0.5, 0.5, 0.5])
 
         self.set_lattce_constant(self._alat)
@@ -464,8 +352,8 @@ class md_dislocation(gn_config.bcc,
                      "xyz")
 
         atoms = self.intro_single_screw_atoms(atoms)
-
-        #  if we don't cut a layer of atoms, will generate two screw dislocations
+        #  if we don't cut a layer of atoms,
+        #  it will generate two screw dislocations
         #  atoms = self.cut_z_normal_atoms(atoms, self._alat);
 
         self.write_lmp_config_data(atoms)
@@ -478,31 +366,16 @@ class md_dislocation(gn_config.bcc,
 
     def add_strain(self, atoms, delta):
         cell = atoms.get_cell()
-        strain = np.mat([[1,   0,    0],
-                         [delta, 1,   0],
-                         [0,   0,    1]], 'float')
+        strain = np.mat([[1, 0,  0],
+                         [delta, 1,  0],
+                         [0, 0,  1]], 'float')
 
         positions = np.mat(atoms.get_positions())
         positions = positions * strain
-
         cell = strain * cell
-
         atoms.set_positions(positions)
         atoms.set_cell(cell)
         return atoms
-
-    def md_add_stress(self):
-        atoms = self.prepare_md_dislocation()
-        #  atoms = self.add_volumeric_strain(atoms, (3.3102/3.307 - 1));
-
-        #  self.write_lmp_config_data(atoms, file_name = "relaxed.txt")
-
-        #  self.gn_md_pp_tensile(potential_file = "Nb.eam.alloy.webarchive",
-        #  element = "Nb",
-        #  temperature = 300.0,
-        #  deform_direction ="xy",
-        #  deform_rate = "1e-6")
-        return
 
     def static_add_stress(self):
         atoms = self.prepare_md_dislocation()
@@ -547,7 +420,7 @@ class md_dislocation(gn_config.bcc,
         #  os.mkdir("cfg")
         return
 
-    ##### calculate the nano particle  ####
+    # calculate the nano particle  #
     def cal_non_periodic_screw_xdislocation(self):
         e1 = np.array([-1.,   1.,  0])
         e2 = np.array([-1.,  -1.,  2])
@@ -587,11 +460,8 @@ class md_dislocation(gn_config.bcc,
         # write pbs
         return
 
-    ##### calculate the dislocation velocity under shear by LMP ####
+    # calculate the dislocation velocity under shear by LMP #
     def loop_write_pbs(self):
-        #  import glob
-        #  files = glob.glob("*");
-
         #  templist = [300, 600, 900, 1200, 1500, 1800];
         #  templist = [400, 500, 700, 800];
 
@@ -621,44 +491,14 @@ class md_dislocation(gn_config.bcc,
                 "mpirun lmp_linux -in in.md_addforce  > screen.log ")
             self.write_pbs()
             self.gn_md_add_force(temp, stress)
-
-            #  os.system("qsub va.pbs");
-
             os.chdir(self.root_dir)
-        return
-
-    ##### submittion of jobs ####
-    def loop_sub_jobs(self):
-        dirlist = glob.glob("dir-*")
-        for dirname in dirlist:
-            os.chdir(dirname)
-            os.system("qsub va.pbs")
-            os.chdir(self.root_dir)
-        return
-
-    def loop_del_restart(self):
-        dirlist = glob.glob("dir-T*")
-        for thedir in dirlist:
-            os.chdir(thedir)
-
-            restart_file = glob.glob('restart/*.restart')
-            for i in range(len(restart_file[:-1])):
-                os.system("rm  %s" % (restart_file[i]))
-
-            os.chdir(self.root_dir)
-        return
-
-    def test(self):
-        atoms = ase.io.read("./custom/lmp.dump",
-                            format='lammps-dump')
-        ase.io.write("ase.cfg", atoms, format='cfg')
         return
 
     def cal_cu3Au_dis(self):
         atoms = ase.io.read("./custom/perf.00000.dump",
                             format='lammps-dump')
 
-        ### delete some Cu atoms to create missing rows ###
+        # delete some Cu atoms to create missing rows #
         unity = 3.63902984582228 * np.sqrt(2.) / 2.
         index_list = []
         for atom in atoms:
@@ -666,7 +506,7 @@ class md_dislocation(gn_config.bcc,
                 index_list.append(atom.index)
         del atoms[index_list]
 
-        ## introduce edge dislocation ##
+        # introduce edge dislocation #
         cell = atoms.get_cell()
         zhigh = cell[2, 2]
         center = [0.5 * cell[0, 0], 10. * unity, 0.0]
@@ -679,11 +519,10 @@ class md_dislocation(gn_config.bcc,
         #  [0.0*zhigh,
         #  zhigh])
 
-        ## cut extra half plane ##
+        # cut extra half plane #
         #  atoms = self.cut_x_normal_atoms(atoms, self._alat,
         #  0, np.sqrt(2)/3.)
 
-        ### output ###
         ase.io.write("ase.cfg", atoms, format='cfg')
         system, elements = am.convert.ase_Atoms.load(atoms)
         lmp.atom_data.dump(system, "lmp_init.txt")

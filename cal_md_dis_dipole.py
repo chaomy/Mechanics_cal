@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-25 16:43:39
+# @Last Modified time: 2017-06-25 17:14:14
 
 import ase
 import ase.io
@@ -19,7 +19,7 @@ import cal_md_dislocation
 class cal_dis_dipole(object):
 
     def __init__(self):
-        self.pot = md_pot_data.md_pot.Nb_eam
+        self.pot = md_pot_data.qe_pot.vca_W75Re25
         self.mddis_drv = cal_md_dislocation.md_dislocation(self.pot)
         return
 
@@ -50,7 +50,7 @@ class cal_dis_dipole(object):
         atoms.set_cell(supercell)
         return atoms
 
-    def gn_dipole_configs(self, sizen=1):
+    def bcc_screw_dipole_configs_alongz(self, sizen=1):
         c = tool_elastic_constants.elastic_constants(C11=self.pot['C11'],
                                                      C12=self.pot['C12'],
                                                      C44=self.pot['C44'])
@@ -78,10 +78,10 @@ class cal_dis_dipole(object):
         disp1 = stroh.displacement(pos - shiftc1)
         disp2 = stroh.displacement(pos - shiftc2)
         atoms.set_positions(pos + np.real(disp1) - np.real(disp2))
-        ase.io.write('POSCAR', atoms, format='vasp')
-        return
+        # ase.io.write('POSCAR', atoms, format='vasp')
+        return atoms
 
 if __name__ == '__main__':
     drv = cal_dis_dipole()
-    drv.gn_dipole_configs()
     drv.set_dipole_box()
+    drv.bcc_screw_dipole_configs_alongz()

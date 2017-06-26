@@ -19,13 +19,12 @@ try:
     import numpy as np
     import md_pot_data
     import ase
-    import ase.io
     import os
     import gn_config
     import get_data
-    import Intro_vasp
     import gn_pbs
     import gn_qe_inputs
+    import cal_md_dis_dipole
     from optparse import OptionParser
 
 except ImportError:
@@ -36,7 +35,7 @@ class qe_dislocation(get_data.get_data,
                      gn_qe_inputs.gn_qe_infile,
                      gn_pbs.gn_pbs,
                      gn_config.bcc,
-                     Intro_vasp.vasp_change_box):
+                     cal_md_dis_dipole.cal_dis_dipole):
 
     def __init__(self):
         self.pot = md_pot_data.qe_pot.vca_W50Re50
@@ -44,7 +43,28 @@ class qe_dislocation(get_data.get_data,
         gn_qe_inputs.gn_qe_infile.__init__(self, self.pot)
         gn_pbs.gn_pbs.__init__(self)
         gn_config.bcc.__init__(self, self.pot)
-        Intro_vasp.vasp_change_box.__init__(self, self.pot)
+        cal_md_dis_dipole.cal_dis_dipole(self, self.pot)
+        return
+
+    def gn_qe_screw_dipole_bcc(self):
+        atoms = self.bcc_screw_dipole_configs_alongz()
+        self.gn_infile_dipole_screw_atoms(atoms)
+        return
+
+    def gn_infile_dipole_screw_atoms(self,
+                                     atoms=None):
+        self.set_cal_type('relax')
+        self.set_ecut('42')
+        self.set_degauss('0.04D0')
+        with open('{}.in'.format(self.pot['element']), 'w') as fid:
+            fid = self.qe_write_control(fid, atoms)
+            fid = self.qe_write_system(fid, atoms)
+            fid = self.qe_write_electrons(fid)
+            fid = self.qe_write_cell(fid, atoms.get_cell())
+            fid = self.qe_write_species(fid, atoms, self.pot)
+            fid = self.qe_write_pos(fid, atoms)
+            fid = self.qe_write_kpts(fid, (1, 2, 8))
+            fid.close()
         return
 
     def cal_qe_dipo_screw(self,
@@ -65,7 +85,6 @@ class qe_dislocation(get_data.get_data,
         strain = np.mat([[1.0, 0.0, 0.0],
                          [0.5, 1.0, 0.5],
                          [0.0, 0.0, 1.0]])
-
         supercell = strain * supercell
         atoms.set_cell(supercell)
         atoms.wrap(pbc=[1, 1, 1])
@@ -97,4 +116,4 @@ if __name__ == '__main__':
 
     drv = qe_dislocation()
     if options.mtype.lower() == 'dipole':
-        drv.cal_qe_dipo_screw()
+        drv.gn_qe_screw_dipole_bcc()
