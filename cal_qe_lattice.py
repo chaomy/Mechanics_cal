@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-25 19:31:26
+# @Last Modified time: 2017-06-25 19:34:04
 
 import os
 import numpy as np
@@ -98,6 +98,7 @@ class cal_lattice(gn_config.bcc,
                 self.mymkdir(mdir)
                 self.loop_kpoints()
                 self.set_pbs(mdir)
+                os.system('mv va.pbs {}'.format(mdir))
                 os.system('mv dir-* {}'.format(mdir))
             elif opt == 'sub':
                 self.goandsub(mdir, self.root)
@@ -262,7 +263,7 @@ class cal_lattice(gn_config.bcc,
     cal_qe_lattice.py -t run
                         """)
         self.write_pbs(od=od)
-        os.system("mv va.pbs %s" % (dirname))
+        #os.system("mv va.pbs %s" % (dirname))
         return
 
 if __name__ == '__main__':
