@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-25 17:50:17
+# @Last Modified time: 2017-06-25 17:57:03
 
 import os
 import numpy as np
@@ -229,13 +229,13 @@ class cal_lattice(gn_config.bcc,
         print "min lat", interps[np.argmin(spl(interps))]
         return data
 
-    def set_pbs(self, dirname, od=False):
+    def set_pbs(self, dirname, od=True):
         self.set_nnodes(2)
         self.set_ppn(12)
         self.set_job_title("%s" % (dirname))
-        self.set_wall_time(8)
+        self.set_wall_time(7)
         self.set_main_job("""
-mpirun  pw.x  < qe.in > qe.out
+    cal_qe_lattice.py -t run
                         """)
         self.write_pbs(od=od)
         os.system("mv va.pbs %s" % (dirname))
