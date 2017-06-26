@@ -114,5 +114,6 @@ if __name__ == '__main__':
     if options.mtype.lower() == 'plt':
         drv.plot_curv()
 
-    if options.mtype.lower() == 'recal':
-        drv.setup_recal()
+    if options.mtype.lower() == 'recal_run':
+        opt = options.mtype.lower().split('_')[-1]
+        drv.setup_recal(opt)
