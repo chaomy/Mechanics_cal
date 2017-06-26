@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-26 09:24:38
+# @Last Modified time: 2017-06-26 09:26:53
 
 import os
 import numpy as np
@@ -294,8 +294,11 @@ if __name__ == '__main__':
     elif options.mtype.lower() in ['ecut', 'loopecut']:
         drv.loop_ecut()
 
-    elif options.mtype.lower() in ['kptsecut']:
-        drv.loop_kpoints_ecut()
+    elif options.mtype.lower() in ['kptsecut_prep',
+                                   'kptsecut_clc',
+                                   'kptsecut_dat']:
+        tag = options.mtype.lower().split('_')[-1]
+        drv.loop_kpoints_ecut(tag)
 
     elif options.mtype.lower() == 'pot':
         drv.loop_pots()
