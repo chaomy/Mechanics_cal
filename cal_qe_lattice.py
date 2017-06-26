@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-25 19:29:04
+# @Last Modified time: 2017-06-25 19:30:33
 
 import os
 import numpy as np
@@ -123,7 +123,7 @@ class cal_lattice(gn_config.bcc,
         return
 
     def loop_kpoints_ecut(self):
-        for i in range(43, 48):
+        for i in range(43, 50):
             kpts = i
             mdir = 'kpts_{:02}'.format(kpts)
             self.mymkdir(mdir)
@@ -285,8 +285,11 @@ if __name__ == '__main__':
     if options.mtype.lower() in ['degauss_prep', 'degauss_sub', 'degauss_clc']:
         drv.loop_degauss(opt=options.mtype.lower().split('_')[-1])
 
-    elif options.mtype.lower() == 'ecut':
+    elif options.mtype.lower() in ['ecut', 'loopecut']:
         drv.loop_ecut()
+
+    elif options.mtype.lower() in ['kptsecut']:
+        drv.loop_kpoints_ecut()
 
     elif options.mtype.lower() == 'pot':
         drv.loop_pots()
