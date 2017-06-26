@@ -25,6 +25,7 @@ from optparse import OptionParser
 
 class cal_bcc_ideal_tensile(get_data.get_data,
                             plt_drv.plt_drv):
+
     def __init__(self):
         self._pot = md_pot_data.dft_data.Nb_pbe
         self.root_dir = os.getcwd()
@@ -36,13 +37,13 @@ class cal_bcc_ideal_tensile(get_data.get_data,
     def grab_engy(self):
         npts = 26
         data = np.ndarray([npts, 8])
-
         for i in range(26):
             dirname = "dir-{:03d}".format(i)
             print dirname
             os.chdir(dirname)
             engy, stress, vol = self.vasp_energy_stress_vol()
-            (data[i, 0], data[i, 1:7], data[-1]) = engy, stress.transpose(), vol
+            (data[i, 0], data[i, 1:7], data[i, -1]) = \
+                engy, stress.transpose(), vol
             os.chdir(self.root_dir)
         print data
         np.savetxt("iten.txt", data)
