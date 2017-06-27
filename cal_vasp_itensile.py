@@ -78,9 +78,9 @@ class cal_bcc_ideal_tensile(get_data.get_data,
         return
 
     def grab_engy(self):
-        npts = 40
+        npts = 41 
         data = np.ndarray([npts, 9])
-        for i in range(26):
+        for i in range(npts):
             # dirname = "dir-{:03d}".format(i)
             delta = 0.01 * i
             dirname = 'dir-{:4.3f}'.format(delta)
