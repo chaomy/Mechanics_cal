@@ -45,7 +45,7 @@ class cal_bcc_ideal_tensile(get_data.get_data,
         for i in range(30, 41):
             dirname = 'dir-{:03}'.format(i)
             mdir = 'dir-{:4.3f}'.format(0.01 * i)
-            print(dirname, mdir)
+            os.system('mv {} {}'.format(dirname, mdir))
         return
 
     def set_pbs(self, dirname, delta, opt='vasp'):
