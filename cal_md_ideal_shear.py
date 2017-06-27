@@ -75,9 +75,10 @@ class cal_bcc_ideal_shear(get_data.get_data,
         self.configdrv = gn_config.bcc(self.pot)
         self.lm_prim = self.configdrv.lmp_change_box(self.va_prim)
         self.qedrv = gn_qe_inputs.gn_qe_infile(self.pot)
+        # set qe simulation setup
         self.qedrv.set_degauss('0.03D0')
         self.qedrv.set_ecut('45')
-        self.qedrv.set_kpnts((35, 35, 35))
+        self.qedrv.set_kpnts((33, 33, 33))
         self.root = os.getcwd()
         return
 

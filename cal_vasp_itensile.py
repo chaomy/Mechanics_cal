@@ -95,20 +95,30 @@ class cal_bcc_ideal_tensile(get_data.get_data,
                     delta, engy, stress.transpose(), vol
                 os.chdir(self.root_dir)
             elif opt == 'cell':
-                fname = 'POSCAR{:4.3f}'.format(delta)
+                fname = 'CONTCAR{:4.3f}'.format(delta)
                 atoms = ase.io.read(fname,
                                     format='vasp')
-                print atoms.get_cell()
-        print data
-        np.savetxt("iten.txt", data)
+                cell = atoms.get_cell()
+                data[i, :] = cell.flatten()
+                # print cell.flatten()
+        np.savetxt("{}.txt".format(opt), data)
         return
 
-    def plot_curv(self):
-        data = np.loadtxt("iten.txt")
-        self.set_keys()
-        self.set_111plt()
-        self.ax.plot(data[:, 0], data[:, 1], marker='o')
-        self.fig.savefig("istress.png", **self.figsave)
+    def plot_curv(self, opt='engy'):
+        data = np.loadtxt("{}.txt".format(opt))
+        if opt == 'engy':
+            self.set_keys()
+            self.set_111plt()
+            self.ax.plot(data[:, 0], data[:, 1], marker='o')
+            self.fig.savefig("{}.png".format(opt), **self.figsave)
+        elif opt == 'cell':
+            self.set_keys()
+            self.set_111plt()
+            delta = np.linspace(0, 0.40, 41)
+            self.ax.plot(delta, data[:, 0], marker='o')
+            self.ax.plot(delta, data[:, 4], marker='<')
+            self.ax.plot(delta, data[:, 8], marker='>')
+            self.fig.savefig("{}.png".format(opt), **self.figsave)
         return
 
 
@@ -131,8 +141,9 @@ if __name__ == '__main__':
     if options.mtype.lower() in ['adj']:
         drv.adjust()
 
-    if options.mtype.lower() == 'plt':
-        drv.plot_curv()
+    if options.mtype.lower() in ['plt_engy', 'plt_cell']:
+        tag = options.mtype.lower().split('_')[-1]
+        drv.plot_curv(tag)
 
     if options.mtype.lower() == 'recal_run':
         opt = options.mtype.lower().split('_')[-1]
