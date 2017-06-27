@@ -178,10 +178,7 @@ class cal_cij(gn_config.bcc,
                 print "i am in ", dirname
                 (energy, vol, stress) = self.qe_get_energy_stress()
                 os.chdir(self.root)
-                self.output_delta_energy(delta, energy,
-                                         file_name=out_file_name)
-                if j == 0:
-                    np.savetxt('equilibrium.txt', [energy, volume])
+                self.output_delta_energy(delta, energy, file_name=out_file_name)
         return
 
     def set_pbs(self, dirname):
