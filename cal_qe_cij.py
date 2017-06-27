@@ -167,7 +167,6 @@ class cal_cij(gn_config.bcc,
             mtype = self.cij_type_list[i]
             self.set_cij_type(mtype)
             out_file_name = "data_%s.txt" % (mtype)
-
             for j in range(-self.looptimes, self.looptimes):
                 delta = self.unit_delta * j
                 if j >= 0:
@@ -178,7 +177,9 @@ class cal_cij(gn_config.bcc,
                 print "i am in ", dirname
                 (energy, vol, stress) = self.qe_get_energy_stress()
                 os.chdir(self.root)
-                self.output_delta_energy(delta, energy, file_name=out_file_name)
+                self.output_delta_energy(delta,
+                                         energy,
+                                         file_name=out_file_name)
         return
 
     def set_pbs(self, dirname):
@@ -208,21 +209,22 @@ if __name__ == "__main__":
                       dest="mtype",
                       help="",
                       default="prep")
+
     (options, args) = parser.parse_args()
     Job = cal_cij()
     if options.mtype.lower() in ['prep']:
         Job.loop_prepare_cij()
 
-    if options.mtype.lower() == 'sub':
+    if options.mtype.lower() in ['sub']:
         Job.loop_sub_jobs()
 
-    if options.mtype.lower() == 'cij':
+    if options.mtype.lower() in ['cij']:
         Job.obtain_cij()
 
     if options.mtype.lower() == 'cnt':
         Job.cal_cij_continue()
 
-    if options.mtype.lower() == 'clc':
+    if options.mtype.lower() in ['clc']:
         Job.collect_data_cij()
 
     #  A.set_volume_energy0()

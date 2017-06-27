@@ -43,12 +43,16 @@ class cal_add_strain(object):
                        Transformed_Base[1, 1],
                        Transformed_Base[1, 2]))
             fid.write("%12.6f %12.6f %12.6f\n" %
-                      (Transformed_Base[2, 0], Transformed_Base[2, 1], Transformed_Base[2, 2]))
+                      (Transformed_Base[2, 0],
+                       Transformed_Base[2, 1],
+                       Transformed_Base[2, 2]))
             fid.write("%d\n" % (atom_number))
             fid.write(comment)
             for i in range(atom_number):
                 fid.write("%12.6f %12.6f %12.6f\n" %
-                          (atom_position[0, i], atom_position[1, i], atom_position[2, i]))
+                          (atom_position[0, i],
+                           atom_position[1, i],
+                           atom_position[2, i]))
             fid.close()
         return
 
