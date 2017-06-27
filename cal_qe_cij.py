@@ -181,7 +181,7 @@ class cal_cij(gn_config.bcc,
                 self.output_delta_energy(delta, energy,
                                          file_name=out_file_name)
                 if j == 0:
-                    self.output_equilibrium(energy=energy, volume=volume)
+                    np.savetxt('equilibrium.txt', [energy, volume])
         return
 
     def set_pbs(self, dirname):
