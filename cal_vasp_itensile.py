@@ -32,7 +32,7 @@ class cal_bcc_ideal_tensile(get_data.get_data,
                             gn_pbs.gn_pbs):
 
     def __init__(self):
-        self._pot = md_pot_data.dft_data.Nb_pbe
+        self._pot = md_pot_data.dft_pot.Nb_pbe
         self.root_dir = os.getcwd()
         gn_pbs.gn_pbs.__init__(self)
         gn_incar.gn_incar.__init__(self)
