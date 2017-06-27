@@ -87,12 +87,9 @@ class cal_cij(gn_config.bcc,
 
     def obtain_cij(self, opt='np'):
         self.set_volume_energy0()
-        if opt is 'np':
-            raw1 = np.loadtxt("data_c11.txt")
-            raw2 = np.loadtxt("data_c12.txt")
-            raw3 = np.loadtxt("data_c44.txt")
-        else:
-            delta_list, energy_list = self.get_delta_energy("data_c11.txt")
+        raw1 = np.loadtxt("data_c11.txt")
+        raw2 = np.loadtxt("data_c12.txt")
+        raw3 = np.loadtxt("data_c44.txt")
 
         delta_list, energy_list = raw1[:, 0], raw1[:, 1]
         c11_plus_c12 = self.fit_para(delta_list, energy_list)
@@ -115,9 +112,10 @@ class cal_cij(gn_config.bcc,
         return
 
     def set_volume_energy0(self):
-        raw = np.loadtxt("equilibrium.txt")
-        self.volume = np.average(raw[:, 0])
-        self.energy0 = np.average(raw[:, 1])
+        (engy, vol, stress) = self.qe_get_energy_stress(
+            filename='dir-c11-p000/qe.out')
+        self.volume = vol
+        self.energy0 = engy
         return
 
     def set_cij_type(self, cij_type):
@@ -220,9 +218,6 @@ if __name__ == "__main__":
 
     if options.mtype.lower() in ['cij']:
         Job.obtain_cij()
-
-    if options.mtype.lower() == 'cnt':
-        Job.cal_cij_continue()
 
     if options.mtype.lower() in ['clc']:
         Job.collect_data_cij()
