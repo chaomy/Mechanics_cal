@@ -39,7 +39,9 @@ class cal_bcc_ideal_shear(get_data.get_data,
                           plt_drv.plt_drv):
 
     def __init__(self, shtype='211'):
-        self.pot = md_pot_data.qe_pot.vca_W50Re50
+        # self.pot = np.load('../pot.dat')
+        self.pot = self.load_data('../pot.dat')
+        # self.pot = md_pot_data.qe_pot.vca_W50Re50
         gn_pbs.gn_pbs.__init__(self)
         plt_drv.plt_drv.__init__(self)
         self.alat = self.pot['lattice']
@@ -297,7 +299,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
         data = np.zeros(7)
         res = minimize(self.runqe, x0, delta,
                        method='Nelder-Mead',
-                       options={'disp': True})
+                       options={'xtol': 1e-3, 'disp': True})
         print res
         data[0] = delta
         data[1] = res.fun
@@ -335,15 +337,20 @@ class cal_bcc_ideal_shear(get_data.get_data,
         np.savetxt("ishear.txt", data)
         return
 
+    def recordstrain(self, delta, x):
+        fid = open("s{:4.3f}.txt".format(delta), "a")
+        fid.write('{} {} {} {} {}\n'.format(x[0], x[1],
+                                            x[2], x[3], x[4]))
+        fid.close()
+        return
+
     def runlmp(self, x, delta):
         basis = self.basis
         # y shear toward x direction
-        # 211 -delta
-        # 110  delta
+        self.recordstrain(delta, x)
         strain = np.mat([[x[0], 0.0, 0.0],
                          [-delta, x[1], 0.0],
                          [x[3], x[4], x[2]]])
-
         new_strain = basis.transpose() * strain * basis
         self.gn_primitive_lmps(new_strain, 'lmp')
         os.system("lmp_mpi -i in.init -screen  no")
@@ -353,6 +360,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
         return engy
 
     def runqe(self, x, delta):
+        self.recordstrain(delta, x)
         basis = self.basis
         strain = np.mat([[x[0], 0.0, 0.0],
                          [-delta, x[1], 0.0],
@@ -365,6 +373,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
         return engy
 
     def runvasp(self, x, delta):
+        self.recordstrain(delta, x)
         basis = self.basis
         strain = np.mat([[x[0], 0.0, 0.0],
                          [-delta, x[1], 0.0],
