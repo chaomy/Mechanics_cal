@@ -41,6 +41,13 @@ class cal_bcc_ideal_tensile(get_data.get_data,
         plt_drv.plt_drv.__init__(self)
         return
 
+    def adjust(self):
+        for i in range(30, 41):
+            dirname = 'dir-{:3}'.format(i)
+            mdir = 'dir-{4.3f}'.format(0.01 * i)
+            print(dirname, mdir)
+        return
+
     def set_pbs(self, dirname, delta, opt='vasp'):
         self.set_nnodes(2)
         self.set_ppn(12)
@@ -109,6 +116,9 @@ if __name__ == '__main__':
 
     if options.mtype.lower() == 'clc':
         drv.grab_engy()
+
+    if options.mtype.lower() in ['adj']:
+        drv.adjust()
 
     if options.mtype.lower() == 'plt':
         drv.plot_curv()
