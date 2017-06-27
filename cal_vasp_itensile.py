@@ -22,6 +22,8 @@ import gn_incar
 import gn_pbs
 import gn_kpoints
 import plt_drv
+import ase.io
+import ase
 from optparse import OptionParser
 
 
@@ -42,10 +44,10 @@ class cal_bcc_ideal_tensile(get_data.get_data,
         return
 
     def adjust(self):
-        for i in range(30, 41):
-            dirname = 'dir-{:03}'.format(i)
+        for i in range(0, 41):
+            # dirname = 'dir-{:03}'.format(i)
             mdir = 'dir-{:4.3f}'.format(0.01 * i)
-            os.system('cp {}/POSCAR0* .'.format(dirname))
+            os.system('cp {}/CONTCAR  CONTCAR{:4.3}'.format(mdir, 0.01 * i))
             # os.system('mv {} {}'.format(dirname, mdir))
         return
 
@@ -78,19 +80,25 @@ class cal_bcc_ideal_tensile(get_data.get_data,
                 os.chdir(os.pardir)
         return
 
-    def grab_engy(self):
+    def grab_engy(self,  opt='engy'):
         npts = 41
         data = np.ndarray([npts, 9])
         for i in range(npts):
             # dirname = "dir-{:03d}".format(i)
             delta = 0.01 * i
-            dirname = 'dir-{:4.3f}'.format(delta)
-            print dirname
-            os.chdir(dirname)
-            engy, stress, vol = self.vasp_energy_stress_vol()
-            (data[i, 0], data[i, 1], data[i, 2:8], data[i, -1]) = \
-                delta, engy, stress.transpose(), vol
-            os.chdir(self.root_dir)
+            if opt == 'engy':
+                dirname = 'dir-{:4.3f}'.format(delta)
+                print dirname
+                os.chdir(dirname)
+                engy, stress, vol = self.vasp_energy_stress_vol()
+                (data[i, 0], data[i, 1], data[i, 2:8], data[i, -1]) = \
+                    delta, engy, stress.transpose(), vol
+                os.chdir(self.root_dir)
+            elif opt == 'cell':
+                fname = 'POSCAR{:4.3f}'.format(delta)
+                atoms = ase.io.read(fname,
+                                    format='vasp')
+                print atoms.get_cell()
         print data
         np.savetxt("iten.txt", data)
         return
@@ -116,8 +124,9 @@ if __name__ == '__main__':
 
     drv = cal_bcc_ideal_tensile()
 
-    if options.mtype.lower() == 'clc':
-        drv.grab_engy()
+    if options.mtype.lower() in ['clc_engy', 'clc_cell']:
+        tag = options.mtype.lower().split('_')[-1]
+        drv.grab_engy(tag)
 
     if options.mtype.lower() in ['adj']:
         drv.adjust()
