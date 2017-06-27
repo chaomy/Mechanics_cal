@@ -45,7 +45,8 @@ class cal_bcc_ideal_tensile(get_data.get_data,
         for i in range(30, 41):
             dirname = 'dir-{:03}'.format(i)
             mdir = 'dir-{:4.3f}'.format(0.01 * i)
-            os.system('mv {} {}'.format(dirname, mdir))
+            os.system('cp {}/POSCAR0* .'.format(dirname))
+            # os.system('mv {} {}'.format(dirname, mdir))
         return
 
     def set_pbs(self, dirname, delta, opt='vasp'):
@@ -78,7 +79,7 @@ class cal_bcc_ideal_tensile(get_data.get_data,
         return
 
     def grab_engy(self):
-        npts = 41 
+        npts = 41
         data = np.ndarray([npts, 9])
         for i in range(npts):
             # dirname = "dir-{:03d}".format(i)
@@ -98,7 +99,7 @@ class cal_bcc_ideal_tensile(get_data.get_data,
         data = np.loadtxt("iten.txt")
         self.set_keys()
         self.set_111plt()
-        self.ax.plot(data[:, 0], data[:, 1])
+        self.ax.plot(data[:, 0], data[:, 1], marker='o')
         self.fig.savefig("istress.png", **self.figsave)
         return
 
