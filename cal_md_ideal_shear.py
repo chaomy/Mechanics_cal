@@ -358,7 +358,6 @@ class cal_bcc_ideal_shear(get_data.get_data,
         return engy
 
     def runqe(self, x, delta):
-        self.recordstrain(delta, x)
         basis = self.basis
         strain = np.mat([[x[0], 0.0, 0.0],
                          [-delta, x[1], 0.0],
@@ -367,11 +366,10 @@ class cal_bcc_ideal_shear(get_data.get_data,
         self.gn_primitive_lmps(new_strain, 'qe')
         os.system("mpirun pw.x < qe.in > qe.out")
         (engy, vol, stress) = self.qe_get_energy_stress('qe.out')
-        print engy
+        self.recordstrain(delta, x, engy)
         return engy
 
     def runvasp(self, x, delta):
-        self.recordstrain(delta, x)
         basis = self.basis
         strain = np.mat([[x[0], 0.0, 0.0],
                          [-delta, x[1], 0.0],
@@ -380,7 +378,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
         self.gn_primitive_lmps(new_strain, 'vasp')
         os.system("mpirun vasp > vasp.log")
         (engy, stress, vol) = self.vasp_energy_stress_vol()
-        print engy
+        self.recordstrain(delta, x, engy)
         return engy
 
     def qe_loop_stress(self, opt='clc'):
