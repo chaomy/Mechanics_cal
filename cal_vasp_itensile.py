@@ -43,7 +43,7 @@ class cal_bcc_ideal_tensile(get_data.get_data,
 
     def adjust(self):
         for i in range(30, 41):
-            dirname = 'dir-{:3}'.format(i)
+            dirname = 'dir-{:03}'.format(i)
             mdir = 'dir-{:4.3f}'.format(0.01 * i)
             print(dirname, mdir)
         return
