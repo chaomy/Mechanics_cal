@@ -47,7 +47,7 @@ class cal_bcc_ideal_tensile(get_data.get_data,
         for i in range(0, 41):
             # dirname = 'dir-{:03}'.format(i)
             mdir = 'dir-{:4.3f}'.format(0.01 * i)
-            os.system('cp {}/CONTCAR  CONTCAR{:4.3}'.format(mdir, 0.01 * i))
+            os.system('cp {}/CONTCAR CONTCAR{:4.3f}'.format(mdir, 0.01 * i))
             # os.system('mv {} {}'.format(dirname, mdir))
         return
 
