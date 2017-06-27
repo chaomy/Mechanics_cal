@@ -39,7 +39,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
                           plt_drv.plt_drv):
 
     def __init__(self, shtype='211'):
-        self.pot = md_pot_data.qe_pot.vca_W50Re50
+        self.pot = md_pot_data.qe_pot.vca_W75Re25
         gn_pbs.gn_pbs.__init__(self)
         plt_drv.plt_drv.__init__(self)
         self.alat = self.pot['lattice']
@@ -52,6 +52,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
         shd111p110 = {'e1': np.array([1., 1., 1.]),
                       'e2': np.array([1., -1, 0]),
                       'e3': np.array([1, 1., -2])}
+
         if shtype == '211':
             e1 = shd111p211['e1']
             e2 = shd111p211['e2']
