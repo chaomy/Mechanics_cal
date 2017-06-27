@@ -336,17 +336,16 @@ class cal_bcc_ideal_shear(get_data.get_data,
         np.savetxt("ishear.txt", data)
         return
 
-    def recordstrain(self, delta, x):
+    def recordstrain(self, delta, x, fval):
         fid = open("s{:4.3f}.txt".format(delta), "a")
-        fid.write('{} {} {} {} {}\n'.format(x[0], x[1],
-                                            x[2], x[3], x[4]))
+        fid.write('{} {} {} {} {} {}\n'.format(x[0], x[1], x[2],
+                                               x[3], x[4], fval))
         fid.close()
         return
 
     def runlmp(self, x, delta):
         basis = self.basis
         # y shear toward x direction
-        self.recordstrain(delta, x)
         strain = np.mat([[x[0], 0.0, 0.0],
                          [-delta, x[1], 0.0],
                          [x[3], x[4], x[2]]])
@@ -355,7 +354,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
         os.system("lmp_mpi -i in.init -screen  no")
         raw = np.loadtxt("out.txt")
         engy = raw[0]
-        print engy
+        self.recordstrain(delta, x, engy)
         return engy
 
     def runqe(self, x, delta):
