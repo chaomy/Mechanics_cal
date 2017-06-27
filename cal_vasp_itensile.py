@@ -22,7 +22,6 @@ import gn_incar
 import gn_pbs
 import gn_kpoints
 import plt_drv
-import matplotlib.pylab as plt
 from optparse import OptionParser
 
 

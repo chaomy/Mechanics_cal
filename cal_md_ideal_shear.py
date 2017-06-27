@@ -74,6 +74,9 @@ class cal_bcc_ideal_shear(get_data.get_data,
         self.configdrv = gn_config.bcc(self.pot)
         self.lm_prim = self.configdrv.lmp_change_box(self.va_prim)
         self.qedrv = gn_qe_inputs.gn_qe_infile(self.pot)
+        self.qedrv.set_degauss('0.03D0')
+        self.qedrv.set_ecut('45')
+        self.qedrv.set_kpnts('35')
         self.root = os.getcwd()
         return
 
@@ -455,6 +458,19 @@ class cal_bcc_ideal_shear(get_data.get_data,
                 data[i, -1] = splder1(raw[i, 0]) * convunit / vol[i]
         print data
         np.savetxt("stress.txt", data)
+        return
+
+    def gn_infile_dipole_ideal_shear(self,
+                                     atoms=None):
+        with open('qe.in', 'w') as fid:
+            fid = self.qe_write_control(fid, atoms)
+            fid = self.qe_write_system(fid, atoms)
+            fid = self.qe_write_electrons(fid)
+            fid = self.qe_write_cell(fid, atoms.get_cell())
+            fid = self.qe_write_species(fid, atoms, self.pot)
+            fid = self.qe_write_pos(fid, atoms)
+            fid = self.qe_write_kpts(fid, (33, 33, 33))
+            fid.close()
         return
 
     def trans_stress_to_cartesian(self, stssvect, opt='vasp'):
