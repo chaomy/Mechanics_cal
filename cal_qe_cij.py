@@ -162,10 +162,7 @@ class cal_cij(gn_config.bcc,
                 os.chdir(self.root)
         return
 
-    def ouput_data_cij(self):
-        if os.path.isfile("cij.dat"):
-            os.system("mv cij.dat cij.dat")
-
+    def collect_data_cij(self):
         for i in range(len(self.cij_type_list)):
             mtype = self.cij_type_list[i]
             self.set_cij_type(mtype)
@@ -174,23 +171,17 @@ class cal_cij(gn_config.bcc,
             for j in range(-self.looptimes, self.looptimes):
                 delta = self.unit_delta * j
                 if j >= 0:
-                    dirname = "dir-%s-delta-%03d" % (mtype, j)
+                    dirname = "dir-%s-p%03d" % (mtype, j)
                 else:
-                    dirname = "dir-%s-delta-n%03d" % (mtype, np.abs(j))
+                    dirname = "dir-%s-n%03d" % (mtype, np.abs(j))
                 os.chdir(dirname)
                 print "i am in ", dirname
-                (energy, volume) = self.vasp_energy_stress_vol_quick()
+                (energy, vol) = self.qe_get_energy_stress()
                 os.chdir(self.root)
-
                 self.output_delta_energy(delta, energy,
                                          file_name=out_file_name)
                 if j == 0:
-                    self.output_equilibrium(energy=energy,
-                                            volume=volume)
-
-        #  fout = open("%s_summary"%cname,"w")
-            #  fout.write("%22.16f %22.16f\n"%(delta_increment*i, energy))
-        #  answer = fit_para(cname,E0)
+                    self.output_equilibrium(energy=energy, volume=volume)
         return
 
     def set_pbs(self, dirname):
@@ -235,7 +226,7 @@ if __name__ == "__main__":
         Job.cal_cij_continue()
 
     if options.mtype.lower() == 'data':
-        Job.ouput_data_cij()
+        Job.collect_data_cij()
 
     #  A.set_volume_energy0()
     #  A.obtain_cij_old()
