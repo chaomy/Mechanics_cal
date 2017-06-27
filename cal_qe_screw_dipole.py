@@ -38,7 +38,7 @@ class qe_dislocation(get_data.get_data,
                      cal_md_dis_dipole.cal_dis_dipole):
 
     def __init__(self):
-        self.pot = md_pot_data.qe_pot.vca_W75Re25
+        self.pot = md_pot_data.qe_pot.vca_W50Re50
         get_data.get_data.__init__(self)
         gn_pbs.gn_pbs.__init__(self)
         gn_config.bcc.__init__(self, self.pot)
@@ -49,17 +49,18 @@ class qe_dislocation(get_data.get_data,
     def gn_qe_screw_dipole_bcc(self):
         (dis_atoms, perf_atoms) = self.bcc_screw_dipole_configs_alongz()
         self.gn_infile_dipole_screw_atoms(dis_atoms)
-        # output poscar as backup
         ase.io.write('dis_poscar', dis_atoms, format='vasp')
         ase.io.write('perf_poscar', perf_atoms, format='vasp')
+        os.system("cp $POTDIR/{} . ".format(self.pot['file']))
         return
 
     def gn_infile_dipole_screw_atoms(self,
-                                     atoms=None):
+                                     atoms=None,
+                                     fname='qe.in'):
         self.set_cal_type('relax')
         self.set_ecut('42')
         self.set_degauss('0.04D0')
-        with open('{}.in'.format(self.pot['element']), 'w') as fid:
+        with open(fname, 'w') as fid:
             fid = self.qe_write_control(fid, atoms)
             fid = self.qe_write_system(fid, atoms)
             fid = self.qe_write_electrons(fid)

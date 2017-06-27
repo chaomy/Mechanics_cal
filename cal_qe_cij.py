@@ -46,7 +46,7 @@ class cal_cij(gn_config.bcc,
 
     def __init__(self):
         self.unit_delta = 0.005
-        self.looptimes = 10
+        self.looptimes = 8
         self.volume = None
         self.energy0 = None
 
