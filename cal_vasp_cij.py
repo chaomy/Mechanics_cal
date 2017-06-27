@@ -15,9 +15,10 @@
 ###################################################################
 
 import glob
-from optparse import OptionParser
 import os
 import numpy as np
+import md_pot_data
+from optparse import OptionParser
 from scipy.optimize import leastsq
 
 try:
@@ -41,12 +42,8 @@ class cal_cij(gn_config.bcc,
               gn_pbs.gn_pbs,
               output_data.output_data):
 
-    def __init__(self,
-                 in_structure='bcc',
-                 lattice_constant=3.1711,
-                 in_element='W',
-                 in_kpoints=[31, 31, 31]):
-
+    def __init__(self):
+        self.pot = md_pot_data.dft_data.Nb_pbe
         gn_kpoints.gn_kpoints.__init__(self)
         get_data.get_data.__init__(self)
         gn_incar.gn_incar.__init__(self)
@@ -57,18 +54,18 @@ class cal_cij(gn_config.bcc,
         self.volume = None
         self.energy0 = None
 
-        self._cij_lattice_constant = lattice_constant
-        self._cij_element = in_element
+        self.alat = self.pot['lattice']
+        self.elem = self.pot['element']
         self.cij_type_list = ['c11', 'c12', 'c44']
         self.cij_type = 'c11'
-        self._surface_kpoints = in_kpoints
-        self._structure = in_structure
+        self.kpts = (30, 30, 30)
+        self.struct = self.pot['structure']
 
-        if self.structure == 'bcc':
+        if self.struct == 'bcc':
             gn_config.bcc.__init__(self)
-        elif self.structure == 'fcc':
+        elif self.struct == 'fcc':
             gn_config.fcc.__init__(self)
-        elif self.structure == 'hcp':
+        elif self.struct == 'hcp':
             gn_config.hcp.__init__(self)
         return
 
@@ -153,7 +150,7 @@ class cal_cij(gn_config.bcc,
         return
 
     def write_cij_poscar(self, delta):
-        self.set_lattce_constant(self._cij_lattice_constant)
+        self.set_lattce_constant(self.alat)
         self.write_bcc_primitive_with_strain(delta,
                                              self.cij_type,
                                              (1, 1, 1))
@@ -284,7 +281,7 @@ parser.add_option("-t",
 
 if __name__ == "__main__":
 
-    Job = cal_cij(in_structure='bcc',
+    Job = cal_cij(in_struct='bcc',
                   lattice_constant=3.322404,
                   in_element='Nb',
                   in_kpoints=[31, 31, 31])

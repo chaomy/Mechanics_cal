@@ -77,38 +77,35 @@ class cal_cij(gn_config.bcc,
         xdata = delta_list
         ydata = energy_list - self.energy0
 
-        def residuals(p):
-            a, c = p
-            return ydata - (a * (0.5 * xdata**2) + c)
-        r = leastsq(residuals, [1, 0])
+        def residuals(params):
+            a, c = params
+            return (ydata - (a * (xdata**2) + c))
+        r = leastsq(residuals, [3.0, 0.0])
+        print 'r is', r
         a, c = r[0]
         a = a / self.volume * self.ev_angstrom3_to_GPa
         return a
 
     def obtain_cij(self, opt='np'):
+        del2coeffs = np.transpose(np.zeros(3))
+        print del2coeffs
         self.set_volume_energy0()
-        raw1 = np.loadtxt("data_c11.txt")
-        raw2 = np.loadtxt("data_c12.txt")
-        raw3 = np.loadtxt("data_c44.txt")
-
-        delta_list, energy_list = raw1[:, 0], raw1[:, 1]
-        c11_plus_c12 = self.fit_para(delta_list, energy_list)
-
-        delta_list, energy_list = raw2[:, 0], raw2[:, 1]
-        c11_minus_c12 = self.fit_para(delta_list, energy_list)
-
-        delta_list, energy_list = raw3[:, 0], raw3[:, 1]
-        c44 = self.fit_para(delta_list, energy_list)
-
-        c11 = (0.111111111111111 * c11_plus_c12 +
-               0.333333333333333 * c11_minus_c12)
-        c12 = (0.111111111111111 * c11_plus_c12 -
-               0.166666666666667 * c11_minus_c12)
-        c44 = 0.25 * c44
-
-        with open("cij.dat", 'w') as fout:
-            fout.write("C11\t%f\t\nC12\t%f\t\nC44\t%f\t\n" % (c11, c12, c44))
-            fout.close()
+        filelist = ['data_c11.txt', 'data_c12.txt', 'data_c44.txt']
+        for i in range(3):
+            raw = np.loadtxt(filelist[i])
+            delta_list, energy_list = raw[:, 0], raw[:, 1]
+            del2coeffs[i] = self.fit_para(delta_list, energy_list)
+        print del2coeffs
+        convmat = np.mat([[3, 6, 0], [2, -2, 0], [0, 0, 4]])
+        print np.linalg.pinv(convmat) * np.transpose(np.mat(del2coeffs))
+        # c11 = (0.111111111111111 * c11_plus_c12 +
+        #        0.333333333333333 * c11_minus_c12)
+        # c12 = (0.111111111111111 * c11_plus_c12 -
+        #        0.166666666666667 * c11_minus_c12)
+        # c44 = 0.25 * c44
+        # with open("cij.dat", 'w') as fout:
+        #     fout.write("C11\t%f\t\nC12\t%f\t\nC44\t%f\t\n" % (c11, c12, c44))
+        #     fout.close()
         return
 
     def set_volume_energy0(self):
