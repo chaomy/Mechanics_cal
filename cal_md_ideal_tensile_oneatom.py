@@ -154,9 +154,24 @@ class cal_bcc_ideal_tensile(get_data.get_data,
             self.write_lmp_config_data(atoms, 'init.txt')
         return
 
+    def load_input_params(self):
+        if os.path.isfile('restart.txt'):
+            data = np.loadtxt("restart.txt")
+            delta = data[0]
+            x0 = data[2:3]
+            print delta
+            print x0
+        else:
+            data = np.loadtxt("strain.txt")
+            delta = data
+            x0 = np.array([1., 1., 1., 0.0, 0.0])
+        return (delta, x0)
+
     def vasp_relax(self):
         (delta, x0) = self.load_input_params()
         data = np.zeros(4)
+        print x0
+        return
         res = minimize(self.runvasp, x0, delta,
                        method='Nelder-Mead',
                        options={'disp': True})
