@@ -27,7 +27,6 @@ import get_data
 import plt_drv
 import md_pot_data
 from scipy.optimize import minimize
-from md_pot_data import unitconv
 from optparse import OptionParser
 
 
@@ -61,16 +60,6 @@ class cal_bcc_ideal_tensile(get_data.get_data,
                                [0.5, -0.5, 0.5],
                                [0.5, 0.5, -0.5]])
         self.root = os.getcwd()
-        return
-
-    def lmp_relax(self):
-        delta = 0.04
-        x0 = np.array([1., 1.])
-        res = minimize(self.runlmp, x0, delta,
-                       method='Nelder-Mead',
-                       options={'fatol': 1e-4, 'disp': True})
-        print res.fun
-        print res.x
         return
 
     def loop_collect_vasp(self):
@@ -109,9 +98,9 @@ class cal_bcc_ideal_tensile(get_data.get_data,
 
     def runvasp(self, x, delta):
         basis = self.basis
-        strain = np.mat([[1.0 + delta, 0.0,  0.0],
-                         [0.0,  x[0],  0.0],
-                         [0.0,  0.0,  x[1]]])
+        strain = np.mat([[1.0 + delta, 0.0, 0.0],
+                         [0.0, x[0], 0.0],
+                         [0.0, 0.0, x[1]]])
         new_strain = basis.transpose() * strain * basis
         self.gn_primitive_lmps(new_strain, 'vasp')
         os.system("mpirun vasp > vasp.log")
@@ -129,14 +118,12 @@ class cal_bcc_ideal_tensile(get_data.get_data,
         self.gn_primitive_lmps(new_strain, 'lmp')
         os.system("lmp_mpi -i in.init -screen  no")
         raw = np.loadtxt("out.txt")
-        engy = raw[0]
-        self.recordstrain(delta, x, engy)
-        return engy
+        print raw
+        self.recordstrain(delta, x, raw)
+        return raw[0]
 
     def gn_primitive_lmps(self,
-                          strain=np.mat([[1., 0., 0.],
-                                         [0., 1., 0.],
-                                         [0., 0., 1.]]),
+                          strain=np.mat(np.identity(3)),
                           tag='lmp'):
         alat = self.alat
         bas = np.mat([[-0.5, 0.5, 0.5],
@@ -194,7 +181,9 @@ class cal_bcc_ideal_tensile(get_data.get_data,
 
     def recordstrain(self, delta, x, fval):
         fid = open("s{:4.3f}.txt".format(delta), "a")
-        fid.write('{} {} {}\n'.format(x[0], x[1], fval))
+        formatstr = '{:6.5f} ' * (len(x) + len(fval))
+        formatstr += '\n'
+        fid.write(formatstr.format(x[0], x[1], *fval))
         fid.close()
         return
 
@@ -220,9 +209,6 @@ if __name__ == '__main__':
 
     if options.mtype.lower() == 'ivasp':
         drv.vasp_relax()
-
-    if options.mtype.lower() == 'lmprelax':
-        drv.lmp_relax()
 
     if options.mtype.lower() == 'clcvasp':
         drv.loop_collect_vasp()
