@@ -36,8 +36,8 @@ class cal_bcc_ideal_tensile(get_data.get_data,
                             gn_config.bcc):
 
     def __init__(self):
-        self.pot = self.load_data('../pot.dat')
-        # self.pot = md_pot_data.md_pot.Nb_adp
+        # self.pot = self.load_data('../pot.dat')
+        self.pot = md_pot_data.dft_pot.Nb_pbe
         gn_pbs.gn_pbs.__init__(self)
         plt_drv.plt_drv.__init__(self)
         get_data.get_data.__init__(self)
