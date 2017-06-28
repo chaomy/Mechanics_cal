@@ -190,7 +190,7 @@ class cal_bcc_ideal_tensile(get_data.get_data,
         self.set_job_title("%s" % (dirname))
         self.set_wall_time(40)
         self.set_main_job("""
-        ../cal_md_ideal_tensile_oneatom.py  -t  ivasp
+        ../cal_md_ideal_tensile_oneatom.py  -t ivasp
                           """)
         self.write_pbs(od=True)
         os.system("mv va.pbs %s" % (dirname))
