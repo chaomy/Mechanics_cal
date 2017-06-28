@@ -106,8 +106,8 @@ class cal_bcc_ideal_tensile(get_data.get_data,
         self.gn_primitive_lmps(new_strain, 'vasp')
         os.system("mpirun vasp > vasp.log")
         (engy, stress, vol) = self.vasp_energy_stress_vol()
-        self.recordstrain(delta, x, engy)
         self.stress = stress
+        self.recordstrain(delta, x, engy)
         print engy
         return engy
 
