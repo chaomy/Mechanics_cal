@@ -215,7 +215,7 @@ class cal_bcc_ideal_tensile(get_data.get_data,
             print dirname
             os.chdir(dirname)
             data[i, :] = np.loadtxt("iten.txt")
-            os.chdir(self.root)
+            os.chdir(os.pardir)
         np.savetxt("iten.txt", data)
         return
 
