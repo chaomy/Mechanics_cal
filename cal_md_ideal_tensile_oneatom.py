@@ -160,7 +160,6 @@ class cal_bcc_ideal_tensile(get_data.get_data,
             delta = data[0]
             x0 = data[2:4]
             print delta
-            print x0
         else:
             data = np.loadtxt("strain.txt")
             delta = data
@@ -170,11 +169,9 @@ class cal_bcc_ideal_tensile(get_data.get_data,
     def vasp_relax(self):
         (delta, x0) = self.load_input_params()
         data = np.zeros(4)
-        print x0
-        return
         res = minimize(self.runvasp, x0, delta,
                        method='Nelder-Mead',
-                       options={'disp': True})
+                       options={'fatol': 2e-3, 'disp': True})
         print res
         data[0] = delta
         data[1] = res.fun

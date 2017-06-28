@@ -44,7 +44,7 @@ class cal_bcc_ideal_tensile_tp(get_data.get_data,
         gn_config.bcc.__init__(self, self.pot)
 
         self.alat = self.pot['lattice']
-        self.range = (0, 16)
+        self.range = (16, 21)
         self.npts = self.range[1] - self.range[0]
         self.delta = 0.02
         e1 = [1., 0., 0.]
