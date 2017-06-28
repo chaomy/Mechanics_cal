@@ -25,7 +25,6 @@ import gn_config
 import gn_pbs
 import get_data
 import plt_drv
-import matplotlib.pylab as plt
 import md_pot_data
 import gn_qe_inputs
 from optparse import OptionParser
@@ -35,6 +34,7 @@ from md_pot_data import unitconv
 
 
 class cal_bcc_ideal_shear(get_data.get_data,
+                          gn_config.bcc,
                           gn_pbs.gn_pbs,
                           plt_drv.plt_drv):
 
@@ -43,6 +43,8 @@ class cal_bcc_ideal_shear(get_data.get_data,
         self.pot = md_pot_data.qe_pot.vca_W75Re25
         gn_pbs.gn_pbs.__init__(self)
         plt_drv.plt_drv.__init__(self)
+        get_data.get_data.__init__(self)
+        gn_config.bcc.__init__(self, self.pot)
         self.alat = self.pot['lattice']
         self.npts = 20
         self.delta = 0.02
@@ -68,11 +70,9 @@ class cal_bcc_ideal_shear(get_data.get_data,
         e3 = e3 / np.linalg.norm(e3)
 
         self.basis = np.mat([e1, e2, e3])
-        get_data.get_data.__init__(self)
         self.va_prim = np.mat([[-0.5, 0.5, 0.5],
                                [0.5, -0.5, 0.5],
                                [0.5, 0.5, -0.5]])
-        self.configdrv = gn_config.bcc(self.pot)
         self.lm_prim = self.configdrv.lmp_change_box(self.va_prim)
         self.qedrv = gn_qe_inputs.gn_qe_infile(self.pot)
         # set qe simulation setup
@@ -106,9 +106,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
         return
 
     def gn_primitive_lmps(self,
-                          strain=np.mat([[1., 0., 0.],
-                                         [0., 1., 0.],
-                                         [0., 0., 1.]]),
+                          strain=np.mat(np.identity(3)),
                           tag='lmp'):
 
         alat = self.alat
@@ -116,12 +114,8 @@ class cal_bcc_ideal_shear(get_data.get_data,
                       [0.5, -0.5, 0.5],
                       [0.5, 0.5, -0.5]])
 
-        ##########################################################
-        # very important (vasp add strain is basis right time strain)
-        ##########################################################
         if tag == 'vasp':
             va_bas = bas * strain
-            # poscar input type
             cell = alat * va_bas
             atoms = ase.Atoms(self.pot['element'],
                               positions=[[0, 0, 0]],
@@ -139,33 +133,14 @@ class cal_bcc_ideal_shear(get_data.get_data,
             self.qedrv.gn_infile_dipole_ideal_shear(atoms)
 
         if tag == 'lmp':
-            # convert to lammps data style
             lmp_bas = bas * strain
             lmp_bas = self.configdrv.lmp_change_box(lmp_bas)
             cell = alat * lmp_bas
-
-            pos = np.array([[0, 0, 0]])
-            file_name = 'init.txt'
-            atom_num = 1
-            with open(file_name, mode="w") as fout:
-                fout.write("#lmp data config")
-                fout.write("\n")
-                fout.write("%d atoms\n" % (1))
-                fout.write("1 atom types\n")
-                fout.write("%f\t%f xlo xhi\n" % (0, cell[0, 0]))
-                fout.write("%f\t%f ylo yhi\n" % (0, cell[1, 1]))
-                fout.write("%f\t%f zlo zhi\n" % (0, cell[2, 2]))
-                fout.write("%f  %f  %f xy xz yz\n"
-                           % (cell[1, 0],
-                              cell[2, 0],
-                              cell[2, 1]))
-
-                fout.write("Atoms\n")
-                fout.write("\n")
-                for i in range(atom_num):
-                    fout.write("%d  1  %12.7f %12.7f %12.7f\n"
-                               % (i + 1, pos[i, 0], pos[i, 1], pos[i, 2]))
-            fout.close()
+            atoms = ase.Atoms(self.pot['element'],
+                              positions=[[0., 0., 0.]],
+                              cell=cell,
+                              pbc=[1, 1, 1])
+            self.write_lmp_config_data(atoms, 'init.txt')
         return
 
     def shear_twin_path(self):
@@ -174,7 +149,6 @@ class cal_bcc_ideal_shear(get_data.get_data,
         e3 = 0.5 * np.array([1, 1, -1])
 
         et = np.array([-1, -1, 1])
-
         npts = 10
         delta = 1. / npts
         oneo6 = 1. / 6.
@@ -194,31 +168,12 @@ class cal_bcc_ideal_shear(get_data.get_data,
                          format='vasp')
         return
 
-    def read_stress(self):
-        (engy, stress, vol) = self.vasp_energy_stress_vol()
-        stress = stress * 0.1
-        print "engy {}".format(engy)
-        print "{}, {}, {}, {}, {}, {}".format(
-            stress[0][0], stress[1][0], stress[2][0],
-            stress[3][0], stress[4][0], stress[5][0])
-        return
-
-    def lmp_relax(self):
-        delta = 0.4
-        x0 = np.array([1., 1., 1., 0., 0.0])
-        res = minimize(self.runlmp, x0, delta,
-                       method='Nelder-Mead',
-                       options={'xtol': 1e-3, 'disp': True})
-        print res.fun
-        print res.x
-        return
-
     def set_pbs(self, dirname, delta, opt='vasp'):
         self.set_nnodes(1)
         self.set_ppn(12)
         self.set_job_title("%s" % (dirname))
-        self.set_wall_time(70)
-        self.set_main_job("""cal_md_ideal_shear.py  -t  i{}
+        self.set_wall_time(60)
+        self.set_main_job("""../cal_md_ideal_shear.py  -t  i{}
                           """.format(opt))
         self.write_pbs(od=False)
         os.system("mv va.pbs %s" % (dirname))
@@ -236,27 +191,20 @@ class cal_bcc_ideal_shear(get_data.get_data,
             self.set_pbs(dirname, delta)
         return
 
-    def loop_prep_vasp_restart(self):
-        data = np.loadtxt("ishear.txt")
-        for i in range(len(data)):
-            dirname = "dir-{:03d}".format(i)
-            self.mymkdir(dirname)
-            np.savetxt("restart.txt", data[i])
-            self.copy_inputs(dirname, 'KPOINTS',
-                             'INCAR', 'POTCAR', 'restart.txt')
-            self.set_pbs(dirname, data[i][0])
-        return
-
-    def loop_prep_qe_restart(self):
+    def loop_prep_restart(self, opt='va'):
         raw = np.mat(np.loadtxt("ishear.txt"))
         for i in range(len(raw)):
             dirname = "dir-{:03d}".format(i)
             self.mymkdir(dirname)
             np.savetxt("restart.txt", raw[i])
-            os.system("mv restart.txt {}".format(dirname))
-            os.system('cp $POTDIR/{}  {}'.format(self.pot['file'],
-                                                 dirname))
-            self.set_pbs(dirname, raw[i][0], opt='qe')
+            if opt in ['va', 'vasp']:
+                self.copy_inputs(dirname, 'KPOINTS',
+                                 'INCAR', 'POTCAR', 'restart.txt')
+            elif opt in ['qe']:
+                os.system("mv restart.txt {}".format(dirname))
+                os.system('cp $POTDIR/{}  {}'.format(self.pot['file'],
+                                                     dirname))
+            self.set_pbs(dirname, raw[i][0])
         return
 
     def loop_prep_qe(self):
@@ -299,7 +247,8 @@ class cal_bcc_ideal_shear(get_data.get_data,
         data = np.zeros(7)
         res = minimize(self.runqe, x0, delta,
                        method='Nelder-Mead',
-                       options={'xtol': 1e-3, 'disp': True})
+                       options={'fatol': 2e-3, 'disp': True})
+
         print res
         data[0] = delta
         data[1] = res.fun
@@ -312,7 +261,8 @@ class cal_bcc_ideal_shear(get_data.get_data,
         data = np.zeros(7)
         res = minimize(self.runvasp, x0, delta,
                        method='Nelder-Mead',
-                       options={'xtol': 1e-3, 'disp': True})
+                       options={'fatol': 2e-3, 'disp': True})
+
         print res
         data[0] = delta
         data[1] = res.fun
@@ -328,7 +278,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
             delta = self.delta * i
             res = minimize(self.runlmp, x0, delta,
                            method='Nelder-Mead',
-                           options={'fatol': 2e-4, 'disp': True})
+                           options={'xtol': 1e-3, 'disp': True})
             x0 = res.x
             print res
             data[i][0] = (delta)
@@ -493,38 +443,6 @@ class cal_bcc_ideal_shear(get_data.get_data,
         stssvect[5] = stssmtx[2, 1]
         return stssvect
 
-    def cmp_plt(self):
-        self.set_keys()
-        self.set_211plt()
-        self.plt_energy_stress(fname='stress_0.00.txt')
-        self.plt_energy_stress(fname='stress_0.25.txt')
-        self.fig.savefig("istress.png", **self.figsave)
-        return
-
-    def plt_energy_stress(self, fname='stress.txt', set=False):
-        if set is True:
-            self.set_keys()
-            self.set_211plt()
-        raw = np.loadtxt(fname)
-        self.ax1.plot(raw[:, 0], (raw[:, 1] - raw[0, 1]),
-                      label='engy',
-                      **self.pltkwargs)
-        self.ax2.plot(raw[:, 0], (raw[:, -1] - raw[0, -1]),
-                      label='stress',
-                      **self.pltkwargs)
-        return
-
-    def set_pltkargs(self):
-        self.keyslist = [{'linestyle': '-.', 'color': 'b', 'linewidth': 2,
-                          'marker': 'o'},
-                         {'linestyle': '--', 'color': 'y', 'linewidth': 2,
-                          'marker': '<'},
-                         {'linestyle': '-.', 'color': 'g', 'linewidth': 2,
-                          'marker': 'o'},
-                         {'linestyle': '--', 'color': 'm', 'linewidth': 2,
-                          'marker': '<'}]
-        return
-
     def clc_data(self):
         npts = self.npts
         data = np.ndarray([npts, 7])
@@ -534,35 +452,6 @@ class cal_bcc_ideal_shear(get_data.get_data,
                 raw = np.loadtxt("{}/ishear.txt".format(dirname))
             data[i, :] = raw
         np.savetxt('ishear.txt', data)
-        return
-
-    def plt_energy_stress_cmp(self):
-        potlist = ['adp', 'pbe']
-        self.set_211plt(mfigsize=(8.5, 4.3), lim=True)
-        self.set_keys()
-        self.set_pltkargs()
-        plt.rc('xtick', labelsize=self.mlabelsize)
-        plt.rc('ytick', labelsize=self.mlabelsize)
-        for i in range(len(potlist)):
-            pot = potlist[i]
-            fname = 'stress.txt.{}'.format(pot)
-            raw = np.loadtxt(fname)
-            self.ax1.plot(raw[:, 0],
-                          (raw[:, 1] - raw[0, 1]),
-                          label=pot,
-                          **self.keyslist[i])
-            self.ax1.legend(**self.legendarg)
-            self.ax1.set_ylabel('energy [eV]', {'fontsize': self.myfontsize})
-
-            self.ax2.plot(raw[:, 0],
-                          (raw[:, -1] - raw[0, -1]),
-                          label=pot,
-                          **self.keyslist[i + 2])
-            self.ax2.legend(**self.legendarg)
-            self.ax2.set_ylabel('stress [Gpa]', {'fontsize': self.myfontsize})
-
-        plt.xlabel('strain', {'fontsize': self.myfontsize})
-        self.fig.savefig("stress_cmp.png", **self.figsave)
         return
 
 
@@ -608,9 +497,6 @@ if __name__ == '__main__':
     if options.mtype.lower() == 'twin':
         drv.shear_twin_path()
 
-    if options.mtype.lower() == 'lmprelax':
-        drv.lmp_relax()
-
     if options.mtype.lower() == 'plt':
         if not os.path.isfile("stress.txt"):
             drv.convert_stress()
@@ -648,3 +534,7 @@ if __name__ == '__main__':
 
     if options.mtype.lower() == 'gnqe':
         drv.gn_primitive_lmps(tag='qe')
+
+    if options.mtype.lower() in ['qe_restart', 'va_restart']:
+        opt = options.mtype.lower().split('_')[0]
+        drv.loop_prep_restart(opt)

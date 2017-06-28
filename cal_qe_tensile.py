@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-14 22:08:10
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-27 21:46:51
+# @Last Modified time: 2017-06-28 00:43:30
 # encoding: utf-8
 
 import os
@@ -93,7 +93,6 @@ class cal_ideal_tensile(object):
         z[0] = x[1] * y[2] - y[1] * x[2]
         z[1] = x[2] * y[0] - y[2] * x[0]
         z[2] = x[0] * y[1] - y[0] * x[1]
-        ######## unify ##############
         xx, yy, zz = 0., 0., 0.
         for i in range(3):
             xx += x[i] * x[i]
