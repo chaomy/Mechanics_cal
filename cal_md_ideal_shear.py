@@ -40,7 +40,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
 
     def __init__(self, shtype='211'):
         # self.pot = self.load_data('../pot.dat')
-        self.pot = md_pot_data.qe_pot.vca_W75Re25
+        self.pot = md_pot_data.qe_pot.pbe_w
         gn_pbs.gn_pbs.__init__(self)
         plt_drv.plt_drv.__init__(self)
         get_data.get_data.__init__(self)
@@ -73,7 +73,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
         self.va_prim = np.mat([[-0.5, 0.5, 0.5],
                                [0.5, -0.5, 0.5],
                                [0.5, 0.5, -0.5]])
-        self.lm_prim = self.configdrv.lmp_change_box(self.va_prim)
+        self.lm_prim = self.lmp_change_box(self.va_prim)
         self.qedrv = gn_qe_inputs.gn_qe_infile(self.pot)
         # set qe simulation setup
         self.qedrv.set_degauss('0.03D0')
@@ -102,7 +102,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
         pos = pos * strain
         atoms.set_positions(pos)
         ase.io.write("POSCAR_c", images=atoms, format='vasp')
-        self.configdrv.write_lmp_config_data(atoms, "con.txt")
+        self.write_lmp_config_data(atoms, "con.txt")
         return
 
     def gn_primitive_lmps(self,
@@ -134,7 +134,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
 
         if tag == 'lmp':
             lmp_bas = bas * strain
-            lmp_bas = self.configdrv.lmp_change_box(lmp_bas)
+            lmp_bas = self.lmp_change_box(lmp_bas)
             cell = alat * lmp_bas
             atoms = ase.Atoms(self.pot['element'],
                               positions=[[0., 0., 0.]],
@@ -172,7 +172,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
         self.set_nnodes(1)
         self.set_ppn(12)
         self.set_job_title("%s" % (dirname))
-        self.set_wall_time(60)
+        self.set_wall_time(70)
         self.set_main_job("""../cal_md_ideal_shear.py  -t  i{}
                           """.format(opt))
         self.write_pbs(od=False)
