@@ -14,6 +14,7 @@
 # Created By    : Chaoming Yang
 #
 ###################################################################
+
 import get_data
 import md_pot_data
 import os
@@ -80,7 +81,8 @@ class cal_bcc_ideal_tensile(get_data.get_data,
                 os.chdir(os.pardir)
         return
 
-    def grab_engy(self,  opt='engy'):
+    def grab_engy(self,
+                  opt='engy'):
         npts = 41
         data = np.ndarray([npts, 9])
         for i in range(npts):
@@ -108,16 +110,27 @@ class cal_bcc_ideal_tensile(get_data.get_data,
         data = np.loadtxt("{}.txt".format(opt))
         if opt == 'engy':
             self.set_keys()
-            self.set_111plt()
-            self.ax.plot(data[:, 0], data[:, 1], marker='o')
+            self.set_311plt()
+            self.ax1.plot(data[:, 0], data[:, 1],
+                          marker='o', color=plt_drv.tableau20[1])
+            self.ax2.plot(data[:, 0], data[:, 2],
+                          marker='>', color=plt_drv.tableau20[3])
+            self.ax3.plot(data[:, 0], data[:, 3],
+                          marker='<', color=plt_drv.tableau20[5])
+            self.ax3.plot(data[:, 0], data[:, 4],
+                          marker='s', color=plt_drv.tableau20[7])
             self.fig.savefig("{}.png".format(opt), **self.figsave)
+
         elif opt == 'cell':
             self.set_keys()
             self.set_111plt()
             delta = np.linspace(0, 0.40, 41)
-            self.ax.plot(delta, data[:, 0], marker='o')
-            self.ax.plot(delta, data[:, 4], marker='<')
-            self.ax.plot(delta, data[:, 8], marker='>')
+            self.ax.plot(delta, data[:, 0],
+                         marker='o', color=plt_drv.tableau20[1])
+            self.ax.plot(delta, data[:, 4],
+                         marker='>', color=plt_drv.tableau20[3])
+            self.ax.plot(delta, data[:, 8],
+                         marker='<', color=plt_drv.tableau20[5])
             self.fig.savefig("{}.png".format(opt), **self.figsave)
         return
 

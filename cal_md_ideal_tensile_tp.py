@@ -250,7 +250,7 @@ if __name__ == '__main__':
                       type="string",
                       dest="mtype", help="",
                       default="prp_r")
-  
+
     parser.add_option('-c', "--delta",
                       action="store",
                       type='float', dest="delta",

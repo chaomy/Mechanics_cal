@@ -1,21 +1,26 @@
-#!/usr/local/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # @Author: chaomy
 # @Date:   2017-06-14 22:08:10
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-15 15:29:48
+# @Last Modified time: 2017-06-27 21:46:51
 # encoding: utf-8
+
 import os
 import re
 import shutil
 import numpy as np
-from optparse import OptionParser
+import gn_qe_inputs
+import md_pot_data
 import copy
+from optparse import OptionParser
 
 __version__ = 0.01
 __author__ = 'Chaoming Yang'
 
-class QEtensile(object):
+
+class cal_ideal_tensile(object):
+
     def __init__(self,
                  Element,
                  AtomMass,
@@ -26,6 +31,8 @@ class QEtensile(object):
                  Kpoints,
                  Potential,
                  Num):
+
+        self.pot = md_pot_data.qe_pot.vca_W75Re25
 
         self._tag = 'Opath'
         self._Num = Num
@@ -205,7 +212,6 @@ class QEtensile(object):
         Base_vector = np.mat([[1, 0, 0],
                               [0, 1, 0],
                               [0, 0, 1]], "float")
-
         Transformed_strain = np.mat(original_strain)
         Transposed_Base = Transformed_strain * Base_vector
         print np.mat(Transposed_Base)
@@ -216,73 +222,6 @@ class QEtensile(object):
                                   [0.5, 0.5, 0.5]], "float")
         AtomicPositions = AtomicPositions * Transposed_Base
 
-        with open(self._infile, 'w') as fid:
-            fid.write("""
-&control
-calculation='relax',
-prefix='%s',
-tstress = .true.,
-tprnfor = .true.,
-outdir='./results',
-pseudo_dir = './',
-etot_conv_thr=1.0D-5,
-forc_conv_thr=1.0D-4,
-/
-&system
-    ibrav = 0, nat=  2, ntyp= 1,
-    occupations='smearing',
-    smearing='m-p',
-    degauss=0.02D0,
-    ecutwfc =45.0,
-/
-&electrons
-conv_thr    = 1.D-6,
-/
-&ions
-ion_dynamics='bfgs',
-/
-&cell
-cell_dynamics='bfgs',
-press_conv_thr=0.1D-0,
-/
-CELL_PARAMETERS {bohr}
-%f  %f  %f
-%f  %f  %f
-%f  %f  %f
-ATOMIC_SPECIES
-%s %f  %s
-ATOMIC_POSITIONS {bohr}
-%s  %f  %f  %f
-%s  %f  %f  %f
-K_POINTS automatic
-%d %d %d  0  0  0
-    """ % (self._Element,
-                Transposed_Base[0, 0], Transposed_Base[
-                    0, 1], Transposed_Base[0, 2],
-                Transposed_Base[1, 0], Transposed_Base[
-                    1, 1], Transposed_Base[1, 2],
-                Transposed_Base[2, 0], Transposed_Base[
-                    2, 1], Transposed_Base[2, 2],
-
-                self._Element1,
-                self._EffectiveMass,
-                self._Potential,
-
-                self._Element1,
-                AtomicPositions[0, 0],
-                AtomicPositions[0, 1],
-                AtomicPositions[0, 2],
-
-                self._Element1,
-                AtomicPositions[1, 0],
-                AtomicPositions[1, 1],
-                AtomicPositions[1, 2],
-
-                self._Kpoints[0],
-                self._Kpoints[1],
-                self._Kpoints[2],
-           ))
-        fid.close()
         return Transformed_strain
 
     def gnInfile_O(self,
@@ -578,6 +517,7 @@ def loop_potentials():
         os.chdir(RootDir)
     return
 
+
 def calculate(PotentialN):
     Potentialist = ['WRe.0-05.fhi.UPF',
                     'WRe.0-10.fhi.UPF',
@@ -640,7 +580,6 @@ parser.add_option("-l", "--lattice_constant",
 (options, args) = parser.parse_args()
 
 if __name__ == "__main__":
-    # loop_potentials()
     calculate(4)
     if options.mtype.lower() == 'prepqe':
         calculation()
