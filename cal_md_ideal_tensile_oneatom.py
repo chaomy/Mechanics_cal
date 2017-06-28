@@ -63,23 +63,6 @@ class cal_bcc_ideal_tensile(get_data.get_data,
         self.stress = None
         return
 
-    def loop_collect_vasp(self):
-        dirlist = glob.glob("dir-*")
-        npts = len(dirlist)
-        data = np.ndarray([npts, 10])
-        for i in range(npts):
-            #  dirname = "dir-{:03d}".format(i)
-            dirname = dirlist[i]
-            print dirname
-            os.chdir(dirname)
-            raw = np.loadtxt("iten.txt")
-            (engy, stress, vol) = self.vasp_energy_stress_vol()
-            os.chdir(self.root)
-            data[i, 0:4] = raw
-            data[i, 4:] = stress.transpose()
-        np.savetxt("istress.txt", data)
-        return
-
     def loop_tensile_lmp(self):
         x0 = np.array([0.91, 1.11])
         npts = self.npts
@@ -220,6 +203,22 @@ class cal_bcc_ideal_tensile(get_data.get_data,
             self.set_pbs(dirname, raw[i][0])
         return
 
+    def loop_collect(self, opt='va'):
+        dirlist = glob.glob("dir-*")
+        npts = len(dirlist)
+        data = np.ndarray([npts, 10])
+        # delta, engy, x, stress
+        if os.path.isfile('iten.txt'):
+            os.system("mv iten.txt input_iten.txt")
+        for i in range(npts):
+            dirname = dirlist[i]
+            print dirname
+            os.chdir(dirname)
+            data[i, :] = np.loadtxt("iten.txt")
+            os.chdir(self.root)
+        np.savetxt("iten.txt", data)
+        return
+
 
 if __name__ == '__main__':
     usage = "usage:%prog [options] arg1 [options] arg2"
@@ -243,8 +242,9 @@ if __name__ == '__main__':
     if options.mtype.lower() == 'ivasp':
         drv.vasp_relax()
 
-    if options.mtype.lower() == 'clcvasp':
-        drv.loop_collect_vasp()
+    if options.mtype.lower() in ['clc_va', 'clc_qe']:
+        opt = options.mtype.lower().split('_')[0]
+        drv.loop_collect(opt)
 
     if options.mtype.lower() in ['qe_restart', 'va_restart']:
         opt = options.mtype.lower().split('_')[0]
