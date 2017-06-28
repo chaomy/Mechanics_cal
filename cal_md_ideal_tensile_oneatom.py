@@ -44,7 +44,7 @@ class cal_bcc_ideal_tensile(get_data.get_data,
         gn_config.bcc.__init__(self, self.pot)
 
         self.alat = self.pot['lattice']
-        self.npts = 5
+        self.npts = 4
         self.delta = 0.02
 
         e1 = np.array([1., 0., 0.])
@@ -60,6 +60,7 @@ class cal_bcc_ideal_tensile(get_data.get_data,
                                [0.5, -0.5, 0.5],
                                [0.5, 0.5, -0.5]])
         self.root = os.getcwd()
+        self.stress = None
         return
 
     def loop_collect_vasp(self):
@@ -106,6 +107,7 @@ class cal_bcc_ideal_tensile(get_data.get_data,
         os.system("mpirun vasp > vasp.log")
         (engy, stress, vol) = self.vasp_energy_stress_vol()
         self.recordstrain(delta, x, engy)
+        self.stress = stress
         print engy
         return engy
 
@@ -118,9 +120,10 @@ class cal_bcc_ideal_tensile(get_data.get_data,
         self.gn_primitive_lmps(new_strain, 'lmp')
         os.system("lmp_mpi -i in.init -screen  no")
         raw = np.loadtxt("out.txt")
-        print raw
-        self.recordstrain(delta, x, raw)
-        return raw[0]
+        engy = raw[0]
+        self.stress = raw[1:]
+        self.recordstrain(delta, x, engy)
+        return engy
 
     def gn_primitive_lmps(self,
                           strain=np.mat(np.identity(3)),
@@ -168,14 +171,15 @@ class cal_bcc_ideal_tensile(get_data.get_data,
 
     def vasp_relax(self):
         (delta, x0) = self.load_input_params()
-        data = np.zeros(4)
+        data = np.zeros(8 + len(x0))
         res = minimize(self.runvasp, x0, delta,
                        method='Nelder-Mead',
                        options={'fatol': 2e-3, 'disp': True})
         print res
         data[0] = delta
         data[1] = res.fun
-        data[2:] = res.x
+        data[2:(2 + len(res.x))] = res.x
+        data[-6:] = self.stress
         np.savetxt("iten.txt", data)
         return
 
@@ -193,9 +197,9 @@ class cal_bcc_ideal_tensile(get_data.get_data,
 
     def recordstrain(self, delta, x, fval):
         fid = open("s{:4.3f}.txt".format(delta), "a")
-        formatstr = '{:6.5f} ' * (len(x) + len(fval))
+        formatstr = '{:6.5f} ' * (len(x) + 1 + 6)
         formatstr += '\n'
-        fid.write(formatstr.format(x[0], x[1], *fval))
+        fid.write(formatstr.format(fval, x[0], x[1], *self.stress))
         fid.close()
         return
 

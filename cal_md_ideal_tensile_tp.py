@@ -221,9 +221,6 @@ if __name__ == '__main__':
     if options.mtype.lower() == 'ilmp':
         drv.loop_tensile_lmp()
 
-    if options.mtype.lower() == 'lmprelax':
-        drv.lmp_relax()
-
     if options.mtype.lower() == 'ivasp':
         drv.vasp_relax()
 
