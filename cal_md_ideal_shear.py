@@ -204,7 +204,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
                 os.system("mv restart.txt {}".format(dirname))
                 os.system('cp $POTDIR/{}  {}'.format(self.pot['file'],
                                                      dirname))
-            self.set_pbs(dirname, raw[i][0])
+            self.set_pbs(dirname, raw[i][0], opt)
         return
 
     def loop_prep_qe(self):
@@ -508,19 +508,13 @@ if __name__ == '__main__':
     if options.mtype.lower() == 'cmp':
         drv.plt_energy_stress_cmp()
 
-    if options.mtype.lower() == 'restart':
-        drv.loop_prep_vasp_restart()
-
-    if options.mtype.lower() == 'qerestart':
-        drv.loop_prep_qe_restart()
-
     if options.mtype.lower() == 'vaspprep':
         drv.loop_prep_vasp()
 
     if options.mtype.lower() == 'qeprep':
         drv.loop_prep_qe()
 
-    if options.mtype.lower() == 'ivasp':
+    if options.mtype.lower() in ['ivasp', 'iva']:
         drv.vasp_relax()
 
     if options.mtype.lower() == 'ilmp':
