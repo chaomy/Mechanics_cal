@@ -1,3 +1,4 @@
+
 Jun 16 
 1, Do we need to remove the outliers 
 
@@ -86,8 +87,11 @@ Jun 26
 1, regrab all stress 
 
 Jun 27 
-1,  Dislocation core : -> 50% calcualte faster than 25%, why ??? 
+1, Dislocation core : -> 50% calcualte faster than 25%, why ??? 
 
 2, calculate the ideal shear of W, WRe50, WRe25, WTa50  
 
-3, 
+3, tp path is doesn't perfectly keep the tetragonal symmetry, check it and figure it out why. 
+
+### lab ### 
+4,  add initial velocity then refit to see what we can do 
