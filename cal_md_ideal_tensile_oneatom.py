@@ -187,6 +187,22 @@ class cal_bcc_ideal_tensile(get_data.get_data,
         fid.close()
         return
 
+    def loop_prep_restart(self, opt='va'):
+        raw = np.mat(np.loadtxt("iten.txt"))
+        for i in range(len(raw)):
+            dirname = "dir-{:03d}".format(i)
+            self.mymkdir(dirname)
+            np.savetxt("restart.txt", raw[i])
+            if opt in ['va', 'vasp']:
+                self.copy_inputs(dirname, 'KPOINTS',
+                                 'INCAR', 'POTCAR', 'restart.txt')
+            elif opt in ['qe']:
+                os.system("mv restart.txt {}".format(dirname))
+                os.system('cp $POTDIR/{}  {}'.format(self.pot['file'],
+                                                     dirname))
+            self.set_pbs(dirname, raw[i][0])
+        return
+
 
 if __name__ == '__main__':
     usage = "usage:%prog [options] arg1 [options] arg2"
