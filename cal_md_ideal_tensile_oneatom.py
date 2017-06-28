@@ -246,9 +246,6 @@ if __name__ == '__main__':
     if options.mtype.lower() == 'clcvasp':
         drv.loop_collect_vasp()
 
-    if options.mtype.lower() == 'plt':
-        drv.convert_stress()
-
     if options.mtype.lower() in ['qe_restart', 'va_restart']:
         opt = options.mtype.lower().split('_')[0]
         drv.loop_prep_restart(opt)

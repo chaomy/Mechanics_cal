@@ -3,16 +3,14 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-28 00:42:26
+# @Last Modified time: 2017-06-28 09:42:50
 
 import matplotlib.pylab as plt
 import numpy as np
-import os
 import plt_drv
 
 
-class cal_md_ideal_tensile_plt(object,
-                               plt_drv.plt_drv):
+class cal_md_ideal_tensile_plt(plt_drv.plt_drv):
 
     def __init__(self):
         plt_drv.plt_drv.__init__(self)
@@ -22,7 +20,21 @@ class cal_md_ideal_tensile_plt(object,
 
         return
 
-    def plt_energy_stress(self, fname='stress.txt', set=False):
+    def plt_strain_vs_energy(self):
+        raw = np.loadtxt("ishear.txt")
+        raw = raw[raw[:, 0].argsort()]
+        print raw
+        self.set_keys()
+        self.set_111plt()
+        # energy
+        self.ax.plot(raw[:, 0], (raw[:, 1] - raw[0, 1]),
+                     color=self.tableau[3],
+                     label='engy',
+                     **self.pltkwargs)
+        self.fig.savefig("engy.png", **self.figsave)
+        return
+
+    def plt_energy_stress(self, fname='ishear.txt', set=False):
         if set is True:
             self.set_keys()
             self.set_211plt()

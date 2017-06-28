@@ -15,6 +15,11 @@
 #
 ###################################################################
 
+from md_pot_data import unitconv
+from optparse import OptionParser
+from scipy.optimize import minimize
+from scipy.interpolate import InterpolatedUnivariateSpline
+import cal_md_ideal_tensile_plt
 import os
 import ase
 import ase.io
@@ -27,10 +32,6 @@ import get_data
 import plt_drv
 import md_pot_data
 import gn_qe_inputs
-from optparse import OptionParser
-from scipy.optimize import minimize
-from scipy.interpolate import InterpolatedUnivariateSpline
-from md_pot_data import unitconv
 
 
 class cal_bcc_ideal_shear(get_data.get_data,
@@ -38,9 +39,9 @@ class cal_bcc_ideal_shear(get_data.get_data,
                           gn_pbs.gn_pbs,
                           plt_drv.plt_drv):
 
-    def __init__(self, shtype='211'):
+    def __init__(self, shtype='110'):
         # self.pot = self.load_data('../pot.dat')
-        self.pot = md_pot_data.qe_pot.pbe_w
+        self.pot = md_pot_data.qe_pot.vca_W50Re50
         gn_pbs.gn_pbs.__init__(self)
         plt_drv.plt_drv.__init__(self)
         get_data.get_data.__init__(self)
@@ -175,7 +176,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
         self.set_wall_time(70)
         self.set_main_job("""../cal_md_ideal_shear.py  -t  i{}
                           """.format(opt))
-        self.write_pbs(od=False)
+        self.write_pbs(od=True)
         os.system("mv va.pbs %s" % (dirname))
         return
 
@@ -205,19 +206,6 @@ class cal_bcc_ideal_shear(get_data.get_data,
                 os.system('cp $POTDIR/{}  {}'.format(self.pot['file'],
                                                      dirname))
             self.set_pbs(dirname, raw[i][0], opt)
-        return
-
-    def loop_prep_qe(self):
-        npts = self.npts
-        for i in range(npts):
-            delta = self.delta * i
-            dirname = "dir-{:03d}".format(i)
-            self.mymkdir(dirname)
-            os.system("echo {} > strain.txt".format(delta))
-            os.system("mv strain.txt {}".format(dirname))
-            os.system('cp $POTDIR/{} {}'.format(self.pot['file'],
-                                                dirname))
-            self.set_pbs(dirname, delta, opt='qe')
         return
 
     def loop_sub(self):
@@ -470,6 +458,8 @@ if __name__ == '__main__':
     (options, args) = parser.parse_args()
 
     drv = cal_bcc_ideal_shear()
+    pltdrv = cal_md_ideal_tensile_plt.cal_md_ideal_tensile_plt()
+
     if options.mtype.lower() in ['run_vasp', 'run_lmp']:
         opt = options.mtype.lower().split('_')[-1]
         drv.md_ideal_shear('run', opt)
@@ -497,10 +487,8 @@ if __name__ == '__main__':
     if options.mtype.lower() == 'twin':
         drv.shear_twin_path()
 
-    if options.mtype.lower() == 'plt':
-        if not os.path.isfile("stress.txt"):
-            drv.convert_stress()
-        drv.plt_energy_stress()
+    if options.mtype.lower() == 'plt_engy':
+        pltdrv.plt_strain_vs_energy()
 
     if options.mtype.lower() == 'cmpplt':
         drv.cmp_plt()

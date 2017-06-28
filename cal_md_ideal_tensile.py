@@ -251,22 +251,6 @@ class cal_bcc_ideal_tensile(get_data.get_data,
             self.set_pbs(dirname, data[i][0])
         return
 
-    def plt_energy_stress(self):
-        raw = np.loadtxt("istress.txt")
-        raw = raw[raw[:, 0].argsort()]
-        print raw
-        self.set_keys()
-        self.set_211plt()
-        # energy
-        self.ax1.plot(raw[:, 0], (raw[:, 1] - raw[0, 1]),
-                      label='engy',
-                      **self.pltkwargs)
-        self.ax2.plot(raw[:, 0], (raw[:, 4] - raw[0, 4]),
-                      label='stress',
-                      **self.pltkwargs)
-        self.fig.savefig("istress.png", **self.figsave)
-        return
-
     def convert_stress(self):
         from scipy.interpolate import InterpolatedUnivariateSpline
         raw = np.loadtxt("ishear.txt")
