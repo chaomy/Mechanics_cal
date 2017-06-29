@@ -215,6 +215,7 @@ if __name__ == '__main__':
 
     if options.mtype.lower() == 'plt_engy':
         pltdrv.plt_energy_stress('iten.txt')
+        pltdrv.plt_cell('iten.txt')
 
     if options.mtype.lower() in ['qe_restart', 'va_restart']:
         opt = options.mtype.lower().split('_')[0]
