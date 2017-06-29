@@ -119,7 +119,7 @@ class cal_bcc_ideal_tensile(get_data.get_data,
         raw = np.loadtxt("out.txt")
         engy = raw[0]
         self.stress = raw[1:]
-        self.recordstrain(delta, x, engy)
+        self.recordstrain(delta, x, engy, 'op')
         return engy
 
     def gn_primitive_lmps(self,
@@ -202,7 +202,7 @@ class cal_bcc_ideal_tensile(get_data.get_data,
 
     def recordstrain(self, delta, x, fval, opt):
         fid = open("s{:4.3f}.txt".format(delta), "a")
-        formatstr = '{:6.5f} ' * (1 + 2 + 6)
+        formatstr = r'{:6.5f} ' * (1 + 2 + 6)
         formatstr += '\n'
         if opt == 'op':
             fid.write(formatstr.format(fval, x[0], x[1], *self.stress))
