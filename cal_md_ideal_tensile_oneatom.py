@@ -208,8 +208,6 @@ class cal_bcc_ideal_tensile(get_data.get_data,
         npts = len(dirlist)
         data = np.ndarray([npts, 10])
         # delta, engy, x, stress
-        if os.path.isfile('iten.txt'):
-            os.system("mv iten.txt input_iten.txt")
         for i in range(npts):
             dirname = dirlist[i]
             print dirname
