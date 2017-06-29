@@ -95,3 +95,23 @@ Jun 27
 
 ### lab ### 
 4,  add initial velocity then refit to see what we can do 
+=
+
+/scratch/qiliang_flux/chaomy/JOB/Nb/Tensile/OneTensile_TP_acc/dir-004
+fix : 
+Traceback (most recent call last):
+  File "../cal_md_ideal_tensile_oneatom.py", line 265, in <module>
+    drv.vasp_relax(opt)
+  File "../cal_md_ideal_tensile_oneatom.py", line 182, in vasp_relax
+    options={'fatol': 5e-4, 'disp': True})
+  File "/sw/lsa/centos7/python-anaconda2/created-20170421/lib/python2.7/site-packages/scipy/optimize/_minimize.py", line 438, in minimize
+    return _minimize_neldermead(fun, x0, args, callback, **options)
+  File "/sw/lsa/centos7/python-anaconda2/created-20170421/lib/python2.7/site-packages/scipy/optimize/optimize.py", line 517, in _minimize_neldermead
+    fsim[k] = func(sim[k])
+  File "/sw/lsa/centos7/python-anaconda2/created-20170421/lib/python2.7/site-packages/scipy/optimize/optimize.py", line 292, in function_wrapper
+    return function(*(wrapper_args + args))
+  File "../cal_md_ideal_tensile_oneatom.py", line 94, in runvasp_tp
+    self.recordstrain(delta, x, engy, 'tp')
+  File "../cal_md_ideal_tensile_oneatom.py", line 210, in recordstrain
+    fid.write(formatstr.format(fval, x, x, *self.stress))
+ValueError: Unknown format code 'f' for object of type 'str'
