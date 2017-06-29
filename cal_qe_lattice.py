@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-26 15:32:37
+# @Last Modified time: 2017-06-29 00:47:45
 
 import os
 import numpy as np
@@ -232,7 +232,7 @@ class cal_lattice(gn_config.bcc,
         for dirname in dirlist:
             print dirname
             os.chdir(dirname)
-            os.system("mpirun -n 24 pw.x < qe.in > qe.out")
+            os.system("mpirun pw.x < qe.in > qe.out")
             os.chdir(self.root)
         return
 
@@ -268,7 +268,7 @@ class cal_lattice(gn_config.bcc,
         self.set_job_title("%s" % (dirname))
         self.set_wall_time(7)
         self.set_main_job("""
-    cal_qe_lattice.py -t run
+cal_qe_lattice.py -t run
                         """)
         self.write_pbs(od=od)
         #os.system("mv va.pbs %s" % (dirname))

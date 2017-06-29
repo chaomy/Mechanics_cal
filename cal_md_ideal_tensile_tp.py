@@ -27,6 +27,7 @@ import plt_drv
 import md_pot_data
 import gn_config
 from scipy.optimize import minimize
+import cal_md_ideal_tensile_plt
 from optparse import OptionParser
 
 
@@ -36,8 +37,8 @@ class cal_bcc_ideal_tensile_tp(get_data.get_data,
                                gn_config.bcc):
 
     def __init__(self):
-        self.pot = self.load_data('../pot.dat')
-        # self.pot = md_pot_data.md_pot.Nb_adp
+        # self.pot = self.load_data('../pot.dat')
+        self.pot = md_pot_data.md_pot.Nb_adp
         gn_pbs.gn_pbs.__init__(self)
         plt_drv.plt_drv.__init__(self)
         get_data.get_data.__init__(self)
@@ -159,23 +160,6 @@ class cal_bcc_ideal_tensile_tp(get_data.get_data,
         os.system("mv va.pbs %s" % (dirname))
         return
 
-    def plt_energy_stress(self):
-        raw = np.loadtxt("iten.txt")
-        raw = raw[raw[:, 0].argsort()]
-        print raw
-        self.set_keys()
-        self.set_211plt()
-        self.ax1.plot(raw[:, 0], (raw[:, 1] - raw[0, 1]),
-                      label='engy',
-                      color=self.tableau[0],
-                      **self.pltkwargs)
-        self.ax2.plot(raw[:, 0], (raw[:, 4] - raw[0, 4]),
-                      label='stress',
-                      color=self.tableau[3],
-                      **self.pltkwargs)
-        self.fig.savefig("iten.png", **self.figsave)
-        return
-
     def loop_prep_restart(self, opt='va'):
         raw = np.mat(np.loadtxt("iten.txt"))
         for i in range(len(raw)):
@@ -218,6 +202,8 @@ if __name__ == '__main__':
 
     (options, args) = parser.parse_args()
     drv = cal_bcc_ideal_tensile_tp()
+    pltdrv = cal_md_ideal_tensile_plt.cal_md_ideal_tensile_plt()
+
     if options.mtype.lower() == 'ilmp':
         drv.loop_tensile_lmp()
 
@@ -227,8 +213,8 @@ if __name__ == '__main__':
     if options.mtype.lower() == 'clcvasp':
         drv.loop_collect_vasp()
 
-    if options.mtype.lower() == 'plt':
-        drv.plt_energy_stress()
+    if options.mtype.lower() == 'plt_engy':
+        pltdrv.plt_energy_stress('iten.txt')
 
     if options.mtype.lower() in ['qe_restart', 'va_restart']:
         opt = options.mtype.lower().split('_')[0]
