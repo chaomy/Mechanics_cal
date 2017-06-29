@@ -91,7 +91,7 @@ class cal_bcc_ideal_tensile(get_data.get_data,
         (engy, stress, vol) = self.vasp_energy_stress_vol()
         self.stress = stress.flatten()
         print engy, self.stress, vol
-        self.recordstrain(delta, x, engy)
+        self.recordstrain(delta, x, engy, 'tp')
         return engy
 
     def runvasp_op(self, x, delta):
@@ -105,7 +105,7 @@ class cal_bcc_ideal_tensile(get_data.get_data,
         (engy, stress, vol) = self.vasp_energy_stress_vol()
         print engy, stress, vol
         self.stress = stress.flatten()
-        self.recordstrain(delta, x, engy)
+        self.recordstrain(delta, x, engy, 'op')
         return engy
 
     def runlmp(self, x, delta):
@@ -200,11 +200,14 @@ class cal_bcc_ideal_tensile(get_data.get_data,
         os.system("mv va.pbs %s" % (dirname))
         return
 
-    def recordstrain(self, delta, x, fval):
+    def recordstrain(self, delta, x, fval, opt):
         fid = open("s{:4.3f}.txt".format(delta), "a")
-        formatstr = '{:6.5f} ' * (len(x) + 1 + 6)
+        formatstr = '{:6.5f} ' * (1 + 2 + 6)
         formatstr += '\n'
-        fid.write(formatstr.format(fval, x[0], x[1], *self.stress))
+        if opt == 'op':
+            fid.write(formatstr.format(fval, x[0], x[1], *self.stress))
+        elif opt == 'tp':
+            fid.write(formatstr.format(fval, x, x, *self.stress))
         fid.close()
         return
 
