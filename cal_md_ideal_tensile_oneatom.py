@@ -172,14 +172,14 @@ class cal_bcc_ideal_tensile(get_data.get_data,
         if opt == 'op':
             res = minimize(self.runvasp_op, x0, delta,
                            method='Nelder-Mead',
-                           options={'fatol': 1e-3, 'disp': True})
+                           options={'fatol': 5e-4, 'disp': True})
             data[2], data[3] = res.x[0], res.x[1]
 
         elif opt == 'tp':
             x0 = x0[0]
             res = minimize(self.runvasp_tp, x0, delta,
                            method='Nelder-Mead',
-                           options={'fatol': 1e-3, 'disp': True})
+                           options={'fatol': 5e-4, 'disp': True})
             data[2], data[3] = res.x, res.x
         data[0] = delta
         data[1] = res.fun
@@ -192,7 +192,7 @@ class cal_bcc_ideal_tensile(get_data.get_data,
         self.set_nnodes(1)
         self.set_ppn(12)
         self.set_job_title("iva_{}_{}".format(opt, dirname))
-        self.set_wall_time(40)
+        self.set_wall_time(50)
         self.set_main_job("""
         ../cal_md_ideal_tensile_oneatom.py  -t ivasp_{}
                           """.format(opt))
