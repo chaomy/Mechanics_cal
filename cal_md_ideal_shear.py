@@ -442,6 +442,12 @@ class cal_bcc_ideal_shear(get_data.get_data,
         np.savetxt('ishear.txt', data)
         return
 
+    def read_ofiles(self):
+        import glob
+        flist = glob.glob('dir-*')
+        print flist[0]
+        return
+
 
 if __name__ == '__main__':
     usage = "usage:%prog [options] arg1 [options] arg2"
