@@ -80,7 +80,21 @@ class cal_bcc_ideal_tensile(get_data.get_data,
         np.savetxt("iten.txt", data)
         return
 
-    def runvasp(self, x, delta):
+    def runvasp_tp(self, x, delta):
+        basis = self.basis
+        strain = np.mat([[1.0 + delta, 0.0, 0.0],
+                         [0.0, x, 0.0],
+                         [0.0, 0.0, x]])
+        new_strain = basis.transpose() * strain * basis
+        self.gn_primitive_lmps(new_strain, 'vasp')
+        os.system("mpirun vasp > vasp.log")
+        (engy, stress, vol) = self.vasp_energy_stress_vol()
+        self.stress = stress.flatten()
+        print engy, self.stress, vol
+        self.recordstrain(delta, x, engy)
+        return engy
+
+    def runvasp_op(self, x, delta):
         basis = self.basis
         strain = np.mat([[1.0 + delta, 0.0, 0.0],
                          [0.0, x[0], 0.0],
@@ -92,7 +106,6 @@ class cal_bcc_ideal_tensile(get_data.get_data,
         print engy, stress, vol
         self.stress = stress.flatten()
         self.recordstrain(delta, x, engy)
-        print engy
         return engy
 
     def runlmp(self, x, delta):
@@ -153,28 +166,36 @@ class cal_bcc_ideal_tensile(get_data.get_data,
             x0 = np.array([1., 1.])
         return (delta, x0)
 
-    def vasp_relax(self):
+    def vasp_relax(self, opt='op'):
         (delta, x0) = self.load_input_params()
         data = np.zeros(8 + len(x0))
-        res = minimize(self.runvasp, x0, delta,
-                       method='Nelder-Mead',
-                       options={'fatol': 2e-3, 'disp': True})
-        print res
+        if opt == 'op':
+            res = minimize(self.runvasp_op, x0, delta,
+                           method='Nelder-Mead',
+                           options={'fatol': 1e-3, 'disp': True})
+            data[2], data[3] = res.x[0], res.x[1]
+
+        elif opt == 'tp':
+            x0 = x0[0]
+            res = minimize(self.runvasp_tp, x0, delta,
+                           method='Nelder-Mead',
+                           options={'fatol': 1e-3, 'disp': True})
+            data[2], data[3] = res.x, res.x
         data[0] = delta
         data[1] = res.fun
-        data[2:(2 + len(res.x))] = res.x
         data[-6:] = self.stress
+        print res
         np.savetxt("iten.txt", data)
         return
 
-    def set_pbs(self, dirname, delta):
+    def set_pbs(self, dirname, delta, opt='tp'):
         self.set_nnodes(1)
         self.set_ppn(12)
-        self.set_job_title("%s" % (dirname))
+        self.set_job_title("iva_{}_{}".format(opt, dirname))
         self.set_wall_time(40)
         self.set_main_job("""
-        ../cal_md_ideal_tensile_oneatom.py  -t ivasp
-                          """)
+        ../cal_md_ideal_tensile_oneatom.py  -t ivasp_{}
+                          """.format(opt))
         self.write_pbs(od=True)
         os.system("mv va.pbs %s" % (dirname))
         return
@@ -187,20 +208,20 @@ class cal_bcc_ideal_tensile(get_data.get_data,
         fid.close()
         return
 
-    def loop_prep_restart(self, opt='va'):
+    def loop_prep_restart(self, opt1='va', opt2='tp'):
         raw = np.mat(np.loadtxt("iten.txt"))
         for i in range(len(raw)):
             dirname = "dir-{:03d}".format(i)
             self.mymkdir(dirname)
             np.savetxt("restart.txt", raw[i])
-            if opt in ['va', 'vasp']:
+            if opt1 in ['va', 'vasp']:
                 self.copy_inputs(dirname, 'KPOINTS',
                                  'INCAR', 'POTCAR', 'restart.txt')
-            elif opt in ['qe']:
+            elif opt1 in ['qe']:
                 os.system("mv restart.txt {}".format(dirname))
                 os.system('cp $POTDIR/{}  {}'.format(self.pot['file'],
                                                      dirname))
-            self.set_pbs(dirname, raw[i][0])
+            self.set_pbs(dirname, raw[i][0], opt2)
         return
 
     def loop_collect(self, opt='va'):
@@ -236,13 +257,16 @@ if __name__ == '__main__':
     if options.mtype.lower() == 'ilmp':
         drv.loop_tensile_lmp()
 
-    if options.mtype.lower() == 'ivasp':
-        drv.vasp_relax()
+    if options.mtype.lower() in ['ivasp_op', 'ivasp_tp']:
+        opt = options.mtype.lower().split('_')[-1]
+        drv.vasp_relax(opt)
 
     if options.mtype.lower() in ['clc_va', 'clc_qe']:
-        opt = options.mtype.lower().split('_')[0]
+        opt = options.mtype.lower().split('_')[-1]
         drv.loop_collect(opt)
 
-    if options.mtype.lower() in ['qe_restart', 'va_restart']:
-        opt = options.mtype.lower().split('_')[0]
-        drv.loop_prep_restart(opt)
+    if options.mtype.lower() in ['restart_qe_op', 'restart_qe_tp',
+                                 'restart_va_op', 'restart_va_tp']:
+        opt1 = options.mtype.lower().split('_')[-2]
+        opt2 = options.mtype.lower().split('_')[-1]
+        drv.loop_prep_restart(opt1, opt2)
