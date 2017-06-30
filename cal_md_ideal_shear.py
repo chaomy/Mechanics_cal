@@ -493,8 +493,8 @@ class cal_bcc_ideal_shear(get_data.get_data,
                 mdir = flist[i]
                 cell = self.qe_get_cell('{}/qe.in'.format(mdir))
                 sfile = 's{:0.3f}.txt'.format(0.02 * int(mdir[-3:]))
-                print sfile
-                # data = np.loadtxt('{}/{}'.format(mdir, ))
+                data = np.loadtxt('{}/{}'.format(mdir, sfile))
+                print data[-1, -1]
 
         elif opt == 'convert':
             raw = np.loadtxt('ishear.txt')
