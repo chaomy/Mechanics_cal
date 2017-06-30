@@ -492,7 +492,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
             for i in range(len(flist)):
                 mdir = flist[i]
                 cell = self.qe_get_cell('{}/qe.in'.format(mdir))
-                sfile = 's{:0.3f}.txt'.format(0.02 * int(mdir[-3:]))
+                sfile = glob.glob('{}/s*'.format(mdir))[0]
                 data = np.loadtxt('{}/{}'.format(mdir, sfile))
                 print mdir
                 print data[-1]
