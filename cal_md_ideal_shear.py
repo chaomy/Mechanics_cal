@@ -396,7 +396,6 @@ class cal_bcc_ideal_shear(get_data.get_data,
             # interpolate
             spl = InterpolatedUnivariateSpline(raw[:, 0], raw[:, 1], k=1)
             splder1 = spl.derivative()
-
             for i in range(len(raw)):
                 # append the stress to the last column
                 print "coeff", convunit / vol[i]
@@ -482,10 +481,30 @@ class cal_bcc_ideal_shear(get_data.get_data,
                 cell = self.qe_get_cell('{}/qe.in'.format(mdir))
                 data[0, i] = int(mdir[4:7]) * 0.02
                 data[2, i] = np.linalg.det(cell) * lat**3
+                print data[2, i]
                 os.chdir(mdir)
                 data[1, i] = self.get_engy(glob.glob('dir-*')[0])
                 os.chdir(os.pardir)
             np.savetxt('vol.txt', data)
+        elif opt == 'convert':
+            raw = np.loadtxt('ishear.txt')
+            index = raw[0, :].argsort()
+            raw2 = raw.transpose()
+            raw = raw2[index]
+            (nrow, ncol) = np.shape(raw)
+            print nrow, ncol
+            data = np.ndarray([nrow, ncol + 1])
+            data[:, :-1] = raw
+            convunit = unitconv.ustress['evA3toGpa']
+            # interpolate
+            print data[:, 0]
+            spl = InterpolatedUnivariateSpline(data[:, 0], data[:, 1], k=1)
+            splder1 = spl.derivative()
+            for i in range(len(data[:, 0])):
+                # append the stress to the last column
+                data[i, -1] = splder1(data[i, 0]) * convunit / data[i, 2]
+            print data
+            np.savetxt("stress.txt", data)
         return
 
 
