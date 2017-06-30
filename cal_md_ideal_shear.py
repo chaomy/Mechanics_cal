@@ -496,8 +496,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
                 cell = self.qe_get_cell('{}/qe.in'.format(mdir))
                 sfile = glob.glob('{}/s*'.format(mdir))[0]
                 data[i, 0] = np.loadtxt('{}/restart.txt'.format(mdir))[0]
-                raw = np.loadtxt('{}'.format(sfile))
-                data[i, 1] = raw[-1][5]
+                data[i, 1] = np.loadtxt('{}'.format(sfile))[-1][5]
                 data[i, 2] = np.linalg.det(cell)
             np.savetxt("itmp.txt", data)
 
