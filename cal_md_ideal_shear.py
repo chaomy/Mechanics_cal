@@ -499,7 +499,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
                 raw = np.loadtxt('{}'.format(sfile))
                 data[i, 1] = raw[-1][5]
                 data[i, 2] = np.linalg.det(cell)
-            np.savetxt("stress.txt", data)
+            np.savetxt("itmp.txt", data)
 
         elif opt == 'convert':
             raw = np.loadtxt('ishear.txt')
