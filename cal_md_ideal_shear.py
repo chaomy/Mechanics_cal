@@ -39,7 +39,8 @@ class cal_bcc_ideal_shear(get_data.get_data,
                           gn_pbs.gn_pbs,
                           plt_drv.plt_drv):
 
-    def __init__(self, shtype='110'):
+    def __init__(self,
+                 shtype='110'):
         # self.pot = self.load_data('../pot.dat')
         self.pot = md_pot_data.qe_pot.vca_W50Re50
         gn_pbs.gn_pbs.__init__(self)
@@ -442,10 +443,30 @@ class cal_bcc_ideal_shear(get_data.get_data,
         np.savetxt('ishear.txt', data)
         return
 
-    def read_ofiles(self):
+    def read_ofiles(self, opt='clcengy'):
         import glob
         flist = glob.glob('dir-*')
-        print flist[0]
+        if opt == 'clcengy':
+            data = np.ndarray([2, len(flist)])
+            for i in range(len(flist)):
+                file = flist[i]
+                cnt = int(file[4:7])
+                fid = open(file, 'r')
+                raw = fid.readlines()
+                fid.close()
+                for line in raw[:-1]:
+                    if len(line.split()) == 1:
+                        dat = line.split()[0]
+                if dat[0] == '[':
+                    dat = dat.split('\'')[1]
+                data[0, i] = 0.02 * cnt
+                data[1, i] = dat
+            print data
+            np.savetxt('ishear.txt', data)
+        elif opt == 'clccell':
+            for i in range(len(flist)):
+                mdir = flist[i]
+                print self.qe_get_cell('{}/qe.in'.format(mdir))
         return
 
 
@@ -519,6 +540,9 @@ if __name__ == '__main__':
 
     if options.mtype.lower() == 'sub':
         drv.loop_sub()
+
+    if options.mtype.lower() == 'tmp':
+        drv.read_ofiles()
 
     if options.mtype.lower() == 'gnqe':
         drv.gn_primitive_lmps(tag='qe')
