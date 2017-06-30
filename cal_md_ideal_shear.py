@@ -469,7 +469,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
                 mdir = flist[i]
                 cell = self.qe_get_cell('{}/qe.in'.format(mdir))
                 data[0, i] = int(mdir[4:7])
-                data[1, i] = np.linalg.norm(cell) * lat**3
+                data[1, i] = np.linalg.det(cell) * lat**3
             np.savetxt('vol.txt', data)
         return
 
