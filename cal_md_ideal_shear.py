@@ -493,8 +493,8 @@ class cal_bcc_ideal_shear(get_data.get_data,
                 mdir = flist[i]
                 cell = self.qe_get_cell('{}/qe.in'.format(mdir))
                 sfile = glob.glob('{}/s*'.format(mdir))[0]
-                data = np.loadtxt('{}'.format(sfile))
                 print mdir
+                data = np.loadtxt('{}'.format(sfile))
                 print data[-1]
 
         elif opt == 'convert':
