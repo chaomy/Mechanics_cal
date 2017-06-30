@@ -42,7 +42,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
     def __init__(self,
                  shtype='110'):
         # self.pot = self.load_data('../pot.dat')
-        self.pot = md_pot_data.qe_pot.vca_W50Re50
+        self.pot = md_pot_data.qe_pot.vca_W75Re25
         gn_pbs.gn_pbs.__init__(self)
         plt_drv.plt_drv.__init__(self)
         get_data.get_data.__init__(self)
@@ -445,6 +445,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
 
     def read_ofiles(self, opt='clccell'):
         import glob
+        lat = self.pot['lattice']
         flist = glob.glob('dir-*')
         if opt == 'clcengy':
             data = np.ndarray([2, len(flist)])
@@ -466,7 +467,9 @@ class cal_bcc_ideal_shear(get_data.get_data,
         elif opt == 'clccell':
             for i in range(len(flist)):
                 mdir = flist[i]
-                print self.qe_get_cell('{}/qe.in'.format(mdir))
+                cell = self.qe_get_cell('{}/qe.in'.format(mdir))
+                vol = np.linalg.norm(cell)
+                print vol
         return
 
 
