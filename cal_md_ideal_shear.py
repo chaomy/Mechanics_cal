@@ -454,7 +454,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
             dat = dat.split('\'')[1]
         return dat
 
-    def read_ofiles(self, opt='step3'):
+    def read_ofiles(self, opt='clccell'):
         import glob
         lat = self.pot['lattice']
         flist = glob.glob('dir-*')
