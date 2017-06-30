@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-29 01:13:43
+# @Last Modified time: 2017-06-29 22:12:13
 
 import matplotlib.pylab as plt
 from itertools import cycle
@@ -34,20 +34,15 @@ class cal_md_ideal_tensile_plt(plt_drv.plt_drv):
         self.fig.savefig("engy.png", **self.figsave)
         return
 
-    def plt_energy_stress_tmp(self):
-        raw = np.loadtxt("iten.txt")
-        raw = raw[raw[:, 0].argsort()]
+    def plt_energy_stress_ishear(self, fname='stress.txt'):
+        raw = np.loadtxt(fname)
         self.set_keys()
         self.set_211plt()
         self.ax1.plot(raw[:, 0], (raw[:, 1] - raw[0, 1]),
-                      label='engy',
-                      color=self.tableau[0],
-                      **self.pltkwargs)
-        self.ax2.plot(raw[:, 0], (raw[:, 4] - raw[0, 4]),
-                      label='stress',
-                      color=self.tableau[3],
-                      **self.pltkwargs)
-        self.fig.savefig("iten.png", **self.figsave)
+                      label='engy', **next(self.keysiter))
+        self.ax2.plot(raw[:, 0], raw[:, -1],
+                      label='stress', **next(self.keysiter))
+        self.fig.savefig("fig-ishear.png", **self.figsave)
         return
 
     def plt_cell(self, fname='iten.txt'):

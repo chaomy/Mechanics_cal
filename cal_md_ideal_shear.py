@@ -442,6 +442,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
         np.savetxt('ishear.txt', data)
         return
 
+    # for unfinished runs (temporary)
     def get_engy(self, file):
         fid = open(file, 'r')
         raw = fid.readlines()
@@ -453,9 +454,9 @@ class cal_bcc_ideal_shear(get_data.get_data,
             dat = dat.split('\'')[1]
         return dat
 
+    # for unfinished runs
     def read_ofiles(self, opt='clccell'):
         import glob
-        lat = self.pot['lattice']
         flist = glob.glob('dir-*')
         data = np.ndarray([2, len(flist)])
         if opt == 'clcengy':
@@ -474,18 +475,24 @@ class cal_bcc_ideal_shear(get_data.get_data,
                 data[1, i] = dat
             print data
             np.savetxt('ishear.txt', data)
+
         elif opt == 'clccell':
             data = np.ndarray([3, len(flist)])
             for i in range(len(flist)):
                 mdir = flist[i]
                 cell = self.qe_get_cell('{}/qe.in'.format(mdir))
-                data[0, i] = int(mdir[4:7]) * 0.02
                 data[2, i] = np.linalg.det(cell)
-                print data[2, i]
                 os.chdir(mdir)
+                data[0, i] = np.loadtxt('restart.txt')[0]
                 data[1, i] = self.get_engy(glob.glob('dir-*')[0])
                 os.chdir(os.pardir)
             np.savetxt('vol.txt', data)
+
+        elif opt == 'clctmp':
+            for i in range(len(flist)):
+                mdir = flist[i]
+                cell = self.qe_get_cell('{}/qe.in'.format(mdir))
+
         elif opt == 'convert':
             raw = np.loadtxt('ishear.txt')
             index = raw[0, :].argsort()
@@ -525,17 +532,9 @@ if __name__ == '__main__':
     drv = cal_bcc_ideal_shear()
     pltdrv = cal_md_ideal_tensile_plt.cal_md_ideal_tensile_plt()
 
-    if options.mtype.lower() in ['run_vasp', 'run_lmp']:
-        opt = options.mtype.lower().split('_')[-1]
-        drv.md_ideal_shear('run', opt)
-
-    if options.mtype.lower() in ['clc_vasp', 'clc_lmp']:
+    if options.mtype.lower() in ['clc_vasp', 'clc_lmp', 'clc_qe']:
         opt = options.mtype.lower().split('_')[-1]
         drv.md_ideal_shear('clc', opt)
-
-    if options.mtype.lower() == 'clcqe' or \
-            options.mtype.lower() == 'qeclc':
-        drv.clc_data()
 
     if options.mtype.lower() == 'vastress':
         drv.vasp_loop_stress()
@@ -552,14 +551,9 @@ if __name__ == '__main__':
     if options.mtype.lower() == 'twin':
         drv.shear_twin_path()
 
-    if options.mtype.lower() == 'plt_engy':
-        pltdrv.plt_strain_vs_energy()
-
-    if options.mtype.lower() == 'cmpplt':
-        drv.cmp_plt()
-
-    if options.mtype.lower() == 'cmp':
-        drv.plt_energy_stress_cmp()
+    if options.mtype.lower() in ['plt_engy', 'plt_cmp']:
+        pltdrv.plt_energy_stress_ishear()
+        # drv.plt_energy_stress_cmp()
 
     if options.mtype.lower() == 'vaspprep':
         drv.loop_prep_vasp()
