@@ -443,7 +443,18 @@ class cal_bcc_ideal_shear(get_data.get_data,
         np.savetxt('ishear.txt', data)
         return
 
-    def read_ofiles(self, opt='clccell'):
+    def get_engy(self, file):
+        fid = open(file, 'r')
+        raw = fid.readlines()
+        fid.close()
+        for line in raw[:-1]:
+            if len(line.split()) == 1:
+                dat = line.split()[0]
+        if dat[0] == '[':
+            dat = dat.split('\'')[1]
+        return dat
+
+    def read_ofiles(self, opt='step3'):
         import glob
         lat = self.pot['lattice']
         flist = glob.glob('dir-*')
@@ -465,11 +476,15 @@ class cal_bcc_ideal_shear(get_data.get_data,
             print data
             np.savetxt('ishear.txt', data)
         elif opt == 'clccell':
+            data = np.ndarray([3, len(flist)])
             for i in range(len(flist)):
                 mdir = flist[i]
                 cell = self.qe_get_cell('{}/qe.in'.format(mdir))
-                data[0, i] = int(mdir[4:7])
-                data[1, i] = np.linalg.det(cell) * lat**3
+                data[0, i] = int(mdir[4:7]) * 0.02
+                data[2, i] = np.linalg.det(cell) * lat**3
+                os.chdir(mdir)
+                data[1, i] = self.get_engy(glob.glob('dir-*')[0])
+                os.chdir(os.pardir)
             np.savetxt('vol.txt', data)
         return
 
