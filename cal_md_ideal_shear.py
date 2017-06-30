@@ -443,7 +443,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
         np.savetxt('ishear.txt', data)
         return
 
-    def read_ofiles(self, opt='clcengy'):
+    def read_ofiles(self, opt='clccell'):
         import glob
         flist = glob.glob('dir-*')
         if opt == 'clcengy':
