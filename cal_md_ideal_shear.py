@@ -480,7 +480,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
                 mdir = flist[i]
                 cell = self.qe_get_cell('{}/qe.in'.format(mdir))
                 data[0, i] = int(mdir[4:7]) * 0.02
-                data[2, i] = np.linalg.det(cell) * lat**3
+                data[2, i] = np.linalg.det(cell)
                 print data[2, i]
                 os.chdir(mdir)
                 data[1, i] = self.get_engy(glob.glob('dir-*')[0])
