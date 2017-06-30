@@ -455,7 +455,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
         return dat
 
     # for unfinished runs
-    def read_ofiles(self, opt='clccell'):
+    def read_ofiles(self, opt='convert'):
         import glob
         flist = glob.glob('dir-*')
         data = np.ndarray([2, len(flist)])
@@ -492,6 +492,9 @@ class cal_bcc_ideal_shear(get_data.get_data,
             for i in range(len(flist)):
                 mdir = flist[i]
                 cell = self.qe_get_cell('{}/qe.in'.format(mdir))
+                sfile = 's{:0.3f}.txt'.format(0.02 * int(mdir[-3:]))
+                print sfile
+                # data = np.loadtxt('{}/{}'.format(mdir, ))
 
         elif opt == 'convert':
             raw = np.loadtxt('ishear.txt')
@@ -499,17 +502,18 @@ class cal_bcc_ideal_shear(get_data.get_data,
             raw2 = raw.transpose()
             raw = raw2[index]
             (nrow, ncol) = np.shape(raw)
-            print nrow, ncol
             data = np.ndarray([nrow, ncol + 1])
             data[:, :-1] = raw
             convunit = unitconv.ustress['evA3toGpa']
-            # interpolate
-            print data[:, 0]
-            spl = InterpolatedUnivariateSpline(data[:, 0], data[:, 1], k=1)
+            print nrow, ncol
+            print convunit
+            print data[:, 0], data[:, 1]
+            spl = InterpolatedUnivariateSpline(data[:, 0], data[:, 1])
             splder1 = spl.derivative()
             for i in range(len(data[:, 0])):
                 # append the stress to the last column
                 data[i, -1] = splder1(data[i, 0]) * convunit / data[i, 2]
+                print data[i, -1]
             print data
             np.savetxt("stress.txt", data)
         return
