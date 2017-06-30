@@ -489,13 +489,17 @@ class cal_bcc_ideal_shear(get_data.get_data,
             np.savetxt('vol.txt', data)
 
         elif opt == 'clctmp':
+            data = np.ndarray([len(flist), 3])
             for i in range(len(flist)):
                 mdir = flist[i]
+                print mdir
                 cell = self.qe_get_cell('{}/qe.in'.format(mdir))
                 sfile = glob.glob('{}/s*'.format(mdir))[0]
-                print mdir
-                data = np.loadtxt('{}'.format(sfile))
-                print data[-1]
+                data[i, 0] = np.loadtxt('restart.txt')[0]
+                raw = np.loadtxt('{}'.format(sfile))
+                data[i, 1] = raw[-1][5]
+                data[i, 2] = np.linalg.det(cell)
+            np.savetxt("stress.txt", data)
 
         elif opt == 'convert':
             raw = np.loadtxt('ishear.txt')
