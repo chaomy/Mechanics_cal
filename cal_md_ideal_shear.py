@@ -447,8 +447,8 @@ class cal_bcc_ideal_shear(get_data.get_data,
         import glob
         lat = self.pot['lattice']
         flist = glob.glob('dir-*')
+        data = np.ndarray([2, len(flist)])
         if opt == 'clcengy':
-            data = np.ndarray([2, len(flist)])
             for i in range(len(flist)):
                 file = flist[i]
                 cnt = int(file[4:7])
@@ -468,8 +468,9 @@ class cal_bcc_ideal_shear(get_data.get_data,
             for i in range(len(flist)):
                 mdir = flist[i]
                 cell = self.qe_get_cell('{}/qe.in'.format(mdir))
-                vol = np.linalg.norm(cell)
-                print vol
+                data[0, i] = int(mdir[4:7])
+                data[1, i] = np.linalg.norm(cell) * lat**3
+            np.savetxt('vol.txt', data)
         return
 
 
