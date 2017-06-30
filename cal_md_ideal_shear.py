@@ -24,7 +24,6 @@ import os
 import ase
 import ase.io
 import ase.lattice
-import ase.lattice.cubic as cubic
 import numpy as np
 import gn_config
 import gn_pbs
@@ -82,29 +81,6 @@ class cal_bcc_ideal_shear(get_data.get_data,
         self.qedrv.set_ecut('45')
         self.qedrv.set_kpnts((33, 33, 33))
         self.root = os.getcwd()
-        return
-
-    def gn_convention(self,
-                      strain=np.mat([[1., 0., 0.],
-                                     [0., 1., 0.],
-                                     [0., 0., 1.]])):
-        alat = self.alat
-        atoms = cubic.BodyCenteredCubic(directions=[[1, 0, 0],
-                                                    [0, 1, 0],
-                                                    [0, 0, 1]],
-                                        latticeconstant=alat,
-                                        size=(1, 1, 1),
-                                        symbol=self.pot['element'],
-                                        pbc=(1, 1, 1))
-
-        ase.io.write("POSCAR_perf", images=atoms, format='vasp')
-        # add strain
-        atoms.set_cell((strain * atoms.get_cell()))
-        pos = np.mat(atoms.get_positions())
-        pos = pos * strain
-        atoms.set_positions(pos)
-        ase.io.write("POSCAR_c", images=atoms, format='vasp')
-        self.write_lmp_config_data(atoms, "con.txt")
         return
 
     def gn_primitive_lmps(self,
@@ -207,15 +183,6 @@ class cal_bcc_ideal_shear(get_data.get_data,
                 os.system('cp $POTDIR/{}  {}'.format(self.pot['file'],
                                                      dirname))
             self.set_pbs(dirname, raw[i][0], opt)
-        return
-
-    def loop_sub(self):
-        npts = self.npts
-        for i in range(npts):
-            dirname = "dir-{:03d}".format(i)
-            os.chdir(dirname)
-            os.system("qsub va.pbs")
-            os.chdir(self.root)
         return
 
     def load_input_params(self):
@@ -342,7 +309,8 @@ class cal_bcc_ideal_shear(get_data.get_data,
             np.savetxt('stress.txt', data)
         elif opt is 'stress':
             data = np.loadtxt('stress.txt')
-            spl = InterpolatedUnivariateSpline(data[:, 0], data[:, 1], k=3)
+            spl = InterpolatedUnivariateSpline(data[:, 0], data[:, 1])
+            spl.set_smoothing_factor(1.5)
             splder1 = spl.derivative()
             for i in range(len(data)):
                 data[i, -1] = splder1(data[i, 0]) * convunit / data[i, 2]
@@ -362,8 +330,8 @@ class cal_bcc_ideal_shear(get_data.get_data,
             data[i, 0] = raw[0]
             data[i, 1] = raw[1]
             data[i, 2] = np.linalg.det(atoms.get_cell())
-
-        spl = InterpolatedUnivariateSpline(data[:, 0], data[:, 1], k=3)
+        spl = InterpolatedUnivariateSpline(data[:, 0], data[:, 1])
+        spl.set_smoothing_factor(1.5)
         splder1 = spl.derivative()
         for i in range(len(data)):
             # append the stress to the last column
@@ -394,7 +362,8 @@ class cal_bcc_ideal_shear(get_data.get_data,
         tag = 'interp'
         if tag == 'interp':
             # interpolate
-            spl = InterpolatedUnivariateSpline(raw[:, 0], raw[:, 1], k=1)
+            spl = InterpolatedUnivariateSpline(raw[:, 0], raw[:, 1])
+            spl.set_smoothing_factor(1.5)
             splder1 = spl.derivative()
             for i in range(len(raw)):
                 # append the stress to the last column
@@ -455,7 +424,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
         return dat
 
     # for unfinished runs
-    def read_ofiles(self, opt='clctmp'):
+    def read_ofiles(self, opt='convert'):
         import glob
         flist = glob.glob('dir-*')
         data = np.ndarray([2, len(flist)])
@@ -502,17 +471,14 @@ class cal_bcc_ideal_shear(get_data.get_data,
 
         elif opt == 'convert':
             raw = np.loadtxt('ishear.txt')
-            index = raw[0, :].argsort()
-            raw2 = raw.transpose()
-            raw = raw2[index]
+            raw = raw[raw[:, 0].argsort()]
             (nrow, ncol) = np.shape(raw)
             data = np.ndarray([nrow, ncol + 1])
             data[:, :-1] = raw
+            data[:, 1] = data[:, 1] * unitconv.uengy['rytoeV']
             convunit = unitconv.ustress['evA3toGpa']
-            print nrow, ncol
-            print convunit
-            print data[:, 0], data[:, 1]
             spl = InterpolatedUnivariateSpline(data[:, 0], data[:, 1])
+            spl.set_smoothing_factor(1.3)
             splder1 = spl.derivative()
             for i in range(len(data[:, 0])):
                 # append the stress to the last column
@@ -559,8 +525,12 @@ if __name__ == '__main__':
     if options.mtype.lower() == 'twin':
         drv.shear_twin_path()
 
-    if options.mtype.lower() in ['plt_engy', 'plt_cmp']:
-        pltdrv.plt_energy_stress_ishear()
+    if options.mtype.lower() in ['plt_engy', 'plt_cmp', 'plt_stress']:
+        opt = options.mtype.lower().split('_')[-1]
+        if opt in 'engy':
+            pltdrv.plt_strain_vs_energy()
+        elif opt in 'stress':
+            pltdrv.plt_energy_stress_ishear()
         # drv.plt_energy_stress_cmp()
 
     if options.mtype.lower() == 'vaspprep':

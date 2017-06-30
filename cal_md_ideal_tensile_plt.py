@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-29 22:29:16
+# @Last Modified time: 2017-06-29 23:14:10
 
 import matplotlib.pylab as plt
 from itertools import cycle
@@ -21,17 +21,14 @@ class cal_md_ideal_tensile_plt(plt_drv.plt_drv):
 
         return
 
-    def plt_strain_vs_energy(self, infile='iten.txt'):
+    def plt_strain_vs_energy(self, infile='ishear.txt'):
         raw = np.loadtxt(infile)
         raw = raw[raw[:, 0].argsort()]
         print raw
-        self.set_keys()
         self.set_111plt()
         self.ax.plot(raw[:, 0], (raw[:, 1] - raw[0, 1]),
-                     color=self.tableau[3],
-                     label='engy',
-                     **self.pltkwargs)
-        self.fig.savefig("engy.png", **self.figsave)
+                     label='engy', **next(self.keysiter))
+        self.fig.savefig("fig-engy.png", **self.figsave)
         return
 
     def plt_energy_stress_ishear(self, fname='stress.txt'):
@@ -40,8 +37,8 @@ class cal_md_ideal_tensile_plt(plt_drv.plt_drv):
         self.set_211plt()
         self.ax1.plot(raw[:, 0], (raw[:, 1] - raw[0, 1]),
                       label='engy', **next(self.keysiter))
-        # self.ax2.plot(raw[:, 0], raw[:, -1],
-                      # label='stress', **next(self.keysiter))
+        self.ax2.plot(raw[:, 0], raw[:, -1],
+                      label='stress', **next(self.keysiter))
         self.fig.savefig("fig-ishear.png", **self.figsave)
         return
 
