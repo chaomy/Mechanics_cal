@@ -155,7 +155,6 @@ class cal_bcc_ideal_shear(get_data.get_data,
         self.set_main_job("""../cal_md_ideal_shear.py  -t  i{}
                           """.format(opt))
         self.write_pbs(od=True)
-        os.system("mv va.pbs %s" % (dirname))
         return
 
     def loop_prep_vasp(self):
