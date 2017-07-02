@@ -23,6 +23,7 @@ import cal_md_ideal_tensile_plt
 import os
 import ase
 import ase.io
+import glob
 import ase.lattice
 import numpy as np
 import gn_config
@@ -108,7 +109,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
                               positions=[[0, 0, 0]],
                               cell=cell,
                               pbc=[1, 1, 1])
-            self.qedrv.gn_infile_dipole_ideal_shear(atoms)
+            self.qedrv.gn_qe_scf(atoms)
 
         if tag == 'lmp':
             lmp_bas = bas * strain
@@ -423,8 +424,13 @@ class cal_bcc_ideal_shear(get_data.get_data,
             dat = dat.split('\'')[1]
         return dat
 
+    def prep_restart_from_log(self, ):
+        flist = glob.glob("s*.txt")
+        print flist[0]
+        return
+
     # for unfinished runs
-    def read_ofiles(self, opt='clctmp'):
+    def read_ofiles(self, opt='makeup'):
         import glob
         flist = glob.glob('dir-*')
         data = np.ndarray([2, len(flist)])
@@ -547,11 +553,14 @@ if __name__ == '__main__':
     if options.mtype.lower() == 'iqe':
         print drv.qe_relax()
 
+    if options.mtype.lower() == 'cnt':
+        drv.prep_restart_from_log()
+
     if options.mtype.lower() == 'sub':
         drv.loop_sub()
 
     if options.mtype.lower() == 'tmp':
-        drv.read_ofiles('clctmp')
+        # drv.read_ofiles('clctmp')
         drv.read_ofiles('convert')
 
     if options.mtype.lower() == 'gnqe':
