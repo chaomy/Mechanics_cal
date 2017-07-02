@@ -184,7 +184,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
                                                      dirname))
             elif opt in ['cnt']:
                 self.prep_restart_from_log()
-            self.set_pbs(dirname, raw[i][0], opt)
+            self.set_pbs(dirname, raw[i][0], 'qe')
         return
 
     def load_input_params(self):
