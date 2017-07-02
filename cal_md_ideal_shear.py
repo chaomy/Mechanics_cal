@@ -148,7 +148,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
         return
 
     def set_pbs(self, dirname, delta, opt='vasp'):
-        self.set_nnodes(1)
+        self.set_nnodes(2)
         self.set_ppn(12)
         self.set_job_title("%s" % (dirname))
         self.set_wall_time(70)
@@ -170,7 +170,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
             self.set_pbs(dirname, delta)
         return
 
-    def loop_prep_restart(self, opt='va'):
+    def loop_prep_restart(self, opt='cnt'):
         raw = np.mat(np.loadtxt("ishear.txt"))
         for i in range(len(raw)):
             dirname = "dir-{:03d}".format(i)
@@ -183,6 +183,8 @@ class cal_bcc_ideal_shear(get_data.get_data,
                 os.system("mv restart.txt {}".format(dirname))
                 os.system('cp $POTDIR/{}  {}'.format(self.pot['file'],
                                                      dirname))
+            elif opt in ['cnt']:
+                self.prep_restart_from_log()
             self.set_pbs(dirname, raw[i][0], opt)
         return
 
@@ -431,7 +433,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
         data_init = np.loadtxt('restart.txt')
         data_init[1] = data[-1][-1]
         data_init[2:] = data[-1][:-1]
-        np.savetxt('restart.cnt', data_init)
+        np.savetxt('restart.txt', data_init)
         return
 
     # for unfinished runs
