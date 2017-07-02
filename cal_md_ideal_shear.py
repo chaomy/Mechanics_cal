@@ -430,7 +430,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
         data = np.loadtxt(flist[0])
         data_init = np.loadtxt('restart.txt')
         data_init[1] = data[-1][-1]
-        data_init[2:] = data[-1][:-2]
+        data_init[2:] = data[-1][:-1]
         np.savetxt('restart.cnt')
         return
 
