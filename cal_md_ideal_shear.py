@@ -531,7 +531,6 @@ if __name__ == '__main__':
             pltdrv.plt_strain_vs_energy()
         elif opt in 'stress':
             pltdrv.plt_energy_stress_ishear()
-        # drv.plt_energy_stress_cmp()
 
     if options.mtype.lower() == 'vaspprep':
         drv.loop_prep_vasp()
@@ -552,7 +551,8 @@ if __name__ == '__main__':
         drv.loop_sub()
 
     if options.mtype.lower() == 'tmp':
-        drv.read_ofiles()
+        drv.read_ofiles('clctmp')
+        drv.read_ofiles('convert')
 
     if options.mtype.lower() == 'gnqe':
         drv.gn_primitive_lmps(tag='qe')
