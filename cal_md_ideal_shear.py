@@ -470,7 +470,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
             np.savetxt("itmp.txt", data)
 
         elif opt == 'convert':
-            raw = np.loadtxt('ishear.txt')
+            raw = np.loadtxt('itmp.txt')
             raw = raw[raw[:, 0].argsort()]
             (nrow, ncol) = np.shape(raw)
             data = np.ndarray([nrow, ncol + 1])
