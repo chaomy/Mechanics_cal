@@ -424,7 +424,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
         return dat
 
     # for unfinished runs
-    def read_ofiles(self, opt='convert'):
+    def read_ofiles(self, opt='clctmp'):
         import glob
         flist = glob.glob('dir-*')
         data = np.ndarray([2, len(flist)])

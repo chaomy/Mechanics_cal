@@ -60,6 +60,7 @@ class qe_dislocation(get_data.get_data,
         self.set_cal_type('relax')
         self.set_ecut('42')
         self.set_degauss('0.04D0')
+        self.set_maxseconds(3600 * 70)
         with open(fname, 'w') as fid:
             fid = self.qe_write_control(fid, atoms)
             fid = self.qe_write_system(fid, atoms)
@@ -103,6 +104,12 @@ class qe_dislocation(get_data.get_data,
         self.gn_infile_dipole_screw_atoms(atoms)
         return (atoms_perf, atoms)
 
+    def cal_qe_restart(self):
+        atoms = self.qe_get_atom_pos()
+        ase.io.write(filename='poscar_relax', images=atoms, format='vasp')
+        # self.gn_infile_dipole_screw_atoms(atoms)
+        return
+
 
 if __name__ == '__main__':
     usage = "usage:%prog [options] arg1 [options] arg2"
@@ -117,3 +124,6 @@ if __name__ == '__main__':
     drv = qe_dislocation()
     if options.mtype.lower() in ['dipole', 'dp']:
         drv.gn_qe_screw_dipole_bcc()
+
+    if options.mtype.lower() in ['restart', 're']:
+        drv.cal_qe_restart()
