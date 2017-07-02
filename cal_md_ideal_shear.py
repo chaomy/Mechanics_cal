@@ -434,7 +434,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
         data_init[2:] = data[-1][:-1]
         np.savetxt('restart.txt', data_init)
         dirname = os.getcwd().split('/')[-1]
-        self.set_pbs(dirname)
+        self.set_pbs(dirname, 'qe')
         return
 
     # for unfinished runs
