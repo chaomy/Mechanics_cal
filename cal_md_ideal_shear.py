@@ -573,6 +573,6 @@ if __name__ == '__main__':
     if options.mtype.lower() == 'gnqe':
         drv.gn_primitive_lmps(tag='qe')
 
-    if options.mtype.lower() in ['qe_restart', 'va_restart']:
+    if options.mtype.lower() in ['qe_restart', 'va_restart', 'cnt_restart']:
         opt = options.mtype.lower().split('_')[0]
         drv.loop_prep_restart(opt)
