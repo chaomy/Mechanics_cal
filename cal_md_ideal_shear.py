@@ -427,6 +427,8 @@ class cal_bcc_ideal_shear(get_data.get_data,
     def prep_restart_from_log(self, ):
         flist = glob.glob("s*.txt")
         print flist[0]
+        data = np.loadtxt(flist[0])
+        print data[-1]
         return
 
     # for unfinished runs
