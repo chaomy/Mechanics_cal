@@ -147,7 +147,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
                          format='vasp')
         return
 
-    def set_pbs(self, dirname, delta, opt='vasp'):
+    def set_pbs(self, dirname, opt='vasp'):
         self.set_nnodes(2)
         self.set_ppn(12)
         self.set_job_title("%s" % (dirname))
