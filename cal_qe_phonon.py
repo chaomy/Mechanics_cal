@@ -95,7 +95,7 @@ class cal_qe_phonon(gn_config.bcc,
         return
 
     def setup_scf_acc(self, opt='one'):
-        if opt == 'loop':
+        if opt == 'reloop':
             dirlist = glob.glob('dir-*')
             for mdir in dirlist:
                 os.chdir(mdir)
