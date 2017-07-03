@@ -23,9 +23,9 @@ class cal_qe_phonon(gn_config.bcc,
         gn_config.bcc.__init__(self, self.pot)
         get_data.get_data.__init__(self)
         gn_qe_inputs.gn_qe_infile.__init__(self, self.pot)
-        self._scf_exe = 'mpirun pw.x < scf.in > scf.out'
-        self._ph_exe = 'mpirun ph.x < ph.in > ph.out'
-        self._q2r_exe = 'q2r.x < q2r.in > q2r.out'
+        self._scf_exe = 'mpirun pw.x < scf.in > scf.out\n'
+        self._ph_exe = 'mpirun ph.x < ph.in > ph.out\n'
+        self._q2r_exe = 'q2r.x < q2r.in > q2r.out\n'
         self._matdyn_exe = 'matdyn.x < matdyn_disp.in > matdyn_disp.out'
         self._nq1, self._nq2, self._nq3 = 6, 6, 6
         return
@@ -35,9 +35,8 @@ class cal_qe_phonon(gn_config.bcc,
         self.set_ppn(12)
         self.set_job_title("{}_{}".format(opt, dirname))
         self.set_wall_time(30)
-        self.set_main_job("""
-        mpirun pw.x <  qe.acc.in  > qe.acc.out
-                          """.format(opt))
+        self.set_main_job(""" {} {} {}
+            """.format(self._scf_exe, self._ph_exe, self._q2r_exe))
         self.write_pbs(od=True)
         return
 
@@ -49,7 +48,7 @@ class cal_qe_phonon(gn_config.bcc,
  prefix = 'qe',
  ldisp  = .true.
  fildyn ='dynmat'
- nq1 =%d, nq2=%d, nq3=%d,
+ nq1 = %d, nq2 = %d, nq3 = %d,
  tr2_ph=1.0d-13,
  /
             """ % (self._nq1, self._nq2, self._nq3))
@@ -104,6 +103,8 @@ class cal_qe_phonon(gn_config.bcc,
                 os.chdir(os.pardir)
         else:
             self.gn_qe_restart()
+            self.write_phinfile()
+            self.write_q2r_infile()
             self.set_pbs(os.getcwd().split('/')[-1], 'scf')
         return
 
