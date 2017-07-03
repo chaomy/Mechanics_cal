@@ -34,8 +34,9 @@ class cal_qe_phonon(gn_config.bcc,
         self.set_nnodes(1)
         self.set_ppn(12)
         self.set_job_title("{}_{}".format(opt, dirname))
-        self.set_wall_time(50)
+        self.set_wall_time(30)
         self.set_main_job("""
+        mpirun pw.x <  qe.acc.in  > qe.acc.out
                           """.format(opt))
         self.write_pbs(od=True)
         os.system("mv va.pbs %s" % (dirname))
@@ -142,9 +143,7 @@ if __name__ == '__main__':
                       type="string", dest="mtype",
                       default="curv")
     (options, args) = parser.parse_args()
-
     drv = cal_qe_phonon()
-
     if options.mtype.lower() in ['scf_re', 'scf_reloop']:
         opt = options.mtype.lower().split('_')[-1]
         drv.setup_scf_acc(opt)
