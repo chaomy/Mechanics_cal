@@ -23,7 +23,7 @@ class cal_qe_phonon(gn_config.bcc,
         gn_config.bcc.__init__(self, self.pot)
         get_data.get_data.__init__(self)
         gn_qe_inputs.gn_qe_infile.__init__(self, self.pot)
-        self._scf_exe = 'mpirun pw.x < scf.in > scf.out\n'
+        self._scf_exe = 'mpirun pw.x < qe.acc.in > qe.acc.out\n'
         self._ph_exe = 'mpirun ph.x < ph.in > ph.out\n'
         self._q2r_exe = 'q2r.x < q2r.in > q2r.out\n'
         self._matdyn_exe = 'matdyn.x < matdyn_disp.in > matdyn_disp.out'
@@ -31,13 +31,13 @@ class cal_qe_phonon(gn_config.bcc,
         return
 
     def set_pbs(self, dirname='qe', opt='ph'):
-        self.set_nnodes(1)
+        self.set_nnodes(2)
         self.set_ppn(12)
         self.set_job_title("{}_{}".format(opt, dirname))
-        self.set_wall_time(30)
+        self.set_wall_time(80)
         self.set_main_job(""" {} {} {}
             """.format(self._scf_exe, self._ph_exe, self._q2r_exe))
-        self.write_pbs(od=True)
+        self.write_pbs(od=False)
         return
 
     def write_phinfile(self, opt='scratch'):
