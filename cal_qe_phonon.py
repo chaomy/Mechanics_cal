@@ -104,6 +104,7 @@ class cal_qe_phonon(gn_config.bcc,
                 os.chdir(os.pardir)
         else:
             self.gn_qe_restart()
+            self.set_pbs(os.getcwd().split('/')[-1], 'scf')
         return
 
     def loop_phonon(self):
