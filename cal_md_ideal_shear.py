@@ -563,7 +563,8 @@ if __name__ == '__main__':
         print drv.qe_relax()
 
     if options.mtype.lower() == 'cnt':
-        drv.prep_restart_from_log()
+        drv.clc_data()
+        # drv.prep_restart_from_log()
 
     if options.mtype.lower() == 'sub':
         drv.loop_sub()
