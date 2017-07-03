@@ -38,7 +38,7 @@ class qe_dislocation(get_data.get_data,
                      cal_md_dis_dipole.cal_dis_dipole):
 
     def __init__(self):
-        self.pot = md_pot_data.qe_pot.vca_W50Re50
+        self.pot = md_pot_data.qe_pot.vca_W75Re25
         get_data.get_data.__init__(self)
         gn_pbs.gn_pbs.__init__(self)
         gn_config.bcc.__init__(self, self.pot)
@@ -58,8 +58,9 @@ class qe_dislocation(get_data.get_data,
                                      atoms=None,
                                      fname='qe.in'):
         self.set_cal_type('relax')
-        self.set_ecut('42')
-        self.set_degauss('0.04D0')
+        self.set_ecut('44')
+        self.set_degauss('0.03D0')
+        self.set_thr('1.0D-4')
         self.set_maxseconds(3600 * 70)
         with open(fname, 'w') as fid:
             fid = self.qe_write_control(fid, atoms)
@@ -68,7 +69,7 @@ class qe_dislocation(get_data.get_data,
             fid = self.qe_write_cell(fid, atoms.get_cell())
             fid = self.qe_write_species(fid, atoms, self.pot)
             fid = self.qe_write_pos(fid, atoms)
-            fid = self.qe_write_kpts(fid, (1, 2, 8))
+            fid = self.qe_write_kpts(fid, (1, 2, 15))
             fid.close()
         return
 
@@ -110,6 +111,17 @@ class qe_dislocation(get_data.get_data,
         # self.gn_infile_dipole_screw_atoms(atoms)
         return
 
+    def cal_qe_restart_rescale_cell(self):
+        atoms = self.qe_get_atom_pos()
+        cell = atoms.get_cell()
+        pot2 = md_pot_data.qe_pot.vca_W50Re50
+        scaled_cell = cell / pot2['lattice']
+        atoms.set_cell(scaled_cell * self.pot['lattice'])
+
+        ase.io.write(filename='poscar_relax', images=atoms, format='vasp')
+        self.gn_infile_dipole_screw_atoms(atoms)
+        return
+
 
 if __name__ == '__main__':
     usage = "usage:%prog [options] arg1 [options] arg2"
@@ -127,3 +139,6 @@ if __name__ == '__main__':
 
     if options.mtype.lower() in ['restart', 're']:
         drv.cal_qe_restart()
+
+    if options.mtype.lower() in ['restart_cell', 're_cell']:
+        drv.cal_qe_restart_rescale_cell()
