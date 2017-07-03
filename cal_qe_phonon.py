@@ -30,7 +30,7 @@ class cal_qe_phonon(gn_config.bcc,
         self._nq1, self._nq2, self._nq3 = 6, 6, 6
         return
 
-    def set_pbs(self, dirname, delta, opt='ph'):
+    def set_pbs(self, dirname='qe', opt='ph'):
         self.set_nnodes(1)
         self.set_ppn(12)
         self.set_job_title("{}_{}".format(opt, dirname))
@@ -39,7 +39,6 @@ class cal_qe_phonon(gn_config.bcc,
         mpirun pw.x <  qe.acc.in  > qe.acc.out
                           """.format(opt))
         self.write_pbs(od=True)
-        os.system("mv va.pbs %s" % (dirname))
         return
 
     def write_phinfile(self, opt='scratch'):
@@ -101,6 +100,7 @@ class cal_qe_phonon(gn_config.bcc,
             for mdir in dirlist:
                 os.chdir(mdir)
                 self.setup_scf_acc('one')
+                self.set_pbs(mdir, 'scf')
                 os.chdir(os.pardir)
         else:
             self.gn_qe_restart()
