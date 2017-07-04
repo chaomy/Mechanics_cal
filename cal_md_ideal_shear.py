@@ -371,21 +371,21 @@ class cal_bcc_ideal_shear(get_data.get_data,
         np.savetxt("stress.txt", data)
         return
 
-    def trans_stress_to_cartesian(self, stssvect, opt='vasp'):
+    def trans_stress_to_cartesian(self, stssvect):
         basis = self.basis
-        stssmtx = np.mat(np.zeros([3, 3]))
+        # stssmtx = np.mat(np.zeros([3, 3]))
 
-        stssmtx[0, 0] = stssvect[0]
-        stssmtx[1, 1] = stssvect[1]
-        stssmtx[2, 2] = stssvect[2]
+        # stssmtx[0, 0] = stssvect[0]
+        # stssmtx[1, 1] = stssvect[1]
+        # stssmtx[2, 2] = stssvect[2]
 
-        stssmtx[1, 0] = stssvect[3]
-        stssmtx[2, 0] = stssvect[4]
-        stssmtx[2, 1] = stssvect[5]
+        # stssmtx[1, 0] = stssvect[3]
+        # stssmtx[2, 0] = stssvect[4]
+        # stssmtx[2, 1] = stssvect[5]
 
-        stssmtx[0, 1] = stssvect[3]
-        stssmtx[0, 2] = stssvect[4]
-        stssmtx[1, 2] = stssvect[5]
+        # stssmtx[0, 1] = stssvect[3]
+        # stssmtx[0, 2] = stssvect[4]
+        # stssmtx[1, 2] = stssvect[5]
 
         stssmtx = basis * stssmtx * basis.transpose()
 
@@ -412,6 +412,14 @@ class cal_bcc_ideal_shear(get_data.get_data,
                     raw = np.loadtxt("{}/ishear.txt".format(dirname))
             data[i, :] = raw
         np.savetxt('ishear.txt', data)
+        return
+
+    def get_qe_stress(self):
+        (engy, vol, stress) = self.qe_get_energy_stress()
+        basis = self.basis
+        stress = np.mat(stress)
+        stress = basis * stress * basis.transpose()
+        print stress
         return
 
     # for unfinished runs (temporary)
@@ -547,27 +555,24 @@ if __name__ == '__main__':
         elif opt in 'stress':
             pltdrv.plt_energy_stress_ishear()
 
-    if options.mtype.lower() == 'vaspprep':
+    if options.mtype.lower() in ['vaspprep']:
         drv.loop_prep_vasp()
 
-    if options.mtype.lower() == 'qeprep':
+    if options.mtype.lower() in ['qeprep']:
         drv.loop_prep_qe()
 
     if options.mtype.lower() in ['ivasp', 'iva']:
         drv.vasp_relax()
 
-    if options.mtype.lower() == 'ilmp':
+    if options.mtype.lower() in ['ilmp']:
         drv.loop_shear_lmp()
 
-    if options.mtype.lower() == 'iqe':
+    if options.mtype.lower() in ['iqe']:
         print drv.qe_relax()
 
     if options.mtype.lower() == 'cnt':
         drv.clc_data()
         # drv.prep_restart_from_log()
-
-    if options.mtype.lower() == 'sub':
-        drv.loop_sub()
 
     if options.mtype.lower() == 'tmp':
         # drv.read_ofiles('clctmp')
@@ -579,3 +584,6 @@ if __name__ == '__main__':
     if options.mtype.lower() in ['qe_restart', 'va_restart', 'cnt_restart']:
         opt = options.mtype.lower().split('_')[0]
         drv.loop_prep_restart(opt)
+
+    if options.mtype.lower() in ['qe_stress']:
+        drv.get_qe_stress()
