@@ -81,7 +81,7 @@ class cal_bcc_ideal_shear_pos(object):
         vect = np.zeros(6)
         vect[0], vect[1], vect[2] = mtx[0, 0], mtx[1, 1], mtx[2, 2]
         vect[3], vect[4], vect[5] = mtx[0, 1], mtx[0, 2], mtx[1, 2]
-        return
+        return vect
 
     def vasp_loop_stress(self):
         npts = self.npts
