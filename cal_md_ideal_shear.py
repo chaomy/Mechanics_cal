@@ -52,6 +52,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
         cal_md_ideal_shear_pre.cal_bcc_ideal_shear_pre.__init__(self)
         cal_md_ideal_shear_run.cal_bcc_ideal_shear_run.__init__(self)
         cal_md_ideal_shear_pos.cal_bcc_ideal_shear_pos.__init__(self)
+        cal_md_ideal_shear_plt.cal_bcc_ideal_shear_plt.__init__(self)
         self.alat = self.pot['lattice']
         self.npts = 20
         self.delta = 0.02
