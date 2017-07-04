@@ -225,9 +225,6 @@ if __name__ == '__main__':
     if options.mtype.lower() == 'ivasp':
         drv.vasp_relax()
 
-    if options.mtype.lower() == 'clcvasp':
-        drv.loop_collect_vasp()
-
     if options.mtype.lower() == 'clcqe':
         drv.loop_clc_qe()
 
