@@ -49,7 +49,7 @@ class cal_bcc_ideal_shear_pos(object):
         data = np.ndarray([npts, 2 + 5 + 6])
         if opt == 'clc':
             for i in range(npts):
-                if i != 4:
+                if i != 4 and i != 18:
                     dirname = "dir-{:03d}".format(i)
                     print dirname
                     if os.path.isdir(dirname):
