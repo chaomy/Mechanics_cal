@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-04 16:18:04
+# @Last Modified time: 2017-07-04 16:26:40
 
 import matplotlib.pylab as plt
 from itertools import cycle
@@ -12,7 +12,7 @@ import plt_drv
 import os
 
 
-class cal_md_ideal_shear_plt(plt_drv.plt_drv):
+class cal_bcc_ideal_shear_plt(plt_drv.plt_drv):
 
     def __init__(self):
         plt_drv.plt_drv.__init__(self)
