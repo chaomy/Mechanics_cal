@@ -1,15 +1,19 @@
 #!/usr/local/bin/python
 # encoding: utf-8
 
-import os, shutil, re
+import os
+import shutil
+import re
+
 
 class md_surface(object):
+
     def __init__(self,
-                 in_lattice = None,
-                 in_md_surface_type = None):
+                 in_lattice=None,
+                 in_md_surface_type=None):
         self.ev_to_j = 1.60218e-19
         if in_lattice is not None:
-            self._lattice =  in_lattice
+            self._lattice = in_lattice
         else:
             self._lattice = 3.3
 
@@ -17,8 +21,8 @@ class md_surface(object):
             self._md_surface_type = in_md_surface_type
         else:
             self._md_surface_type = '100'  # default
-        self.file_name_a = 'in.surface%sA'%(self._md_surface_type)
-        self.file_name_b = 'in.surface%sB'%(self._md_surface_type)
+        self.file_name_a = 'in.surface%sA' % (self._md_surface_type)
+        self.file_name_b = 'in.surface%sB' % (self._md_surface_type)
         return
 
     def set_md_surface_lattice(self, lattice_constant):
@@ -41,17 +45,17 @@ class md_surface(object):
         change_lin_num = 6
         raw[change_lin_num] = \
             "variable    latparam1   equal    %f\n"\
-            %(self._lattice)
+            % (self._lattice)
 
         shutil.move(fileName,
-                    '%s.copy'%(fileName))
+                    '%s.copy' % (fileName))
         with open(fileName, 'w') as fid:
             fid.writelines(raw)
             fid.close()
         return
 
     def get_md_surface_energy(self, infile):
-        with open(infile , 'r') as fid:
+        with open(infile, 'r') as fid:
             for line in fid:
                 matchA = \
                     re.search(r"Surface Area = (\d*\.\d*)", line)
@@ -60,14 +64,15 @@ class md_surface(object):
                     area = float(line.split()[-2])
 
                 matchE = \
-                    re.search(r"Final energy of atoms =   (-?\d*\.\d*) eV", line)
+                    re.search(
+                        r"Final energy of atoms =   (-?\d*\.\d*) eV", line)
                 if matchE:
                     print line.split()
                     energy = float(line.split()[-2])
 
                 matchN = \
-                    re.search("new total = \d*",line)
-                if matchN :
+                    re.search("new total = \d*", line)
+                if matchN:
                     print line.split()
 
         return (area, energy)
@@ -83,8 +88,8 @@ class md_surface(object):
             print "change Lattice B"
             self.change_lattice('B')
 
-        os.system("lmp_linux < %s > A.log"%(in_file_a))
-        os.system("lmp_linux < %s > B.log"%(in_file_b))
+        os.system("lmp_linux < %s > A.log" % (in_file_a))
+        os.system("lmp_linux < %s > B.log" % (in_file_b))
 
         area, energy_a = self.get_md_surface_energy('A.log')
         area, energy_b = self.get_md_surface_energy('B.log')

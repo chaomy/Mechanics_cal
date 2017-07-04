@@ -1,4 +1,4 @@
-#!/usr/local/bin/python
+#!/usr/bin/env python
 # encoding: utf-8
 
 ###################################################################
@@ -77,9 +77,9 @@ class cal_md_surface(gn_config.bcc,
 
     def gn_surface_atoms(self):
         if self._surface_type == '100':
-            self._surface_direction = [[1,  0,  0],
-                                       [0,  1,  0],
-                                       [0,  0,  1]]
+            self._surface_direction = [[1, 0, 0],
+                                       [0, 1, 0],
+                                       [0, 0, 1]]
             atoms = self.set_bcc_convention(in_direction=self._surface_direction,
                                             in_size=(1, 1, 20))
             for i in range(12):
