@@ -20,6 +20,7 @@ import cal_md_ideal_tensile_plt
 import cal_md_ideal_shear_pre
 import cal_md_ideal_shear_run
 import cal_md_ideal_shear_pos
+import cal_md_ideal_shear_plt
 import os
 import numpy as np
 import gn_config
@@ -37,6 +38,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
                           cal_md_ideal_shear_pre.cal_bcc_ideal_shear_pre,
                           cal_md_ideal_shear_run.cal_bcc_ideal_shear_run,
                           cal_md_ideal_shear_pos.cal_bcc_ideal_shear_pos,
+                          cal_md_ideal_shear_plt.cal_bcc_ideal_shear_plt,
                           plt_drv.plt_drv):
 
     def __init__(self,
@@ -251,35 +253,6 @@ class cal_bcc_ideal_shear(get_data.get_data,
     #     self.recordstrain(delta, x, engy)
     #     return engy
 
-    # def qe_loop_stress(self, opt='clc'):
-    #     npts = self.npts
-    #     convunit = unitconv.ustress['evA3toGpa']
-    #     # conveng = unitconv.uengy['rytoeV']
-    #     data = np.ndarray([npts, 3])
-    #     if opt == 'clc':
-    #         for i in range(npts):
-    #             dirname = "dir-{:03d}".format(i)
-    #             print dirname
-    #             if os.path.isdir(dirname):
-    #                 os.chdir(dirname)
-    #                 (engy, vol, stress) = self.qe_get_energy_stress('qe.out')
-    #                 raw = np.loadtxt("ishear.txt")
-    #                 os.chdir(self.root)
-    #                 vol = vol * (unitconv.ulength['BohrtoA']**3)
-    #                 data[i, 0] = raw[0]
-    #                 data[i, 1] = raw[1]
-    #                 data[i, 2] = vol
-    #         np.savetxt('stress.txt', data)
-    #     elif opt is 'stress':
-    #         data = np.loadtxt('stress.txt')
-    #         spl = InterpolatedUnivariateSpline(data[:, 0], data[:, 1])
-    #         spl.set_smoothing_factor(1.5)
-    #         splder1 = spl.derivative()
-    #         for i in range(len(data)):
-    #             data[i, -1] = splder1(data[i, 0]) * convunit / data[i, 2]
-    #         print data
-    #     return
-
     # def vasp_loop_stress(self):
     #     npts = self.npts
     #     data = np.ndarray([npts, 4])
@@ -492,8 +465,6 @@ if __name__ == '__main__':
     (options, args) = parser.parse_args()
 
     drv = cal_bcc_ideal_shear()
-    pltdrv = cal_md_ideal_tensile_plt.cal_md_ideal_tensile_plt()
-
     if options.mtype.lower() in ['clc_vasp', 'clc_lmp', 'clc_qe']:
         opt = options.mtype.lower().split('_')[-1]
         drv.md_ideal_shear('clc', opt)
@@ -516,9 +487,9 @@ if __name__ == '__main__':
     if options.mtype.lower() in ['plt_engy', 'plt_cmp', 'plt_stress']:
         opt = options.mtype.lower().split('_')[-1]
         if opt in 'engy':
-            pltdrv.plt_strain_vs_energy()
+            drv.plt_strain_vs_energy()
         elif opt in 'stress':
-            pltdrv.plt_energy_stress_ishear()
+            drv.plt_energy_stress_ishear()
 
     if options.mtype.lower() in ['vaspprep']:
         drv.loop_prep_vasp()
