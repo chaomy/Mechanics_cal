@@ -85,8 +85,6 @@ class cal_bcc_ideal_shear(get_data.get_data,
         self.root = os.getcwd()
         return
 
-
-
     # def shear_twin_path(self):
     #     e1 = 0.5 * np.array([-1, 1, 1])
     #     e2 = 0.5 * np.array([1, -1, 1])
@@ -504,7 +502,7 @@ if __name__ == '__main__':
         drv.vasp_loop_stress()
 
     if options.mtype.lower() == 'qestress':
-        drv.qe_loop_stress(opt='stress')
+        drv.qe_loop_stress(opt='clc')
 
     if options.mtype.lower() == 'lmpstress':
         drv.convert_stress()
