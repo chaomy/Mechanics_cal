@@ -15,7 +15,6 @@
 #
 ###################################################################
 
-from md_pot_data import unitconv
 from optparse import OptionParser
 import cal_md_ideal_tensile_plt
 import cal_md_ideal_shear_pre
