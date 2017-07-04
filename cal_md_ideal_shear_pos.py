@@ -49,18 +49,19 @@ class cal_bcc_ideal_shear_pos(object):
         data = np.ndarray([npts, 2 + 5 + 6])
         if opt == 'clc':
             for i in range(npts):
-                dirname = "dir-{:03d}".format(i)
-                print dirname
-                if os.path.isdir(dirname):
-                    os.chdir(dirname)
-                    (engy, vol, stress) = self.qe_get_energy_stress('qe.out')
-                    stress = self.trans_coords_to_cartisian(np.mat(stress))
-                    stress = self.convert_mtx_to_vec(stress)
-                    raw = np.loadtxt("ishear.txt")
-                    os.chdir(self.root)
-                    # vol = vol * (unitconv.ulength['BohrtoA']**3)
-                    data[i, :7] = raw
-                    data[i, 7:] = stress
+                if i != 4:
+                    dirname = "dir-{:03d}".format(i)
+                    print dirname
+                    if os.path.isdir(dirname):
+                        os.chdir(dirname)
+                        (engy, vol, stress) = self.qe_get_energy_stress('qe.out')
+                        stress = self.trans_coords_to_cartisian(np.mat(stress))
+                        stress = self.convert_mtx_to_vec(stress)
+                        raw = np.loadtxt("ishear.txt")
+                        os.chdir(self.root)
+                        # vol = vol * (unitconv.ulength['BohrtoA']**3)
+                        data[i, :7] = raw
+                        data[i, 7:] = stress
             np.savetxt('stress.txt', data)
         elif opt is 'stress':
             data = np.loadtxt('stress.txt')
