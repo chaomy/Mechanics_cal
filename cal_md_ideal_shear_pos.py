@@ -75,7 +75,7 @@ class cal_bcc_ideal_shear_pos(object):
     def trans_coords_to_cartisian(self, stress):
         basis = self.basis
         stress = basis * stress * basis.transpose()
-        return
+        return stress
 
     def convert_mtx_to_vec(self, mtx):
         vect = np.zeros(6)
