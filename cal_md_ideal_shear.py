@@ -16,7 +16,6 @@
 ###################################################################
 
 from optparse import OptionParser
-import cal_md_ideal_tensile_plt
 import cal_md_ideal_shear_pre
 import cal_md_ideal_shear_run
 import cal_md_ideal_shear_pos

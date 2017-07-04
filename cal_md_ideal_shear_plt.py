@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-04 16:12:10
+# @Last Modified time: 2017-07-04 16:18:04
 
 import matplotlib.pylab as plt
 from itertools import cycle
@@ -32,7 +32,7 @@ class cal_md_ideal_shear_plt(plt_drv.plt_drv):
         self.fig.savefig("fig-engy.png", **self.figsave)
         return
 
-    def plt_energy_stress_ishear(self, fname='stress.txt'):
+    def plt_energy_stress(self, fname='stress.txt'):
         til = os.getcwd().split('/')[-1].split('_')[-2:]
         raw = np.loadtxt(fname)
         ylabeliter = cycle(['E [eV]', r'$\tau$ [Gpa]'])
@@ -51,8 +51,8 @@ class cal_md_ideal_shear_plt(plt_drv.plt_drv):
         self.fig.savefig("fig-ishear.png", **self.figsave)
         return
 
-    def plt_energy_stress(self,
-                          fname='ishear.txt'):
+    def plt_energy_stress_cell(self,
+                               fname='ishear.txt'):
         self.set_311plt()
         raw = np.loadtxt(fname)
         raw = raw[raw[:, 0].argsort()]
