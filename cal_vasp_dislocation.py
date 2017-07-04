@@ -248,14 +248,12 @@ class vasp_dislocation(gn_config.bcc,
         return
 
     def loop_sub_jobs(self):
-        dirlist = glob.glob('dir-*')
-        for i in range(len(dirlist)):
-            os.chdir(dirlist[i])
-
-            #  os.system("cp ../INCAR  .");
+        for i in range(20):
+            dirname = 'dir-{:03d}'.format(i)
+            print dirname
+            os.chdir(dirname)
             os.system("qsub va.pbs")
-            os.chdir(self.root_dir)
-
+            os.chdir(os.pardir)
         return
 
     def collect_energy(self):
@@ -275,9 +273,11 @@ class vasp_dislocation(gn_config.bcc,
 
 usage = "usage:%prog [options] arg1 [options] arg2"
 parser = OptionParser(usage=usage)
-parser.add_option("-t", "--mtype", action="store", type="string", dest="mtype", help="",
+parser.add_option("-t", "--mtype", action="store",
+                  type="string", dest="mtype", help="",
                   default="curv")
-parser.add_option("-f", "--mfile", action="store", type="string", dest="mfile",
+parser.add_option("-f", "--mfile", action="store",
+                  type="string", dest="mfile",
                   default="./dummy.config.pair")
 
 (options, args) = parser.parse_args()
@@ -296,6 +296,5 @@ if __name__ == "__main__":
     if options.mtype.lower() == 'path':
         N.vasp_reaction_coordinate()
 
-    #  N.cal_dislocations()
-    #  N.parepare_screw_dipo_with_solutes();
-    #  N.loop_sub_jobs();
+    if options.mtype.lower() == 'sub':
+        N.loop_sub_jobs()
