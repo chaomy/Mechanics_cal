@@ -16,7 +16,6 @@
 ###################################################################
 
 
-import glob
 import os
 import numpy as np
 import shutil
@@ -252,7 +251,7 @@ class vasp_dislocation(gn_config.bcc,
             dirname = 'dir-{:03d}'.format(i)
             print dirname
             os.chdir(dirname)
-            os.system("qsub va.pbs")
+            # os.system("qsub va.pbs")
             os.chdir(os.pardir)
         return
 

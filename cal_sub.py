@@ -36,7 +36,7 @@ def loop_sub_jobs():
         dirname = 'dir-{:03d}'.format(i)
         print dirname
         os.chdir(dirname)
-        # os.system("qsub va.pbs")
+        os.system("qsub va.pbs")
         os.chdir(os.pardir)
     return
 
