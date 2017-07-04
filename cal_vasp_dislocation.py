@@ -246,15 +246,6 @@ class vasp_dislocation(gn_config.bcc,
             os.chdir(self.root_dir)
         return
 
-    def loop_sub_jobs(self):
-        for i in range(20):
-            dirname = 'dir-{:03d}'.format(i)
-            print dirname
-            os.chdir(dirname)
-            # os.system("qsub va.pbs")
-            os.chdir(os.pardir)
-        return
-
     def collect_energy(self):
         flist = [0, 1, 2, 3, 5]
         engy, vol = np.zeros(len(flist)), np.zeros(len(flist))
@@ -284,7 +275,7 @@ OriDir = os.getcwd()
 
 if __name__ == "__main__":
     N = vasp_dislocation()
-    #  N.Intro_Screw_dipole()
+     # N.Intro_Screw_dipole()
 
     if options.mtype.lower() == 'new':
         N.new_cal_dipo_dislocations()
@@ -294,6 +285,3 @@ if __name__ == "__main__":
 
     if options.mtype.lower() == 'path':
         N.vasp_reaction_coordinate()
-
-    if options.mtype.lower() == 'sub':
-        N.loop_sub_jobs()
