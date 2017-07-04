@@ -489,7 +489,7 @@ if __name__ == '__main__':
         if opt in 'engy':
             drv.plt_strain_vs_energy()
         elif opt in 'stress':
-            drv.plt_energy_stress_ishear()
+            drv.plt_energy_stress()
 
     if options.mtype.lower() in ['vaspprep']:
         drv.loop_prep_vasp()
