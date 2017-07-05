@@ -16,7 +16,8 @@
 ###################################################################
 
 from optparse import OptionParser
-import cal_md_ideal_shear_ini
+import md_pot_data as dat
+import cal_md_ideal_shear_ini as init
 
 
 if __name__ == '__main__':
@@ -33,7 +34,8 @@ if __name__ == '__main__':
                       default=None)
 
     (options, args) = parser.parse_args()
-    drv = cal_md_ideal_shear_ini.cal_bcc_ideal_shear()
+    drv = init.cal_bcc_ideal_shear(dat.qe_pot.vca_W75Re25,
+                                   '211')
 
     dispatcher = {'qeone': drv.get_qe_stress,
                   'restart': drv.loop_prep_restart,

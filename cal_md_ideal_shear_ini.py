@@ -25,7 +25,6 @@ import gn_config
 import gn_pbs
 import get_data
 import plt_drv
-import md_pot_data
 import gn_qe_inputs
 
 
@@ -39,9 +38,8 @@ class cal_bcc_ideal_shear(get_data.get_data,
                           cal_md_ideal_shear_pos.cal_bcc_ideal_shear_pos,
                           cal_md_ideal_shear_plt.cal_bcc_ideal_shear_plt):
 
-    def __init__(self, shtype='110'):
-        # self.pot = self.load_data('../pot.dat')
-        self.pot = md_pot_data.qe_pot.vca_W75Re25
+    def __init__(self, inpot, shtype='110'):
+        self.pot = inpot
         gn_pbs.gn_pbs.__init__(self)
         plt_drv.plt_drv.__init__(self)
         get_data.get_data.__init__(self)
