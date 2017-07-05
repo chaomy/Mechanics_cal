@@ -17,6 +17,7 @@
 
 
 import os
+import glob
 from optparse import OptionParser
 
 usage = "usage:%prog [options] arg1 [options] arg2"
@@ -24,21 +25,46 @@ parser = OptionParser(usage=usage)
 parser.add_option("-t", "--mtype", action="store",
                   type="string", dest="mtype", help="",
                   default="curv")
-parser.add_option("-f", "--mfile", action="store",
-                  type="string", dest="mfile",
-                  default="./dummy.config.pair")
-
 (options, args) = parser.parse_args()
 
 
-def loop_sub_jobs():
-    for i in range(20):
-        dirname = 'dir-{:03d}'.format(i)
-        print dirname
-        os.chdir(dirname)
-        os.system("qsub va.pbs")
-        os.chdir(os.pardir)
-    return
+class subjobs(object):
+
+    def __init__(self):
+        self.diriter = None
+        self.get_dirs()
+        return
+
+    def get_dirs(self):
+        self.diriter = iter(glob.glob('dir-*'))
+        return
+
+    def loop_sub_jobs(self):
+        while True:
+            try:
+                mdir = next(self.diriter)
+                print mdir
+                os.chdir(mdir)
+                os.system("qsub va.pbs")
+                os.chdir(os.pardir)
+            except StopIteration:
+                break
+        return
+
+    def loop_shear_cnt(self):
+        while True:
+            try:
+                mdir = next(self.diriter)
+                os.chdir(mdir)
+                if not os.path.isfile('ishear.txt'):
+                    print mdir
+                os.chdir(os.pardir)
+            except StopIteration:
+                break
+        return
 
 if __name__ == "__main__":
-    loop_sub_jobs()
+    drv = subjobs()
+    dispatcher = {'sub': drv.loop_sub_jobs,
+                  'shearcnt': drv.loop_shear_cnt}
+    dispatcher[options.mtype.lower()]()
