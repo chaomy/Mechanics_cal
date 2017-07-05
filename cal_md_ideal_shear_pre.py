@@ -133,4 +133,5 @@ class cal_bcc_ideal_shear_pre(object):
                 os.system('cp $POTDIR/{}  {}'.format(self.pot['file'],
                                                      dirname))
             self.set_pbs(dirname, 'qe')
+            os.system('mv va.pbs {}'.format(dirname))
         return
