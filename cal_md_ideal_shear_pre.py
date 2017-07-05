@@ -104,7 +104,7 @@ class cal_bcc_ideal_shear_pre(object):
         self.set_wall_time(70)
         self.set_main_job("""../cal_md_ideal_shear.py  -t  i{}
                           """.format(opt))
-        self.write_pbs(od=True)
+        self.write_pbs(od=False)
         return
 
     def loop_prep_vasp(self):
