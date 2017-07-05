@@ -41,6 +41,7 @@ if __name__ == '__main__':
                   'preprestart': drv.loop_prep_restart_from_log,
                   'clcqe': drv.qe_loop_stress,
                   'clcva': drv.va_loop_stress,
+                  'clclmp': drv.convert_stress,
                   'prepva': drv.loop_prep_vasp,
                   'iva': drv.vasp_relax,
                   'ivasp': drv.vasp_relax,
@@ -55,6 +56,3 @@ if __name__ == '__main__':
         dispatcher[options.mtype.lower()](options.fargs)
     else:
         dispatcher[options.mtype.lower()]()
-
-    if options.mtype.lower() == 'lmpstress':
-        drv.convert_stress()

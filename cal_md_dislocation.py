@@ -1,19 +1,11 @@
 #!/usr/bin/env python
 # encoding: utf-8
+# -*- coding: utf-8 -*-
+# @Author: chaomy
+# @Date:   2017-07-05 08:12:30
+# @Last Modified by:   chaomy
+# @Last Modified time: 2017-07-05 08:12:42
 
-###################################################################
-#
-# File Name : ./cal_md_dislocation.py
-#
-###################################################################
-#
-# Purpose :  introduce dislocation for md calculation (LAMMPS)
-#
-# Creation Date :
-# Last Modified : Sun Apr  9 20:20:57 2017
-# Created By    : Chaoming Yang
-#
-###################################################################
 
 import os
 import ase
