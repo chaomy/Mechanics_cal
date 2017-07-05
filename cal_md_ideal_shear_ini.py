@@ -78,9 +78,6 @@ class cal_bcc_ideal_shear(get_data.get_data,
         e3 = e3 / np.linalg.norm(e3)
 
         self.basis = np.mat([e1, e2, e3])
-        # set qe simulation setup
-        self.set_degauss('0.03D0')
-        self.set_ecut('45')
-        self.set_kpnts((33, 33, 33))
+        self.setup_qe_params()
         self.root = os.getcwd()
         return

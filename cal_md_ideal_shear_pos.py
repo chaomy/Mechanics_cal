@@ -43,6 +43,17 @@ class cal_bcc_ideal_shear_pos(object):
             x0 = np.array([1., 1., 1., 0.0, 0.0])
         return (delta, x0)
 
+    def trans_coords_to_cartisian(self, stress):
+        basis = self.basis
+        stress = basis * stress * basis.transpose()
+        return stress
+
+    def convert_mtx_to_vec(self, mtx):
+        vect = np.zeros(6)
+        vect[0], vect[1], vect[2] = mtx[0, 0], mtx[1, 1], mtx[2, 2]
+        vect[3], vect[4], vect[5] = mtx[0, 1], mtx[0, 2], mtx[1, 2]
+        return vect
+
     def qe_loop_stress(self, opt='clc'):
         npts = self.npts
         convunit = unitconv.ustress['evA3toGpa']
@@ -73,18 +84,7 @@ class cal_bcc_ideal_shear_pos(object):
             print data
         return
 
-    def trans_coords_to_cartisian(self, stress):
-        basis = self.basis
-        stress = basis * stress * basis.transpose()
-        return stress
-
-    def convert_mtx_to_vec(self, mtx):
-        vect = np.zeros(6)
-        vect[0], vect[1], vect[2] = mtx[0, 0], mtx[1, 1], mtx[2, 2]
-        vect[3], vect[4], vect[5] = mtx[0, 1], mtx[0, 2], mtx[1, 2]
-        return vect
-
-    def vasp_loop_stress(self):
+    def va_loop_stress(self):
         npts = self.npts
         data = np.ndarray([npts, 4])
         convunit = unitconv.ustress['evA3toGpa']
@@ -140,18 +140,27 @@ class cal_bcc_ideal_shear_pos(object):
         np.savetxt("stress.txt", data)
         return
 
-    def clc_data(self, opt='cnt'):
+    def prep_restart_from_log(self):
+        flist = glob.glob("s*.txt")
+        print flist[0]
+        data = np.loadtxt(flist[0])
+        data_init = np.loadtxt('restart.txt')
+        data_init[1] = data[-1][-1]
+        data_init[2:] = data[-1][:-1]
+        np.savetxt('restart.txt', data_init)
+        dirname = os.getcwd().split('/')[-1]
+        self.set_pbs(dirname, 'qe')
+        return data_init
+
+    def loop_prep_restart_from_log(self):
         npts = self.npts
         data = np.ndarray([npts, 7])
         for i in range(npts):
             dirname = "dir-{:03d}".format(i)
             if os.path.isdir(dirname):
-                if opt == 'cnt':
-                    os.chdir(dirname)
-                    raw = self.prep_restart_from_log()
-                    os.chdir(os.pardir)
-                else:
-                    raw = np.loadtxt("{}/ishear.txt".format(dirname))
+                os.chdir(dirname)
+                raw = self.prep_restart_from_log()
+                os.chdir(os.pardir)
             data[i, :] = raw
         np.savetxt('ishear.txt', data)
         return

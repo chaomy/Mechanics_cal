@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-04 16:30:24
+# @Last Modified time: 2017-07-04 17:12:44
 
 from itertools import cycle
 import numpy as np
@@ -11,7 +11,7 @@ import plt_drv
 import os
 
 
-class cal_bcc_ideal_shear_plt(plt_drv.plt_drv):
+class cal_bcc_ideal_shear_plt(object):
 
     def __init__(self):
         plt_drv.plt_drv.__init__(self)

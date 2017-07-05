@@ -18,7 +18,6 @@
 import os
 import ase
 import ase.io
-import glob
 import ase.lattice
 import numpy as np
 
@@ -135,15 +134,3 @@ class cal_bcc_ideal_shear_pre(object):
                                                      dirname))
             self.set_pbs(dirname, raw[i][0], 'qe')
         return
-
-    def prep_restart_from_log(self):
-        flist = glob.glob("s*.txt")
-        print flist[0]
-        data = np.loadtxt(flist[0])
-        data_init = np.loadtxt('restart.txt')
-        data_init[1] = data[-1][-1]
-        data_init[2:] = data[-1][:-1]
-        np.savetxt('restart.txt', data_init)
-        dirname = os.getcwd().split('/')[-1]
-        self.set_pbs(dirname, 'qe')
-        return data_init
