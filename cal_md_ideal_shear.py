@@ -37,7 +37,7 @@ if __name__ == '__main__':
 
     dispatcher = {'qeone': drv.get_qe_stress,
                   'restart': drv.loop_prep_restart,
-                  'twin': drv.shear_twin_path,
+                  'twin': drv.gn_shear_twin_path,
                   'preprestart': drv.loop_prep_restart_from_log,
                   'clcqe': drv.qe_loop_stress,
                   'clcva': drv.va_loop_stress,
