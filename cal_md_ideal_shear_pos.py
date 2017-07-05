@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-04 20:53:50
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-05 08:20:46
+# @Last Modified time: 2017-07-05 08:27:41
 
 
 from md_pot_data import unitconv
@@ -51,19 +51,18 @@ class cal_bcc_ideal_shear_pos(object):
         data = np.ndarray([npts, 2 + 5 + 6])
         if opt == 'clc':
             for i in range(npts):
-                if i != 4 and i != 18:
-                    dirname = "dir-{:03d}".format(i)
-                    print dirname
-                    if os.path.isdir(dirname):
-                        os.chdir(dirname)
-                        (engy, vol, stress) = self.qe_get_energy_stress('qe.out')
-                        stress = self.trans_coords_to_cartisian(np.mat(stress))
-                        stress = self.convert_mtx_to_vec(stress)
-                        raw = np.loadtxt("ishear.txt")
-                        os.chdir(self.root)
-                        # vol = vol * (unitconv.ulength['BohrtoA']**3)
-                        data[i, :7] = raw
-                        data[i, 7:] = stress
+                dirname = "dir-{:03d}".format(i)
+                print dirname
+                if os.path.isdir(dirname):
+                    os.chdir(dirname)
+                    (engy, vol, stress) = self.qe_get_energy_stress('qe.out')
+                    stress = self.trans_coords_to_cartisian(np.mat(stress))
+                    stress = self.convert_mtx_to_vec(stress)
+                    raw = np.loadtxt("ishear.txt")
+                    os.chdir(self.root)
+                    # vol = vol * (unitconv.ulength['BohrtoA']**3)
+                    data[i, :7] = raw
+                    data[i, 7:] = stress
             np.savetxt('stress.txt', data)
         elif opt is 'stress':
             data = np.loadtxt('stress.txt')
