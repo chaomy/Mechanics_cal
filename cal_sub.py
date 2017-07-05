@@ -39,16 +39,20 @@ class subjobs(object):
         self.diriter = iter(glob.glob('dir-*'))
         return
 
-    def loop_sub_jobs(self):
+    def loop_sub_jobs(self, opt):
         while True:
             try:
                 mdir = next(self.diriter)
                 print mdir
-                os.chdir(mdir)
-                os.system("qsub va.pbs")
-                os.chdir(os.pardir)
+                self.gonadsub()
             except StopIteration:
                 break
+        return
+
+    def gonadsub(self, mdir):
+        os.chdir(mdir)
+        os.system("qsub va.pbs")
+        os.chdir(os.pardir)
         return
 
     def loop_shear_cnt(self):
@@ -58,6 +62,7 @@ class subjobs(object):
                 os.chdir(mdir)
                 if not os.path.isfile('ishear.txt'):
                     print mdir
+                    os.system('qsub va.pbs')
                 os.chdir(os.pardir)
             except StopIteration:
                 break
