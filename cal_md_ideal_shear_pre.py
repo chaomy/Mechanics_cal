@@ -132,5 +132,5 @@ class cal_bcc_ideal_shear_pre(object):
                 os.system("mv restart.txt {}".format(dirname))
                 os.system('cp $POTDIR/{}  {}'.format(self.pot['file'],
                                                      dirname))
-            self.set_pbs(dirname, raw[i][0], 'qe')
+            self.set_pbs(dirname, 'qe')
         return
