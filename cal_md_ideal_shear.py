@@ -39,6 +39,7 @@ if __name__ == '__main__':
                   'restart': drv.loop_prep_restart,
                   'twin': drv.gn_shear_twin_path,
                   'preprestart': drv.loop_prep_restart_from_log,
+                  'loopre': drv.loop_prep_restart_from_log,
                   'clcqe': drv.qe_loop_stress,
                   'clcva': drv.va_loop_stress,
                   'clclmp': drv.convert_stress,
