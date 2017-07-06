@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-25 17:29:00
+# @Last Modified time: 2017-07-05 23:28:53
 
 import ase
 import ase.io
@@ -20,29 +20,25 @@ class cal_dis_dipole(object):
 
     def __init__(self, pot=None):
         if pot is None:
-            pot = md_pot_data.qe_pot.vca_W75Re25
+            pot = md_pot_data.qe_pot.vca_W50Re50
         self.pot = pot
         self.mddis_drv = cal_md_dislocation.md_dislocation(self.pot)
         return
 
     def set_dipole_box(self, sizen=1):
-        e1 = np.array([1., 1., -2.])
-        e2 = np.array([-1., 1., 0])
-        e3 = np.array([0.5, 0.5, 0.5])
-
         n = 7 * sizen
         m = 11 * sizen
         t = 1 * sizen
 
         print self.pot
         alat = self.pot['lattice']
-        atoms = ase.lattice.cubic.BodyCenteredCubic(directions=[e1, e2, e3],
+        atoms = ase.lattice.cubic.BodyCenteredCubic(directions=[[1., 1., -2.],
+                                                                [-1., 1., 0],
+                                                                [0.5, 0.5, 0.5]],
                                                     latticeconstant=alat,
                                                     size=(n, m, t),
-                                                    symbol=self.pot['element'],
-                                                    pbc=(1, 1, 1))
+                                                    symbol=self.pot['element'])
 
-        # add shiftment to the supercell #
         atoms = self.mddis_drv.cut_half_atoms_new(atoms, "cuty")
         supercell = atoms.get_cell()
         strain = np.mat([[1.0, 0.0, 0.0],
@@ -59,9 +55,9 @@ class cal_dis_dipole(object):
         return
 
     def bcc_screw_dipole_configs_alongz(self, sizen=1):
-        c = tool_elastic_constants.elastic_constants(C11=self.pot['C11'],
-                                                     C12=self.pot['C12'],
-                                                     C44=self.pot['C44'])
+        c = tool_elastic_constants.elastic_constants(C11=self.pot['c11'],
+                                                     C12=self.pot['c12'],
+                                                     C44=self.pot['c44'])
         axes = np.array([[1, 1, -2],
                          [-1, 1, 0],
                          [1, 1, 1]])
@@ -86,6 +82,7 @@ class cal_dis_dipole(object):
         shiftc2 = np.ones(np.shape(pos)) * np.array([c2[0], c2[1], 0.0])
         disp1 = stroh.displacement(pos - shiftc1)
         disp2 = stroh.displacement(pos - shiftc2)
+        print disp1
         atoms.set_positions(pos + np.real(disp1) - np.real(disp2))
         # ase.io.write('POSCAR', atoms, format='vasp')
         return (atoms, atoms_perf)

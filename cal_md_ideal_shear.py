@@ -29,7 +29,7 @@ if __name__ == '__main__':
                       type="string", dest="mtype", help="",
                       default="prp_r")
 
-    parser.add_option('-a', "--delta", action="store",
+    parser.add_option('-p', "--param", action="store",
                       type='string', dest="fargs",
                       default=None)
 

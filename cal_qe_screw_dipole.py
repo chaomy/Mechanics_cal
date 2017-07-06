@@ -1,19 +1,10 @@
 #!/usr/bin/env python
-# encoding: utf-8
+# -*- coding: utf-8 -*-
+# @Author: yang37
+# @Date:   2017-06-12 17:03:43
+# @Last Modified by:   chaomy
+# @Last Modified time: 2017-07-06 00:03:28
 
-###################################################################
-#
-# File Name : cal_qe_screw_dipole.py
-#
-###################################################################
-#
-# Purpose :
-#
-# Creation Date :
-# Last Modified :
-# Created By    : Chaoming Yang
-#
-###################################################################
 
 try:
     import numpy as np
@@ -106,8 +97,9 @@ class qe_dislocation(get_data.get_data,
         return (atoms_perf, atoms)
 
     def cal_qe_restart(self):
-        atoms = self.qe_get_atom_pos()
-        ase.io.write(filename='poscar_relax', images=atoms, format='vasp')
+        atoms = self.qe_get_atom_pos_final()
+        # atoms = self.qe_get_atom_pos_init()
+        ase.io.write(filename='relax_poscar', images=atoms, format='vasp')
         # self.gn_infile_dipole_screw_atoms(atoms)
         return
 
