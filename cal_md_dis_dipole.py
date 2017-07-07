@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-05 23:28:53
+# @Last Modified time: 2017-07-06 23:21:22
 
 import ase
 import ase.io
@@ -12,7 +12,6 @@ import md_pot_data
 import tool_elastic_constants
 import stroh_solve
 import ase.lattice
-# import atomman as am
 import cal_md_dislocation
 
 
@@ -46,6 +45,7 @@ class cal_dis_dipole(object):
                          [0.0, 0.0, 1.0]])
         supercell = strain * supercell
         atoms.set_cell(supercell)
+        atoms.wrap(pbc=[1, 1, 1])
         return atoms
 
     def print_dis_constants(self, stroh):
@@ -58,6 +58,8 @@ class cal_dis_dipole(object):
         c = tool_elastic_constants.elastic_constants(C11=self.pot['c11'],
                                                      C12=self.pot['c12'],
                                                      C44=self.pot['c44'])
+        # c = tool_elastic_constants.elastic_constants(C11=502, C12=173, C44=138)
+
         axes = np.array([[1, 1, -2],
                          [-1, 1, 0],
                          [1, 1, 1]])
@@ -71,23 +73,27 @@ class cal_dis_dipole(object):
 
         unitx = np.sqrt(6) / 3. * self.pot['lattice']
         unity = np.sqrt(2) / 2. * self.pot['lattice']
-
         sx = 10.0 * sizen
         sy = 5 * sizen
         ix = 10.5 * sizen
+
+        # c1 = 1. / 3. * np.sum(self.pot['core1'], axis=0)
+        # c2 = 1. / 3. * np.sum(self.pot['core2'], axis=0)
+        # shiftc1 = np.ones(np.shape(pos)) * np.array([c1[0, 0], c1[0, 1], 0.0])
+        # shiftc2 = np.ones(np.shape(pos)) * np.array([c2[0, 0], c2[0, 1], 0.0])
+
         c1 = [(sx) * unitx, (sy + 1. / 3.) * unity]
         c2 = [(sx + ix) * unitx, (sy + 2. / 3.) * unity]
-
         shiftc1 = np.ones(np.shape(pos)) * np.array([c1[0], c1[1], 0.0])
         shiftc2 = np.ones(np.shape(pos)) * np.array([c2[0], c2[1], 0.0])
+
         disp1 = stroh.displacement(pos - shiftc1)
         disp2 = stroh.displacement(pos - shiftc2)
-        print disp1
+
         atoms.set_positions(pos + np.real(disp1) - np.real(disp2))
         # ase.io.write('POSCAR', atoms, format='vasp')
         return (atoms, atoms_perf)
 
 if __name__ == '__main__':
     drv = cal_dis_dipole()
-    drv.set_dipole_box()
     drv.bcc_screw_dipole_configs_alongz()
