@@ -1,19 +1,10 @@
 #!/usr/bin/env python
-# encoding: utf-8
+# -*- coding: utf-8 -*-
+# @Author: yang37
+# @Date:   2017-06-12 17:03:43
+# @Last Modified by:   chaomy
+# @Last Modified time: 2017-07-08 06:54:10
 
-###################################################################
-#
-# File Name : cal_md_ideal_tensile.py
-#
-###################################################################
-#
-# Purpose :
-#
-# Creation Date :
-# Last Modified :
-# Created By    : Chaoming Yang
-#
-###################################################################
 
 import os
 import ase
@@ -88,7 +79,6 @@ class cal_bcc_ideal_tensile(get_data.get_data,
         npts = len(dirlist)
         data = np.ndarray([npts, 10])
         for i in range(npts):
-            #  dirname = "dir-{:03d}".format(i)
             dirname = dirlist[i]
             print dirname
 
@@ -98,7 +88,6 @@ class cal_bcc_ideal_tensile(get_data.get_data,
             os.chdir(self.root)
             data[i, 0:4] = raw
             data[i, 4:] = stress.transpose()
-
         np.savetxt("istress.txt", data)
         return
 

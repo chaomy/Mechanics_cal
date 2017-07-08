@@ -72,5 +72,4 @@ if __name__ == "__main__":
     drv = subjobs()
     dispatcher = {'sub': drv.loop_sub_jobs,
                   'shearcnt': drv.loop_shear_cnt}
-
     dispatcher[options.mtype.lower()]()

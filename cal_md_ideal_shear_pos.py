@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-04 20:53:50
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-05 08:33:52
+# @Last Modified time: 2017-07-06 23:56:21
 
 
 from md_pot_data import unitconv
@@ -47,7 +47,6 @@ class cal_bcc_ideal_shear_pos(object):
 
     def qe_loop_stress(self, opt='clc'):
         npts = self.npts
-        convunit = unitconv.ustress['evA3toGpa']
         data = np.ndarray([npts, 2 + 5 + 6])
         if opt == 'clc':
             for i in range(npts):
@@ -64,14 +63,15 @@ class cal_bcc_ideal_shear_pos(object):
                     data[i, :7] = raw
                     data[i, 7:] = stress
             np.savetxt('stress.txt', data)
-        elif opt is 'stress':
-            data = np.loadtxt('stress.txt')
-            spl = InterpolatedUnivariateSpline(data[:, 0], data[:, 1])
-            spl.set_smoothing_factor(1.5)
-            splder1 = spl.derivative()
-            for i in range(len(data)):
-                data[i, -1] = splder1(data[i, 0]) * convunit / data[i, 2]
-            print data
+        # elif opt is 'stress':
+        #     convunit = unitconv.ustress['evA3toGpa']
+        #     data = np.loadtxt('stress.txt')
+        #     spl = InterpolatedUnivariateSpline(data[:, 0], data[:, 1])
+        #     spl.set_smoothing_factor(1.5)
+        #     splder1 = spl.derivative()
+        #     for i in range(len(data)):
+        #         data[i, -1] = splder1(data[i, 0]) * convunit / data[i, 2]
+        #     print data
         return
 
     def va_loop_stress(self):
