@@ -4,7 +4,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-09 09:53:49
+# @Last Modified time: 2017-07-09 09:54:37
 
 
 import os
@@ -35,7 +35,7 @@ class subjobs(object):
             try:
                 mdir = next(self.diriter)
                 print mdir
-                self.gonadsub()
+                self.gonadsub(mdir)
             except StopIteration:
                 break
         return
