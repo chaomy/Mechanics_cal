@@ -1,19 +1,10 @@
 #!/usr/bin/env python
 # encoding: utf-8
-#
-###################################################################
-#
-# File Name : ./cal_sub.py
-#
-###################################################################
-#
-# Purpose :
-#
-# Creation Date : Tue Apr 11 15:36:33 2017
-# Last Modified : Sat Apr  1 23:15:41 2017
-# Created By    : Chaoming Yang
-#
-###################################################################
+# -*- coding: utf-8 -*-
+# @Author: yang37
+# @Date:   2017-06-12 17:03:43
+# @Last Modified by:   chaomy
+# @Last Modified time: 2017-07-09 09:52:47
 
 
 import os
