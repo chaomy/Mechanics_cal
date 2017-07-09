@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-09 09:24:01
+# @Last Modified time: 2017-07-09 09:27:38
 
 
 import os
@@ -197,6 +197,18 @@ class cal_bcc_ideal_tensile_tp(get_data.get_data,
                 os.system('cp $POTDIR/{}  {}'.format(self.pot['file'],
                                                      dirname))
             self.set_pbs(dirname, raw[i][0], opt2)
+        return
+
+    def set_pbs(self, dirname, delta):
+        self.set_nnodes(1)
+        self.set_ppn(12)
+        self.set_job_title("iva_{}".format(dirname))
+        self.set_wall_time(50)
+        self.set_main_job("""
+        ../cal_md_ideal_tensile_op.py  -t ivasp
+                          """.format(opt))
+        self.write_pbs(od=True)
+        os.system("mv va.pbs %s" % (dirname))
         return
 
 
