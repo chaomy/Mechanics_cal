@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-04 20:53:50
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-09 10:31:06
+# @Last Modified time: 2017-07-09 10:39:14
 
 
 from md_pot_data import unitconv
@@ -12,7 +12,6 @@ import os
 import ase
 import ase.io
 import glob
-import ase.lattice
 import numpy as np
 
 
@@ -72,10 +71,9 @@ class cal_bcc_ideal_shear_pos(object):
             dirname = "dir-{:03d}".format(i)
             os.chdir(dirname)
             raw = self.load_isear_txt()
-            (engy, stress, vol) = self.vasp_energy_stress_vol()
+            self.get_va_stress()
             os.chdir(self.root)
             data[i, :7] = raw
-            data[i, 7:] = np.flatten(stress)
         np.savetxt("stress.txt", data)
         return
 
@@ -142,6 +140,27 @@ class cal_bcc_ideal_shear_pos(object):
                 os.chdir(os.pardir)
             data[i, :] = raw
         np.savetxt('ishear.txt', data)
+        return
+
+    def get_va_stress(self):
+        basis = self.basis
+        (engy, stsvec, vol) = self.vasp_energy_stress_vol()
+        vaspmtx = np.mat(np.zeros([3, 3]))
+
+        vaspmtx[0, 0] = stsvec[0]
+        vaspmtx[1, 1] = stsvec[1]
+        vaspmtx[2, 2] = stsvec[2]
+
+        vaspmtx[1, 0] = stsvec[3]
+        vaspmtx[2, 0] = stsvec[4]
+        vaspmtx[2, 1] = stsvec[5]
+
+        vaspmtx[0, 1] = stsvec[3]
+        vaspmtx[0, 2] = stsvec[4]
+        vaspmtx[1, 2] = stsvec[5]
+
+        vaspmtx = basis * vaspmtx * basis.transpose()
+        print vaspmtx
         return
 
     def get_qe_stress(self):
