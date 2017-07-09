@@ -3,14 +3,12 @@
 # @Author: chaomy
 # @Date:   2017-07-04 20:53:50
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-09 10:39:14
+# @Last Modified time: 2017-07-09 10:43:04
 
 
 from md_pot_data import unitconv
 from scipy.interpolate import InterpolatedUnivariateSpline
 import os
-import ase
-import ase.io
 import glob
 import numpy as np
 
@@ -72,8 +70,9 @@ class cal_bcc_ideal_shear_pos(object):
             os.chdir(dirname)
             raw = self.load_isear_txt()
             self.get_va_stress()
-            os.chdir(self.root)
             data[i, :7] = raw
+            data[i, 7:] = self.get_va_stress()
+            os.chdir(self.root)
         np.savetxt("stress.txt", data)
         return
 
@@ -160,8 +159,8 @@ class cal_bcc_ideal_shear_pos(object):
         vaspmtx[1, 2] = stsvec[5]
 
         vaspmtx = basis * vaspmtx * basis.transpose()
-        print vaspmtx
-        return
+        vector = self.convert_mtx_to_vec(vaspmtx)
+        return vector
 
     def get_qe_stress(self):
         (engy, vol, stress) = self.qe_get_energy_stress()
