@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-04 20:53:50
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-09 10:27:46
+# @Last Modified time: 2017-07-09 10:31:06
 
 
 from md_pot_data import unitconv
@@ -75,7 +75,7 @@ class cal_bcc_ideal_shear_pos(object):
             (engy, stress, vol) = self.vasp_energy_stress_vol()
             os.chdir(self.root)
             data[i, :7] = raw
-            data[i, 7:] = stress
+            data[i, 7:] = np.flatten(stress)
         np.savetxt("stress.txt", data)
         return
 
