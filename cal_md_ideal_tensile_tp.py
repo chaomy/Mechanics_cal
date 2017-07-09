@@ -1,19 +1,10 @@
 #!/usr/bin/env python
-# encoding: utf-8
+# -*- coding: utf-8 -*-
+# @Author: yang37
+# @Date:   2017-06-12 17:03:43
+# @Last Modified by:   chaomy
+# @Last Modified time: 2017-07-08 22:00:33
 
-###################################################################
-#
-# File Name : cal_md_ideal_tensile_tp.py
-#
-###################################################################
-#
-# Purpose :
-#
-# Creation Date :
-# Last Modified :
-# Created By    : Chaoming Yang
-#
-###################################################################
 
 import os
 import ase
@@ -23,7 +14,6 @@ import gn_pbs
 import numpy as np
 import gn_config
 import get_data
-import plt_drv
 import md_pot_data
 from scipy.optimize import minimize
 import cal_md_ideal_tensile_plt
@@ -32,19 +22,17 @@ from optparse import OptionParser
 
 class cal_bcc_ideal_tensile_tp(get_data.get_data,
                                gn_pbs.gn_pbs,
-                               plt_drv.plt_drv,
                                gn_config.bcc):
 
     def __init__(self):
         # self.pot = self.load_data('../pot.dat')
         self.pot = md_pot_data.md_pot.Nb_adp
         gn_pbs.gn_pbs.__init__(self)
-        plt_drv.plt_drv.__init__(self)
         get_data.get_data.__init__(self)
         gn_config.bcc.__init__(self, self.pot)
 
         self.alat = self.pot['lattice']
-        self.range = (0, 20)
+        self.range = (20, 26)
         self.npts = self.range[1] - self.range[0]
         self.delta = 0.02
         e1 = [1., 0., 0.]
@@ -235,3 +223,9 @@ if __name__ == '__main__':
     if options.mtype.lower() in ['qe_restart', 'va_restart']:
         opt = options.mtype.lower().split('_')[0]
         drv.loop_prep_restart(opt)
+
+    if options.mtype.lower() == 'adj':
+        pltdrv.adjust_data_format()
+
+    if options.mtype.lower() == 'cmp':
+        pltdrv.cmp_plt()
