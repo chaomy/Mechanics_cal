@@ -4,22 +4,17 @@
 ###################################################################
 #
 # File Name : cal_md_ideal_shear_old.py
-# 
+#
 ###################################################################
 #
 # Purpose :
-# 
+#
 # Creation Date :
 # Last Modified :
 # Created By    : Chaoming Yang
 #
 ###################################################################
 
-try:
-    import
-
-except ImportError:
-    print("error during import")
 
 
     def md_ideal_shear(self, tag='clc', opt='lmp'):
@@ -97,7 +92,8 @@ except ImportError:
         #  [0.0,   0.97346549918, 0.0],
         #  [0.0,   0.0, 0.97667253459]])
 
-        stsslmp = np.array([-0.48763, -6.18858, -6.023485, 0.94804, -2.579288, 1.057818])
+        stsslmp = np.array([-0.48763, -6.18858, -6.023485,
+                            0.94804, -2.579288, 1.057818])
 
         # Tij = aik * Tkl * ajl
         lmpmtx[0, 0] = stsslmp[0]
@@ -131,7 +127,8 @@ except ImportError:
                           [-0.977,  -1.3491,  2.294]])
         invlmp = np.linalg.inv(lmpcell)
         invlmp /= np.linalg.norm(invlmp)
-        stsslmp = np.array([-1.77674, -1.77674, 1.070929, -0.389782, 0.059423, 0.059423])
+        stsslmp = np.array(
+            [-1.77674, -1.77674, 1.070929, -0.389782, 0.059423, 0.059423])
 
         lmpmtx[0, 0] = stsslmp[0]
         lmpmtx[1, 1] = stsslmp[1]
@@ -154,7 +151,8 @@ except ImportError:
                            [1.7865,  1.7865, -1.5359]])
         invvasp = np.linalg.inv(vaspcell)
         invvasp /= np.linalg.norm(invvasp)
-        stssvasp = np.array([-2.400844, -2.400844, 2.587547, -1.036506, 0.036871, 0.036871])
+        stssvasp = np.array(
+            [-2.400844, -2.400844, 2.587547, -1.036506, 0.036871, 0.036871])
 
         vaspmtx[0, 0] = stssvasp[0]
         vaspmtx[1, 1] = stssvasp[1]
@@ -179,6 +177,6 @@ except ImportError:
         invcon /= np.linalg.norm(invcon)
 
         engy = -20.09869489
-        stsscon = np.array([-2.51505, -2.51505, 3.934676, -1.279162, -0.002954, -0.002954])
+        stsscon = np.array(
+            [-2.51505, -2.51505, 3.934676, -1.279162, -0.002954, -0.002954])
         return
-

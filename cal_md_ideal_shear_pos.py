@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-04 20:53:50
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-06 23:56:21
+# @Last Modified time: 2017-07-09 10:27:46
 
 
 from md_pot_data import unitconv
@@ -63,37 +63,19 @@ class cal_bcc_ideal_shear_pos(object):
                     data[i, :7] = raw
                     data[i, 7:] = stress
             np.savetxt('stress.txt', data)
-        # elif opt is 'stress':
-        #     convunit = unitconv.ustress['evA3toGpa']
-        #     data = np.loadtxt('stress.txt')
-        #     spl = InterpolatedUnivariateSpline(data[:, 0], data[:, 1])
-        #     spl.set_smoothing_factor(1.5)
-        #     splder1 = spl.derivative()
-        #     for i in range(len(data)):
-        #         data[i, -1] = splder1(data[i, 0]) * convunit / data[i, 2]
-        #     print data
         return
 
     def va_loop_stress(self):
         npts = self.npts
-        data = np.ndarray([npts, 4])
-        convunit = unitconv.ustress['evA3toGpa']
+        data = np.ndarray([npts, 2 + 5 + 6])
         for i in range(npts):
             dirname = "dir-{:03d}".format(i)
             os.chdir(dirname)
-            atoms = ase.io.read("CONTCAR", format='vasp')
-            raw = np.loadtxt("ishear.txt")
+            raw = self.load_isear_txt()
+            (engy, stress, vol) = self.vasp_energy_stress_vol()
             os.chdir(self.root)
-            data[i, 0] = raw[0]
-            data[i, 1] = raw[1]
-            data[i, 2] = np.linalg.det(atoms.get_cell())
-        spl = InterpolatedUnivariateSpline(data[:, 0], data[:, 1])
-        spl.set_smoothing_factor(1.5)
-        splder1 = spl.derivative()
-        for i in range(len(data)):
-            # append the stress to the last column
-            data[i, -1] = splder1(data[i, 0]) * convunit / data[i, 2]
-        print data
+            data[i, :7] = raw
+            data[i, 7:] = stress
         np.savetxt("stress.txt", data)
         return
 
