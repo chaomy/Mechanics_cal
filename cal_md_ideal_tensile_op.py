@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-09 09:27:38
+# @Last Modified time: 2017-07-09 09:29:58
 
 
 import os
@@ -196,7 +196,7 @@ class cal_bcc_ideal_tensile_tp(get_data.get_data,
                 os.system("mv restart.txt {}".format(dirname))
                 os.system('cp $POTDIR/{}  {}'.format(self.pot['file'],
                                                      dirname))
-            self.set_pbs(dirname, raw[i][0], opt2)
+            self.set_pbs(dirname, raw[i][0])
         return
 
     def set_pbs(self, dirname, delta):
