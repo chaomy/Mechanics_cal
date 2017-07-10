@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-09 18:16:57
+# @Last Modified time: 2017-07-09 18:22:48
 
 
 from optparse import OptionParser
@@ -74,7 +74,7 @@ class cal_gsf(gn_config.bcc,
         self.set_ecut('43')
         self.set_degauss('0.03D0')
         self.set_thr('1.0D-5')
-        self.set_kpnts((20, 9, 1))
+        self.set_kpnts((17, 9, 1))
         self.set_maxseconds(3600 * 70)
         return
 
