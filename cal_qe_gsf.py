@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-09 18:27:31
+# @Last Modified time: 2017-07-09 18:39:42
 
 
 from optparse import OptionParser
@@ -74,7 +74,7 @@ class cal_gsf(gn_config.bcc,
         self.set_ecut('43')
         self.set_degauss('0.03D0')
         self.set_thr('1.0D-5')
-        self.set_kpnts((17, 9, 1))
+        self.set_kpnts(gsf_data.gsfkpts[self.mgsf])
         self.set_maxseconds(3600 * 70)
         return
 
@@ -188,10 +188,6 @@ if __name__ == '__main__':
                       type="string",
                       dest="mtype")
     (options, args) = parser.parse_args()
-    gsf111_211 = {'type': 'x111z112', 'kpoints': [23, 21, 1]}
-    gsf111_110 = {'type': 'x111z110', 'kpoints': [23, 11, 1]}
-    ingsf = gsf111_211
-
-    drv = cal_gsf(mgsf=ingsf['type'])
+    drv = cal_gsf(mgsf='x111z110')
     dispatcher = {'prep': drv.gn_qe_single_dir_gsf}
     dispatcher[options.mtype.lower()]()
