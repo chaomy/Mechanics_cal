@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-07 00:27:16
+# @Last Modified time: 2017-07-09 14:09:57
 
 
 from itertools import cycle
@@ -16,6 +16,22 @@ class cal_bcc_ideal_shear_plt(object):
 
     def __init__(self):
         plt_drv.plt_drv.__init__(self)
+        return
+
+    def plt_vc(self):
+        self.set_111plt()
+        # tp_sxx = np.loadtxt('0.25Re-Tpath.txt')
+        # sh_211 = np.loadtxt('stress.txt.0.25')
+        # tp_sxx = np.loadtxt('0.50Re-Tpath.txt')
+        # sh_211 = np.loadtxt('stress.txt.0.50')
+        tp_sxx = np.loadtxt('0.50Re-Tpath.txt')
+        sh_211 = np.loadtxt('stress.txt.0.50')
+        self.ax.plot(tp_sxx[:, 0], tp_sxx[:, 1],
+                     label='tp', **next(self.keysiter))
+        self.ax.plot(sh_211[:, 0], sh_211[:, -3],
+                     label='sh', **next(self.keysiter))
+        self.add_legends(self.ax)
+        self.fig.savefig('fig-stress.0.50.png')
         return
 
     def plt_strain_vs_energy(self, infile='ishear.txt'):

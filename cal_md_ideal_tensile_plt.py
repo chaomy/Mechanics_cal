@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-08 22:02:30
+# @Last Modified time: 2017-07-09 14:06:31
 
 import matplotlib.pylab as plt
 from itertools import cycle
@@ -72,9 +72,9 @@ class cal_md_ideal_tensile_plt(plt_drv.plt_drv):
         raw = raw[raw[:, 0].argsort()]
         ylabeliter = cycle(['dE', 'Sxx', 'Syy', 'Szz'])
         if fname == 'iten.txt':
-            self.ax1.plot(raw[:, 0], 0.5 * (raw[:, 1] - raw[0, 1]),
+            self.ax1.plot(raw[:, 0], (raw[:, 1] - raw[0, 1]),
                           label='engy', **next(self.keysiter))
-            self.ax2.plot(raw[:, 0], (raw[:, 4]),
+            self.ax2.plot(raw[:, 0], -(raw[:, 4]),
                           label='sxx', **next(self.keysiter))
         self.add_legends(*self.axlist)
         self.add_y_labels(ylabeliter, *self.axlist)
@@ -113,22 +113,24 @@ class cal_md_ideal_tensile_plt(plt_drv.plt_drv):
         raw = np.loadtxt(fname)
         raw = raw[raw[:, 0].argsort()]
         raw[:, 1] = raw[:, 1]
+        raw[:, 4] = 0.1 * raw[:, 4]
         np.savetxt('iten.save.txt', raw)
         return
 
     def cmp_plt(self):
         self.set_211plt()
-        raw = np.loadtxt('iten.tp.txt')
+        raw = np.loadtxt('iten.va.tp.txt')
         ylabeliter = cycle(['dE', 'Sxx', 'Syy', 'Szz'])
         self.ax1.plot(raw[:, 0], raw[:, 1] - raw[0, 1],
-                      label='tp', **next(self.keysiter))
+                      label='va', **next(self.keysiter))
         self.ax2.plot(raw[:, 0], -raw[:, 4],
-                      label='tp', **next(self.keysiter))
-        raw = np.loadtxt('iten.op.txt')
+                      label='va', **next(self.keysiter))
+
+        raw = np.loadtxt('iten.md.tp.txt')
         self.ax1.plot(raw[:, 0], raw[:, 1] - raw[0, 1],
-                      label='op', **next(self.keysiter))
-        self.ax2.plot(raw[:, 0], raw[:, 4],
-                      label='op', **next(self.keysiter))
+                      label='md', **next(self.keysiter))
+        self.ax2.plot(raw[:, 0], -raw[:, 4],
+                      label='md', **next(self.keysiter))
         self.add_legends(*self.axlist)
         self.add_y_labels(ylabeliter, *self.axlist)
         self.add_x_labels(cycle([r'$\varepsilon_{xx}$']), self.ax2)

@@ -1,19 +1,9 @@
 #!/usr/bin/env python
-# encoding: utf-8
-#
-###################################################################
-#
-# File Name : ./cal_md_gsf.py
-#
-###################################################################
-#
-# Purpose : calculate generalized stacking fault energy
-#
-# Creation Date :
-# Last Modified :
-# Created By    : Chaoming Yang
-#
-###################################################################
+# -*- coding: utf-8 -*-
+# @Author: chaomy
+# @Date:   2017-06-28 00:35:14
+# @Last Modified by:   chaomy
+# @Last Modified time: 2017-07-09 17:20:19
 
 import os
 import glob

@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-07 00:14:28
+# @Last Modified time: 2017-07-09 14:05:58
 
 
 from optparse import OptionParser
@@ -44,7 +44,8 @@ if __name__ == '__main__':
                   'gnprim': drv.gn_primitive_lmps,
                   'clctmp': drv.read_ofiles,
                   'pltengy': drv.plt_strain_vs_energy,
-                  'pltstress': drv.plt_energy_stress}
+                  'pltstress': drv.plt_energy_stress,
+                  'pltvc': drv.plt_vc}
 
     if options.fargs is not None:
         dispatcher[options.mtype.lower()](options.fargs)

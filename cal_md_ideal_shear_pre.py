@@ -1,19 +1,10 @@
 #!/usr/bin/env python
-# encoding: utf-8
+# -*- coding: utf-8 -*-
+# @Author: chaomy
+# @Date:   2017-06-28 00:35:14
+# @Last Modified by:   chaomy
+# @Last Modified time: 2017-07-09 16:51:50
 
-###################################################################
-#
-# File Name : ./cal_bcc_ideal_shear.py
-#
-###################################################################
-#
-# Purpose :
-#
-# Creation Date :
-# Last Modified : Sat Apr 22 21:22:17 2017
-# Created By    : Chaoming Yang
-#
-###################################################################
 
 import os
 import ase
@@ -28,7 +19,6 @@ class cal_bcc_ideal_shear_pre(object):
         return
 
     def setup_qe_params(self):
-        # set qe simulation setup
         self.set_degauss('0.03D0')
         self.set_ecut('45')
         self.set_kpnts((33, 33, 33))

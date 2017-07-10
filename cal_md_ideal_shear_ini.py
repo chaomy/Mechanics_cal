@@ -1,19 +1,11 @@
 #!/usr/bin/env python
 # encoding: utf-8
+# -*- coding: utf-8 -*-
+# @Author: chaomy
+# @Date:   2017-06-28 00:35:14
+# @Last Modified by:   chaomy
+# @Last Modified time: 2017-07-09 16:00:55
 
-###################################################################
-#
-# File Name : ./cal_bcc_ideal_shear.py
-#
-###################################################################
-#
-# Purpose :
-#
-# Creation Date :
-# Last Modified : Sat Apr 22 21:22:17 2017
-# Created By    : Chaoming Yang
-#
-###################################################################
 
 import cal_md_ideal_shear_pre
 import cal_md_ideal_shear_run

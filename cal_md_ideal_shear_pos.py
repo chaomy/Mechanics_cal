@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-04 20:53:50
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-09 10:43:04
+# @Last Modified time: 2017-07-09 13:24:35
 
 
 from md_pot_data import unitconv
@@ -54,7 +54,7 @@ class cal_bcc_ideal_shear_pos(object):
                     (engy, vol, stress) = self.qe_get_energy_stress('qe.out')
                     stress = self.trans_coords_to_cartisian(np.mat(stress))
                     stress = self.convert_mtx_to_vec(stress)
-                    raw = self.load_isear_txt()
+                    raw = self.load_ishear_txt()
                     os.chdir(self.root)
                     # vol = vol * (unitconv.ulength['BohrtoA']**3)
                     data[i, :7] = raw
@@ -68,7 +68,7 @@ class cal_bcc_ideal_shear_pos(object):
         for i in range(npts):
             dirname = "dir-{:03d}".format(i)
             os.chdir(dirname)
-            raw = self.load_isear_txt()
+            raw = self.load_ishear_txt()
             self.get_va_stress()
             data[i, :7] = raw
             data[i, 7:] = self.get_va_stress()
@@ -76,7 +76,7 @@ class cal_bcc_ideal_shear_pos(object):
         np.savetxt("stress.txt", data)
         return
 
-    def load_isear_txt(self):
+    def load_ishear_txt(self):
         if os.path.isfile('ishear.txt'):
             raw = np.loadtxt("ishear.txt")
             return raw
