@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-09 18:22:48
+# @Last Modified time: 2017-07-09 18:23:52
 
 
 from optparse import OptionParser
@@ -99,6 +99,7 @@ class cal_gsf(gn_config.bcc,
             local_atoms.translate(disp_matrix)
 
             self.gn_qe_scf(local_atoms)
+            os.system("cp $POTDIR/{} . ".format(self.pot['file']))
             ase.io.write('poscar', images=local_atoms, format='vasp')
             os.system("mv poscar ../poscar.{:03d}".format(i))
             os.chdir(self.rootdir)
