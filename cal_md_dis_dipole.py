@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-07 22:23:27
+# @Last Modified time: 2017-07-10 15:30:48
 
 import ase
 import ase.io
@@ -31,12 +31,13 @@ class cal_dis_dipole(object):
 
         print self.pot
         alat = self.pot['lattice']
-        atoms = ase.lattice.cubic.BodyCenteredCubic(directions=[[1., 1., -2.],
-                                                                [-1., 1., 0],
-                                                                [0.5, 0.5, 0.5]],
-                                                    latticeconstant=alat,
-                                                    size=(n, m, t),
-                                                    symbol=self.pot['element'])
+        atoms = ase.lattice.cubic.BodyCenteredCubic(
+            directions=[[1., 1., -2.],
+                        [-1., 1., 0],
+                        [0.5, 0.5, 0.5]],
+            latticeconstant=alat,
+            size=(n, m, t),
+            symbol=self.pot['element'])
 
         atoms = self.mddis_drv.cut_half_atoms_new(atoms, "cuty")
         supercell = atoms.get_cell()
@@ -55,9 +56,11 @@ class cal_dis_dipole(object):
         return
 
     def bcc_screw_dipole_configs_alongz(self, sizen=1):
-        c = tool_elastic_constants.elastic_constants(C11=self.pot['c11'],
-                                                     C12=self.pot['c12'],
-                                                     C44=self.pot['c44'])
+        c = tool_elastic_constants.elastic_constants(
+            C11=self.pot['c11'],
+            C12=self.pot['c12'],
+            C44=self.pot['c44'])
+
         # c = tool_elastic_constants.elastic_constants(C11=502, C12=173, C44=138)
 
         axes = np.array([[1, 1, -2],
@@ -76,14 +79,22 @@ class cal_dis_dipole(object):
         sx = 10.0 * sizen
         sy = 5 * sizen
         ix = 10.5 * sizen
-
         # c1 = 1. / 3. * np.sum(self.pot['core1'], axis=0)
         # c2 = 1. / 3. * np.sum(self.pot['core2'], axis=0)
-        # shiftc1 = np.ones(np.shape(pos)) * np.array([c1[0, 0], c1[0, 1], 0.0])
-        # shiftc2 = np.ones(np.shape(pos)) * np.array([c2[0, 0], c2[0, 1], 0.0])
+        # shiftc1 = \
+        # np.ones(np.shape(pos)) * np.array([c1[0, 0], c1[0, 1], 0.0])
+        # shiftc2 = \
+        # np.ones(np.shape(pos)) * np.array([c2[0, 0], c2[0, 1], 0.0])
 
-        c1 = [(sx) * unitx, (sy + 1. / 3.) * unity]
-        c2 = [(sx + ix) * unitx, (sy + 2. / 3.) * unity]
+        opt = 'split'
+        if opt == 'split':
+            c1 = self.pot['posleft'] + \
+                np.array([0.0, 0.21 * self.pot['yunit']])
+            c2 = self.pot['posrigh'] + \
+                np.array([0.0, -0.21 * self.pot['yunit']])
+        else:
+            c1 = [(sx) * unitx, (sy + 1. / 3.) * unity]
+            c2 = [(sx + ix) * unitx, (sy + 2. / 3.) * unity]
         shiftc1 = np.ones(np.shape(pos)) * np.array([c1[0], c1[1], 0.0])
         shiftc2 = np.ones(np.shape(pos)) * np.array([c2[0], c2[1], 0.0])
 

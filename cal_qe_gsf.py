@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-10 01:07:42
+# @Last Modified time: 2017-07-10 20:23:49
 
 
 from optparse import OptionParser
@@ -73,7 +73,7 @@ class cal_gsf(gn_config.bcc,
         self.set_cal_type('scf')
         self.set_ecut('43')
         self.set_degauss('0.03D0')
-        self.set_thr('1.0D-5')
+        self.set_thr('1.0D-4')
         self.set_kpnts(gsf_data.gsfkpts[self.mgsf])
         self.set_maxseconds(3600 * 70)
         return
@@ -81,9 +81,9 @@ class cal_gsf(gn_config.bcc,
     def gn_qe_single_dir_gsf(self):
         atoms = self.gn_gsf_atoms()
         perf_cells = deepcopy(atoms.get_cell())
-        npts = 8
-        disprng = [0.35, 0.65]
-        delta = (disprng[1] - disprng[0]) / npts
+        npts = 3
+        disprng = [0.45, 0.55]
+        delta = (disprng[1] - disprng[0]) / (npts - 1)
         self.setup_qe_scf()
         for i in range(npts):
             disp = disprng[0] + i * delta
@@ -95,6 +95,8 @@ class cal_gsf(gn_config.bcc,
                                                       disp_vector)
             disp_matrix = deepcopy(disp_matrix_direct)
             disp_matrix[:, 0] = disp_matrix_direct[:, 0] * perf_cells[0, 0]
+            print disp_matrix
+
             local_atoms = atoms.copy()
             local_atoms.translate(disp_matrix)
 
@@ -111,7 +113,7 @@ class cal_gsf(gn_config.bcc,
         self.set_ppn(12)
         self.set_job_title("{}".format(dirname))
         self.set_wall_time(80)
-        self.set_main_job("""mpirun  pw.x < qe.in > qe.out""")
+        self.set_main_job("""mpirun pw.x < qe.in > qe.out""")
         self.write_pbs(od=True)
         return
 
@@ -119,7 +121,7 @@ class cal_gsf(gn_config.bcc,
         self.set_cal_type('relax')
         self.set_ecut('43')
         self.set_degauss('0.03D0')
-        self.set_thr('1.0D-5')
+        self.set_thr('1.0D-4')
         self.set_maxseconds(3600 * 80)
         with open(fname, 'w') as fid:
             fid = self.qe_write_control(fid, atoms)
@@ -130,29 +132,6 @@ class cal_gsf(gn_config.bcc,
             fid = self.qe_write_pos(fid, atoms)
             fid = self.qe_write_kpts(fid, (5, 5, 1))
             fid.close()
-        return
-
-    def gn_qe_gsf_given_dis(self, disp):
-        atoms = self.gn_gsf_atoms()
-        perf_cells = copy.deepcopy(atoms.get_cell())
-        dirname = 'dir-{}-{4.3f}' % (self.mgsf, disp)
-        self.mymkdir(dirname)
-        disp_vector = [disp, 0, 0]
-        disp_matrix_direct = self.gn_displacement(atoms.copy(),
-                                                  disp_vector)
-
-        disp_matrix = copy.deepcopy(disp_matrix_direct)
-        disp_matrix[:, 0] = disp_matrix_direct[:, 0] * perf_cells[0, 0]
-
-        local_atoms = atoms.copy()
-        local_atoms.translate(disp_matrix)
-
-        self.gn_qe_scf(local_atoms)
-        os.system("cp $POTDIR/{} . ".format(self.pot['file']))
-
-        ase.io.write('poscar', images=local_atoms, format='vasp')
-        os.system("mv poscar ../poscar.{:03d}".format(disp))
-        os.chdir(self.rootdir)
         return
 
     def collect_qe_gsf_energy(self):
@@ -188,6 +167,6 @@ if __name__ == '__main__':
                       type="string",
                       dest="mtype")
     (options, args) = parser.parse_args()
-    drv = cal_gsf(mgsf='x111z110')
+    drv = cal_gsf(mgsf='x111z112')
     dispatcher = {'prep': drv.gn_qe_single_dir_gsf}
     dispatcher[options.mtype.lower()]()

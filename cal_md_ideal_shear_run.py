@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-09 16:52:39
+# @Last Modified time: 2017-07-10 20:44:06
 
 
 from scipy.optimize import minimize
@@ -45,14 +45,14 @@ class cal_bcc_ideal_shear_run(object):
         return
 
     def loop_shear_lmp(self):
-        x0 = np.array([1., 1., 1., 0., 0.])
+        x0 = np.array([1.2, 1.1, 0.9, 0., 0.])
         npts = self.npts
         data = np.ndarray([npts, 7])
         for i in range(npts):
             delta = self.delta * i
             res = minimize(self.runlmp, x0, delta,
                            method='Nelder-Mead',
-                           options={'xtol': 1e-3, 'disp': True})
+                           options={'xtol': 5e-4, 'disp': True})
             x0 = res.x
             print res
             data[i][0] = (delta)

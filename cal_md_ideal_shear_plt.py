@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-09 14:09:57
+# @Last Modified time: 2017-07-11 00:52:44
 
 
 from itertools import cycle
@@ -34,7 +34,7 @@ class cal_bcc_ideal_shear_plt(object):
         self.fig.savefig('fig-stress.0.50.png')
         return
 
-    def plt_strain_vs_energy(self, infile='ishear.txt'):
+    def plt_energy(self, infile='ishear.txt'):
         raw = np.loadtxt(infile)
         raw = raw[raw[:, 0].argsort()]
         print raw
@@ -42,6 +42,25 @@ class cal_bcc_ideal_shear_plt(object):
         self.ax.plot(raw[:, 0], (raw[:, 1] - raw[0, 1]),
                      label='engy', **next(self.keysiter))
         self.fig.savefig("fig-engy.png", **self.figsave)
+        return
+
+    def plt_energy_stress_lmp(self, fname='stress.txt'):
+        til = os.getcwd().split('/')[-1].split('_')[-2:]
+        raw = np.loadtxt(fname)
+        ylabeliter = cycle(['E [eV]', r'$\tau$ [Gpa]'])
+        self.set_keys()
+        self.set_211plt()
+        axlist = [self.ax1, self.ax2]
+        self.ax1.plot(raw[:, 0], (raw[:, 1] - raw[0, 1]),
+                      label='engy', **next(self.keysiter))
+        self.ax2.plot(raw[:, 0], raw[:, -1],
+                      label='stress', **next(self.keysiter))
+        self.add_legends(*axlist)
+        self.set_tick_size(*axlist)
+        self.add_y_labels(ylabeliter, *axlist)
+        self.add_x_labels(cycle([r'$\epsilon$']), self.ax2)
+        self.ax1.set_title('{} {}'.format(*til), fontsize=self.myfontsize)
+        self.fig.savefig("fig-ishear.png", **self.figsave)
         return
 
     def plt_energy_stress(self, fname='stress.txt'):
@@ -55,7 +74,7 @@ class cal_bcc_ideal_shear_plt(object):
         print raw[:, -2]
         self.ax1.plot(raw[:, 0], (raw[:, 1] - raw[0, 1]),
                       label='engy', **next(self.keysiter))
-        self.ax2.plot(raw[:, 0], raw[:, -3],
+        self.ax2.plot(raw[:, 0], -0.1 * raw[:, -2],
                       label='stress', **next(self.keysiter))
         self.add_legends(*axlist)
         self.set_tick_size(*axlist)
@@ -65,36 +84,25 @@ class cal_bcc_ideal_shear_plt(object):
         self.fig.savefig("fig-ishear.png", **self.figsave)
         return
 
-    def plt_energy_stress_cell(self,
-                               fname='ishear.txt'):
-        self.set_311plt()
-        raw = np.loadtxt(fname)
-        raw = raw[raw[:, 0].argsort()]
-        print raw
-        ylabeliter = cycle(['dE', 'Sxx', 'Syy', 'Szz'])
-        if fname == 'iten.txt':
-            self.ax1.plot(raw[:, 0], raw[:, 1] - raw[0, 1],
-                          label='engy', **next(self.keysiter))
-            self.ax2.plot(raw[:, 0], -(raw[:, 4]),
-                          label='sxx', **next(self.keysiter))
-            syy = np.max([raw[:, 5], raw[:, 6]], axis=0)
-            szz = np.min([raw[:, 5], raw[:, 6]], axis=0)
-            #
-            self.ax3.plot(raw[:, 0], -(syy),
-                          label='syy', **next(self.keysiter))
-            self.ax3.plot(raw[:, 0], -(szz),
-                          label='szz', **next(self.keysiter))
-        self.add_legends(*self.axlist)
-        self.add_y_labels(ylabeliter, *self.axlist)
-        self.set_tick_size(*self.axlist)
-        self.fig.savefig('fig-engy-{}'.format(fname.split('.')[0]),
-                         **self.figsave)
-        return
-
-    def cmp_plt(self):
+    def plt_cmp(self):
+        pln = '110'
         self.set_keys()
         self.set_211plt()
-        self.plt_energy_stress(fname='stress_0.00.txt')
-        self.plt_energy_stress(fname='stress_0.25.txt')
-        self.fig.savefig("istress.png", **self.figsave)
+        axlist = [self.ax1, self.ax2]
+        filelist = ['stress.adp.p{}'.format(pln), 'stress.pbe.p{}'.format(pln)]
+        til = 'ideal shear along ({})'.format(pln)
+        lablist = ['adp', 'pbe']
+        ylabeliter = cycle(['E [eV]', r'$\tau$ [Gpa]'])
+        for i in range(len(filelist)):
+            raw = np.loadtxt(filelist[i])
+            self.ax1.plot(raw[:, 0], (raw[:, 1] - raw[0, 1]),
+                          label=lablist[i], **next(self.keysiter))
+            self.ax2.plot(raw[:, 0], raw[:, -1],
+                          label=lablist[i], **next(self.keysiter))
+        self.add_legends(*axlist)
+        self.set_tick_size(*axlist)
+        self.add_y_labels(ylabeliter, *axlist)
+        self.add_x_labels(cycle([r'$\epsilon$']), self.ax2)
+        self.ax1.set_title(til, fontsize=self.myfontsize)
+        self.fig.savefig("fig-cmp-{}.png".format(pln), **self.figsave)
         return

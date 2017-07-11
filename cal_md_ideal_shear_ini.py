@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-09 16:00:55
+# @Last Modified time: 2017-07-10 22:55:02
 
 
 import cal_md_ideal_shear_pre
@@ -32,6 +32,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
 
     def __init__(self, inpot, shtype='110'):
         self.pot = inpot
+        # self.pot = self.load_data('../pot.dat')
         gn_pbs.gn_pbs.__init__(self)
         plt_drv.plt_drv.__init__(self)
         get_data.get_data.__init__(self)

@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-09 14:05:58
+# @Last Modified time: 2017-07-10 23:55:02
 
 
 from optparse import OptionParser
@@ -26,7 +26,7 @@ if __name__ == '__main__':
 
     (options, args) = parser.parse_args()
     drv = init.cal_bcc_ideal_shear(dat.qe_pot.vca_W75Re25,
-                                   '211')
+                                   '110')
 
     dispatcher = {'qeone': drv.get_qe_stress,
                   'restart': drv.loop_prep_restart,
@@ -43,9 +43,11 @@ if __name__ == '__main__':
                   'iqe': drv.qe_relax,
                   'gnprim': drv.gn_primitive_lmps,
                   'clctmp': drv.read_ofiles,
-                  'pltengy': drv.plt_strain_vs_energy,
+                  'pltengy': drv.plt_energy,
                   'pltstress': drv.plt_energy_stress,
-                  'pltvc': drv.plt_vc}
+                  'pltlmp': drv.plt_energy_stress_lmp,
+                  'pltvc': drv.plt_vc,
+                  'pltcmp': drv.plt_cmp}
 
     if options.fargs is not None:
         dispatcher[options.mtype.lower()](options.fargs)

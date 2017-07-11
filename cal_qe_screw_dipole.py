@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-06 23:34:38
+# @Last Modified time: 2017-07-10 15:08:22
 
 
 try:
@@ -29,7 +29,7 @@ class qe_dislocation(get_data.get_data,
                      cal_md_dis_dipole.cal_dis_dipole):
 
     def __init__(self):
-        self.pot = md_pot_data.qe_pot.pbe_w
+        self.pot = md_pot_data.qe_pot.exp_w
         get_data.get_data.__init__(self)
         gn_pbs.gn_pbs.__init__(self)
         gn_config.bcc.__init__(self, self.pot)
@@ -112,6 +112,8 @@ class qe_dislocation(get_data.get_data,
         ase.io.write(filename='poscar_relax', images=atoms, format='vasp')
         self.gn_infile_dipole_screw_atoms(atoms)
         return
+
+
 
 
 if __name__ == '__main__':

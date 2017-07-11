@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-09 14:06:31
+# @Last Modified time: 2017-07-10 20:47:56
 
 import matplotlib.pylab as plt
 from itertools import cycle
@@ -107,6 +107,32 @@ class cal_md_ideal_tensile_plt(plt_drv.plt_drv):
             self.ax2.legend(**self.legendarg)
         plt.xlabel('strain', {'fontsize': self.myfontsize})
         self.fig.savefig("stress_cmp.png", **self.figsave)
+        return
+
+    def plt_energy_stress_cell(self,
+                               fname='ishear.txt'):
+        self.set_311plt()
+        raw = np.loadtxt(fname)
+        raw = raw[raw[:, 0].argsort()]
+        print raw
+        ylabeliter = cycle(['dE', 'Sxx', 'Syy', 'Szz'])
+        if fname == 'iten.txt':
+            self.ax1.plot(raw[:, 0], raw[:, 1] - raw[0, 1],
+                          label='engy', **next(self.keysiter))
+            self.ax2.plot(raw[:, 0], -(raw[:, 4]),
+                          label='sxx', **next(self.keysiter))
+            syy = np.max([raw[:, 5], raw[:, 6]], axis=0)
+            szz = np.min([raw[:, 5], raw[:, 6]], axis=0)
+            #
+            self.ax3.plot(raw[:, 0], -(syy),
+                          label='syy', **next(self.keysiter))
+            self.ax3.plot(raw[:, 0], -(szz),
+                          label='szz', **next(self.keysiter))
+        self.add_legends(*self.axlist)
+        self.add_y_labels(ylabeliter, *self.axlist)
+        self.set_tick_size(*self.axlist)
+        self.fig.savefig('fig-engy-{}'.format(fname.split('.')[0]),
+                         **self.figsave)
         return
 
     def adjust_data_format(self, fname='iten.txt'):

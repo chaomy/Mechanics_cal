@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-04 20:53:50
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-09 13:24:35
+# @Last Modified time: 2017-07-10 23:10:10
 
 
 from md_pot_data import unitconv
@@ -85,7 +85,38 @@ class cal_bcc_ideal_shear_pos(object):
         return
 
     ##########################################################
-    # calculate derivative of energy to get stress
+    # used for lammps
+    ##########################################################
+    def convert_stress_vasp(self):
+        raw = np.loadtxt("ishear.txt")
+        data = np.zeros((len(raw), len(raw[0]) + 1))
+        data[:, :-1] = raw
+        convunit = unitconv.ustress['evA3toGpa']
+        vol = np.zeros(len(raw))
+        vperf = 0.5 * self.alat**3
+        strmat = np.zeros([3, 3])
+        for i in range(len(raw)):
+            strmat[0, 0], strmat[1, 1], strmat[2, 2] = \
+                raw[i, 2], raw[i, 3], raw[i, 4]
+            strmat[1, 0], strmat[2, 0], strmat[2, 1] = \
+                raw[i, 0], raw[i, 5], raw[i, 6]
+            strmat = np.mat(strmat)
+            vol[i] = vperf * np.linalg.det(strmat)
+        tag = 'interp'
+        if tag == 'interp':
+            # interpolate
+            spl = InterpolatedUnivariateSpline(raw[:, 0], raw[:, 1])
+            # spl.set_smoothing_factor(0.5)
+            splder1 = spl.derivative()
+            for i in range(len(raw)):
+                # append the stress to the last column
+                print "coeff", convunit / vol[i]
+                data[i, -1] = splder1(raw[i, 0]) * convunit / vol[i]
+        np.savetxt("stress.txt", data)
+        return
+
+    ##########################################################
+    # used for lammps
     ##########################################################
     def convert_stress(self):
         raw = np.loadtxt("ishear.txt")
@@ -107,7 +138,7 @@ class cal_bcc_ideal_shear_pos(object):
         if tag == 'interp':
             # interpolate
             spl = InterpolatedUnivariateSpline(raw[:, 0], raw[:, 1])
-            spl.set_smoothing_factor(1.5)
+            # spl.set_smoothing_factor(0.5)
             splder1 = spl.derivative()
             for i in range(len(raw)):
                 # append the stress to the last column
