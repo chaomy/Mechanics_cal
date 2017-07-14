@@ -33,6 +33,7 @@ except ImportError:
 
 
 class lmp_phonon(object):
+
     def __init__(self):
         self._pot = md_pot_data.md_pot.Nb_adp
         self._element = self._pot['element']
@@ -136,9 +137,9 @@ class lmp_phonon(object):
 #  [0.5, 0.5, -0.5]]
 #  as we want to calculate
 #  [[0.5, 0.5, 0.5]
- #  [0.0, 0.0, 0.0],
- #  [0.0, 0.5, 0.0],
- #  [0.0, 0.5, 0.5]]
+#  [0.0, 0.0, 0.0],
+#  [0.0, 0.5, 0.0],
+#  [0.0, 0.5, 0.5]]
 
     def convert_kpath_upon_base_vector(self):
         unitcell = np.mat([[-0.5, 0.5, 0.5],
@@ -162,6 +163,7 @@ class lmp_phonon(object):
         # for lammps we need to convert the unit cell
         #  unitcell = self.lmp_change_box(unitcell)
         # N[0.5 0.5 0.0]','\Gamma','H[1.0 0.0 0.0]','P[0.5 0.5 0.5]','\Gamma'
+        # '\Gamma','H[1.0 0.0 0.0]','P[0.5 0.5 0.5]','\Gamma', N[0.5 0.5 0.0]',
 
         standardkpath = np.mat([[0.0, 0.0, 0.0],
                                 [1.0, 0.0, 0.0],

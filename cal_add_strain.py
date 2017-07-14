@@ -1,19 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-###################################################################
-#
-# File Name : cal_add_strain.py
-#
-###################################################################
-#
-# Purpose :  add strain (shear or tensile) to the supercell
-#
-# Creation Date :
-# Last Modified :
-# Created By    : Chaoming Yang
-#
-###################################################################
 
 import numpy as np
 
