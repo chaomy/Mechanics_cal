@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-16 12:16:07
+# @Last Modified time: 2017-07-16 12:18:24
 
 
 import os
@@ -28,7 +28,7 @@ class cal_bcc_ideal_tensile(get_data.get_data,
 
     def __init__(self):
         # self.pot = self.load_data('../pot.dat')
-        self.pot = md_pot_data.md_pot.Nb_adp
+        self.pot = md_pot_data.va_pot.Nb_pbe
         gn_pbs.gn_pbs.__init__(self)
         plt_drv.plt_drv.__init__(self)
         self.alat = self.pot['lattice']
