@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-16 11:24:06
+# @Last Modified time: 2017-07-16 11:37:55
 
 
 import os
@@ -52,7 +52,7 @@ class cal_bcc_ideal_tensile_tp(get_data.get_data,
         npts = len(dirlist)
         data = np.ndarray([npts, 10])
         for i in range(npts):
-            #  dirname = "dir-{:03d}".format(i)
+            # dirname = "dir-{:03d}".format(i)
             dirname = dirlist[i]
             print dirname
             os.chdir(dirname)
@@ -61,7 +61,7 @@ class cal_bcc_ideal_tensile_tp(get_data.get_data,
             os.chdir(self.root)
             data[i, 0:4] = raw
             data[i, 4:] = stress.transpose()
-        np.savetxt("istress.txt", data)
+        np.savetxt("iten.txt", data)
         return
 
     def load_input_params(self):
