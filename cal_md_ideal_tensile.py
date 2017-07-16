@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-16 11:23:22
+# @Last Modified time: 2017-07-16 12:16:07
 
 
 import os
@@ -67,7 +67,7 @@ class cal_bcc_ideal_tensile(get_data.get_data,
     def lmp_relax(self):
         delta = 0.04
         x0 = np.array([1., 1.])
-        res = minimize(self.runlmp,  x0,  delta,
+        res = minimize(self.runlmp, x0, delta,
                        method='Nelder-Mead',
                        options={'xtol': 1e-3, 'disp': True})
         print res.fun
@@ -82,12 +82,13 @@ class cal_bcc_ideal_tensile(get_data.get_data,
             dirname = dirlist[i]
             print dirname
             os.chdir(dirname)
-            raw = np.loadtxt("ishear.txt")
+            atoms = ase.io.read('CONTCAR', format='vasp')
             (engy, stress, vol) = self.vasp_energy_stress_vol()
+            cell = atoms.get_cell()
             os.chdir(self.root)
-            data[i, 0:4] = raw
+            data[i, 0:4] = cell[0, 0] - 1.0, engy, cell[1, 1], cell[2, 2]
             data[i, 4:] = stress.transpose()
-        np.savetxt("istress.txt", data)
+        np.savetxt("iten.txt", data)
         return
 
     def loop_tensile_lmp(self):

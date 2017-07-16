@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-09 11:14:37
+# @Last Modified time: 2017-07-16 12:03:56
 
 
 import os
@@ -217,7 +217,7 @@ if __name__ == '__main__':
         drv.loop_clc_qe()
 
     if options.mtype.lower() == 'plt_engy':
-        pltdrv.plt_energy_stress('iten.txt')
+        pltdrv.plt_energy_stress('iten.save.txt')
 
     if options.mtype.lower() in ['qe_restart', 'va_restart']:
         opt = options.mtype.lower().split('_')[0]
