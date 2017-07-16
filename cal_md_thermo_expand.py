@@ -1,19 +1,10 @@
 #!/usr/bin/env python
-# encoding: utf-8
+# -*- coding: utf-8 -*-
+# @Author: yang37
+# @Date:   2017-06-21 18:42:47
+# @Last Modified by:   chaomy
+# @Last Modified time: 2017-07-15 22:47:26
 
-###################################################################
-#
-# File Name : cal_md_thermo_expand.py
-#
-###################################################################
-#
-# Purpose :
-#
-# Creation Date :
-# Last Modified :
-# Created By    : Chaoming Yang
-#
-###################################################################
 
 from optparse import OptionParser
 import matplotlib.pylab as plt
@@ -30,14 +21,6 @@ import gn_pbs
 import plt_drv
 import md_pot_data
 import glob
-
-#  try:
-#  #  import atomman as am
-#  #  import atomman.lammps as lmp
-#  #  import atomman.unitconvert as uc
-
-#  except ImportError:
-#  print("error during import")
 
 
 class cal_md_thermo(gn_config.hcp,
@@ -56,13 +39,14 @@ class cal_md_thermo(gn_config.hcp,
 
         self._size = np.array([16, 16, 16])
         self.set_lat('pot')
-        self.unit_atoms = ase.lattice.cubic.BodyCenteredCubic(directions=[[1, 0, 0],
-                                                                          [0, 1, 0],
-                                                                          [0, 0, 1]],
-                                                              latticeconstant=self._lat,
-                                                              size=(1, 1, 1),
-                                                              symbol=self._element,
-                                                              pbc=(1, 1, 1))
+        self.unit_atoms = \
+            ase.lattice.cubic.BodyCenteredCubic(directions=[[1, 0, 0],
+                                                            [0, 1, 0],
+                                                            [0, 0, 1]],
+                                                latticeconstant=self._lat,
+                                                size=(1, 1, 1),
+                                                symbol=self._element,
+                                                pbc=(1, 1, 1))
 
         self.root = os.getcwd()
         gn_config.bcc.__init__(self, self._pot)
@@ -169,9 +153,6 @@ class cal_md_thermo(gn_config.hcp,
         print temp, lx
         return (temp, lx)
 
-    ################################################################
-    # plot the thermo expansion  Lattice - T curve
-    ################################################################
     def theormo_expand_plt(self):
         temp_lx = np.loadtxt("temp_lx.txt")
         print temp_lx
@@ -259,7 +240,7 @@ class cal_md_thermo(gn_config.hcp,
                                    inlabel='p-v',
                                    npt=30):
         self.set_keys("upper right")
-        self.set_111plt()
+        self.set_111plt((10, 6.5))
         (vol, press) = np.loadtxt("data.txt")
         (dft_vol, dft_press) = np.loadtxt("../../DATA_DFT_PV.txt")
 
@@ -269,17 +250,16 @@ class cal_md_thermo(gn_config.hcp,
 
         self.ax.plot(vol[:npt], press[:npt],
                      label='adp',
-                     **self.pltkwargs)
+                     **next(self.keysiter))
 
         self.ax.plot(dft_vol[:npt], dft_press[:npt],
                      label='pbe',
-                     **self.pltkwargs)
-
-        plt.legend(**self.legendarg)
-        plt.yticks(size=self.mlabelsize)
-        plt.xticks(size=self.mlabelsize)
-        plt.xlabel('relative volume (V / V$_0$)', {'fontsize': self.myfontsize})
+                     **next(self.keysiter))
+        plt.xlabel('relative volume (V / V$_0$)',
+                   {'fontsize': self.myfontsize})
         plt.ylabel('presssure (GPa)', {'fontsize': self.myfontsize})
+        self.add_legends(self.ax)
+        self.set_tick_size(self.ax)
         self.fig.savefig("p2v.png", **self.figsave)
         return
 

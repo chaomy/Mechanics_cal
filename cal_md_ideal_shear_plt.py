@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-11 00:52:44
+# @Last Modified time: 2017-07-16 10:37:43
 
 
 from itertools import cycle
@@ -85,9 +85,9 @@ class cal_bcc_ideal_shear_plt(object):
         return
 
     def plt_cmp(self):
-        pln = '110'
-        self.set_keys()
+        pln = '211'
         self.set_211plt()
+        self.set_keys('upper left')
         axlist = [self.ax1, self.ax2]
         filelist = ['stress.adp.p{}'.format(pln), 'stress.pbe.p{}'.format(pln)]
         til = 'ideal shear along ({})'.format(pln)
@@ -103,6 +103,6 @@ class cal_bcc_ideal_shear_plt(object):
         self.set_tick_size(*axlist)
         self.add_y_labels(ylabeliter, *axlist)
         self.add_x_labels(cycle([r'$\epsilon$']), self.ax2)
-        self.ax1.set_title(til, fontsize=self.myfontsize)
+        # self.ax1.set_title(til, fontsize=self.myfontsize)
         self.fig.savefig("fig-cmp-{}.png".format(pln), **self.figsave)
         return

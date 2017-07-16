@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-09 17:20:19
+# @Last Modified time: 2017-07-15 08:15:51
 
 import os
 import glob
@@ -11,6 +11,7 @@ import copy
 import numpy as np
 from multiprocessing import Pool
 from optparse import OptionParser
+from itertools import cycle
 import matplotlib.pylab as plt
 import plt_drv
 
@@ -35,14 +36,15 @@ class cal_md_gsf(gn_config.bcc,
                  get_data.get_data,
                  gn_pbs.gn_pbs,
                  gn_lmp_infile.gn_md_infile,
-                 output_data.output_data):
+                 output_data.output_data,
+                 plt_drv.plt_drv):
 
     def __init__(self, gsf_surface_type='110'):
         get_data.get_data.__init__(self)
         gn_pbs.gn_pbs.__init__(self)
+        plt_drv.plt_drv.__init__(self)
         gn_lmp_infile.gn_md_infile.__init__(self)
         output_data.output_data.__init__(self)
-
         self._pot = self.load_data('pot.dat')
         #  self._pot = md_pot.Nb_adp
 
@@ -52,13 +54,8 @@ class cal_md_gsf(gn_config.bcc,
         self._structure = self._pot['structure']
         self._gsf_potential = self._pot['file']
         self._pot_type = self._pot['pair_style']
-
         if self._structure == 'bcc':
             gn_config.bcc.__init__(self, self._pot)
-        elif self._structure == 'fcc':
-            gn_config.fcc.__init__(self, self._pot)
-        elif self._structure == 'hcp':
-            gn_config.hcp.__init__(self, self._pot)
 
         self.set_lattce_constant(self._surface_lattice_constant)
         self.set_element(self._surface_element)
@@ -235,95 +232,71 @@ class cal_md_gsf(gn_config.bcc,
                     delta=None,
                     energy=None,
                     filename='md_gsf.png'):
-        pltdrv = plt_drv.plt_drv()
-        pltdrv.set_keys()
-        pltdrv.set_111plt((8, 4))
-        pltdrv.ax.plot(delta, energy,
-                       label="$displacement-energy$",
-                       **pltdrv.pltkwargs)
-        plt.savefig(filename, **pltdrv.figsave)
+        self.set_keys()
+        self.set_111plt((8, 4))
+        self.ax.plot(delta, energy,
+                     label="$displacement-energy$",
+                     **self.pltkwargs)
+        plt.savefig(filename, **self.figsave)
         return
 
     def plot_multi_gsf_curv(self,
                             potlist,
                             typelist,
                             fname='gsf_compare.png'):
-        pltdrv = plt_drv.plt_drv()
-        pltdrv.set_keys()
-        pltdrv.set_211plt((8, 6))
-        plt.rc('xtick', labelsize='large')
-        plt.rc('ytick', labelsize='large')
-        cnt = 0
+        self.set_keys()
+        self.set_211plt()
+        axlist = [self.ax1, self.ax2]
+        ylabiter = cycle([
+            r"$\gamma$[{}]({}) [eV/$\AA^2$]".format(typelist[0][:3],
+                                                    typelist[0][-3:]),
+            r"$\gamma$[{}]({}) [eV/$\AA^2$]".format(typelist[1][:3],
+                                                    typelist[1][-3:])
+        ])
         for pottype in potlist:
             filename = "gsf_{}_{}.txt".format(pottype,
                                               typelist[0])
             pltlabel = "{}".format(pottype)
-            pltylabel = \
-                r"$\gamma$[{}]({}) [eV/$\AA^2$]".format(typelist[0][:3],
-                                                        typelist[0][-3:])
             data = np.loadtxt(filename)
-            pltdrv.ax1.plot(data[:, 0], data[:, 1],
-                            linestyle=pltdrv.line[
-                                np.mod(cnt, pltdrv.linetype)],
-                            color=pltdrv.color[np.mod(15 * cnt, 50)],
-                            marker=pltdrv.markers[
-                                np.mod(cnt, pltdrv.markerstype)],
-                            label=pltlabel)
-            pltdrv.ax1.legend(**pltdrv.legendarg)
-            pltdrv.ax1.get_legend()
-            pltdrv.ax1.set_ylabel(pltylabel,
-                                  {'fontsize': (pltdrv.myfontsize - 3)})  # (110): -110  (11-2) -110
+            self.ax1.plot(data[:, 0], data[:, 1],
+                          label=pltlabel, **next(self.keysiter))
 
             filename = "gsf_{}_{}.txt".format(pottype,
                                               typelist[1])
             pltlabel = "{}".format(pottype)
-            pltylabel = \
-                r"$\gamma$[{}]({}) [eV/$\AA^2$]".format(typelist[1][:3],
-                                                        typelist[1][-3:])
             data = np.loadtxt(filename)
-            pltdrv.ax2.plot(data[:, 0], data[:, 1],
-                            linestyle=pltdrv.line[
-                                np.mod(cnt, pltdrv.linetype)],
-                            color=pltdrv.color[np.mod(15 * cnt, 50)],
-                            marker=pltdrv.markers[
-                                np.mod(cnt, pltdrv.markerstype)],
-                            label=pltlabel)
-            pltdrv.ax2.set_xlabel("normalized displacement along $[{}]$".format(self._gsf_surface_type[:3]),
-                                  {'fontsize': (pltdrv.myfontsize - 3)})   # (110): -110  (11-2) -110
-            pltdrv.ax2.set_ylabel(pltylabel,
-                                  {'fontsize': (pltdrv.myfontsize - 3)})   # (110): -110  (11-2) -110
-            cnt += 1
-            pltdrv.ax2.legend(**pltdrv.legendarg)
-            pltdrv.ax2.get_legend()
-
-        plt.savefig(fname, **pltdrv.figsave)
+            self.ax2.plot(data[:, 0], data[:, 1],
+                          label=pltlabel, **next(self.keysiter))
+            self.ax2.set_xlabel("normalized displacement along $[{}]$".format(self._gsf_surface_type[:3]),
+                                {'fontsize': (self.myfontsize - 3)})   # (110): -110  (11-2) -110
+        self.set_tick_size(*axlist)
+        self.add_y_labels(ylabiter, *axlist)
+        self.add_legends(*axlist)
+        plt.savefig(fname, **self.figsave)
         return
 
     def plot_multi_type_gsf_curv(self, typelist, fname='gsf_compare.png'):
         pltdrv = plt_drv.plt_drv()
-        pltdrv.set_keys()
-        pltdrv.set_111plt((8, 4))
+        self.set_keys()
+        self.set_111plt((8, 4))
         plt.rc('xtick', labelsize='large')
         plt.rc('ytick', labelsize='large')
         cnt = 0
         for gsftype in typelist:
             filename = "gsf_{}_{}.txt".format(self._pot['pair_type'],
                                               gsftype)
-            pltlabel = "{}-{}".format(self._pot['pair_type'], gsftype)
+            pltlabel = "{}_{}".format(self._pot['pair_type'], gsftype)
             data = np.loadtxt(filename)
-            pltdrv.ax.plot(data[:, 0], data[:, 1],
-                           linestyle=pltdrv.line[np.mod(cnt, pltdrv.linetype)],
-                           color=pltdrv.color[np.mod(12 * cnt, 50)],
-                           marker=pltdrv.markers[
-                               np.mod(cnt, pltdrv.markerstype)],
-                           label=pltlabel)
+            self.ax.plot(data[:, 0], data[:, 1],
+                         label=pltlabel,
+                         **next(self.keysiter))
             cnt += 1
-            pltdrv.ax.legend(**pltdrv.legendarg)
+            self.ax.legend(**self.legendarg)
         plt.xlabel("normalized displacement along $[{}]$".format(gsftype[:3]),
-                   {'fontsize': (pltdrv.myfontsize)})   # (110): -110  (11-2) -110
+                   {'fontsize': (self.myfontsize)})   # (110): -110  (11-2) -110
         plt.ylabel("stacking fault energy $[eV/\AA^{2}]$",
-                   {'fontsize': (pltdrv.myfontsize)})   # (110): -110  (11-2) -110
-        plt.savefig(fname, **pltdrv.figsave)
+                   {'fontsize': (self.myfontsize)})   # (110): -110  (11-2) -110
+        plt.savefig(fname, **self.figsave)
         return
 
     # trans dft to md
@@ -391,7 +364,7 @@ if __name__ == '__main__':
     elif options.mtype.lower() == 'trans':
         drv.trans_data_format()
 
-    elif options.mtype.lower() == 'compare':
+    elif options.mtype.lower() in ['compare', 'cmp']:
         potlist = ['adp', 'pbe']
         typelist = ['111_211', '111_110']
         drv.plot_multi_gsf_curv(potlist, typelist)
@@ -423,38 +396,4 @@ if __name__ == '__main__':
         #  drv.plot_multi_type_gsf_curv(typelist)
         drv.plot_multi_gsf_curv(potlist, typelist, 'gsf_unrelaxed.png')
 
-###################################################################
-    #  def loop_md_gsf_surface(self):
-        #  for j in range(0,1):
-        #  for i in range(0,11):
-        #  dir_name = 'dir-x-%03d-y-%03d'%(i,j)
-        #  os.mkdir(dir_name)
-        #  shutil.copy('POTCAR',dir_name)
 
-        #  os.chdir(dir_name)
-
-        #  disp_vector = [i * 0.05, j * 0, 0]
-        #  print disp_vector
-        #  disp_matrix_direct = self.gn_displacement(atoms.copy(),
-        #  disp_vector)
-
-        #  disp_matrix = copy.deepcopy(disp_matrix_direct)
-        #   print self._atoms.get_positions()
-        #  X1 = self._atoms.get_cell()[0,0]
-        #  X2 = self._atoms.get_cell()[1,1]
-
-        #  disp_matrix[:,0] = disp_matrix_direct[:,0] * X1
-        #  disp_matrix[:,1] = disp_matrix_direct[:,1] * X2
-
-        #  print "disp_matrix is", disp_matrix
-        #  print "Length is", len(disp_matrix)
-
-        #  Localatoms = self._atoms.copy()
-        #  Localatoms.translate(disp_matrix)
-
-        #  self.add_selective_dynamics(len(disp_matrix))
-        #  self.add_alloy(len(disp_matrix))
-
-        #  os.chdir(self.root_dir)
-        #  return
-###################################################################

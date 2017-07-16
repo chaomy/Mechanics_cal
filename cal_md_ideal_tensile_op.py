@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-09 09:29:58
+# @Last Modified time: 2017-07-16 11:24:06
 
 
 import os
@@ -55,14 +55,12 @@ class cal_bcc_ideal_tensile_tp(get_data.get_data,
             #  dirname = "dir-{:03d}".format(i)
             dirname = dirlist[i]
             print dirname
-
             os.chdir(dirname)
             raw = np.loadtxt("ishear.txt")
             (engy, stress, vol) = self.vasp_energy_stress_vol()
             os.chdir(self.root)
             data[i, 0:4] = raw
             data[i, 4:] = stress.transpose()
-
         np.savetxt("istress.txt", data)
         return
 
