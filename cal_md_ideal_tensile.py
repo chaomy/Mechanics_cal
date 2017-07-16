@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-16 12:18:24
+# @Last Modified time: 2017-07-16 12:19:26
 
 
 import os
@@ -85,6 +85,7 @@ class cal_bcc_ideal_tensile(get_data.get_data,
             atoms = ase.io.read('CONTCAR', format='vasp')
             (engy, stress, vol) = self.vasp_energy_stress_vol()
             cell = atoms.get_cell()
+            cell = cell / self.pot['lattice']
             os.chdir(self.root)
             data[i, 0:4] = cell[0, 0] - 1.0, engy, cell[1, 1], cell[2, 2]
             data[i, 4:] = stress.transpose()
