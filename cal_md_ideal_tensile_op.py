@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-16 11:37:55
+# @Last Modified time: 2017-07-16 11:39:02
 
 
 import os
@@ -56,7 +56,7 @@ class cal_bcc_ideal_tensile_tp(get_data.get_data,
             dirname = dirlist[i]
             print dirname
             os.chdir(dirname)
-            raw = np.loadtxt("ishear.txt")
+            raw = np.loadtxt("iten.txt")
             (engy, stress, vol) = self.vasp_energy_stress_vol()
             os.chdir(self.root)
             data[i, 0:4] = raw
