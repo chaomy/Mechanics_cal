@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-16 12:09:59
+# @Last Modified time: 2017-07-16 12:48:24
 
 import matplotlib.pylab as plt
 from itertools import cycle
@@ -136,25 +136,27 @@ class cal_md_ideal_tensile_plt(plt_drv.plt_drv):
     def adjust_data_format(self, fname='iten.txt'):
         raw = np.loadtxt(fname)
         raw = raw[raw[:, 0].argsort()]
-        raw[:, 1] = raw[:, 1] / 2.
+        raw[:, 1] = raw[:, 1] / 4.
         raw[:, 4] = 0.1 * raw[:, 4]
         np.savetxt('iten.save.txt', raw)
         return
 
     def cmp_plt(self):
         self.set_211plt()
+        self.set_keys('upper left')
         raw = np.loadtxt('iten.tp.txt')
-        ylabeliter = cycle(['dE', 'Sxx', 'Syy', 'Szz'])
+        raw = raw[:25, :]
+        ylabeliter = cycle(['Energy per atom[eV]', 'Sxx [Gpa]'])
         self.ax1.plot(raw[:, 0], raw[:, 1] - raw[0, 1],
-                      label='va', **next(self.keysiter))
+                      label='tp', **next(self.keysiter))
         self.ax2.plot(raw[:, 0], -raw[:, 4],
-                      label='va', **next(self.keysiter))
-
+                      label='tp', **next(self.keysiter))
         raw = np.loadtxt('iten.op.txt')
+        raw = raw[:25, :]
         self.ax1.plot(raw[:, 0], raw[:, 1] - raw[0, 1],
-                      label='md', **next(self.keysiter))
+                      label='op', **next(self.keysiter))
         self.ax2.plot(raw[:, 0], -raw[:, 4],
-                      label='md', **next(self.keysiter))
+                      label='op', **next(self.keysiter))
         self.add_legends(*self.axlist)
         self.add_y_labels(ylabeliter, *self.axlist)
         self.add_x_labels(cycle([r'$\varepsilon_{xx}$']), self.ax2)

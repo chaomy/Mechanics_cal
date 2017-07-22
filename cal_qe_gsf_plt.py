@@ -3,13 +3,12 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-09 16:03:26
+# @Last Modified time: 2017-07-21 23:35:00
 
 
 import os
 import glob
 import copy
-import shutil
 import numpy as np
 import matplotlib.pylab as plt
 from optparse import OptionParser

@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-10 20:23:49
+# @Last Modified time: 2017-07-21 23:47:14
 
 
 from optparse import OptionParser
@@ -31,7 +31,7 @@ class cal_gsf(gn_config.bcc,
               Intro_vasp.vasp_change_box):
 
     def __init__(self, mgsf='x111z112'):
-        self.pot = md_pot_data.qe_pot.vca_W75Re25
+        self.pot = md_pot_data.qe_pot.pbe_w
         self.mgsf = mgsf
 
         gn_kpoints.gn_kpoints.__init__(self)
@@ -71,7 +71,7 @@ class cal_gsf(gn_config.bcc,
 
     def setup_qe_scf(self):
         self.set_cal_type('scf')
-        self.set_ecut('43')
+        self.set_ecut('41')
         self.set_degauss('0.03D0')
         self.set_thr('1.0D-4')
         self.set_kpnts(gsf_data.gsfkpts[self.mgsf])
@@ -81,7 +81,7 @@ class cal_gsf(gn_config.bcc,
     def gn_qe_single_dir_gsf(self):
         atoms = self.gn_gsf_atoms()
         perf_cells = deepcopy(atoms.get_cell())
-        npts = 3
+        npts = 5
         disprng = [0.45, 0.55]
         delta = (disprng[1] - disprng[0]) / (npts - 1)
         self.setup_qe_scf()
@@ -115,6 +115,23 @@ class cal_gsf(gn_config.bcc,
         self.set_wall_time(80)
         self.set_main_job("""mpirun pw.x < qe.in > qe.out""")
         self.write_pbs(od=True)
+        return
+
+    def gn_infile_unrelax_gsf_atoms(self, atoms=None, fname='qe.in'):
+        self.set_cal_type('scf')
+        self.set_ecut('43')
+        self.set_degauss('0.03D0')
+        self.set_thr('1.0D-4')
+        self.set_maxseconds(3600 * 80)
+        with open(fname, 'w') as fid:
+            fid = self.qe_write_control(fid, atoms)
+            fid = self.qe_write_system(fid, atoms)
+            fid = self.qe_write_electrons_tf(fid)
+            fid = self.qe_write_cell(fid, atoms.get_cell())
+            fid = self.qe_write_species(fid, atoms, self.pot)
+            fid = self.qe_write_pos(fid, atoms)
+            fid = self.qe_write_kpts(fid, (5, 5, 1))
+            fid.close()
         return
 
     def gn_infile_gsf_atoms(self, atoms=None, fname='qe.in'):

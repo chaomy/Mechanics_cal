@@ -1,3 +1,30 @@
+July 20 
+1, fit the stress
+2, current working in 
+/Users/yangchaoming/My_cal/DDalpre/ForChaoming/CompareAlu/dir_fit1to5_b1tob4
+3, try different burgers vector
+
+July 18
+1, fix the format of the formula
+2, alpha is ~ 1 but has some error => try with different value of alpha
+
+=> use 1/f exactly 
+=> fit alpha to be 1 but use 1/f^0.95
+
+July 17 
+1, In the directory /Users/yangchaoming/My_cal/DDalpre/ForChaoming/CompareAlu/dir_fixM_b1tob4  
+use  command=>  cal_al_plasticity.py  -t  prec
+2, /Users/yangchaoming/My_cal/DDalpre/ForChaoming/CompareAlu/dir_fixM_b1tob4 
+try to find relationship between concentrations 
+
+
+
+July 16 
+1, fit the velocity of one type of burgers vector 
+2, use the other types of burgers vector to fit it !!!!!!
+3, time the stress with taylor coeff.
+
+
 July 15 
 1, taylor factor information => fcc_taylor_mtx.txt 
 2, refit the v = M (sigma) - \mu b alpha 
