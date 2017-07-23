@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-21 23:47:14
+# @Last Modified time: 2017-07-23 08:53:09
 
 
 from optparse import OptionParser
@@ -33,7 +33,6 @@ class cal_gsf(gn_config.bcc,
     def __init__(self, mgsf='x111z112'):
         self.pot = md_pot_data.qe_pot.pbe_w
         self.mgsf = mgsf
-
         gn_kpoints.gn_kpoints.__init__(self)
         get_data.get_data.__init__(self)
         gn_incar.gn_incar.__init__(self)
@@ -57,7 +56,6 @@ class cal_gsf(gn_config.bcc,
 
     def gn_displacement(self, atoms,
                         displacement_vector):
-
         positions = atoms.get_positions()
         atom_num = len(positions)
         displacement = deepcopy(positions)
@@ -73,20 +71,21 @@ class cal_gsf(gn_config.bcc,
         self.set_cal_type('scf')
         self.set_ecut('41')
         self.set_degauss('0.03D0')
-        self.set_thr('1.0D-4')
+        self.set_thr('1.0D-6')
         self.set_kpnts(gsf_data.gsfkpts[self.mgsf])
         self.set_maxseconds(3600 * 70)
         return
 
     def gn_qe_single_dir_gsf(self):
         atoms = self.gn_gsf_atoms()
+        atoms.wrap()
         perf_cells = deepcopy(atoms.get_cell())
+        ase.io.write('perf_poscar', images=atoms, format='vasp')
         npts = 5
-        disprng = [0.45, 0.55]
-        delta = (disprng[1] - disprng[0]) / (npts - 1)
+        disps = np.linspace(0.44, 0.56, npts)
+        disps = np.append(disps, 0.0)
         self.setup_qe_scf()
-        for i in range(npts):
-            disp = disprng[0] + i * delta
+        for i, disp in zip(range(npts + 1), disps):
             dirname = 'dir-{}-{:4.3f}'.format(self.mgsf, disp)
             self.mymkdir(dirname)
             os.chdir(dirname)
@@ -96,14 +95,13 @@ class cal_gsf(gn_config.bcc,
             disp_matrix = deepcopy(disp_matrix_direct)
             disp_matrix[:, 0] = disp_matrix_direct[:, 0] * perf_cells[0, 0]
             print disp_matrix
-
             local_atoms = atoms.copy()
             local_atoms.translate(disp_matrix)
-
             self.gn_qe_scf(local_atoms)
             self.set_pbs(dirname)
             os.system("cp $POTDIR/{} . ".format(self.pot['file']))
             ase.io.write('poscar', images=local_atoms, format='vasp')
+            self.write_lmp_config_data(local_atoms)
             os.system("mv poscar ../poscar.{:03d}".format(i))
             os.chdir(self.rootdir)
         return

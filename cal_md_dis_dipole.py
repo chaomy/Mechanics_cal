@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-10 15:30:48
+# @Last Modified time: 2017-07-22 20:57:34
 
 import ase
 import ase.io
@@ -28,7 +28,6 @@ class cal_dis_dipole(object):
         n = 7 * sizen
         m = 11 * sizen
         t = 1 * sizen
-
         print self.pot
         alat = self.pot['lattice']
         atoms = ase.lattice.cubic.BodyCenteredCubic(
@@ -38,7 +37,6 @@ class cal_dis_dipole(object):
             latticeconstant=alat,
             size=(n, m, t),
             symbol=self.pot['element'])
-
         atoms = self.mddis_drv.cut_half_atoms_new(atoms, "cuty")
         supercell = atoms.get_cell()
         strain = np.mat([[1.0, 0.0, 0.0],
@@ -49,10 +47,76 @@ class cal_dis_dipole(object):
         atoms.wrap(pbc=[1, 1, 1])
         return atoms
 
+    def set_dipole_triangular_box(self, sizen=1):
+        u = 1. / 3. * np.array([1., -2., 1.])
+        v = 1. / 3. * np.array([2., -1., -1.])
+        z = 1. / 3. * np.array([1., 1., 1.])
+
+        # n1u = 3 * n - 1
+        # n1v = 0
+        # n2u = 0
+        # n2v = 3 * n - 1
+        # c1z = 1. / 3.
+        # c2z = -c1z
+
+        # c1 = n1u * u + n1v * v + c1z * z
+        # c2 = n2u * u + n2v * v + c2z * z
+
+        # print c1; print c2
+        atoms = ase.lattice.cubic.BodyCenteredCubic(
+            directions=[[1., -2., 1.],
+                        [2., -1., -1.],
+                        [1., 1., 1.]],
+            latticeconstant=self.pot['latbcc'],
+            size=(4, 4, 1),
+            symbol=self.pot['element'])
+        supercell = atoms.get_cell()
+        addstrain = False
+        if addstrain is True:
+            print len(atoms)
+            strain = np.mat([[1.0, 0.0, 0.0],
+                             [0.5, 1.0, 0.5],
+                             [0.0, 0.0, 1.0]])
+            supercell = strain * supercell
+            atoms.set_cell(supercell)
+            atoms.wrap(pbc=[1, 1, 1])
+        ase.io.write('tri_perf_poscar.vasp', images=atoms, format='vasp')
+        return atoms
+
     def print_dis_constants(self, stroh):
         print "K tensor", stroh.K_tensor
         print "K (biKijbj)", stroh.K_coeff, "eV/A"
         print "pre-ln alpha = biKijbj/4pi", stroh.preln, "ev/A"
+        return
+
+    def bcc_screw_dipole_triangular_atoms(self, atoms=None, fname='qe.in'):
+        c = tool_elastic_constants.elastic_constants(
+            C11=self.pot['c11'],
+            C12=self.pot['c12'],
+            C44=self.pot['c44'])
+        axes = np.array([[1, 1, -2],
+                         [-1, 1, 0],
+                         [1, 1, 1]])
+        burgers = self.pot['lattice'] / 2 * np.array([1., 1., 1.])
+        stroh = stroh_solve.Stroh(c, burgers, axes=axes)
+
+        atoms = self.set_dipole_triangular_box()
+
+        pos = atoms.get_positions()
+        cell = atoms.get_cell()
+
+        c1 = [0.51 * cell[0, 0], 1. / 3. * cell[1, 1]]
+        c2 = [2 * cell[1, 0], 2. / 3. * cell[1, 1]]
+        print cell, c1, c2
+
+        shiftc1 = np.ones(np.shape(pos)) * np.array([c1[0], c1[1], 0.0])
+        shiftc2 = np.ones(np.shape(pos)) * np.array([c2[0], c2[1], 0.0])
+
+        disp1 = stroh.displacement(pos - shiftc1)
+        disp2 = stroh.displacement(pos - shiftc2)
+
+        atoms.set_positions(pos + np.real(disp1) - np.real(disp2))
+        ase.io.write('tri_dis_poscar.vasp', atoms, format='vasp')
         return
 
     def bcc_screw_dipole_configs_alongz(self, sizen=1):
@@ -60,8 +124,6 @@ class cal_dis_dipole(object):
             C11=self.pot['c11'],
             C12=self.pot['c12'],
             C44=self.pot['c44'])
-
-        # c = tool_elastic_constants.elastic_constants(C11=502, C12=173, C44=138)
 
         axes = np.array([[1, 1, -2],
                          [-1, 1, 0],
@@ -107,4 +169,5 @@ class cal_dis_dipole(object):
 
 if __name__ == '__main__':
     drv = cal_dis_dipole()
-    drv.bcc_screw_dipole_configs_alongz()
+    # drv.bcc_screw_dipole_configs_alongz()
+    drv.bcc_screw_dipole_triangular_atoms()

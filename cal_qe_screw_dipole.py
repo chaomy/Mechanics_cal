@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-10 15:08:22
+# @Last Modified time: 2017-07-22 16:19:06
 
 
 try:
@@ -112,8 +112,6 @@ class qe_dislocation(get_data.get_data,
         ase.io.write(filename='poscar_relax', images=atoms, format='vasp')
         self.gn_infile_dipole_screw_atoms(atoms)
         return
-
-
 
 
 if __name__ == '__main__':
