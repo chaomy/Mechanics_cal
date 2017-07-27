@@ -3,11 +3,12 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-27 00:18:59
+# @Last Modified time: 2017-07-27 00:34:17
 
 
 from optparse import OptionParser
 from copy import deepcopy
+from glob import glob
 import os
 import numpy as np
 import md_pot_data
@@ -114,9 +115,17 @@ class cal_gsf(gn_config.bcc,
         self.set_nnodes(2)
         self.set_ppn(12)
         self.set_job_title("{}".format(dirname))
-        self.set_wall_time(70)
+        self.set_wall_time(30)
         self.set_main_job("""mpirun pw.x < qe.in > qe.out""")
         self.write_pbs(od=False)
+        return
+
+    def loop_set_pbs(self):
+        dirlist = glob('dir-*')
+        for mdir in dirlist:
+            os.chdir(mdir)
+            self.set_pbs(mdir)
+            os.chdir(os.pardir)
         return
 
     def gn_infile_gsf_atoms(self, atoms=None, fname='qe.in'):
@@ -193,5 +202,6 @@ if __name__ == '__main__':
     dispatcher = {'prep': drv.gn_qe_single_dir_gsf,
                   'loopprep': drv.loop_pot_gsf,
                   'clcengy': drv.clc_qe_gsf_engy,
-                  'usf': drv.cal_usf}
+                  'usf': drv.cal_usf,
+                  'setpbs': drv.loop_set_pbs}
     dispatcher[options.mtype.lower()]()
