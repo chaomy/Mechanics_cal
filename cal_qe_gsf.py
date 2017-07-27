@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-27 10:54:39
+# @Last Modified time: 2017-07-27 11:05:17
 
 
 from optparse import OptionParser
@@ -21,6 +21,7 @@ import gn_kpoints
 import gn_incar
 import gn_pbs
 import Intro_vasp
+import cal_sub 
 
 
 class cal_gsf(gn_config.bcc,
@@ -28,6 +29,7 @@ class cal_gsf(gn_config.bcc,
               gn_kpoints.gn_kpoints,
               gn_incar.gn_incar,
               gn_pbs.gn_pbs,
+              cal_sub.cal_sub,
               gn_qe_inputs.gn_qe_infile,
               Intro_vasp.vasp_change_box):
 
@@ -169,7 +171,7 @@ class cal_gsf(gn_config.bcc,
         np.savetxt('gsf.dat', data)
         return
 
-    def loop_pot_gsf(self):
+    def loop_pot_gsf(self, tag='prep'):
         vcapots = {
             'WRe00': md_pot_data.qe_pot.pbe_w,
             'WRe05': md_pot_data.qe_pot.vca_W95Re05,
@@ -182,11 +184,18 @@ class cal_gsf(gn_config.bcc,
         for key in vcapots:
             for gsf in gsfs:
                 mdir = 'Bcc_QE_VCA_{}_gsf{}'.format(key, gsf)
-                self.mymkdir(mdir)
-                os.chdir(mdir)
-                self.__init__(vcapots[key], gsf)
-                self.gn_qe_single_dir_gsf()
-                os.chdir(os.pardir)
+
+                if tag in ['prep']:
+	                self.mymkdir(mdir)
+	                os.chdir(mdir)
+	                self.__init__(vcapots[key], gsf)
+	                self.gn_qe_single_dir_gsf()
+	                os.chdir(os.pardir)
+
+	            elif tag in ['sub']:
+	                os.chdir(mdir)
+	                self.loop_sub_jobs()
+	                os.chdir(os.pardir)
         return
 
     def cal_usf(self):
@@ -211,4 +220,7 @@ if __name__ == '__main__':
                   'clcengy': drv.clc_qe_gsf_engy,
                   'usf': drv.cal_usf,
                   'setpbs': drv.loop_set_pbs}
-    dispatcher[options.mtype.lower()]()
+    if options.fargs is not None:
+        dispatcher[options.mtype.lower()](options.fargs)
+    else:
+        dispatcher[options.mtype.lower()]()
