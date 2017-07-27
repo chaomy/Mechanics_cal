@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-27 11:08:32
+# @Last Modified time: 2017-07-27 11:13:52
 
 
 from optparse import OptionParser
@@ -29,7 +29,7 @@ class cal_gsf(gn_config.bcc,
               gn_kpoints.gn_kpoints,
               gn_incar.gn_incar,
               gn_pbs.gn_pbs,
-              cal_sub.cal_sub,
+              cal_sub.subjobs,
               gn_qe_inputs.gn_qe_infile,
               Intro_vasp.vasp_change_box):
 
@@ -38,6 +38,7 @@ class cal_gsf(gn_config.bcc,
                  mgsf='x111z112'):
         self.pot = pot
         self.mgsf = mgsf
+        cal_sub.subjobs.__init__(self)
         gn_kpoints.gn_kpoints.__init__(self)
         get_data.get_data.__init__(self)
         gn_incar.gn_incar.__init__(self)
@@ -184,14 +185,14 @@ class cal_gsf(gn_config.bcc,
         for key in vcapots:
             for gsf in gsfs:
                 mdir = 'Bcc_QE_VCA_{}_gsf{}'.format(key, gsf)
-
                 if tag in ['prep']:
 	                self.mymkdir(mdir)
 	                os.chdir(mdir)
 	                self.__init__(vcapots[key], gsf)
 	                self.gn_qe_single_dir_gsf()
 	                os.chdir(os.pardir)
-				elif tag in ['sub']:
+
+                elif tag in ['sub']:
 	                os.chdir(mdir)
 	                self.loop_sub_jobs()
 	                os.chdir(os.pardir)
