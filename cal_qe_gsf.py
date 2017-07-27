@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-26 23:37:05
+# @Last Modified time: 2017-07-26 23:51:09
 
 
 from optparse import OptionParser
@@ -171,6 +171,13 @@ class cal_gsf(gn_config.bcc,
                 self.__init__(vcapots[key], gsf)
                 self.gn_qe_single_dir_gsf()
                 os.chdir(os.pardir)
+        return
+
+    def cal_gsf(self):
+        data = np.loadtxt('gsf.dat')
+        gsf = (data[:, 3] - data[-1, 3]) / (2 * data[:, 2])
+        ugsf = np.max(gsf)
+        print ugsf
         return
 
 
