@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-27 08:39:40
+# @Last Modified time: 2017-07-27 10:19:44
 
 
 from optparse import OptionParser
@@ -77,7 +77,7 @@ class cal_gsf(gn_config.bcc,
         self.set_degauss('0.03D0')
         self.set_thr('1.0D-6')
         self.set_kpnts(gsf_data.gsfkpts[self.mgsf])
-        self.set_maxseconds(3600 * 60)
+        self.set_maxseconds(3600 * 29)
         return
 
     def gn_qe_single_dir_gsf(self):
