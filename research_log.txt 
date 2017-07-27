@@ -1,3 +1,18 @@
+July 25 
+1, check Tprec 1e4 1e6 
+2, extend the ode to intial 0 
+3, fix the everything and calculate the fitting.
+
+
+July 23 
+1, check the calculation of gsf 
+2, when solving the ODE, find out how length and delta varies. 
+3, refit everything 
+4, ppt for initial setup  
+
+July 22
+1, Start DD on Mg Nd alloys 
+
 July 21
 1, using relax to check how it looks like after relaxation  
 2, the problem is when we use diffrent orientations we get very weird results ???  
