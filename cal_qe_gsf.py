@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-27 11:08:22
+# @Last Modified time: 2017-07-27 11:08:32
 
 
 from optparse import OptionParser
@@ -191,7 +191,6 @@ class cal_gsf(gn_config.bcc,
 	                self.__init__(vcapots[key], gsf)
 	                self.gn_qe_single_dir_gsf()
 	                os.chdir(os.pardir)
-
 				elif tag in ['sub']:
 	                os.chdir(mdir)
 	                self.loop_sub_jobs()
