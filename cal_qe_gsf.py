@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-27 00:34:17
+# @Last Modified time: 2017-07-27 00:34:38
 
 
 from optparse import OptionParser
@@ -115,7 +115,7 @@ class cal_gsf(gn_config.bcc,
         self.set_nnodes(2)
         self.set_ppn(12)
         self.set_job_title("{}".format(dirname))
-        self.set_wall_time(30)
+        self.set_wall_time(40)
         self.set_main_job("""mpirun pw.x < qe.in > qe.out""")
         self.write_pbs(od=False)
         return
