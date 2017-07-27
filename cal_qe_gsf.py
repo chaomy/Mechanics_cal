@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-26 23:23:34
+# @Last Modified time: 2017-07-26 23:34:57
 
 
 from optparse import OptionParser
@@ -50,8 +50,9 @@ class cal_gsf(gn_config.bcc,
 
     def gn_gsf_atoms(self):
         mgsf = self.mgsf
-        atoms = self.set_bcc_convention(in_direction=gsf_data.gsfbase[mgsf],
-                                        in_size=gsf_data.gsfsize[mgsf])
+        atoms = self.set_bcc_convention(
+            in_direction=gsf_data.gsfbase[mgsf],
+            in_size=gsf_data.gsfsize[mgsf])
         for i in range(gsf_data.gsfpopn[mgsf]):
             atoms.pop()
         return atoms
@@ -139,37 +140,17 @@ class cal_gsf(gn_config.bcc,
         npts = 5
         disps = np.linspace(0.42, 0.58, npts)
         disps = np.append(disps, 0.0)
-        self.setup_qe_scf()
+        data = np.ndarray([npts, 4])
         for i, disp in zip(range(npts + 1), disps):
             dirname = 'dir-{}-{:4.3f}'.format(self.mgsf, disp)
             os.chdir(dirname)
             print(self.qe_get_cell())
-            print(self.qe_get_energy_stress())
+            data[i, 0] = i
+            data[i, 1] = disp
+            data[i, 2] = self.cal_xy_area()
+            data[i, 3] = self.qe_get_energy_stress()[0]
             os.chdir(os.pardir)
-        return
-
-    def collect_qe_gsf_energy(self):
-        disp_list, energy_list, area_list = [], [], []
-        for i in range(0, self.sample_gsf_num):
-            dir_name = 'dir-x-%03d-%s' \
-                % (i, self._gsf_surface_type)
-
-            print "dir is", dir_name
-            disp_list.append(i * self.disp_delta)
-
-            if os.path.isdir(dir_name):
-                os.chdir(dir_name)
-                energy_list.append(self.vasp_energy_stress_vol_quick()[0])
-                area_list.append(self.cal_xy_area_read_poscar())
-                os.chdir(self.rootdir)
-            else:
-                energy_list.append(0.0)
-                area_list.append(0.0)
-
-        with open("DATA", 'w') as fid:
-            for i in range(len(disp_list)):
-                fid.write("%d  %f  %f  %f \n"
-                          % (i, disp_list[i], area_list[i], energy_list[i]))
+        np.savetxt('gsf.dat', data)
         return
 
     def loop_pot_gsf(self):
