@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-27 11:05:17
+# @Last Modified time: 2017-07-27 11:06:32
 
 
 from optparse import OptionParser
@@ -21,7 +21,7 @@ import gn_kpoints
 import gn_incar
 import gn_pbs
 import Intro_vasp
-import cal_sub 
+import cal_sub
 
 
 class cal_gsf(gn_config.bcc,
@@ -87,16 +87,16 @@ class cal_gsf(gn_config.bcc,
         atoms.wrap()
         perf_cells = deepcopy(atoms.get_cell())
         ase.io.write('perf_poscar', images=atoms, format='vasp')
-        # # original 
+        # # original
         # npts = 5
         # disps = np.linspace(0.42, 0.58, npts)
         # disps = np.append(disps, 0.0)
 
-       	# continue 
+       	# continue
         # disps = np.linspace(0.02, 0.42, npts)
         # disps = np.append(disps, 0.0)
-        disps = np.arange(0.02, 0.42, 0.04) 
-        npts = len(disps) 
+        disps = np.arange(0.02, 0.42, 0.04)
+        npts = len(disps)
         self.setup_qe_scf()
         for i, disp in zip(range(npts), disps):
             dirname = 'dir-{}-{:4.3f}'.format(self.mgsf, disp)
@@ -209,10 +209,12 @@ class cal_gsf(gn_config.bcc,
 if __name__ == '__main__':
     usage = "usage:%prog [options] arg1 [options] arg2"
     parser = OptionParser(usage=usage)
-    parser.add_option("-t", "--mtype",
-                      action="store",
-                      type="string",
-                      dest="mtype")
+    parser.add_option("-t", "--mtype", action="store",
+                      type="string", dest="mtype")
+
+    parser.add_option('-p', "--params", action="store",
+                      type='string', dest="fargs")
+    
     (options, args) = parser.parse_args()
     drv = cal_gsf()
     dispatcher = {'prep': drv.gn_qe_single_dir_gsf,
