@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-26 23:51:09
+# @Last Modified time: 2017-07-26 23:53:17
 
 
 from optparse import OptionParser
@@ -173,11 +173,11 @@ class cal_gsf(gn_config.bcc,
                 os.chdir(os.pardir)
         return
 
-    def cal_gsf(self):
+    def cal_usf(self):
         data = np.loadtxt('gsf.dat')
         gsf = (data[:, 3] - data[-1, 3]) / (2 * data[:, 2])
-        ugsf = np.max(gsf)
-        print ugsf
+        usf = np.max(gsf)
+        print("usf = {} eV/A^2".format(usf))
         return
 
 
@@ -192,5 +192,6 @@ if __name__ == '__main__':
     drv = cal_gsf()
     dispatcher = {'prep': drv.gn_qe_single_dir_gsf,
                   'loopprep': drv.loop_pot_gsf,
-                  'clcengy': drv.clc_qe_gsf_engy}
+                  'clcengy': drv.clc_qe_gsf_engy,
+                  'usf': drv.cal_usf}
     dispatcher[options.mtype.lower()]()
