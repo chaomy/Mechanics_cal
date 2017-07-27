@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-26 23:34:57
+# @Last Modified time: 2017-07-26 23:37:05
 
 
 from optparse import OptionParser
@@ -140,7 +140,7 @@ class cal_gsf(gn_config.bcc,
         npts = 5
         disps = np.linspace(0.42, 0.58, npts)
         disps = np.append(disps, 0.0)
-        data = np.ndarray([npts, 4])
+        data = np.ndarray([npts + 1, 4])
         for i, disp in zip(range(npts + 1), disps):
             dirname = 'dir-{}-{:4.3f}'.format(self.mgsf, disp)
             os.chdir(dirname)
