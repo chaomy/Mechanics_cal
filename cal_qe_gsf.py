@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-27 11:25:37
+# @Last Modified time: 2017-07-27 11:26:09
 
 
 from optparse import OptionParser
@@ -201,6 +201,7 @@ class cal_gsf(gn_config.bcc,
             'WRe20': md_pot_data.qe_pot.vca_W80Re20,
             'WRe25': md_pot_data.qe_pot.vca_W75Re25,
             'WRe50': md_pot_data.qe_pot.vca_W50Re50}
+        gsfs = ['x111z112', 'x111z110']
         for key in vcapots.keys():
             for gsf in gsfs:
                 mdir = 'Bcc_QE_VCA_{}_gsf{}'.format(key, gsf)
