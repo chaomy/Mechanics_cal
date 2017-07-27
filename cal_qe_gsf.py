@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-27 11:18:43
+# @Last Modified time: 2017-07-27 11:23:01
 
 
 from optparse import OptionParser
@@ -93,7 +93,7 @@ class cal_gsf(gn_config.bcc,
         # disps = np.linspace(0.42, 0.58, npts)
         # disps = np.append(disps, 0.0)
 
-       	# continue
+        # continue
         # disps = np.linspace(0.02, 0.42, npts)
         # disps = np.append(disps, 0.0)
         disps = np.arange(0.02, 0.42, 0.04)
@@ -185,17 +185,28 @@ class cal_gsf(gn_config.bcc,
         for key in vcapots:
             for gsf in gsfs:
                 mdir = 'Bcc_QE_VCA_{}_gsf{}'.format(key, gsf)
-                if tag in ['prep']:
-	                self.mymkdir(mdir)
-	                os.chdir(mdir)
-	                self.__init__(vcapots[key], gsf)
-	                self.gn_qe_single_dir_gsf()
-	                os.chdir(os.pardir)
+                self.mymkdir(mdir)
+                os.chdir(mdir)
+                self.__init__(vcapots[key], gsf)
+                self.gn_qe_single_dir_gsf()
+                os.chdir(os.pardir)
+        return
 
-                elif tag in ['sub']:
-	                os.chdir(mdir)
-	                self.loop_sub_jobs()
-	                os.chdir(os.pardir)
+    def loop_sub(self):
+        vcapots = {
+            'WRe00': md_pot_data.qe_pot.pbe_w,
+            'WRe05': md_pot_data.qe_pot.vca_W95Re05,
+            'WRe10': md_pot_data.qe_pot.vca_W90Re10,
+            'WRe15': md_pot_data.qe_pot.vca_W85Re15,
+            'WRe20': md_pot_data.qe_pot.vca_W80Re20,
+            'WRe25': md_pot_data.qe_pot.vca_W75Re25,
+            'WRe50': md_pot_data.qe_pot.vca_W50Re50}
+        for key in vcapots[1:]:
+            for gsf in gsfs:
+                mdir = 'Bcc_QE_VCA_{}_gsf{}'.format(key, gsf)
+                os.chdir(mdir)
+                os.system('cal_sub.py -t sub')
+                os.chdir(os.pardir)
         return
 
     def cal_usf(self):
@@ -221,7 +232,9 @@ if __name__ == '__main__':
                   'loopprep': drv.loop_pot_gsf,
                   'clcengy': drv.clc_qe_gsf_engy,
                   'usf': drv.cal_usf,
-                  'setpbs': drv.loop_set_pbs}
+                  'setpbs': drv.loop_set_pbs,
+                  'sub': drv.loop_sub}
+
     if options.fargs is not None:
         dispatcher[options.mtype.lower()](options.fargs)
     else:
