@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-27 10:24:38
+# @Last Modified time: 2017-07-27 10:54:39
 
 
 from optparse import OptionParser
@@ -77,7 +77,7 @@ class cal_gsf(gn_config.bcc,
         self.set_degauss('0.03D0')
         self.set_thr('1.0D-6')
         self.set_kpnts(gsf_data.gsfkpts[self.mgsf])
-        self.set_maxseconds(3600 * 29)
+        self.set_maxseconds(3600 * 24)
         return
 
     def gn_qe_single_dir_gsf(self):
@@ -85,11 +85,18 @@ class cal_gsf(gn_config.bcc,
         atoms.wrap()
         perf_cells = deepcopy(atoms.get_cell())
         ase.io.write('perf_poscar', images=atoms, format='vasp')
-        npts = 5
-        disps = np.linspace(0.42, 0.58, npts)
-        disps = np.append(disps, 0.0)
+        # # original 
+        # npts = 5
+        # disps = np.linspace(0.42, 0.58, npts)
+        # disps = np.append(disps, 0.0)
+
+       	# continue 
+        # disps = np.linspace(0.02, 0.42, npts)
+        # disps = np.append(disps, 0.0)
+        disps = np.arange(0.02, 0.42, 0.04) 
+        npts = len(disps) 
         self.setup_qe_scf()
-        for i, disp in zip(range(npts + 1), disps):
+        for i, disp in zip(range(npts), disps):
             dirname = 'dir-{}-{:4.3f}'.format(self.mgsf, disp)
             self.mymkdir(dirname)
             os.chdir(dirname)
@@ -115,7 +122,7 @@ class cal_gsf(gn_config.bcc,
         self.set_nnodes(2)
         self.set_ppn(12)
         self.set_job_title("{}".format(dirname))
-        self.set_wall_time(30)
+        self.set_wall_time(25)
         self.set_main_job("""mpirun pw.x < qe.in > qe.out""")
         self.write_pbs(od=False)
         return
