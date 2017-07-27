@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-27 11:13:52
+# @Last Modified time: 2017-07-27 11:18:43
 
 
 from optparse import OptionParser
@@ -212,7 +212,7 @@ if __name__ == '__main__':
     parser.add_option("-t", "--mtype", action="store",
                       type="string", dest="mtype")
 
-    parser.add_option('-p', "--params", action="store",
+    parser.add_option("-p", "--params", action="store",
                       type='string', dest="fargs")
 
     (options, args) = parser.parse_args()
