@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-26 23:53:17
+# @Last Modified time: 2017-07-27 00:18:59
 
 
 from optparse import OptionParser
@@ -32,7 +32,7 @@ class cal_gsf(gn_config.bcc,
 
     def __init__(self,
                  pot=md_pot_data.qe_pot.pbe_w,
-                 mgsf='x111z110'):
+                 mgsf='x111z112'):
         self.pot = pot
         self.mgsf = mgsf
         gn_kpoints.gn_kpoints.__init__(self)
