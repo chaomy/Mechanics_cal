@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-27 11:06:32
+# @Last Modified time: 2017-07-27 11:08:22
 
 
 from optparse import OptionParser
@@ -192,7 +192,7 @@ class cal_gsf(gn_config.bcc,
 	                self.gn_qe_single_dir_gsf()
 	                os.chdir(os.pardir)
 
-	            elif tag in ['sub']:
+				elif tag in ['sub']:
 	                os.chdir(mdir)
 	                self.loop_sub_jobs()
 	                os.chdir(os.pardir)
@@ -214,7 +214,7 @@ if __name__ == '__main__':
 
     parser.add_option('-p', "--params", action="store",
                       type='string', dest="fargs")
-    
+
     (options, args) = parser.parse_args()
     drv = cal_gsf()
     dispatcher = {'prep': drv.gn_qe_single_dir_gsf,
