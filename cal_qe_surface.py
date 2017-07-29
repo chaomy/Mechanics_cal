@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-28 21:38:14
+# @Last Modified time: 2017-07-28 21:41:28
 
 
 from optparse import OptionParser
@@ -102,7 +102,7 @@ class cal_surface(cal_qe_gsf.cal_gsf):
         surf = 'x100z100'
         npts = len(vcapots)
         data = np.ndarray([npts, 4])
-        for key, i in zip(vcapots.keys(), npts):
+        for key, i in zip(vcapots.keys(), range(npts)):
             dirtag = 'dir-{}'.format(key)
             self.__init__(vcapots[key], surf)
             if i == 6:
