@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-28 21:42:50
+# @Last Modified time: 2017-07-28 21:43:44
 
 
 from optparse import OptionParser
@@ -110,7 +110,7 @@ class cal_surface(cal_qe_gsf.cal_gsf):
             else:
                 data[i, 0] = 0.05 * i
             data[i, 1:] = self.cal_qe_surface(dirtag)
-        np.savedata('surf.dat', data)
+        np.savetxt('surf.dat', data)
         return
 
 
