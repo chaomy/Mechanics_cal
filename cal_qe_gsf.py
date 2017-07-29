@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-28 20:10:07
+# @Last Modified time: 2017-07-28 20:29:12
 
 
 from optparse import OptionParser
@@ -11,6 +11,7 @@ from copy import deepcopy
 from glob import glob
 import os
 import numpy as np
+import plt_drv
 import md_pot_data
 import gn_qe_inputs
 import ase.io
@@ -30,6 +31,7 @@ class cal_gsf(gn_config.bcc,
               gn_incar.gn_incar,
               gn_pbs.gn_pbs,
               cal_sub.subjobs,
+              plt_drv.plt_drv,
               gn_qe_inputs.gn_qe_infile,
               Intro_vasp.vasp_change_box):
 
@@ -43,6 +45,7 @@ class cal_gsf(gn_config.bcc,
         get_data.get_data.__init__(self)
         gn_incar.gn_incar.__init__(self)
         gn_pbs.gn_pbs.__init__(self)
+        plt_drv.plt_drv.__init__(self)
         Intro_vasp.vasp_change_box.__init__(self, self.pot)
         gn_config.bcc.__init__(self, self.pot)
         gn_qe_inputs.gn_qe_infile.__init__(self, self.pot)
@@ -156,7 +159,7 @@ class cal_gsf(gn_config.bcc,
         return
 
     def clc_qe_gsf_engy(self):
-        disps = np.arange(0.02, 0.42, 0.04)
+        disps = np.arange(0.02, 0.58, 0.04)
         npts = len(disps)
         disps = np.append(disps, 0.0)
         data = np.ndarray([npts + 1, 4])
@@ -217,6 +220,16 @@ class cal_gsf(gn_config.bcc,
         print("usf = {} eV/A^2".format(usf))
         return
 
+    def plt_gsf(self):
+        data = np.loadtxt('gsf.dat')
+        gsf = (data[:, 3] - data[-1, 3]) / (2 * data[:, 2])
+        print gsf
+        self.set_111plt()
+        self.ax.plot(data[:, 1][:-1], gsf[:-1],
+                     label='gsf', **next(self.keysiter))
+        self.fig.savefig('fig_gsf.png', **self.figsave)
+        return
+
 
 if __name__ == '__main__':
     usage = "usage:%prog [options] arg1 [options] arg2"
@@ -234,7 +247,8 @@ if __name__ == '__main__':
                   'clcengy': drv.clc_qe_gsf_engy,
                   'usf': drv.cal_usf,
                   'setpbs': drv.loop_set_pbs,
-                  'sub': drv.loop_sub}
+                  'sub': drv.loop_sub,
+                  'plt': drv.plt_gsf}
 
     if options.fargs is not None:
         dispatcher[options.mtype.lower()](options.fargs)
