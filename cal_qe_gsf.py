@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-28 21:05:13
+# @Last Modified time: 2017-07-28 21:22:11
 
 
 from optparse import OptionParser
@@ -91,7 +91,7 @@ class cal_gsf(gn_config.bcc,
         atoms.wrap()
         perf_cells = deepcopy(atoms.get_cell())
         ase.io.write('perf_poscar', images=atoms, format='vasp')
-        # # original
+        # original
         # npts = 5
         # disps = np.linspace(0.42, 0.58, npts)
         # disps = np.append(disps, 0.0)
@@ -100,6 +100,7 @@ class cal_gsf(gn_config.bcc,
         # disps = np.linspace(0.02, 0.42, npts)
         # disps = np.append(disps, 0.0)
         # disps = np.arange(0.02, 0.42, 0.04)
+
         disps = np.arange(0.62, 0.82, 0.04)
         disps = np.arange(0.82, 1.0, 0.04)
         npts = len(disps)
@@ -124,6 +125,20 @@ class cal_gsf(gn_config.bcc,
             self.write_lmp_config_data(local_atoms)
             os.system("mv poscar ../poscar.{:03d}".format(i))
             os.chdir(self.rootdir)
+        return
+
+    def check_gsf(self):
+        for key in gsf_data.gsfsize:
+            atomss = self.set_bcc_convention(
+                in_direction=gsf_data.gsfbase[key],
+                in_size=gsf_data.gsfsize[key])
+
+            atomsb = self.set_bcc_convention(
+                in_direction=gsf_data.gsfbase[key],
+                in_size=gsf_data.bulksize[key])
+
+            print(key, len(atomss) - len(atomsb),
+                  gsf_data.gsfpopn[key])
         return
 
     def set_pbs(self, dirname):
