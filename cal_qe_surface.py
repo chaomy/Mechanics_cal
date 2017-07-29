@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-28 21:42:01
+# @Last Modified time: 2017-07-28 21:42:50
 
 
 from optparse import OptionParser
@@ -70,7 +70,7 @@ class cal_surface(cal_qe_gsf.cal_gsf):
             self.qe_get_cell()
             area = self.cal_xy_area()
             data[i] = self.qe_get_energy_stress()[0]
-            os.chdir()
+            os.chdir(os.pardir)
         return np.array([area, data[0], data[1]])
 
     def loop_pot_surf(self, intag='prep'):
