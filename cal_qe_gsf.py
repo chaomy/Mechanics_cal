@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-28 20:29:12
+# @Last Modified time: 2017-07-28 20:52:24
 
 
 from optparse import OptionParser
@@ -99,7 +99,8 @@ class cal_gsf(gn_config.bcc,
         # continue
         # disps = np.linspace(0.02, 0.42, npts)
         # disps = np.append(disps, 0.0)
-        disps = np.arange(0.02, 0.42, 0.04)
+        # disps = np.arange(0.02, 0.42, 0.04)
+        disps = np.arange(0.62, 0.98, 0.04)
         npts = len(disps)
         self.setup_qe_scf()
         for i, disp in zip(range(npts), disps):
