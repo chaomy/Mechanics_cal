@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-28 21:41:28
+# @Last Modified time: 2017-07-28 21:42:01
 
 
 from optparse import OptionParser
@@ -63,7 +63,7 @@ class cal_surface(cal_qe_gsf.cal_gsf):
     def cal_qe_surface(self, dirtag='dir'):
         configs = ['bulk', 'surf']
         data = np.zeros(len(configs))
-        for i, config in zip(len(configs), configs):
+        for i, config in zip(range(len(configs)), configs):
             dirname = '{}-{}-{}'.format(
                 dirtag, self.mgsf, config)
             os.chdir(dirname)
