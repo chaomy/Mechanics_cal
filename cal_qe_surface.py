@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-28 22:31:58
+# @Last Modified time: 2017-07-28 22:38:00
 
 
 from optparse import OptionParser
@@ -114,8 +114,14 @@ class cal_surface(cal_qe_gsf.cal_gsf):
         np.savetxt('surf.dat', data)
         return
 
-    def loop_plt_surf(self):
-        np.loadtxt()
+    def plt_surf(self):
+        data = np.loadtxt('surf.dat')
+        self.set_111plt()
+        axlist = [self.ax]
+        self.ax.plot(data[:, 0], data[:, 1],
+                     label='(100)', **next(self.keysiter))
+        self.add_legends(*axlist)
+        self.fig.savefig('fig_surfE.png')
         return
 
 
@@ -129,5 +135,6 @@ if __name__ == '__main__':
     dispatcher = {'prep': drv.prep_qe_surface,
                   'chk': drv.check_gsf,
                   'loopprep': drv.loop_pot_surf,
-                  'loopsurf': drv.loop_cal_surf}
+                  'loopsurf': drv.loop_cal_surf,
+                  'plt': drv.plt_surf}
     dispatcher[options.mtype.lower()]()

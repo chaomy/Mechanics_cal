@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-28 21:22:11
+# @Last Modified time: 2017-07-28 22:57:12
 
 
 from optparse import OptionParser
@@ -225,9 +225,11 @@ class cal_gsf(gn_config.bcc,
         for key in vcapots.keys():
             for gsf in gsfs:
                 mdir = 'Bcc_QE_VCA_{}_gsf{}'.format(key, gsf)
-                os.chdir(mdir)
-                os.system('cal_sub.py -t sub')
-                os.chdir(os.pardir)
+                if os.path.isdir(mdir):
+                    os.chdir(mdir)
+                    os.system('cal_qe_gsf.py -t setpbs')
+                    os.system('cal_sub.py -t sub')
+                    os.chdir(os.pardir)
         return
 
     def cal_usf(self):
