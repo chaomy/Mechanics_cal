@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-28 22:25:37
+# @Last Modified time: 2017-07-28 22:31:58
 
 
 from optparse import OptionParser
@@ -110,12 +110,12 @@ class cal_surface(cal_qe_gsf.cal_gsf):
             else:
                 data[i, 0] = 0.05 * i
             data[i, 2:] = self.cal_qe_surface(dirtag)
-            data[i, 1] = ((data[i, -1] - data[i, -2]) / data[i, -3])
+            data[i, 1] = 0.5 * ((data[i, -1] - data[i, -2]) / data[i, -3])
         np.savetxt('surf.dat', data)
         return
 
     def loop_plt_surf(self):
-
+        np.loadtxt()
         return
 
 
