@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-28 21:43:44
+# @Last Modified time: 2017-07-28 22:25:37
 
 
 from optparse import OptionParser
@@ -101,7 +101,7 @@ class cal_surface(cal_qe_gsf.cal_gsf):
             ('WRe50', md_pot_data.qe_pot.vca_W50Re50)])
         surf = 'x100z100'
         npts = len(vcapots)
-        data = np.ndarray([npts, 4])
+        data = np.ndarray([npts, 5])
         for key, i in zip(vcapots.keys(), range(npts)):
             dirtag = 'dir-{}'.format(key)
             self.__init__(vcapots[key], surf)
@@ -109,8 +109,13 @@ class cal_surface(cal_qe_gsf.cal_gsf):
                 data[i, 0] = 0.5
             else:
                 data[i, 0] = 0.05 * i
-            data[i, 1:] = self.cal_qe_surface(dirtag)
+            data[i, 2:] = self.cal_qe_surface(dirtag)
+            data[i, 1] = ((data[i, -1] - data[i, -2]) / data[i, -3])
         np.savetxt('surf.dat', data)
+        return
+
+    def loop_plt_surf(self):
+
         return
 
 
