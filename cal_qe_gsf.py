@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-28 20:52:54
+# @Last Modified time: 2017-07-28 21:02:36
 
 
 from optparse import OptionParser
@@ -100,7 +100,7 @@ class cal_gsf(gn_config.bcc,
         # disps = np.linspace(0.02, 0.42, npts)
         # disps = np.append(disps, 0.0)
         # disps = np.arange(0.02, 0.42, 0.04)
-        disps = np.arange(0.62, 0.98, 0.04)
+        disps = np.arange(0.62, 0.82, 0.04)
         npts = len(disps)
         self.setup_qe_scf()
         for i, disp in zip(range(npts), disps):
@@ -129,7 +129,7 @@ class cal_gsf(gn_config.bcc,
         self.set_nnodes(2)
         self.set_ppn(12)
         self.set_job_title("{}".format(dirname))
-        self.set_wall_time(4)
+        self.set_wall_time(3)
         self.set_main_job("""mpirun pw.x < qe.in > qe.out""")
         self.write_pbs(od=False)
         return
