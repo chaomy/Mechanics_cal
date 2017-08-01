@@ -1,18 +1,10 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# @Author: yang37
+# @Date:   2017-06-21 18:42:47
+# @Last Modified by:   chaomy
+# @Last Modified time: 2017-07-31 09:25:51
 
-###################################################################
-#
-# File Name : ./cal_vasp_cij.py
-#
-###################################################################
-#
-# Purpose : cal cij by vasp
-#
-# Creation Date :
-# Last Modified : Sat Apr  1 23:15:50 2017
-# Created By    : Chaoming Yang
-#
-###################################################################
 
 import glob
 import os
