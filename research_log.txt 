@@ -1,7 +1,14 @@
+Aug 2 
+1. Mobv -> alphav -> fit ideal alphav 
+2. use fit ideal alhpav -> minimize the 1e5tpre case
+3. 
+
 July 31
 1, how it related to erates 
-2, delta to that is -> linear
-3, solve the fm problem 
+2, fm : cell size = ? default or 18000 
+3, iniital density = ? 
+4, 8 cores; each step is longer than 1s. how to deal with it? 
+ 
 
 July 29 
 1, fix the tprecerate !!!!
