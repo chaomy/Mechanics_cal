@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-03 00:03:29
+# @Last Modified time: 2017-08-08 23:19:22
 
 
 from optparse import OptionParser
@@ -15,7 +15,6 @@ if __name__ == '__main__':
 
     usage = "usage:%prog [options] arg1 [options] arg2"
     parser = OptionParser(usage=usage)
-
     parser.add_option('-t', "--mtype", action="store",
                       type="string", dest="mtype", help="",
                       default="prp_r")

@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-05 08:12:42
+# @Last Modified time: 2017-08-08 09:54:07
 
 
 import os
@@ -316,8 +316,7 @@ class md_dislocation(gn_config.bcc,
 
         # if we don't cut a layer of atoms, will generate two dislocations
         # cut a layer normal the burger direction
-        atoms = self.cut_x_normal_atoms(atoms,
-                                        self._alat)
+        atoms = self.cut_x_normal_atoms(atoms,self._alat)
         self.write_lmp_config_data(atoms)
 
         self.gn_md_minimize_cfg("lmp_init.txt",
@@ -518,9 +517,6 @@ class md_dislocation(gn_config.bcc,
         ase.io.write("ase.cfg", atoms, format='cfg')
         system, elements = am.convert.ase_Atoms.load(atoms)
         lmp.atom_data.dump(system, "lmp_init.txt")
-        return
-
-    def cal_edge_nucleate_neb(self):
         return
 
     def cal_ani_dis(self):

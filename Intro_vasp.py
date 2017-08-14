@@ -1,19 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
 #
-###################################################################
-#
-# File Name : ./Intro_vasp.py
-#
-###################################################################
-#
-# Purpose :   contains the routine that change the configurations of atoms
-#
-# Creation Date :
-# Last Modified : Sun Apr  9 20:23:17 2017
-# Created By    : Chaoming Yang
-#
-###################################################################
 
 import os
 import numpy as np
@@ -548,10 +535,8 @@ class vasp_change_box(object):
             del atoms[index_list]
         return atoms
 
-    def cut_x_normal_atoms(self,
-                           atoms,
-                           lattice_constant,
-                           bdir=0,
+    def cut_x_normal_atoms(self, atoms,
+                           lattice_constant, bdir=0,
                            ratio=np.sqrt(3) / 2.5):
 
         index_list = []
@@ -560,6 +545,7 @@ class vasp_change_box(object):
         # x_crit =  np.sqrt(3.)/2.5 * lattice constant
         # #####################################################
         #  x_crit = np.sqrt(3.) / 2.5 * lattice_constant
+
         x_crit = ratio * lattice_constant
         for i in range(len(atoms)):
             atom = atoms[i]

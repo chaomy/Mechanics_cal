@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-22 20:57:34
+# @Last Modified time: 2017-08-08 08:59:27
 
 import ase
 import ase.io
@@ -101,7 +101,6 @@ class cal_dis_dipole(object):
         stroh = stroh_solve.Stroh(c, burgers, axes=axes)
 
         atoms = self.set_dipole_triangular_box()
-
         pos = atoms.get_positions()
         cell = atoms.get_cell()
 
@@ -141,6 +140,7 @@ class cal_dis_dipole(object):
         sx = 10.0 * sizen
         sy = 5 * sizen
         ix = 10.5 * sizen
+
         # c1 = 1. / 3. * np.sum(self.pot['core1'], axis=0)
         # c2 = 1. / 3. * np.sum(self.pot['core2'], axis=0)
         # shiftc1 = \
