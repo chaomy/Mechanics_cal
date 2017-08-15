@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-14 20:37:48
+# @Last Modified time: 2017-08-14 20:42:41
 
 
 from optparse import OptionParser
@@ -217,7 +217,7 @@ class cal_gsf(gn_config.bcc,
             # 'WRe00': md_pot_data.qe_pot.pbe_w,
             'WRe05': md_pot_data.qe_pot.vca_W95Re05,
             'WRe10': md_pot_data.qe_pot.vca_W90Re10,
-            'WRe15': md_pot_data.qe_pot.vca_W85Re15,
+            # 'WRe15': md_pot_data.qe_pot.vca_W85Re15,
             'WRe20': md_pot_data.qe_pot.vca_W80Re20,
             'WRe25': md_pot_data.qe_pot.vca_W75Re25,
             'WRe50': md_pot_data.qe_pot.vca_W50Re50}
