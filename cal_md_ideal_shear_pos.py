@@ -3,14 +3,16 @@
 # @Author: chaomy
 # @Date:   2017-07-04 20:53:50
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-16 20:38:27
+# @Last Modified time: 2017-08-16 21:04:10
 
 
 from md_pot_data import unitconv
 from scipy.interpolate import InterpolatedUnivariateSpline
+import ase.io
 import os
 import glob
 import numpy as np
+from md_pot_data import fluxdirs
 
 
 class cal_bcc_ideal_shear_pos(object):
@@ -28,10 +30,21 @@ class cal_bcc_ideal_shear_pos(object):
             x0 = np.array([1., 1., 1., 0.0, 0.0])
         return (delta, x0)
 
-    def transdata(self):
+    def transdata(self, ptype='format'):
         for i in range(20):
-            fname = 'dir-{:03}'.format(i)
-            self.mymkdir(fname)
+            mdir = 'dir-{:03}'.format(i)
+            self.mymkdir(mdir)
+            if ptype in ['scp']:
+                fdir = fluxdirs['QE'] + 'VC_WRe/Bcc_QE_VCA_W_ishear211/'
+                os.system('scp {}/{}/qe.out {}'.format(fdir, mdir, mdir))
+                os.system('scp {}/{}/qe.in {}'.format(fdir, mdir, mdir))
+                os.system('scp {}/{}/*.txt {}'.format(fdir, mdir, mdir))
+            elif ptype in ['format']:
+                os.chdir(mdir)
+                atoms = ase.io.read('qe.out', format='espresso-out')
+                ase.io.write(filename='poscar', images=atoms, format='vasp')
+                os.system('mv poscar ../poscar_{:03}'.format(i))
+                os.chdir(os.pardir)
         return
 
     def trans_coords_to_cartisian(self, stress):
@@ -60,6 +73,7 @@ class cal_bcc_ideal_shear_pos(object):
                     raw = self.load_ishear_txt()
                     os.chdir(self.root)
                     # vol = vol * (unitconv.ulength['BohrtoA']**3)
+                    print i, raw
                     data[i, :7] = raw
                     data[i, 7:] = stress
             np.savetxt('stress.txt', data)

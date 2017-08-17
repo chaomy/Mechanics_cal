@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-10 20:44:06
+# @Last Modified time: 2017-08-17 00:33:11
 
 
 from scipy.optimize import minimize
@@ -13,16 +13,11 @@ import numpy as np
 
 class cal_bcc_ideal_shear_run(object):
 
-    def __init__(self):
-        return
-
     def qe_relax(self):
         (delta, x0) = self.load_input_params()
         data = np.zeros(7)
-        res = minimize(self.runqe, x0, delta,
-                       method='Nelder-Mead',
-                       options={'fatol': 2e-3, 'disp': True})
-
+        res = minimize(self.runqe, x0, delta, method='Nelder-Mead',
+                       options={'fatol': 2e-3})
         print res
         data[0] = delta
         data[1] = res.fun

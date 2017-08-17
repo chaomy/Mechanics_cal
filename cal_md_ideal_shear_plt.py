@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-16 10:37:43
+# @Last Modified time: 2017-08-16 21:07:58
 
 
 from itertools import cycle
@@ -74,7 +74,7 @@ class cal_bcc_ideal_shear_plt(object):
         print raw[:, -2]
         self.ax1.plot(raw[:, 0], (raw[:, 1] - raw[0, 1]),
                       label='engy', **next(self.keysiter))
-        self.ax2.plot(raw[:, 0], -0.1 * raw[:, -2],
+        self.ax2.plot(raw[:, 0], raw[:, -3],
                       label='stress', **next(self.keysiter))
         self.add_legends(*axlist)
         self.set_tick_size(*axlist)
