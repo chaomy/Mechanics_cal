@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-04 20:53:50
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-17 01:41:12
+# @Last Modified time: 2017-08-17 01:49:56
 
 
 from md_pot_data import unitconv
@@ -186,10 +186,13 @@ class cal_bcc_ideal_shear_pos(object):
 
     def prep_restart_from_log(self):
         flist = glob.glob("s*.txt")
-        data = np.loadtxt(flist[0])
-        data_init = np.loadtxt('restart.txt')
-        data_init[1] = data[-1][-1]
-        data_init[2:] = data[-1][:-1]
+        if len(flist) >= 1:
+            data = np.loadtxt(flist[0])
+            data_init = np.loadtxt('restart.txt')
+            data_init[1] = data[-1][-1]
+            data_init[2:] = data[-1][:-1]
+        else:
+            data = np.loadtxt('restart.txt')
         np.savetxt('restart.txt', data_init)
         dirname = os.getcwd().split('/')[-1]
         self.set_pbs(dirname, 'qe')
