@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-22 16:19:06
+# @Last Modified time: 2017-08-16 20:12:02
 
 
 try:
@@ -107,10 +107,11 @@ class qe_dislocation(get_data.get_data,
         atoms = self.qe_get_atom_pos()
         cell = atoms.get_cell()
         pot2 = md_pot_data.qe_pot.vca_W50Re50
+
         scaled_cell = cell / pot2['lattice']
         atoms.set_cell(scaled_cell * self.pot['lattice'])
         ase.io.write(filename='poscar_relax', images=atoms, format='vasp')
-        self.gn_infile_dipole_screw_atoms(atoms)
+        # self.gn_infile_dipole_screw_atoms(atoms)
         return
 
 

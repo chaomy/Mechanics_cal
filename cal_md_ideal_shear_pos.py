@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-04 20:53:50
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-10 23:10:10
+# @Last Modified time: 2017-08-16 20:38:27
 
 
 from md_pot_data import unitconv
@@ -14,9 +14,6 @@ import numpy as np
 
 
 class cal_bcc_ideal_shear_pos(object):
-
-    def __init__(self):
-        return
 
     def load_input_params(self):
         if os.path.isfile('restart.txt'):
@@ -30,6 +27,12 @@ class cal_bcc_ideal_shear_pos(object):
             delta = data
             x0 = np.array([1., 1., 1., 0.0, 0.0])
         return (delta, x0)
+
+    def transdata(self):
+        for i in range(20):
+            fname = 'dir-{:03}'.format(i)
+            self.mymkdir(fname)
+        return
 
     def trans_coords_to_cartisian(self, stress):
         basis = self.basis
