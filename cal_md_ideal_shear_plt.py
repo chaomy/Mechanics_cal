@@ -3,10 +3,11 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-16 21:07:58
+# @Last Modified time: 2017-08-17 01:27:04
 
 
 from itertools import cycle
+from md_pot_data import unitconv
 import numpy as np
 import plt_drv
 import os
@@ -63,7 +64,7 @@ class cal_bcc_ideal_shear_plt(object):
         self.fig.savefig("fig-ishear.png", **self.figsave)
         return
 
-    def plt_energy_stress(self, fname='stress.txt'):
+    def plt_energy_stress(self, ptype='211', fname='stress.txt'):
         til = os.getcwd().split('/')[-1].split('_')[-2:]
         raw = np.loadtxt(fname)
         ylabeliter = cycle(['E [eV]', r'$\tau$ [Gpa]'])
@@ -71,10 +72,17 @@ class cal_bcc_ideal_shear_plt(object):
         self.set_211plt()
         axlist = [self.ax1, self.ax2]
         print raw[:, 0]
-        print raw[:, -2]
+        index = np.where(raw[:, 1] < -100.0)
+        raw[:, 1][index] = raw[:, 1][index] / unitconv.uengy['rytoeV']
         self.ax1.plot(raw[:, 0], (raw[:, 1] - raw[0, 1]),
                       label='engy', **next(self.keysiter))
-        self.ax2.plot(raw[:, 0], raw[:, -3],
+
+        if ptype in ['211']:
+            yy = raw[:, -3]
+        elif ptype in ['110']:
+            yy = -raw[:, -2]
+
+        self.ax2.plot(raw[:, 0], yy,
                       label='stress', **next(self.keysiter))
         self.add_legends(*axlist)
         self.set_tick_size(*axlist)

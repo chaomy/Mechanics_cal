@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-09 16:51:50
+# @Last Modified time: 2017-08-17 01:01:42
 
 
 import os
@@ -14,9 +14,6 @@ import numpy as np
 
 
 class cal_bcc_ideal_shear_pre(object):
-
-    def __init__(self):
-        return
 
     def setup_qe_params(self):
         self.set_degauss('0.03D0')

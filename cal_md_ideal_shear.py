@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-16 20:38:53
+# @Last Modified time: 2017-08-17 01:41:49
 
 
 from optparse import OptionParser
@@ -30,7 +30,6 @@ if __name__ == '__main__':
     dispatcher = {'qeone': drv.get_qe_stress,
                   'restart': drv.loop_prep_restart,
                   'twin': drv.gn_shear_twin_path,
-                  'preprestart': drv.loop_prep_restart_from_log,
                   'loopre': drv.loop_prep_restart_from_log,
                   'clcqe': drv.qe_loop_stress,
                   'clcva': drv.va_loop_stress,

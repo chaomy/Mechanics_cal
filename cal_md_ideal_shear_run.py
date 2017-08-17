@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-17 00:33:11
+# @Last Modified time: 2017-08-17 01:07:08
 
 
 from scipy.optimize import minimize
@@ -28,8 +28,7 @@ class cal_bcc_ideal_shear_run(object):
     def vasp_relax(self):
         (delta, x0) = self.load_input_params()
         data = np.zeros(7)
-        res = minimize(self.runvasp, x0, delta,
-                       method='Nelder-Mead',
+        res = minimize(self.runvasp, x0, delta, method='Nelder-Mead',
                        options={'fatol': 2e-3, 'disp': True})
 
         print res
@@ -45,8 +44,7 @@ class cal_bcc_ideal_shear_run(object):
         data = np.ndarray([npts, 7])
         for i in range(npts):
             delta = self.delta * i
-            res = minimize(self.runlmp, x0, delta,
-                           method='Nelder-Mead',
+            res = minimize(self.runlmp, x0, delta, method='Nelder-Mead',
                            options={'xtol': 5e-4, 'disp': True})
             x0 = res.x
             print res

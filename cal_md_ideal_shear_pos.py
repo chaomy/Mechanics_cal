@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-04 20:53:50
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-16 21:04:10
+# @Last Modified time: 2017-08-17 01:41:12
 
 
 from md_pot_data import unitconv
@@ -13,6 +13,23 @@ import os
 import glob
 import numpy as np
 from md_pot_data import fluxdirs
+
+dirtree = {'110': {
+    '05': 'Bcc_QE_VCA_WRe05_ishear110',
+    '10': 'Bcc_QE_VCA_WRe10_ishear110',
+    '15': 'Bcc_QE_VCA_WRe15_ishear110',
+    '20': 'Bcc_QE_VCA_WRe20_ishear110',
+    '25': 'Bcc_QE_VCA_WRe25_ishear110',
+    '50': 'Bcc_QE_VCA_WRe50_ishear110'
+}, '211': {
+    '05': 'Bcc_QE_VCA_WRe05_ishear211',
+    '10': 'Bcc_QE_VCA_WRe10_ishear211',
+    '15': 'Bcc_QE_VCA_WRe15_ishear211',
+    '20': 'Bcc_QE_VCA_WRe20_ishear211',
+    '25': 'Bcc_QE_VCA_WRe25_ishear211',
+    '50': 'Bcc_QE_VCA_WRe50_ishear211'
+}
+}
 
 
 class cal_bcc_ideal_shear_pos(object):
@@ -35,10 +52,12 @@ class cal_bcc_ideal_shear_pos(object):
             mdir = 'dir-{:03}'.format(i)
             self.mymkdir(mdir)
             if ptype in ['scp']:
-                fdir = fluxdirs['QE'] + 'VC_WRe/Bcc_QE_VCA_W_ishear211/'
+                fdir = fluxdirs['QE'] + \
+                    'VC_WRe/{}/'.format(dirtree['110']['50'])
                 os.system('scp {}/{}/qe.out {}'.format(fdir, mdir, mdir))
                 os.system('scp {}/{}/qe.in {}'.format(fdir, mdir, mdir))
                 os.system('scp {}/{}/*.txt {}'.format(fdir, mdir, mdir))
+                print fdir
             elif ptype in ['format']:
                 os.chdir(mdir)
                 atoms = ase.io.read('qe.out', format='espresso-out')
