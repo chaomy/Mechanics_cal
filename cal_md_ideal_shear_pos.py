@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-04 20:53:50
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-17 01:51:54
+# @Last Modified time: 2017-08-17 01:53:35
 
 
 from md_pot_data import unitconv
@@ -205,6 +205,7 @@ class cal_bcc_ideal_shear_pos(object):
             dirname = "dir-{:03d}".format(i)
             if os.path.isdir(dirname):
                 os.chdir(dirname)
+                print dirname
                 raw = self.prep_restart_from_log()
                 os.chdir(os.pardir)
             data[i, :] = raw
