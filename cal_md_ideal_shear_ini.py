@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-22 21:35:30
+# @Last Modified time: 2017-08-22 22:06:44
 
 
 import cal_md_ideal_shear_pre
@@ -43,7 +43,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
         cal_md_ideal_shear_pos.cal_bcc_ideal_shear_pos.__init__(self)
         cal_md_ideal_shear_plt.cal_bcc_ideal_shear_plt.__init__(self)
         self.alat = self.pot['lattice']
-        self.npts = 5
+        self.npts = 20
         self.delta = 0.02
 
         shd111p211 = {'e1': np.array([1., 1., 1.]),
