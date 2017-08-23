@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-04 20:53:50
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-22 22:38:38
+# @Last Modified time: 2017-08-22 22:39:19
 
 
 from md_pot_data import unitconv
@@ -201,7 +201,7 @@ class cal_bcc_ideal_shear_pos(object):
     def loop_prep_restart_from_log(self):
         npts = self.npts
         data = np.ndarray([npts, 7])
-        for i in range(1, npts):
+        for i in range(0, npts):
             dirname = "dir-{:03d}".format(i)
             if os.path.isdir(dirname):
                 os.chdir(dirname)
