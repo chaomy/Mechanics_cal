@@ -2,6 +2,7 @@ Aug 19
 1, add modification to xy yz and xz => make sure lammps calculate same results
 2, whether the elastic constants are hessian matrix 
 
+Bcc_QE_VCA_WRe20_gsfx111z112 0.02, 0.820, 0.90, 0.98
 
 Aug 17
 1, screw glide and edge glide

@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-22 20:15:28
+# @Last Modified time: 2017-08-22 21:07:35
 
 
 from optparse import OptionParser
@@ -91,6 +91,7 @@ class cal_gsf(gn_config.bcc,
         atoms.wrap()
         perf_cells = deepcopy(atoms.get_cell())
         ase.io.write('perf_poscar', images=atoms, format='vasp')
+
         # original
         # npts = 5
         # disps = np.linspace(0.42, 0.58, npts)
@@ -142,10 +143,10 @@ class cal_gsf(gn_config.bcc,
         return
 
     def set_pbs(self, dirname):
-        self.set_nnodes(2)
+        self.set_nnodes(1)
         self.set_ppn(12)
         self.set_job_title("{}".format(dirname))
-        self.set_wall_time(5)
+        self.set_wall_time(20)
         self.set_main_job("""mpirun pw.x < qe.in > qe.out""")
         self.write_pbs(od=False)
         return
