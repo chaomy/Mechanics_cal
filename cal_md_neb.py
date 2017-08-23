@@ -1,19 +1,11 @@
 #!/usr/bin/env python
 # encoding: utf-8
-#
-###################################################################
-#
-# File Name : ./cal_md_dislocation.py
-#
-###################################################################
-#
-# Purpose :   # use the NEB method in LAMMPS
-#
-# Creation Date :
-# Last Modified : Wed Mar 29 15:06:51 2017
-# Created By    : Chaoming Yang
-#
-###################################################################
+# -*- coding: utf-8 -*-
+# @Author: chaomy
+# @Date:   2017-07-05 08:12:30
+# @Last Modified by:   chaomy
+# @Last Modified time: 2017-08-18 11:22:06
+
 
 import os
 import re
@@ -35,6 +27,7 @@ except ImportError:
 
 class lmps_neb_tools(get_data.get_data,
                      gn_config.bcc):
+
     def __init__(self):
         get_data.get_data.__init__(self)
         return
@@ -135,10 +128,10 @@ class lmps_neb_tools(get_data.get_data,
             fid.write(raw[3])
             fid.writelines(raw[9:])
 
-        sshdir = "$FLUX:/home/chaomy/{}".format(mydir)
-        os.system("scp init_restart  final.coord  ../dummy.lammps.ADP {}".format(sshdir))
-        os.system("rm ./Final_custom/dump.custom.*")
-        os.system("rm dummp.custom.*")
+        # sshdir = "$FLUX:/home/chaomy/{}".format(mydir)
+        # os.system("scp init_restart  final.coord  ../dummy.lammps.ADP {}".format(sshdir))
+        # os.system("rm ./Final_custom/dump.custom.*")
+        # os.system("rm dummp.custom.*")
         return
 
     def change_index(self):
@@ -164,6 +157,10 @@ class lmps_neb_tools(get_data.get_data,
         neb_energy = np.array(neb_energy)
         neb_energy -= np.min(neb_energy)
         self.plot_neb_energy(neb_energy, figname)
+        data = np.ndarray([len(neb_energy), 2])
+        data[:, 0] = np.linspace(0, 1, len(neb_energy))
+        data[:, 1] = neb_energy
+        np.savetxt('data.txt', data)
         return
 
     def read_screen(self):
@@ -217,7 +214,7 @@ class lmps_neb_tools(get_data.get_data,
 
         plt.xlabel("Normalized reaction coordinate",
                    {'fontsize': 19})   # (110): -110  (11-2) -110
-        plt.ylabel("Energy [eV]",
+        plt.ylabel("Energy [meV/|b|]",
                    {'fontsize': 19})   #
 
         plt.yticks(size=19)

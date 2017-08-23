@@ -18,14 +18,16 @@ class cubic_cij:
 
 
 class vasp_change_box(object):
+
     def __init__(self, pot=None):
-        print pot 
+        print pot
         self.pot = pot
         self.screw_coeff = None
         self.Edge_coeff = None
         self.lattice_constant = self.pot['lattice']
         self.add_strain_drv = cal_add_strain.cal_add_strain()
-        self.add_iso_dis_drv = cal_intro_iso_dis.cal_intro_iso_dis(self.lattice_constant)
+        self.add_iso_dis_drv = cal_intro_iso_dis.cal_intro_iso_dis(
+            self.lattice_constant)
         self.add_ani_dis_drv = cal_intro_ani_dis.cal_intro_iso_dis()
         self.set_intro_coeff()
         return
@@ -52,11 +54,13 @@ class vasp_change_box(object):
         return atoms
 
     def volume_conserving_ortho_strain_atoms(self, delta, atoms):
-        atoms = self.add_strain_drv._volume_conserving_ortho_strain_atoms(delta, atoms)
+        atoms = self.add_strain_drv._volume_conserving_ortho_strain_atoms(
+            delta, atoms)
         return atoms
 
     def volume_conserving_mono_strain_atoms(self, delta, atoms):
-        atoms = self.add_strain_drv._volume_conserving_mono_strain_atoms(delta, atoms)
+        atoms = self.add_strain_drv._volume_conserving_mono_strain_atoms(
+            delta, atoms)
         return atoms
 
     def volume_conserving_mono_strain(self, delta):
@@ -91,7 +95,8 @@ class vasp_change_box(object):
         for i in range(len(atoms)):
             xc1 = xc0
             yc1 = yc0 * (1 + math.tanh(alpha * (atom_position[i, tdir] - zzone[0]))) - \
-                yc0 * (1 + math.tanh(alpha * (atom_position[i, tdir] - zzone[1])))
+                yc0 * (1 + math.tanh(alpha *
+                                     (atom_position[i, tdir] - zzone[1])))
             yc1 *= 0.5
 
             dx1 = atom_position[i, bdir] - xc1
@@ -116,9 +121,8 @@ class vasp_change_box(object):
 
     def intro_kink_screw_dislocations(self, atoms,
                                       center1, center2,
-                                      H=None,
-                                      tilpnt=1. / 4., sign=1):
-        ### find how many layer of atoms ###
+                                      H=None, tilpnt=1. / 4., sign=1):
+        # find how many layer of atoms #
         #  (layerList, distance) = \
         #  ase.utils.geometry.get_layers(atoms, [0, 0, 1], tolerance=0.01);
         boundary = 'ppp'
@@ -153,22 +157,23 @@ class vasp_change_box(object):
             ##########################################################
             vol = np.linalg.det(cell)
             areaxy = (cell[0, 0] - 2 * lowx) * cell[1, 1]
-            volcut = ((lowx * cell[1, 1] + lowy * (cell[0, 0] - 2 * lowx)) * 2 * cell[2, 2])
+            volcut = ((lowx * cell[1, 1] + lowy *
+                       (cell[0, 0] - 2 * lowx)) * 2 * cell[2, 2])
 
-            print ("vol[%f] - volcut[%f] = %f " % (vol, volcut, vol - volcut))
-            print ("area is [%f]" % (areaxy))  # 29094.182232  A^2
+            print("vol[%f] - volcut[%f] = %f " % (vol, volcut, vol - volcut))
+            print("area is [%f]" % (areaxy))  # 29094.182232  A^2
 
             index_list = []
         cut = None  # only cut y direction ####
         #  shift   = True;
         shift = False
 
-        #### loop over atoms to add displacement ####
+        # loop over atoms to add displacement #
         for atom in atoms:
             pos = atom.position
 
             if not boundary == 'ppp':
-                ### cut  10 A along x and y  ###
+                # cut  10 A along x and y  #
                 if cut == "xy":
                     if ((pos[lxid] < lowx) or (pos[lxid] > higx) or
                             (pos[lxid] > higy) or (pos[lxid] < lowy)):
@@ -192,7 +197,8 @@ class vasp_change_box(object):
             ###### add shift if peierodic along x   ######
             if shift is True:
                 if pos[lxid] > xc:
-                    pos[lzid] += 0.25 * self.burger  # 0.3 or 0.2 for e1 = 1 -1 0
+                    # 0.3 or 0.2 for e1 = 1 -1 0
+                    pos[lzid] += 0.25 * self.burger
 
             theta = np.arctan2(dy, dx)
             dz = sign * self.screw_coeff * theta
@@ -221,7 +227,8 @@ class vasp_change_box(object):
 
     def intro_single_screw_with_image_atoms(self,
                                             atoms):
-        atoms = self.add_iso_dis_drv._intro_single_screw_with_image_atoms(atoms)
+        atoms = self.add_iso_dis_drv._intro_single_screw_with_image_atoms(
+            atoms)
         return atoms
 
     def intro_single_screw_atoms_xdirection(self,
@@ -264,7 +271,8 @@ class vasp_change_box(object):
         return atoms
 
     def intro_dipole_screw_with_image_atoms(self, atoms):
-        atoms = self.add_iso_dis_drv._intro_dipole_screw_with_image_atoms(atoms)
+        atoms = self.add_iso_dis_drv._intro_dipole_screw_with_image_atoms(
+            atoms)
         return atoms
 
     def core_center(self):
@@ -350,12 +358,14 @@ class vasp_change_box(object):
             xc2 = center[1][0]
             yc2 = center[1][1]
 
-        print ("center 1 (%g  %g)\n" % (xc1, yc1))
-        print ("center 2 (%g  %g)\n" % (xc2, yc2))
+        print("center 1 (%g  %g)\n" % (xc1, yc1))
+        print("center 2 (%g  %g)\n" % (xc2, yc2))
 
         for i in range(len(atom_position)):
-            dx1, dx2 = atom_position[i, lxid] - xc1, atom_position[i, lxid] - xc2
-            dy1, dy2 = atom_position[i, lyid] - yc1, atom_position[i, lyid] - yc2
+            dx1, dx2 = atom_position[i, lxid] - \
+                xc1, atom_position[i, lxid] - xc2
+            dy1, dy2 = atom_position[i, lyid] - \
+                yc1, atom_position[i, lyid] - yc2
 
             theta1 = np.arctan2(dy1, dx1)
             theta2 = np.arctan2(dy2, dx2)
@@ -371,7 +381,7 @@ class vasp_change_box(object):
     ###########################################################################
     # normal way of intro_dipole_screw_atoms used for vasp calculation
     ###########################################################################
-    def intro_dipole_screw_atoms(self, 
+    def intro_dipole_screw_atoms(self,
                                  atoms,
                                  lattice=3.307,
                                  move_x=0,
@@ -403,15 +413,15 @@ class vasp_change_box(object):
         scale_positions = atoms.get_scaled_positions()
 
         if (tag == "cuty"):
-            ### cut along y direction ###
+            # cut along y direction #
             cutIndx = 1
 
         elif (tag == "cutx"):
-            ### cut along x direction ###
+            # cut along x direction #
             cutIndx = 0
 
         elif (tag == "cutz"):
-            ### cut along z direction ###
+            # cut along z direction #
             cutIndx = 2
 
         yy_max = 0.5 * np.max(positions[:, cutIndx])
@@ -471,27 +481,37 @@ class vasp_change_box(object):
         print len(atoms.get_positions())
         return atoms
 
-    def cut_y_normal_atoms(self, atoms, gp_n=1):
-
+    def assign_ynormal_fixatoms(self, atoms, gp_n=1):
         cell = atoms.get_cell()
-        positions = atoms.get_positions()
+        dh = 28.
+        y_above = cell[gp_n, gp_n] - dh
+        y_below = dh
+        for i in range(len(atoms)):
+            atom = atoms[i]
+            atom.symbol = 'W'
+            if (atom.position[gp_n] > y_above):
+                atom.symbol = 'Mo'
+            if (atom.position[gp_n] < y_below):
+                atom.symbol = 'Nb'
+        return atoms
+
+    def cut_y_normal_atoms(self, atoms, gp_n=1):
+        cell = atoms.get_cell()
 
         # cut along glide plane normal
-        print cell
+        dh = 20.
+        y_above = cell[gp_n, gp_n] - dh
+        y_below = dh
 
-        y_above = 7. / 8. * cell[gp_n, gp_n]  # edge
-        y_below = 1. / 8. * cell[gp_n, gp_n]  # edge
+        # y_above = 7. / 8. * cell[gp_n, gp_n]  # edge
+        # y_below = 1. / 8. * cell[gp_n, gp_n]  # edge
 
-        print y_above, y_below
-
-        index_list = []
-
+        index = []
         for i in range(len(atoms)):
             atom = atoms[i]
             if ((atom.position[gp_n] > y_above) or (atom.position[gp_n] < y_below)):
-                index_list.append(atom.index)
-
-        del atoms[index_list]
+                index.append(atom.index)
+        del atoms[index]
         return atoms
 
     def cut_z_normal_top_atoms(self, atoms):
@@ -514,16 +534,13 @@ class vasp_change_box(object):
         del atoms[index_list]
         return atoms
 
-    def cut_z_normal_atoms(self, atoms, lattice_constant):
+    def cut_z_normal_atoms(self, atoms):
         cell = atoms.get_cell()
         positions = atoms.get_positions()
 
         index_list = []
-        # #####################################################
-        # be careful, to delete
-        # x_crit =  np.sqrt(3.)/2.5 * lattice constant
-        # #####################################################
-        z_crit = -0.2 * np.sqrt(3.) / 4. * lattice_constant
+        # z_crit = -0.2 * np.sqrt(3.) / 4. * lattice_constant
+        z_crit = -0.2 * np.sqrt(3.) / 2.0 * self.pot['lattice']
 
         for i in range(len(atoms)):
             atom = atoms[i]
@@ -532,7 +549,7 @@ class vasp_change_box(object):
 
         if index_list is not []:
             print "delete %s atoms" % (len(index_list))
-            del atoms[index_list]
+            # del atoms[index_list]
         return atoms
 
     def cut_x_normal_atoms(self, atoms,
@@ -584,23 +601,6 @@ class vasp_change_box(object):
             dz2 = self.screw_coeff * theta2
 
             atom_position[2, i] = atom_position[2, i] + dz1 - dz2
-
-        with open("POSCAR", 'w') as fid:
-            fid.write("# Screw Bcc\n")
-            fid.write("%12.6f\n" % (self.lattice_constant))
-            fid.write("%12.6f %12.6f %12.6f\n" %
-                      (supercell_base[0, 0], supercell_base[0, 1], supercell_base[0, 2]))
-            fid.write("%12.6f %12.6f %12.6f\n" %
-                      (supercell_base[1, 0], supercell_base[1, 1], supercell_base[1, 2]))
-            fid.write("%12.6f %12.6f %12.6f\n" %
-                      (supercell_base[2, 0], supercell_base[2, 1], supercell_base[2, 2]))
-            fid.write("%d\n" % (atom_number))
-            fid.write("Cartesian\n")
-            for i in range(atom_number):
-                fid.write("%12.6f %12.6f %12.6f\n" %
-                          (atom_position[0, i], atom_position[1, i], atom_position[2, i]))
-            fid.close()
-        os.system("cp POSCAR POSCAR.vasp")
         return
 
     def lmp_map_atoms_list(self, atoms, atoms_tobe_change):

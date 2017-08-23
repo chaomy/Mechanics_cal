@@ -1,28 +1,20 @@
 #!/usr/bin/env python
-# encoding: utf-8
+# -*- coding: utf-8 -*-
+# @Author: yang37
+# @Date:   2017-06-12 17:03:43
+# @Last Modified by:   chaomy
+# @Last Modified time: 2017-08-18 00:16:59
 
-###################################################################
-#
-# File Name : ./cal_md_peierls_barrier.py
-#
-###################################################################
-#
-# Purpose :     # use the NEB method in LAMMPS
-#
-# Creation Date :
-# Last Modified : Wed Mar 29 15:06:51 2017
-# Created By    : Chaoming Yang
-#
-###################################################################
 
+from multiprocessing import Pool
+from scipy.interpolate import InterpolatedUnivariateSpline
+from optparse import OptionParser
+import md_pot_data
 import os
 import ase
 import glob
 import numpy as np
-from multiprocessing import Pool
 import matplotlib.pylab as plt
-from scipy.interpolate import InterpolatedUnivariateSpline
-from optparse import OptionParser
 import ase.lattice
 import gn_config
 import get_data
@@ -43,17 +35,15 @@ def unwrap_self_run_lammps(arg, **kwarg):
 
 
 class md_reaction_coordinate(gn_config.bcc,
-                             gn_config.fcc,
-                             gn_config.hcp,
-                             get_data.get_data,
-                             gn_pbs.gn_pbs,
+                             gn_config.fcc, gn_config.hcp,
+                             gn_pbs.gn_pbs, get_data.get_data,
                              Intro_vasp.vasp_change_box,
                              gn_lmp_infile.gn_md_infile,
                              plt_drv.plt_drv):
 
     def __init__(self):
-        self.pot = self.load_data('../pot.dat')
-        #  self.pot = md_pot_data.md_pot.Nb_adp_tmp
+        # self.pot = self.load_data('../pot.dat')
+        self.pot = md_pot_data.md_pot.w_zhou
         gn_pbs.gn_pbs.__init__(self)
 
         self._alat = self.pot['lattice']
@@ -116,9 +106,9 @@ class md_reaction_coordinate(gn_config.bcc,
         # use dipole method to calcualte the peierls barrier
         ############################################################
     def dipole_peierls_barrier(self):
-        e1 = 1. / 3. * np.array([1., 1., -2.])
-        e2 = np.array([0.5, 0.5, 0.5])
-        e3 = 1. / 2. * np.array([1, -1, 0])
+        e1 = [1., 1., -2.]
+        e2 = [0.5, 0.5, 0.5]
+        e3 = [1, -1, 0]
 
         sizen = 1
         n = 7 * sizen
@@ -472,33 +462,26 @@ class md_reaction_coordinate(gn_config.bcc,
 if __name__ == "__main__":
     usage = "usage:%prog [options] arg1 [options] arg2"
     parser = OptionParser(usage=usage)
-    parser.add_option("-t", "--mtype",
-                      action="store",
-                      type="string",
-                      dest="mtype",
-                      help="",
-                      default="prp_r")
+    parser.add_option("-t", "--mtype", action="store",
+                      type="string", dest="mtype")
+
+    parser.add_option('-p', "--param", action="store",
+                      type='string', dest="fargs")
 
     (options, args) = parser.parse_args()
     drv = md_reaction_coordinate()
+    dispatcher = {'dipole': drv.dipole_peierls_barrier,
+                  'cluster': drv.cluster_peierls_barrier,
+                  'vasp': drv.convert_dump_to_poscar,
+                  'stress': drv.cal_peierls_stress,
+                  'cmp': drv.plot_multi_peierls_barrier,
+                  'looprcut': drv.loop_rcut,
+                  'minimize': drv.multi_thread_minimize}
 
-    if options.mtype.lower() == 'dipole':
-        drv.dipole_peierls_barrier()
-
-    elif options.mtype.lower() == 'cluster':
-        drv.cluster_peierls_barrier()
-
-    elif options.mtype.lower() == 'vasp':
-        drv.convert_dump_to_poscar()
-
-    elif options.mtype.lower() == 'stress':
-        drv.cal_peierls_stress()
-
-    elif options.mtype.lower() == 'cmp':
-        drv.plot_multi_peierls_barrier()
-
-    elif options.mtype.lower() == 'looprcut':
-        drv.loop_rcut()
+    if options.fargs is not None:
+        dispatcher[options.mtype.lower()](options.fargs)
+    else:
+        dispatcher[options.mtype.lower()]()
 
     #  job.collect_peierls_energy()
     #  drv.peierls()

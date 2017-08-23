@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-16 20:12:02
+# @Last Modified time: 2017-08-17 17:56:53
 
 
 try:
@@ -24,8 +24,7 @@ except ImportError:
 
 class qe_dislocation(get_data.get_data,
                      gn_qe_inputs.gn_qe_infile,
-                     gn_pbs.gn_pbs,
-                     gn_config.bcc,
+                     gn_pbs.gn_pbs, gn_config.bcc,
                      cal_md_dis_dipole.cal_dis_dipole):
 
     def __init__(self):

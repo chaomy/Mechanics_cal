@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-15 08:15:51
+# @Last Modified time: 2017-08-22 20:14:45
 
 import os
 import glob
@@ -220,7 +220,6 @@ class cal_md_gsf(gn_config.bcc,
         energylist = energylist / np.average(np.array(area_list))
         energylist = energylist - np.min(energylist)
         disp_list = np.array(disp_list)
-
         self.output_disp_energy(disp_list,
                                 energylist,
                                 "gsf_{}_{}.txt".format(self._pot['pair_type'],
@@ -395,5 +394,3 @@ if __name__ == '__main__':
             drv.collect_gsf_energy()
         #  drv.plot_multi_type_gsf_curv(typelist)
         drv.plot_multi_gsf_curv(potlist, typelist, 'gsf_unrelaxed.png')
-
-

@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-08 09:54:07
+# @Last Modified time: 2017-08-18 14:25:36
 
 
 import os
@@ -24,39 +24,28 @@ import atomman as am
 import atomman.lammps as lmp
 
 
-class md_dislocation(gn_config.bcc,
-                     gn_config.fcc,
-                     gn_config.hcp,
-                     get_data.get_data,
-                     gn_pbs.gn_pbs,
+class md_dislocation(gn_config.bcc, gn_config.fcc, gn_config.hcp,
+                     get_data.get_data, gn_pbs.gn_pbs,
                      Intro_vasp.vasp_change_box,
                      gn_lmp_infile.gn_md_infile):
 
     def __init__(self, pot=None):
         if pot is None:
-            self.pot = md_pot_data.md_pot.Nb_eam
+            self.pot = md_pot_data.md_pot.w_zhou
         else:
             self.pot = pot
 
         gn_pbs.gn_pbs.__init__(self)
-        #  self._alat = 3.1648492  # W
-        #  self._alat = 3.1711
-        self._alat = self.pot.get('lattice')   # w_eam4
+        self._alat = self.pot.get('lattice')
         self.structure = self.pot['structure']
 
         #  self._alat = 3.304   # Ta
         #  self._alat = 3.16741543   # Mo
-
-        # 0 K   300 K
-        # Nb    3.307   3.3102
-        # W     3.1652  3.165258
-        # W.set 3.1648492
+        #  W.set 3.1648492
 
         print self.pot
-        Intro_vasp.vasp_change_box.__init__(self,
-                                            self.pot)
-        gn_lmp_infile.gn_md_infile.__init__(self,
-                                            self.pot)
+        Intro_vasp.vasp_change_box.__init__(self, self.pot)
+        gn_lmp_infile.gn_md_infile.__init__(self, self.pot)
 
         if self.structure == 'bcc':
             gn_config.bcc.__init__(self, self.pot)
@@ -120,12 +109,8 @@ class md_dislocation(gn_config.bcc,
 
         # cut a layer normal the burger direction
         atoms = self.cut_x_normal_atoms(atoms,
-                                        lata,
-                                        1,
-                                        np.sqrt(3) / 4.0)
-        ase.io.write("edge.cfg",
-                     atoms,
-                     "cfg")
+                                        lata, 1, np.sqrt(3) / 4.0)
+        ase.io.write("edge.cfg", atoms, "cfg")
 
         self.write_lmp_config_data(atoms)
         os.system("cp ./lmp_init.txt ../MgNd_2NNmeam")
@@ -260,20 +245,16 @@ class md_dislocation(gn_config.bcc,
         atoms = self.intro_dipole_screw_atoms_LMP(atoms, center=center,
                                                   lattice=self._alat)
         self.write_lmp_config_data(atoms)
-        ase.io.write("lmp_perf_modified.cfg",
-                     atoms2,
-                     "cfg")
-        ase.io.write("lmp_dis.cfg",
-                     atoms,
-                     "cfg")
+        ase.io.write("lmp_perf_modified.cfg", atoms2, "cfg")
+        ase.io.write("lmp_dis.cfg", atoms, "cfg")
         os.system("mv lmp_perf_modified.cfg output")
         os.system("mv lmp_dis.cfg output")
         return atoms
 
     def cal_disp_dipo_lisa(self):
-        e1 = 1. / 3. * np.array([-1., -1.,  2.])
-        e2 = 1. / 2. * np.array([1.,  -1.,   0])
-        e3 = 1. / 2. * np.array([1.,   1.,  1.])
+        e1 = 1. / 3. * np.array([-1., -1., 2.])
+        e2 = 1. / 2. * np.array([1., -1., 0])
+        e3 = 1. / 2. * np.array([1., 1., 1.])
         n, m = 21, 13
 
         v1 = n * e1 - 1. / (3. * m) * e3
@@ -295,71 +276,59 @@ class md_dislocation(gn_config.bcc,
                                         size=(n, 1, 1),
                                         symbol='Nb',
                                         pbc=(1, 1, 1))
-        ase.io.write("lmp_init.xyz",
-                     atoms,
-                     "xyz")
-
+        ase.io.write("lmp_init.xyz", atoms, "xyz")
         return
 
     def cal_single_edge_dislocations(self):
-        e1 = np.array([1., 1., 1.])
-        e2 = np.array([-1., 1., 0.])
-        e3 = np.array([-1., -1., 2.])
+        e1 = [1., 1., 1.]
+        e2 = [-1., 1., 0.]
+        e3 = [-1., -1., 2.]
 
-        self.set_lattce_constant(self._alat)
-        self.set_element('W')
+        self.set_lattce_constant(self.pot['latbcc'])
+        self.set_element(self.pot['element'])
 
-        atoms = self.set_bcc_convention([e1, e2, e3], (80, 60, 5))  # 5
-
+        atoms = self.set_bcc_convention([e1, e2, e3], (140, 80, 6))
         atoms = self.cut_y_normal_atoms(atoms)
+        atoms = self.assign_ynormal_fixatoms(atoms)
         atoms = self.intro_dipole_edge_with_image_atoms(atoms)
 
         # if we don't cut a layer of atoms, will generate two dislocations
         # cut a layer normal the burger direction
-        atoms = self.cut_x_normal_atoms(atoms,self._alat)
+        atoms = self.cut_x_normal_atoms(atoms, self._alat)
         self.write_lmp_config_data(atoms)
-
-        self.gn_md_minimize_cfg("lmp_init.txt",
-                                "W.set.txt",    # "Nb.eam.alloy.webarchive",
-                                "W")
-
-        os.system("rm cfg/*; mpirun -n 12 lmp_mpi -in in.minimize")
+        # self.gn_md_minimize_cfg("lmp_init.txt",
+        #                         "W.set.txt", "W")
         return
 
     def cal_single_screw_dislocatoins(self):
-        e1 = np.array([-1., 1., 0])
-        e2 = np.array([1., 1., -2])
-        e3 = np.array([0.5, 0.5, 0.5])
+        e1 = [1., -1., 0]
+        e2 = [1., 1., -2]
+        e3 = [0.5, 0.5, 0.5]
 
-        self.set_lattce_constant(self._alat)
-        self.set_element('Nb')
+        self.set_lattce_constant(self.pot['lattice'])
+        self.set_element(self.pot['element'])
 
         atoms = self.set_bcc_convention(
-            [e1, e2, e3], (20, 20, 10))  # z periodic 12
+            [e1, e2, e3], (100, 60, 30))  # z periodic 12
 
         atoms = self.cut_y_normal_atoms(atoms)
-        ase.io.write("lmp_perf.xyz",
-                     atoms,
-                     "xyz")
+        atoms = self.assign_ynormal_fixatoms(atoms)
+        ase.io.write("lmp_perf.cfg", atoms, "cfg")
 
         atoms = self.intro_single_screw_atoms(atoms)
         #  if we don't cut a layer of atoms,
         #  it will generate two screw dislocations
-        #  atoms = self.cut_z_normal_atoms(atoms, self._alat);
+        atoms = self.cut_z_normal_atoms(atoms)
 
+        ase.io.write("lmp_dis.cfg", atoms, "cfg")
         self.write_lmp_config_data(atoms)
-        ase.io.write("lmp_init.xyz",
-                     atoms,
-                     "xyz")
-
-        #  os.system("rm cfg/*; mpirun -n 12 lmp_mpi -in in.minimize");
         return
 
     def add_strain(self, atoms, delta):
         cell = atoms.get_cell()
-        strain = np.mat([[1, 0,  0],
-                         [delta, 1,  0],
-                         [0, 0,  1]], 'float')
+        strain = np.mat([[1, 0, 0],
+                         [delta, 1, 0],
+                         [0, 0, 1]], 'float')
 
         positions = np.mat(atoms.get_positions())
         positions = positions * strain
@@ -369,13 +338,11 @@ class md_dislocation(gn_config.bcc,
         return atoms
 
     def static_add_stress(self):
-        atoms = self.prepare_md_dislocation()
-        self.gn_md_tensile("Nb.eam.alloy.webarchive",
-                           "Nb")
+        atoms = self.prep_relaxed_dislocation()
+        self.gn_md_tensile("Nb.eam.alloy.webarchive", "Nb")
         strain_dir = "add_strain"
         if not os.path.isdir(strain_dir):
             os.mkdir(strain_dir)
-
         os.chdir(strain_dir)
 
         for i in range(0, 20):
@@ -385,18 +352,16 @@ class md_dislocation(gn_config.bcc,
             self.write_lmp_config_data(atoms_new, filename)
         return
 
-    def prepare_md_dislocation(self):
-        file_list = glob.glob("./cfg/W.398.cfg")
-        print file_list[-1]
-        atoms = ase.io.read(file_list[-1],
-                            format='cfg')
-        self.write_lmp_config_data(atoms, file_name="relaxed.txt")
+    def prep_relaxed_dislocation(self):
+        # atoms = ase.io.read('bcc.init.213', format='lammps-dump')
+        atoms = ase.io.read('bcc.init.383', format='lammps-dump')
+        self.write_lmp_config_data(atoms, "relaxed.txt")
         return atoms
 
     def cal_non_periodic_screw(self):
-        e1 = np.array([1.,   1., -2.])
-        e2 = np.array([-1.,  1.,  0.])
-        e3 = np.array([1.,   1.,  1.])
+        e1 = np.array([1., 1., -2.])
+        e2 = np.array([-1., 1., 0.])
+        e3 = np.array([1., 1., 1.])
 
         self.set_lattce_constant(self._alat)
         self.set_element('Nb')
@@ -413,9 +378,9 @@ class md_dislocation(gn_config.bcc,
 
     # calculate the nano particle  #
     def cal_non_periodic_screw_xdislocation(self):
-        e1 = np.array([-1.,   1.,  0])
-        e2 = np.array([-1.,  -1.,  2])
-        e3 = np.array([1.,   1.,  1.])
+        e1 = np.array([-1., 1., 0])
+        e2 = np.array([-1., -1., 2])
+        e3 = np.array([1., 1., 1.])
 
         self.set_lattce_constant(self._alat)
         self.set_element('W')
@@ -426,7 +391,6 @@ class md_dislocation(gn_config.bcc,
             [e1, e2, e3], (60, 40, 80))  # z peri 18
 
         atoms = self.intro_single_screw_atoms(atoms)
-
         #  atoms = self.intro_dipole_screw_with_image_atoms(atoms);
 
         atoms = self.cut_y_normal_atoms(atoms)
@@ -499,7 +463,7 @@ class md_dislocation(gn_config.bcc,
 
         # introduce edge dislocation #
         cell = atoms.get_cell()
-        zhigh = cell[2, 2]
+        # zhigh = cell[2, 2]
         center = [0.5 * cell[0, 0], 10. * unity, 0.0]
         atoms = self.intro_single_edge_atoms(atoms,
                                              center, 1,
@@ -534,50 +498,27 @@ if __name__ == "__main__":
     usage = "usage:%prog [options] arg1 [options] arg2"
     parser = OptionParser(usage=usage)
     parser.add_option("-t", "--mtype", action="store",
-                      type="string", dest="mtype", help="",
-                      default="prp_r")
+                      type="string", dest="mtype")
+
+    parser.add_option('-p', "--param", action="store",
+                      type='string', dest="fargs")
 
     (options, args) = parser.parse_args()
+    drv = md_dislocation()
+    dispatcher = {'kink': drv.intro_kink_pair,
+                  # ouptut the rotated dipole configuration #
+                  'modify': drv.modified_cal_disp_dipo,
+                  'hcpedge': drv.hcp_edge_dislocation,
+                  'bccedge': drv.cal_single_edge_dislocations,
+                  'bccscrew': drv.cal_single_screw_dislocatoins,
+                  'nye': drv.cal_nye,
+                  'cuau': drv.cal_cu3Au_dis,
+                  'ani': drv.cal_ani_dis,
+                  'looppbs': drv.loop_write_pbs,
+                  'static': drv.static_add_stress,
+                  'prep': drv.prep_relaxed_dislocation}
 
-    N = md_dislocation()
-
-    # static calculate the kink pair migration barrier by neb method #
-    if options.mtype == "nebkink":
-        # nano particle only Peierdic along z #
-        N.cal_kink_pair_neb_pre()
-
-    if options.mtype == "kink":
-        N.intro_kink_pair()
-
-    if options.mtype == "modify":
-        # ouptut the rotated dipole configuration #
-        N.modified_cal_disp_dipo()
-
-    if options.mtype.lower() == "hcpedge":
-        N.hcp_edge_dislocation()
-
-    if options.mtype.lower() == 'bccedge':
-        N.cal_single_edge_dislocations()
-
-    if options.mtype.lower() == 'bccscerw':
-        N.cal_single_screw_dislocatoins()
-
-    if options.mtype.lower() == 'nye':
-        N.cal_nye()
-
-    if options.mtype.lower() == 'cuau':
-        N.cal_cu3Au_dis()
-
-    if options.mtype.lower() == 'sub':
-        N.loop_sub_jobs()
-
-    if options.mtype.lower() == 'ani':
-        N.cal_ani_dis()
-
-    #  calculate the mobility of screw dislocation by MD
-    #  N.cal_non_periodic_screw_xdislocation()
-    #  N.static_add_stress();
-    #  prepare md input files
-    #  N.prepare_md_dislocation()
-    #  prepare md input files
-    #  N.loop_write_pbs()
+    if options.fargs is not None:
+        dispatcher[options.mtype.lower()](options.fargs)
+    else:
+        dispatcher[options.mtype.lower()]()

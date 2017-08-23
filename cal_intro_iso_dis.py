@@ -22,9 +22,10 @@ class cal_intro_iso_dis(object):
         return
 
     def _intro_single_screw(self):
-        atom_number, supercell_base, comment, atom_position = self.read_vasp_poscar()
-        xc = 0.5 * supercell_base[0, 0]
-        yc = 0.5 * supercell_base[1, 1]
+        atom_number, ucell, \
+            comment, atom_position = self.read_vasp_poscar()
+        xc = 0.5 * ucell[0, 0]
+        yc = 0.5 * ucell[1, 1]
 
         for i in range(atom_number):
             dx, dy = atom_position[0, i] - xc, atom_position[1, i] - yc
@@ -35,11 +36,13 @@ class cal_intro_iso_dis(object):
             fid.write("# Screw Bcc\n")
             fid.write("%12.6f\n" % (self.lattice_constant))
             fid.write("%12.6f %12.6f %12.6f\n" %
-                      (supercell_base[0, 0], supercell_base[0, 1], supercell_base[0, 2]))
+                      (ucell[0, 0],
+                       ucell[0, 1],
+                       ucell[0, 2]))
             fid.write("%12.6f %12.6f %12.6f\n" %
-                      (supercell_base[1, 0], supercell_base[1, 1], supercell_base[1, 2]))
+                      (ucell[1, 0], ucell[1, 1], ucell[1, 2]))
             fid.write("%12.6f %12.6f %12.6f\n" %
-                      (supercell_base[2, 0], supercell_base[2, 1], supercell_base[2, 2]))
+                      (ucell[2, 0], ucell[2, 1], ucell[2, 2]))
             fid.write("%d\n" % (atom_number))
             fid.write("Cartesian\n")
             for i in range(atom_number):
@@ -54,12 +57,12 @@ class cal_intro_iso_dis(object):
                                   sign=None,
                                   orient=[0, 1, 2]):
 
-        supercell_base = atoms.get_cell()
+        ucell = atoms.get_cell()
         atom_position = atoms.get_positions()
 
         if center is None:
-            add_disp = [0.5 * (supercell_base[0, 0] + supercell_base[1, 0]),
-                        0.5 * (supercell_base[0, 1] + supercell_base[1, 1])]
+            add_disp = [0.5 * (ucell[0, 0] + ucell[1, 0]),
+                        0.5 * (ucell[0, 1] + ucell[1, 1])]
 
             xc = 0 + add_disp[0]
             yc = 0 + add_disp[1]
@@ -70,7 +73,7 @@ class cal_intro_iso_dis(object):
         for i in range(len(atoms)):
             dx, dy = atom_position[i, 0] - xc, atom_position[i, 1] - yc
 
-            ######  important !!!!! add shift  ######
+            #  important !!!!! add shift  #
             if atom_position[i, 0] > xc:
                 # 0.3 or 0.2 for e1 = 1 -1 0
                 atom_position[i, 2] += 0.30 * self.burger
@@ -84,9 +87,9 @@ class cal_intro_iso_dis(object):
         return atoms
 
     def _intro_single_screw_with_image_atoms(self, atoms):
-        supercell_base = atoms.get_cell()
-        add_disp = [0.5 * (supercell_base[0, 0] + supercell_base[1, 0]),
-                    0.5 * (supercell_base[0, 1] + supercell_base[1, 1])]
+        ucell = atoms.get_cell()
+        add_disp = [0.5 * (ucell[0, 0] + ucell[1, 0]),
+                    0.5 * (ucell[0, 1] + ucell[1, 1])]
 
         xc1 = 0 + add_disp[0]
         yc1 = 0 + add_disp[1]
@@ -104,15 +107,15 @@ class cal_intro_iso_dis(object):
 
         for i in range(len(first_neigh_list)):
             positive_positions[0].append(
-                xc1 + first_neigh_list[i][0] * supercell_base[0, 0])
+                xc1 + first_neigh_list[i][0] * ucell[0, 0])
             positive_positions[1].append(
-                yc1 + first_neigh_list[i][1] * supercell_base[1, 1])
+                yc1 + first_neigh_list[i][1] * ucell[1, 1])
 
         for i in range(len(second_neigh_list)):
             positive_positions[0].append(
-                xc1 + second_neigh_list[i][0] * supercell_base[0, 0])
+                xc1 + second_neigh_list[i][0] * ucell[0, 0])
             positive_positions[1].append(
-                yc1 + second_neigh_list[i][1] * supercell_base[1, 1])
+                yc1 + second_neigh_list[i][1] * ucell[1, 1])
 
         for i in range(len(positive_positions[0])):
             atoms = self.intro_single_screw_atoms(atoms,
@@ -121,26 +124,31 @@ class cal_intro_iso_dis(object):
                                                   sign=1)
         return atoms
 
-    def _intro_single_edge_atoms(self,
-                                 atoms, center=None,
+    def _intro_single_edge_atoms(self, atoms, center=None,
                                  sign=1, orient=None):
         # default
         bdir = 0  # burger
-        tdir = 1  # line direction
-        ndir = 2  # glide plane normal
+        ndir = 1  # glide plane normal
+        tdir = 2  # line direction
 
         # # hcp
         # tdir = 0
         # bdir = 1
         # ndir = 2
 
+        ucell = atoms.get_cell()
+        atom_position = atoms.get_positions()
+
+        if center is None:
+            center = [0.5 * ucell[0, 0],
+                      0.5 * ucell[1, 1],
+                      0.5 * ucell[2, 2]]
+
         if orient is not None:
             bdir = orient[0]
             ndir = orient[1]
             tdir = orient[2]
-
-        supercell_base = atoms.get_cell()
-        atom_position = atoms.get_positions()
+        print center
 
         xc1 = center[bdir]
         yc1 = center[ndir]
@@ -165,7 +173,7 @@ class cal_intro_iso_dis(object):
         return atoms
 
     def _intro_dipole_edge_atoms(self, atoms, c1, c2):
-        supercell_base = atoms.get_cell()
+        ucell = atoms.get_cell()
         atom_position = atoms.get_positions()
 
         bdir = 0  # burger
@@ -173,7 +181,7 @@ class cal_intro_iso_dis(object):
         tdir = 1  # line direction
 
         xc1 = c1[bdir]
-        yc1 = c1[ndir] 
+        yc1 = c1[ndir]
         xc2 = c2[bdir]
         yc2 = c2[ndir]
 
@@ -202,23 +210,23 @@ class cal_intro_iso_dis(object):
                 uy2 *= -coeff
             else:
                 ux2 = uy2 = 0
-            if atoms[i].symbol in ['W', 'Mo']: 
+            if atoms[i].symbol in ['W', 'Mo']:
                 atom_position[i, 0] = atom_position[i, 0] + ux1 - ux2
                 atom_position[i, 1] = atom_position[i, 1] + uy1 - uy2
         atoms.set_positions(atom_position)
         return atoms
 
     def _intro_dipole_edge_with_image_atoms(self, atoms):
-        supercell_base = atoms.get_cell()
+        ucell = atoms.get_cell()
 
-        add_disp = [0.5 * (supercell_base[0, 0] + supercell_base[1, 0]),
-                    0.0 * (supercell_base[0, 1] + supercell_base[1, 1])]
+        add_disp = [0.5 * (ucell[0, 0] + ucell[1, 0]),
+                    0.0 * (ucell[0, 1] + ucell[1, 1])]
 
         xc1 = 0 + add_disp[0]
         yc1 = 0 + add_disp[1]
 
-        xc2 = 0.0 * supercell_base[0, 0] + add_disp[0]
-        yc2 = 0.5 * supercell_base[1, 1] + add_disp[1]
+        xc2 = 0.0 * ucell[0, 0] + add_disp[0]
+        yc2 = 0.5 * ucell[1, 1] + add_disp[1]
 
         positive_positions = [[xc1], [yc1]]
         negative_positions = [[xc2], [yc2]]
@@ -236,48 +244,50 @@ class cal_intro_iso_dis(object):
 
         for i in range(len(first_neigh_list)):
             positive_positions[0].append(
-                xc1 + first_neigh_list[i][0] * supercell_base[0, 0])
+                xc1 + first_neigh_list[i][0] * ucell[0, 0])
             positive_positions[1].append(
-                yc1 + first_neigh_list[i][1] * supercell_base[1, 1])
+                yc1 + first_neigh_list[i][1] * ucell[1, 1])
 
             negative_positions[0].append(
-                xc2 + first_neigh_list[i][0] * supercell_base[0, 0])
+                xc2 + first_neigh_list[i][0] * ucell[0, 0])
             negative_positions[1].append(
-                yc2 + first_neigh_list[i][1] * supercell_base[1, 1])
+                yc2 + first_neigh_list[i][1] * ucell[1, 1])
 
         for i in range(len(second_neigh_list)):
             positive_positions[0].append(
-                xc1 + second_neigh_list[i][0] * supercell_base[0, 0])
+                xc1 + second_neigh_list[i][0] * ucell[0, 0])
             positive_positions[1].append(
-                yc1 + second_neigh_list[i][1] * supercell_base[1, 1])
+                yc1 + second_neigh_list[i][1] * ucell[1, 1])
 
             negative_positions[0].append(
-                xc2 + second_neigh_list[i][0] * supercell_base[0, 0])
+                xc2 + second_neigh_list[i][0] * ucell[0, 0])
             negative_positions[1].append(
-                yc2 + second_neigh_list[i][1] * supercell_base[1, 1])
+                yc2 + second_neigh_list[i][1] * ucell[1, 1])
 
         for i in range(len(positive_positions[0])):
-            atoms = self._intro_single_edge_atoms(atoms,
-                                                  center=[positive_positions[0][i],
-                                                          positive_positions[1][i]],
-                                                  sign=1)
-            atoms = self._intro_single_edge_atoms(atoms,
-                                                  center=[negative_positions[0][i],
-                                                          negative_positions[1][i]],
-                                                  sign=-1)
+            atoms = self._intro_single_edge_atoms(
+                atoms,
+                center=[positive_positions[0][i],
+                        positive_positions[1][i], 0.0],
+                sign=1)
+            atoms = self._intro_single_edge_atoms(
+                atoms,
+                center=[negative_positions[0][i],
+                        negative_positions[1][i], 0.0],
+                sign=-1)
         return atoms
 
     def _intro_dipole_screw_with_image_atoms(self, atoms):
-        supercell_base = atoms.get_cell()
+        ucell = atoms.get_cell()
 
-        add_disp = [0.5 * (supercell_base[0, 0] + supercell_base[1, 0]),
-                    0.5 * (supercell_base[0, 1] + supercell_base[1, 1])]
+        add_disp = [0.5 * (ucell[0, 0] + ucell[1, 0]),
+                    0.5 * (ucell[0, 1] + ucell[1, 1])]
 
-        xc1 = 0.5 * supercell_base[0, 0]
-        yc1 = 0.0 * supercell_base[1, 1]
+        xc1 = 0.5 * ucell[0, 0]
+        yc1 = 0.0 * ucell[1, 1]
 
-        xc2 = 0.5 * supercell_base[0, 0]
-        yc2 = 0.0 * supercell_base[1, 1] + add_disp[1]
+        xc2 = 0.5 * ucell[0, 0]
+        yc2 = 0.0 * ucell[1, 1] + add_disp[1]
 
         positive_positions = [[xc1], [yc1]]
         negative_positions = [[xc2], [yc2]]
@@ -293,25 +303,25 @@ class cal_intro_iso_dis(object):
 
         for i in range(len(first_neigh_list)):
             positive_positions[0].append(
-                xc1 + first_neigh_list[i][0] * supercell_base[0, 0])
+                xc1 + first_neigh_list[i][0] * ucell[0, 0])
             positive_positions[1].append(
-                yc1 + first_neigh_list[i][1] * supercell_base[1, 1])
+                yc1 + first_neigh_list[i][1] * ucell[1, 1])
 
             negative_positions[0].append(
-                xc2 + first_neigh_list[i][0] * supercell_base[0, 0])
+                xc2 + first_neigh_list[i][0] * ucell[0, 0])
             negative_positions[1].append(
-                yc2 + first_neigh_list[i][1] * supercell_base[1, 1])
+                yc2 + first_neigh_list[i][1] * ucell[1, 1])
 
         for i in range(len(second_neigh_list)):
             positive_positions[0].append(
-                xc1 + second_neigh_list[i][0] * supercell_base[0, 0])
+                xc1 + second_neigh_list[i][0] * ucell[0, 0])
             positive_positions[1].append(
-                yc1 + second_neigh_list[i][1] * supercell_base[1, 1])
+                yc1 + second_neigh_list[i][1] * ucell[1, 1])
 
             negative_positions[0].append(
-                xc2 + second_neigh_list[i][0] * supercell_base[0, 0])
+                xc2 + second_neigh_list[i][0] * ucell[0, 0])
             negative_positions[1].append(
-                yc2 + second_neigh_list[i][1] * supercell_base[1, 1])
+                yc2 + second_neigh_list[i][1] * ucell[1, 1])
 
         #  check the correctness of the image
         #  import matplotlib.pylab as plt
@@ -323,14 +333,16 @@ class cal_intro_iso_dis(object):
             #  color='r')
 
         for i in range(len(positive_positions[0])):
-            atoms = self.intro_single_screw_atoms(atoms,
-                                                  center=[positive_positions[0][i],
-                                                          positive_positions[1][i]],
-                                                  sign=1)
-            atoms = self.intro_single_screw_atoms(atoms,
-                                                  center=[negative_positions[0][i],
-                                                          negative_positions[1][i]],
-                                                  sign=-1)
+            atoms = self.intro_single_screw_atoms(
+                atoms,
+                center=[positive_positions[0][i],
+                        positive_positions[1][i]],
+                sign=1)
+            atoms = self.intro_single_screw_atoms(
+                atoms,
+                center=[negative_positions[0][i],
+                        negative_positions[1][i]],
+                sign=-1)
         return atoms
 
     def _core_center_by_atom_index(self, atoms):
@@ -376,9 +388,10 @@ class cal_intro_iso_dis(object):
         atom_position = atoms.get_positions()
 
         ([aeasy_core, ahard_core, asplit, aM_point, aeasy_core2],
-         [beasy_core, bhard_core, bsplit, bM_point, beasy_core2]) = self._core_center_by_atom_index(atoms)
+         [beasy_core, bhard_core, bsplit, bM_point, beasy_core2]) = \
+            self._core_center_by_atom_index(atoms)
 
-        ########### easy to hard ################
+        # easy to hard
         tag = in_tag
         s = input_s
         if tag == 'easy_Mid':
@@ -447,13 +460,15 @@ class cal_intro_iso_dis(object):
 
         atom_position = atoms.get_positions()
 
-        ([aeasy_core, ahard_core, asplit, aM_point, aeasy_core2],
-         [beasy_core, bhard_core, bsplit, bM_point, beasy_core2]) = self.core_center_by_atom_index(atoms)
+        ([aeasy_core, ahard_core, asplit,
+          aM_point, aeasy_core2],
+         [beasy_core, bhard_core, bsplit,
+          bM_point, beasy_core2]) = self.core_center_by_atom_index(atoms)
 
         alpha_list = np.array([107, 105])
         beta_list = np.array([122, 84])
 
-        ## introduce hard core ##
+        # introduce hard core #
         s = 0
         xc1 = (1 - s) * ahard_core[0] + s * asplit[0]
         yc1 = (1 - s) * ahard_core[1] + s * asplit[1]

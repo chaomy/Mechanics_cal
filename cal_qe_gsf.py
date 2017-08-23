@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-14 20:42:41
+# @Last Modified time: 2017-08-22 20:15:28
 
 
 from optparse import OptionParser
@@ -176,7 +176,7 @@ class cal_gsf(gn_config.bcc,
         return
 
     def clc_qe_gsf_engy(self):
-        disps = np.arange(0.02, 0.58, 0.04)
+        disps = np.arange(0.02, 0.98, 0.04)
         npts = len(disps)
         disps = np.append(disps, 0.0)
         data = np.ndarray([npts + 1, 4])

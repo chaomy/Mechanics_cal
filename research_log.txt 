@@ -1,3 +1,13 @@
+Aug 19
+1, add modification to xy yz and xz => make sure lammps calculate same results
+2, whether the elastic constants are hessian matrix 
+
+
+Aug 17
+1, screw glide and edge glide
+2, dd simulation of Mg  
+3, fix the bug in the potfit of meam
+
 Aug 2 
 1. Mobv -> alphav -> fit ideal alphav 
 2. use fit ideal alhpav -> minimize the 1e5tpre case

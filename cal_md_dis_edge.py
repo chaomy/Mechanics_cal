@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-08-07 20:35:25
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-09 14:03:54
+# @Last Modified time: 2017-08-17 21:08:58
 
 from optparse import OptionParser
 from numpy import array, max, min
@@ -81,7 +81,7 @@ class cal_dis_edge(gn_config.bcc,
         e2 = [-1., -1., 2.]
         e3 = [1., -1., 0]
 
-        # first rotate 
+        # first rotate
         atoms = ase.io.read('1096_30x02y.aims', format='aims')
         atoms.rotate(a=self.rot, v='y')
 
@@ -96,7 +96,7 @@ class cal_dis_edge(gn_config.bcc,
         # atoms = self._intro_dipole_edge_atoms(atoms, c1=center1, c2=center2)
         # atoms = self.cut_x_normal_atoms(atoms,self.pot['lattice'], ratio=1./sqrt(5.))
 
-        # rotate back 
+        # rotate back
         atoms.rotate(a=-self.rot, v='y')
 
         ase.io.write('single_edge_30x02y.aims', images=atoms, format='aims')
