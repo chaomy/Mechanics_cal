@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-22 21:50:41
+# @Last Modified time: 2017-08-22 21:53:39
 
 
 import os
@@ -100,7 +100,7 @@ class cal_bcc_ideal_shear_pre(object):
         self.set_wall_time(30)
         self.set_main_job("""../cal_md_ideal_shear.py  -t  i{}
                           """.format(opt))
-        self.write_pbs(od=False)
+        self.write_pbs(od=True)
         return
 
     def loop_prep_vasp(self):
