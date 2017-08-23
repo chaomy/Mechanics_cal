@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-22 21:33:41
+# @Last Modified time: 2017-08-22 21:50:48
 
 
 from optparse import OptionParser
@@ -43,7 +43,8 @@ if __name__ == '__main__':
                   'pltlmp': drv.plt_energy_stress_lmp,
                   'pltvc': drv.plt_vc,
                   'pltcmp': drv.plt_cmp,
-                  'trans': drv.transdata}
+                  'trans': drv.transdata,
+                  'setpbs': drv.loop_set_pbs}
 
     if options.fargs is not None:
         dispatcher[options.mtype.lower()](options.fargs)

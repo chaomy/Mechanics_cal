@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-22 21:47:05
+# @Last Modified time: 2017-08-22 21:50:41
 
 
 import os
@@ -11,6 +11,7 @@ import ase
 import ase.io
 import ase.lattice
 import numpy as np
+from glob import glob
 
 
 class cal_bcc_ideal_shear_pre(object):
@@ -82,6 +83,14 @@ class cal_bcc_ideal_shear_pre(object):
             ase.io.write("POSCAR_{:03d}".format(i),
                          images=atoms,
                          format='vasp')
+        return
+
+    def loop_set_pbs(self):
+        dirlist = glob('dir-*')
+        for mdir in dirlist:
+            os.chdir(mdir)
+            self.set_pbs(mdir)
+            os.chdir(os.pardir)
         return
 
     def set_pbs(self, dirname, opt='vasp'):
