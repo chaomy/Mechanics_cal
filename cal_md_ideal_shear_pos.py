@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-04 20:53:50
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-22 22:28:25
+# @Last Modified time: 2017-08-22 22:30:59
 
 
 from md_pot_data import unitconv
@@ -201,14 +201,14 @@ class cal_bcc_ideal_shear_pos(object):
     def loop_prep_restart_from_log(self):
         npts = self.npts
         data = np.ndarray([npts, 7])
-        for i in range(npts):
+        for i in range(1, npts):
             dirname = "dir-{:03d}".format(i)
             if os.path.isdir(dirname):
                 os.chdir(dirname)
                 print dirname
                 raw = self.prep_restart_from_log()
                 os.chdir(os.pardir)
-            data[i, :] = raw
+                data[i, :] = raw
         np.savetxt('ishear.txt', data)
         return
 
