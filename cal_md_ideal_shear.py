@@ -3,11 +3,11 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-17 01:41:49
+# @Last Modified time: 2017-08-22 21:33:41
 
 
 from optparse import OptionParser
-import md_pot_data as dat
+import md_pot_data
 import cal_md_ideal_shear_ini as init
 
 
@@ -16,16 +16,13 @@ if __name__ == '__main__':
     usage = "usage:%prog [options] arg1 [options] arg2"
     parser = OptionParser(usage=usage)
     parser.add_option('-t', "--mtype", action="store",
-                      type="string", dest="mtype", help="",
-                      default="prp_r")
+                      type="string", dest="mtype")
 
     parser.add_option('-p', "--param", action="store",
-                      type='string', dest="fargs",
-                      default=None)
+                      type='string', dest="fargs")
 
     (options, args) = parser.parse_args()
-    drv = init.cal_bcc_ideal_shear(dat.qe_pot.vca_W80Re20,
-                                   '211')
+    drv = init.cal_bcc_ideal_shear(md_pot_data.md_pot.Nb_eam, '211')
 
     dispatcher = {'qeone': drv.get_qe_stress,
                   'restart': drv.loop_prep_restart,

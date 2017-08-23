@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-17 01:07:08
+# @Last Modified time: 2017-08-22 21:44:20
 
 
 from scipy.optimize import minimize
@@ -16,8 +16,7 @@ class cal_bcc_ideal_shear_run(object):
     def qe_relax(self):
         (delta, x0) = self.load_input_params()
         data = np.zeros(7)
-        res = minimize(self.runqe, x0, delta, method='Nelder-Mead',
-                       options={'fatol': 2e-3})
+        res = minimize(self.runqe, x0, delta, options={'fatol': 1e-4})
         print res
         data[0] = delta
         data[1] = res.fun
@@ -28,9 +27,7 @@ class cal_bcc_ideal_shear_run(object):
     def vasp_relax(self):
         (delta, x0) = self.load_input_params()
         data = np.zeros(7)
-        res = minimize(self.runvasp, x0, delta, method='Nelder-Mead',
-                       options={'fatol': 2e-3, 'disp': True})
-
+        res = minimize(self.runvasp, x0, delta, options={'fatol': 1e-4})
         print res
         data[0] = delta
         data[1] = res.fun
@@ -44,8 +41,7 @@ class cal_bcc_ideal_shear_run(object):
         data = np.ndarray([npts, 7])
         for i in range(npts):
             delta = self.delta * i
-            res = minimize(self.runlmp, x0, delta, method='Nelder-Mead',
-                           options={'xtol': 5e-4, 'disp': True})
+            res = minimize(self.runlmp, x0, delta, options={'fatol': 1e-4})
             x0 = res.x
             print res
             data[i][0] = (delta)
