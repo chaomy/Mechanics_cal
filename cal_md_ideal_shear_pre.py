@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-22 21:53:39
+# @Last Modified time: 2017-08-22 21:56:09
 
 
 import os
@@ -93,7 +93,7 @@ class cal_bcc_ideal_shear_pre(object):
             os.chdir(os.pardir)
         return
 
-    def set_pbs(self, dirname, opt='vasp'):
+    def set_pbs(self, dirname, opt='qe'):
         self.set_nnodes(1)
         self.set_ppn(12)
         self.set_job_title("%s" % (dirname))

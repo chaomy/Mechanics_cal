@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-22 21:50:48
+# @Last Modified time: 2017-08-22 21:55:54
 
 
 from optparse import OptionParser
@@ -23,7 +23,6 @@ if __name__ == '__main__':
 
     (options, args) = parser.parse_args()
     drv = init.cal_bcc_ideal_shear(md_pot_data.md_pot.Nb_eam, '211')
-
     dispatcher = {'qeone': drv.get_qe_stress,
                   'restart': drv.loop_prep_restart,
                   'twin': drv.gn_shear_twin_path,
