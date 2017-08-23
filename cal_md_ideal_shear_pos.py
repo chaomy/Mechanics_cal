@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-04 20:53:50
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-22 22:33:06
+# @Last Modified time: 2017-08-22 22:35:37
 
 
 from md_pot_data import unitconv
@@ -188,9 +188,8 @@ class cal_bcc_ideal_shear_pos(object):
         flist = glob.glob("s*.txt")
         if len(flist) >= 1:
             data = np.loadtxt(flist[0])
-            print data
-            data_init = np.loadtxt('restart.txt')
-            print data_init
+            # data_init = np.loadtxt('restart.txt')
+            data_init = np.zeros(7)
             data_init[1] = data[-1][-1]
             data_init[2:] = data[-1][:-1]
         else:
