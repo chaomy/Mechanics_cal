@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-04 20:53:50
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-22 22:39:19
+# @Last Modified time: 2017-08-26 00:11:09
 
 
 from md_pot_data import unitconv
@@ -66,6 +66,15 @@ class cal_bcc_ideal_shear_pos(object):
                 os.chdir(os.pardir)
         return
 
+    def plt_check(self):
+        file = glob.glob('s0.*.txt')[0]
+        data = np.loadtxt(file)
+        self.set_111plt()
+        xx = np.linspace(0, 1, len(data))
+        self.ax.plot(xx, data[:, -1])
+        self.fig.savefig('fig-engy.png')
+        return
+
     def trans_coords_to_cartisian(self, stress):
         basis = self.basis
         stress = basis * stress * basis.transpose()
@@ -91,6 +100,7 @@ class cal_bcc_ideal_shear_pos(object):
                     stress = self.convert_mtx_to_vec(stress)
                     raw = self.load_ishear_txt()
                     os.chdir(self.root)
+
                     # vol = vol * (unitconv.ulength['BohrtoA']**3)
                     print i, raw
                     data[i, :7] = raw

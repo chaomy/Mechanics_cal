@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-22 21:55:54
+# @Last Modified time: 2017-08-26 00:05:56
 
 
 from optparse import OptionParser
@@ -42,6 +42,7 @@ if __name__ == '__main__':
                   'pltlmp': drv.plt_energy_stress_lmp,
                   'pltvc': drv.plt_vc,
                   'pltcmp': drv.plt_cmp,
+                  'pltchk': drv.plt_check,
                   'trans': drv.transdata,
                   'setpbs': drv.loop_set_pbs}
 

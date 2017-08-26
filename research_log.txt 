@@ -1,3 +1,8 @@
+Aug 24 
+1, Grain Boundary Energy -> elastic energy + core energy
+2, Grain Boundary Strength -> gliding of edge dislocation 
+3, Adding La, => resist the movement of edge dislocation 
+
 Aug 19
 1, add modification to xy yz and xz => make sure lammps calculate same results
 2, whether the elastic constants are hessian matrix 

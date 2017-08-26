@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-22 21:58:12
+# @Last Modified time: 2017-08-26 00:13:45
 
 
 import os
@@ -97,10 +97,11 @@ class cal_bcc_ideal_shear_pre(object):
         self.set_nnodes(1)
         self.set_ppn(12)
         self.set_job_title("%s" % (dirname))
-        self.set_wall_time(30)
-        self.set_main_job("""../cal_md_ideal_shear.py  -t  i{}
-                          """.format(opt))
-        self.write_pbs(od=False)
+        self.set_wall_time(1)
+        # self.set_main_job("""../cal_md_ideal_shear.py  -t  i{}
+        #                   """.format(opt))
+        self.set_main_job('mpirun pw.x < qe.in > qe.out')
+        self.write_pbs(od=True)
         return
 
     def loop_prep_vasp(self):

@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-22 21:16:40
+# @Last Modified time: 2017-08-25 23:40:16
 
 
 from optparse import OptionParser
@@ -23,6 +23,7 @@ import gn_incar
 import gn_pbs
 import Intro_vasp
 import cal_sub
+import cal_qe_gsf_pos
 
 
 class cal_gsf(gn_config.bcc,
@@ -33,11 +34,12 @@ class cal_gsf(gn_config.bcc,
               cal_sub.subjobs,
               plt_drv.plt_drv,
               gn_qe_inputs.gn_qe_infile,
+              cal_qe_gsf_pos.cal_qe_gsf_pos,
               Intro_vasp.vasp_change_box):
 
     def __init__(self,
                  pot=md_pot_data.qe_pot.pbe_w,
-                 mgsf='x111z112'):
+                 mgsf='x111z110'):
         self.pot = pot
         self.mgsf = mgsf
         cal_sub.subjobs.__init__(self)
@@ -49,6 +51,7 @@ class cal_gsf(gn_config.bcc,
         Intro_vasp.vasp_change_box.__init__(self, self.pot)
         gn_config.bcc.__init__(self, self.pot)
         gn_qe_inputs.gn_qe_infile.__init__(self, self.pot)
+        cal_qe_gsf_pos.cal_qe_gsf_pos.__init__(self)
 
         self.rootdir = os.getcwd()
         self.sample_gsf_num = 21
@@ -177,14 +180,19 @@ class cal_gsf(gn_config.bcc,
         return
 
     def clc_qe_gsf_engy(self):
-        disps = np.arange(0.02, 0.98, 0.04)
+        disps = 0.0
+        disps = np.append(disps, np.arange(0.02, 0.98, 0.04))
+        disps = np.append(disps, 1.0)
         npts = len(disps)
-        disps = np.append(disps, 0.0)
-        data = np.ndarray([npts + 1, 4])
-        for i, disp in zip(range(npts + 1), disps):
-            dirname = 'dir-{}-{:4.3f}'.format(self.mgsf, disp)
+        data = np.ndarray([npts, 4])
+        for i, disp in zip(range(npts), disps):
+            if disp == 1:
+                dirname = 'dir-{}-{:4.3f}'.format(self.mgsf, 0.0)
+            else:
+                dirname = 'dir-{}-{:4.3f}'.format(self.mgsf, disp)
             os.chdir(dirname)
-            print(self.qe_get_cell())
+            print dirname
+            # print(self.qe_get_cell())
             data[i, 0] = i
             data[i, 1] = disp
             data[i, 2] = self.cal_xy_area()
@@ -242,10 +250,11 @@ class cal_gsf(gn_config.bcc,
 
     def plt_gsf(self):
         data = np.loadtxt('gsf.dat')
-        gsf = (data[:, 3] - data[-1, 3]) / (2 * data[:, 2])
+        print data
+        gsf = (data[:, 3] - np.min(data[:, 3])) / (2 * data[:, 2])
         print gsf
         self.set_111plt()
-        self.ax.plot(data[:, 1][:-1], gsf[:-1],
+        self.ax.plot(data[:, 1], gsf,
                      label='gsf', **next(self.keysiter))
         self.fig.savefig('fig_gsf.png', **self.figsave)
         return
@@ -254,10 +263,10 @@ class cal_gsf(gn_config.bcc,
 if __name__ == '__main__':
     usage = "usage:%prog [options] arg1 [options] arg2"
     parser = OptionParser(usage=usage)
-    parser.add_option("-t", "--mtype", action="store",
+    parser.add_option('-t', "--mtype", action="store",
                       type="string", dest="mtype")
 
-    parser.add_option("-p", "--params", action="store",
+    parser.add_option('-p', "--param", action="store",
                       type='string', dest="fargs")
 
     (options, args) = parser.parse_args()
@@ -268,7 +277,8 @@ if __name__ == '__main__':
                   'usf': drv.cal_usf,
                   'setpbs': drv.loop_set_pbs,
                   'sub': drv.loop_sub,
-                  'plt': drv.plt_gsf}
+                  'plt': drv.plt_gsf,
+                  'trans': drv.transdata}
 
     if options.fargs is not None:
         dispatcher[options.mtype.lower()](options.fargs)
