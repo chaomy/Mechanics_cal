@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-04 20:53:50
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-26 00:11:09
+# @Last Modified time: 2017-08-26 00:52:56
 
 
 from md_pot_data import unitconv
@@ -53,7 +53,7 @@ class cal_bcc_ideal_shear_pos(object):
             self.mymkdir(mdir)
             if ptype in ['scp']:
                 fdir = fluxdirs['QE'] + \
-                    'VC_WRe/{}/'.format(dirtree['110']['50'])
+                    'VC_WRe/{}/'.format(dirtree['211']['20'])
                 os.system('scp {}/{}/qe.out {}'.format(fdir, mdir, mdir))
                 os.system('scp {}/{}/qe.in {}'.format(fdir, mdir, mdir))
                 os.system('scp {}/{}/*.txt {}'.format(fdir, mdir, mdir))
@@ -100,6 +100,9 @@ class cal_bcc_ideal_shear_pos(object):
                     stress = self.convert_mtx_to_vec(stress)
                     raw = self.load_ishear_txt()
                     os.chdir(self.root)
+                    if raw is None:
+                        print "raw is NOne"
+                        exit(0)
 
                     # vol = vol * (unitconv.ulength['BohrtoA']**3)
                     print i, raw
@@ -116,6 +119,7 @@ class cal_bcc_ideal_shear_pos(object):
             os.chdir(dirname)
             raw = self.load_ishear_txt()
             self.get_va_stress()
+            print "raw is", raw
             data[i, :7] = raw
             data[i, 7:] = self.get_va_stress()
             os.chdir(self.root)
@@ -128,7 +132,7 @@ class cal_bcc_ideal_shear_pos(object):
             return raw
         else:
             raw = self.prep_restart_from_log()
-        return
+            return raw
 
     ##########################################################
     # used for lammps
@@ -201,12 +205,17 @@ class cal_bcc_ideal_shear_pos(object):
             data_init = np.loadtxt('restart.txt')
             data_init[1] = data[-1][-1]
             data_init[2:] = data[-1][:-1]
+            print data_init
         else:
             data_init = np.loadtxt('restart.txt')
         np.savetxt('restart.txt', data_init)
         dirname = os.getcwd().split('/')[-1]
         self.set_pbs(dirname, 'qe')
         return data_init
+
+    def trans_s_to_isear(self):
+
+        return
 
     def loop_prep_restart_from_log(self):
         npts = self.npts
