@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-27 22:50:44
+# @Last Modified time: 2017-08-27 23:01:11
 
 
 import os
@@ -113,7 +113,7 @@ class cal_bcc_ideal_shear_pre(object):
             self.set_pbs(dirname, delta)
         return
 
-    def loop_prep_restart(self, opt='va'):
+    def loop_prep_restart(self, opt='qe'):
         raw = np.mat(np.loadtxt("ishear.txt"))
         for i in range(len(raw)):
             dirname = "dir-{:03d}".format(i)

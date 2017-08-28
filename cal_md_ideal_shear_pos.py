@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-04 20:53:50
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-27 22:56:53
+# @Last Modified time: 2017-08-27 23:08:21
 
 
 from md_pot_data import unitconv
@@ -40,11 +40,11 @@ class cal_bcc_ideal_shear_pos(object):
             delta = data[0]
             # x0 = data[-5:]
             if shtype in ['110']:
-                x0 = data[1.009433888227457832e+00,
-                          1.073562147487662877e+00,
-                          1.082181305132341009e+00,
-                          1.079656535712334997e-01,
-                          3.744713183531088452e-02]
+                x0 = np.array([1.009433888227457832e+00,
+                               1.073562147487662877e+00,
+                               1.082181305132341009e+00,
+                               1.079656535712334997e-01,
+                               3.744713183531088452e-02])
             print delta
             print x0
         else:
