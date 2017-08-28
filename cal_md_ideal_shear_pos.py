@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-04 20:53:50
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-27 20:52:56
+# @Last Modified time: 2017-08-27 22:54:19
 
 
 from md_pot_data import unitconv
@@ -34,11 +34,17 @@ dirtree = {'110': {
 
 class cal_bcc_ideal_shear_pos(object):
 
-    def load_input_params(self):
+    def load_input_params(self, shtype='110'):
         if os.path.isfile('restart.txt'):
             data = np.loadtxt("restart.txt")
             delta = data[0]
-            x0 = data[-5:]
+            # x0 = data[-5:]
+            if shtype in ['110']:
+                x0 = data[1.009433888227457832e+00,
+                          1.073562147487662877e+00,
+                          1.082181305132341009e+00,
+                          1.079656535712334997e-01,
+                          3.744713183531088452e-02]
             print delta
             print x0
         else:
@@ -53,7 +59,7 @@ class cal_bcc_ideal_shear_pos(object):
             self.mymkdir(mdir)
             if ptype in ['scp']:
                 fdir = fluxdirs['QE'] + \
-                    'VC_WRe/{}/'.format(dirtree['211']['05'])
+                    'VC_WRe/{}/'.format(dirtree['110']['20'])
                 os.system('scp {}/{}/qe.out {}'.format(fdir, mdir, mdir))
                 os.system('scp {}/{}/qe.in {}'.format(fdir, mdir, mdir))
                 os.system('scp {}/{}/*.txt {}'.format(fdir, mdir, mdir))
@@ -88,6 +94,7 @@ class cal_bcc_ideal_shear_pos(object):
 
     def qe_loop_stress(self, opt='clc'):
         npts = self.npts
+        npts = 14
         data = np.ndarray([npts, 2 + 5 + 6])
         if opt == 'clc':
             for i in range(npts):

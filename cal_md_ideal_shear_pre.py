@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-26 01:28:25
+# @Last Modified time: 2017-08-27 22:50:44
 
 
 import os
@@ -78,11 +78,9 @@ class cal_bcc_ideal_shear_pre(object):
             print cell
             atoms = ase.Atoms('Nb',
                               positions=[[0, 0, 0]],
-                              cell=cell,
-                              pbc=[1, 1, 1])
+                              cell=cell, pbc=[1, 1, 1])
             ase.io.write("POSCAR_{:03d}".format(i),
-                         images=atoms,
-                         format='vasp')
+                         images=atoms, format='vasp')
         return
 
     def loop_set_pbs(self):
