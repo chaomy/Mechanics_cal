@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-04 20:53:50
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-26 00:52:56
+# @Last Modified time: 2017-08-27 20:52:56
 
 
 from md_pot_data import unitconv
@@ -53,7 +53,7 @@ class cal_bcc_ideal_shear_pos(object):
             self.mymkdir(mdir)
             if ptype in ['scp']:
                 fdir = fluxdirs['QE'] + \
-                    'VC_WRe/{}/'.format(dirtree['211']['20'])
+                    'VC_WRe/{}/'.format(dirtree['211']['05'])
                 os.system('scp {}/{}/qe.out {}'.format(fdir, mdir, mdir))
                 os.system('scp {}/{}/qe.in {}'.format(fdir, mdir, mdir))
                 os.system('scp {}/{}/*.txt {}'.format(fdir, mdir, mdir))
