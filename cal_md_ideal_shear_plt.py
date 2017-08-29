@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-17 01:27:04
+# @Last Modified time: 2017-08-28 18:36:46
 
 
 from itertools import cycle
@@ -80,8 +80,7 @@ class cal_bcc_ideal_shear_plt(object):
         if ptype in ['211']:
             yy = raw[:, -3]
         elif ptype in ['110']:
-            yy = -raw[:, -2]
-
+            yy = -raw[:, -1]
         self.ax2.plot(raw[:, 0], yy,
                       label='stress', **next(self.keysiter))
         self.add_legends(*axlist)

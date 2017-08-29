@@ -3,17 +3,15 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-21 23:35:00
+# @Last Modified time: 2017-08-28 15:18:17
 
 
 import os
-import glob
 import copy
 import numpy as np
 import matplotlib.pylab as plt
 from optparse import OptionParser
 import md_pot_data
-import plt_drv
 
 try:
     import gn_config
@@ -161,7 +159,7 @@ class cal_gsf(gn_config.bcc,
                 displacement[i] = [0, 0, 0]
             else:
                 displacement[i] = displacement_vector
-        return displacement 
+        return displacement
 
     def cal_gsf_given_dis(self, given_disp):
         atoms = self.gn_gsf_atoms()
@@ -184,7 +182,7 @@ class cal_gsf(gn_config.bcc,
 
         local_atoms = atoms.copy()
         local_atoms.translate(disp_matrix)
-        #### add small perturbation ####
+        # add small perturbation #
         local_atoms = self.add_perturbation(local_atoms, 1.0)
         self.write_poscar(local_atoms)
 
@@ -246,7 +244,6 @@ class cal_gsf(gn_config.bcc,
                 fid.write("%d  %f  %f  %f \n"
                           % (i, disp_list[i],  area_list[i], energy_list[i]))
         return
-
 
     def plot_gsf_data(self, tag="full"):
         data = np.loadtxt("DATA")
@@ -329,11 +326,11 @@ if __name__ == '__main__':
                   in_element='Nb',
                   in_kpoints=ingsf['kpoints'])
 
-    #### cal total lists of given shift direction ####
+    #cal total lists of given shift direction #
     if options.mtype.lower() == "single":
         Job.vasp_single_dir_gsf()
 
-    #### cal given strain at given direction ####
+    # cal given strain at given direction #
     if options.mtype.lower() == "given":
         Job.cal_gsf_given_dis(0.25)
 

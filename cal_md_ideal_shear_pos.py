@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-04 20:53:50
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-27 23:08:21
+# @Last Modified time: 2017-08-28 21:08:56
 
 
 from md_pot_data import unitconv
@@ -38,7 +38,6 @@ class cal_bcc_ideal_shear_pos(object):
         if os.path.isfile('restart.txt'):
             data = np.loadtxt("restart.txt")
             delta = data[0]
-            # x0 = data[-5:]
             if shtype in ['110']:
                 x0 = np.array([1.009433888227457832e+00,
                                1.073562147487662877e+00,
@@ -93,30 +92,33 @@ class cal_bcc_ideal_shear_pos(object):
         vect[3], vect[4], vect[5] = mtx[0, 1], mtx[0, 2], mtx[1, 2]
         return vect
 
-    def qe_loop_stress(self, opt='clc'):
+    def qe_loop_stress(self, opt='clc', mtype='cal'):
         npts = self.npts
-        npts = 14
-        data = np.ndarray([npts, 2 + 5 + 6])
+        if mtype in ['out']:
+            data = np.ndarray([npts, 2 + 5 + 6])
+        elif mtype in ['cal']:
+            data = np.ndarray([npts, 7])
         if opt == 'clc':
             for i in range(npts):
                 dirname = "dir-{:03d}".format(i)
                 print dirname
                 if os.path.isdir(dirname):
                     os.chdir(dirname)
-                    (engy, vol, stress) = self.qe_get_energy_stress('qe.out')
-                    stress = self.trans_coords_to_cartisian(np.mat(stress))
-                    stress = self.convert_mtx_to_vec(stress)
-                    raw = self.load_ishear_txt()
-                    os.chdir(self.root)
-                    if raw is None:
-                        print "raw is NOne"
-                        exit(0)
-
-                    # vol = vol * (unitconv.ulength['BohrtoA']**3)
-                    print i, raw
+                    raw = self.load_sfile_txt()
+                    raw[0] = 0.02 * i
+                    # raw = self.load_ishear_txt()
                     data[i, :7] = raw
-                    data[i, 7:] = stress
-            np.savetxt('stress.txt', data)
+                    # stress
+                    if mtype in ['out']:
+                        (engy, vol, stress) = \
+                            self.qe_get_energy_stress('qe.out')
+                        stress = self.trans_coords_to_cartisian(np.mat(stress))
+                        data[i, 7:] = stress = self.convert_mtx_to_vec(stress)
+                    os.chdir(self.root)
+            if mtype in ['cal']:
+                np.savetxt('ishear.txt', data)
+            elif mtype in ['out']:
+                np.savetxt('stress.txt', data)
         return
 
     def va_loop_stress(self):
@@ -134,6 +136,19 @@ class cal_bcc_ideal_shear_pos(object):
         np.savetxt("stress.txt", data)
         return
 
+    def load_sfile_txt(self):
+        flist = glob.glob("s0.*.txt")
+        if len(flist) >= 1:
+            data = np.loadtxt(flist[0])
+        indx = np.argmin(data[:, -1])
+        print 'min engy index', indx
+        tmp = data[indx]
+        print tmp
+        data_init = np.zeros(len(tmp) + 1)
+        data_init[1] = tmp[-1]
+        data_init[2:] = tmp[:-1]
+        return data_init
+
     def load_ishear_txt(self):
         if os.path.isfile('ishear.txt'):
             raw = np.loadtxt("ishear.txt")
@@ -143,7 +158,7 @@ class cal_bcc_ideal_shear_pos(object):
             return raw
 
     ##########################################################
-    # used for lammps
+    # used for transform all
     ##########################################################
     def convert_stress_vasp(self):
         raw = np.loadtxt("ishear.txt")
@@ -176,11 +191,12 @@ class cal_bcc_ideal_shear_pos(object):
     ##########################################################
     # used for lammps
     ##########################################################
-    def convert_stress(self):
+    def convert_stress(self, mtype='qe'):
         raw = np.loadtxt("ishear.txt")
-        data = np.zeros((len(raw),
-                         len(raw[0]) + 1))
+        data = np.zeros((len(raw), len(raw[0]) + 1))
         data[:, :-1] = raw
+        if mtype in ['qe']:
+            data[:, 1] /= unitconv.uengy['rytoeV']
         convunit = unitconv.ustress['evA3toGpa']
         vol = np.zeros(len(raw))
         vperf = 0.5 * self.alat**3
@@ -220,10 +236,6 @@ class cal_bcc_ideal_shear_pos(object):
         dirname = os.getcwd().split('/')[-1]
         self.set_pbs(dirname, 'qe')
         return data_init
-
-    def trans_s_to_isear(self):
-
-        return
 
     def loop_prep_restart_from_log(self):
         npts = self.npts

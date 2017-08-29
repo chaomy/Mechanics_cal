@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-22 21:44:20
+# @Last Modified time: 2017-08-28 21:24:15
 
 
 from scipy.optimize import minimize
@@ -16,7 +16,7 @@ class cal_bcc_ideal_shear_run(object):
     def qe_relax(self):
         (delta, x0) = self.load_input_params()
         data = np.zeros(7)
-        res = minimize(self.runqe, x0, delta, options={'fatol': 1e-4})
+        res = minimize(self.runqe, x0, delta, tol=1e-4)
         print res
         data[0] = delta
         data[1] = res.fun
@@ -27,7 +27,7 @@ class cal_bcc_ideal_shear_run(object):
     def vasp_relax(self):
         (delta, x0) = self.load_input_params()
         data = np.zeros(7)
-        res = minimize(self.runvasp, x0, delta, options={'fatol': 1e-4})
+        res = minimize(self.runvasp, x0, delta, tol=1e-4)
         print res
         data[0] = delta
         data[1] = res.fun

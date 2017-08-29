@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-25 23:40:16
+# @Last Modified time: 2017-08-28 16:30:46
 
 
 from optparse import OptionParser
@@ -38,8 +38,7 @@ class cal_gsf(gn_config.bcc,
               Intro_vasp.vasp_change_box):
 
     def __init__(self,
-                 pot=md_pot_data.qe_pot.pbe_w,
-                 mgsf='x111z110'):
+                 pot=md_pot_data.qe_pot.pbe_w, mgsf='x111z110'):
         self.pot = pot
         self.mgsf = mgsf
         cal_sub.subjobs.__init__(self)
@@ -179,7 +178,7 @@ class cal_gsf(gn_config.bcc,
             fid.close()
         return
 
-    def clc_qe_gsf_engy(self):
+    def clc_qe_gsf_engy(self, fname='gsf'):
         disps = 0.0
         disps = np.append(disps, np.arange(0.02, 0.98, 0.04))
         disps = np.append(disps, 1.0)
@@ -274,10 +273,13 @@ if __name__ == '__main__':
     dispatcher = {'prep': drv.gn_qe_single_dir_gsf,
                   'loopprep': drv.loop_pot_gsf,
                   'clcengy': drv.clc_qe_gsf_engy,
+                  'loopclc': drv.loop_clcenergy,
                   'usf': drv.cal_usf,
                   'setpbs': drv.loop_set_pbs,
                   'sub': drv.loop_sub,
                   'plt': drv.plt_gsf,
+                  'plttol': drv.plt_tol,
+                  'loopplt': drv.loop_plt_gsf,
                   'trans': drv.transdata}
 
     if options.fargs is not None:
