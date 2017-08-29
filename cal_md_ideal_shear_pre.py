@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-27 23:01:11
+# @Last Modified time: 2017-08-28 22:12:11
 
 
 import os
@@ -97,7 +97,6 @@ class cal_bcc_ideal_shear_pre(object):
         self.set_job_title("%s" % (dirname))
         self.set_wall_time(50)
         self.set_main_job("""../cal_md_ideal_shear.py  -t  i{}""".format(opt))
-        # self.set_main_job('mpirun pw.x < qe.in > qe.out')
         self.write_pbs(od=False)
         return
 

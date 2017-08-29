@@ -4,16 +4,13 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:10:22
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-05 08:12:27
+# @Last Modified time: 2017-08-28 21:26:17
 
 
 import os
 
 
 class md_crack_run(object):
-
-    def __init__(self):
-        return
 
     def md_crack(self):
         os.system("python gnStructure.py")

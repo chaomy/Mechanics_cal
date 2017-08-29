@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-04 20:53:50
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-28 21:08:56
+# @Last Modified time: 2017-08-28 22:18:32
 
 
 from md_pot_data import unitconv
@@ -39,11 +39,11 @@ class cal_bcc_ideal_shear_pos(object):
             data = np.loadtxt("restart.txt")
             delta = data[0]
             if shtype in ['110']:
-                x0 = np.array([1.009433888227457832e+00,
-                               1.073562147487662877e+00,
-                               1.082181305132341009e+00,
-                               1.079656535712334997e-01,
-                               3.744713183531088452e-02])
+                x0 = np.array([1.004333888227457832e+00,
+                               1.024562147487662877e+00,
+                               0.993181305132341009e+00,
+                               1.079656535712334997e-04,
+                               3.744713183531088452e-04])
             print delta
             print x0
         else:

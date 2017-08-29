@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-28 21:24:15
+# @Last Modified time: 2017-08-28 22:18:47
 
 
 from scipy.optimize import minimize
@@ -16,7 +16,7 @@ class cal_bcc_ideal_shear_run(object):
     def qe_relax(self):
         (delta, x0) = self.load_input_params()
         data = np.zeros(7)
-        res = minimize(self.runqe, x0, delta, tol=1e-4)
+        res = minimize(self.runqe, x0, delta, tol=1.e-3, method='Nelder-Mead')
         print res
         data[0] = delta
         data[1] = res.fun
@@ -27,7 +27,7 @@ class cal_bcc_ideal_shear_run(object):
     def vasp_relax(self):
         (delta, x0) = self.load_input_params()
         data = np.zeros(7)
-        res = minimize(self.runvasp, x0, delta, tol=1e-4)
+        res = minimize(self.runvasp, x0, delta, tol=5e-4, method='Nelder-Mead')
         print res
         data[0] = delta
         data[1] = res.fun
@@ -41,7 +41,8 @@ class cal_bcc_ideal_shear_run(object):
         data = np.ndarray([npts, 7])
         for i in range(npts):
             delta = self.delta * i
-            res = minimize(self.runlmp, x0, delta, options={'fatol': 1e-4})
+            res = minimize(self.runlmp, x0, delta,
+                           tol=1e-4, method='Nelder-Mead')
             x0 = res.x
             print res
             data[i][0] = (delta)
@@ -63,6 +64,7 @@ class cal_bcc_ideal_shear_run(object):
         strain = np.mat([[x[0], 0.0, 0.0],
                          [-delta, x[1], 0.0],
                          [x[3], x[4], x[2]]])
+
         new_strain = basis.transpose() * strain * basis
         self.gn_primitive_lmps(new_strain, 'lmp')
         os.system("lmp_mpi -i in.init -screen  no")
