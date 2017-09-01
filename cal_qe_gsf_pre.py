@@ -3,11 +3,11 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-31 22:48:49
+# @Last Modified time: 2017-08-31 23:05:29
 
 
 import numpy as np
-import md_pot_data
+import os
 from itertools import cycle
 from numpy import arange
 from numpy import loadtxt, savetxt, ndarray
@@ -45,7 +45,7 @@ class cal_qe_gsf_pre(object):
 
     def clc_qe_gsf_engy(self, fname='gsf'):
         disps = 0.0
-        disps = np.append(disps, np.arange(0.30, 0.70, 0.04))
+        disps = np.append(disps, np.arange(0.02, 0.98, 0.04))
         disps = np.append(disps, 1.0)
         npts = len(disps)
         data = np.ndarray([npts, 4])
@@ -66,15 +66,7 @@ class cal_qe_gsf_pre(object):
         return
 
     def loop_pot_gsf(self, tag='prep'):
-        vcapots = {
-            'WTa50': md_pot_data.qe_pot.vca_W50Ta50,
-            'WRe00': md_pot_data.qe_pot.pbe_w,
-            'WRe05': md_pot_data.qe_pot.vca_W95Re05,
-            'WRe10': md_pot_data.qe_pot.vca_W90Re10,
-            'WRe15': md_pot_data.qe_pot.vca_W85Re15,
-            'WRe20': md_pot_data.qe_pot.vca_W80Re20,
-            'WRe25': md_pot_data.qe_pot.vca_W75Re25,
-            'WRe50': md_pot_data.qe_pot.vca_W50Re50}
+        vcapots = self.vcapots
         gsfs = ['x111z112', 'x111z110']
         for key in vcapots:
             for gsf in gsfs:
@@ -87,15 +79,7 @@ class cal_qe_gsf_pre(object):
         return
 
     def loop_sub(self):
-        vcapots = {
-            'WTa50': md_pot_data.qe_pot.vca_W50Ta50,
-            'WRe00': md_pot_data.qe_pot.pbe_w,
-            'WRe05': md_pot_data.qe_pot.vca_W95Re05,
-            'WRe10': md_pot_data.qe_pot.vca_W90Re10,
-            'WRe15': md_pot_data.qe_pot.vca_W85Re15,
-            'WRe20': md_pot_data.qe_pot.vca_W80Re20,
-            'WRe25': md_pot_data.qe_pot.vca_W75Re25,
-            'WRe50': md_pot_data.qe_pot.vca_W50Re50}
+        vcapots = self.vcapots
         gsfs = ['x111z112', 'x111z110']
         for key in vcapots.keys():
             for gsf in gsfs:
@@ -105,4 +89,20 @@ class cal_qe_gsf_pre(object):
                     os.system('cal_qe_gsf.py -t setpbs')
                     os.system('cal_sub.py -t sub')
                     os.chdir(os.pardir)
+        return
+
+    def move_dirs(self):
+        vcapots = self.vcapots
+        gsfs = ['x111z112', 'x111z110']
+        for key in vcapots.keys():
+            for gsf in gsfs:
+                mdir = 'Bcc_{}_gsf{}'.format(key, gsf)
+                mdir1 = 'Bcc_{}_gsf{}_1'.format(key, gsf)
+                os.mkdir(mdir1)
+                os.chdir(mdir)
+                disps = np.arange(0.02, 0.34, 0.04)
+                for disp in disps:
+                    dirname = 'dir-{}-{:4.3f}'.format(self.mgsf, disp)
+                    os.system('mv {} ../{}'.format(dirname, mdir1))
+                os.chdir(os.pardir)
         return

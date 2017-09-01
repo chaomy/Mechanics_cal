@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-31 22:56:48
+# @Last Modified time: 2017-08-31 22:59:24
 
 
 from optparse import OptionParser
@@ -59,6 +59,15 @@ class cal_gsf(gn_config.bcc,
         self.rootdir = os.getcwd()
         self.sample_gsf_num = 21
         self.disp_delta = 1. / (self.sample_gsf_num - 1)
+        self.vcapots = {
+            'WTa50': md_pot_data.qe_pot.vca_W50Ta50,
+            'WRe00': md_pot_data.qe_pot.pbe_w,
+            'WRe05': md_pot_data.qe_pot.vca_W95Re05,
+            'WRe10': md_pot_data.qe_pot.vca_W90Re10,
+            'WRe15': md_pot_data.qe_pot.vca_W85Re15,
+            'WRe20': md_pot_data.qe_pot.vca_W80Re20,
+            'WRe25': md_pot_data.qe_pot.vca_W75Re25,
+            'WRe50': md_pot_data.qe_pot.vca_W50Re50}
         return
 
     def gn_gsf_atoms(self):
