@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-31 23:22:46
+# @Last Modified time: 2017-08-31 23:25:27
 
 
 import numpy as np
@@ -97,13 +97,13 @@ class cal_qe_gsf_pre(object):
         for key in vcapots.keys():
             for gsf in gsfs:
                 mdir = 'Bcc_{}_gsf{}'.format(key, gsf)
-                # mdir1 = 'Bcc_{}_gsf{}_1'.format(key, gsf)
-                mdir1 = 'Bcc_{}_gsf{}_2'.format(key, gsf)
+                mdir1 = 'Bcc_{}_gsf{}_1'.format(key, gsf)
+                # mdir1 = 'Bcc_{}_gsf{}_2'.format(key, gsf)
                 if not os.path.isdir(mdir1):
                     os.mkdir(mdir1)
                 os.chdir(mdir)
-                # disps = np.arange(0.02, 0.34, 0.04)
-                disps = np.arange(0.66, 1.00, 0.04)
+                disps = np.arange(0.02, 0.34, 0.04)
+                # disps = np.arange(0.66, 1.00, 0.04)
                 for disp in disps:
                     dirname = 'dir-{}-{:4.3f}'.format(gsf, disp)
                     os.system('mv {} ../{}'.format(dirname, mdir1))
