@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-31 23:08:22
+# @Last Modified time: 2017-08-31 23:09:30
 
 
 import numpy as np
@@ -98,7 +98,8 @@ class cal_qe_gsf_pre(object):
             for gsf in gsfs:
                 mdir = 'Bcc_{}_gsf{}'.format(key, gsf)
                 mdir1 = 'Bcc_{}_gsf{}_1'.format(key, gsf)
-                os.mkdir(mdir1)
+                if not os.path.isdir(mdir1):
+                    os.mkdir(mdir1)
                 os.chdir(mdir)
                 disps = np.arange(0.02, 0.34, 0.04)
                 for disp in disps:
