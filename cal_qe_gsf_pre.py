@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-31 23:20:05
+# @Last Modified time: 2017-08-31 23:22:46
 
 
 import numpy as np
@@ -45,7 +45,7 @@ class cal_qe_gsf_pre(object):
 
     def clc_qe_gsf_engy(self, fname='gsf'):
         disps = 0.0
-        disps = np.append(disps, np.arange(0.02, 0.98, 0.04))
+        disps = np.append(disps, np.arange(0.02, 1.00, 0.04))
         disps = np.append(disps, 1.0)
         npts = len(disps)
         data = np.ndarray([npts, 4])
