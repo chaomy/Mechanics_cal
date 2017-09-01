@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-28 22:38:00
+# @Last Modified time: 2017-08-31 22:44:07
 
 
 from optparse import OptionParser
@@ -43,17 +43,26 @@ class cal_surface(cal_qe_gsf.cal_gsf):
         atomsb.wrap()
         return [atomss, atomsb]
 
-    def prep_qe_surface(self, dirtag='dir'):
+    def prep_qe_surface(self, dirtag='dir', mtype='relax'):
         configs = ['surf', 'bulk']
         atomsl = self.gn_surface_atoms()
-        self.setup_qe_scf()
+
+        if mtype in ['scf']:
+            self.setup_qe_scf()
+        elif mtype in ['relax']:
+            self.setup_qe_relax()
+
         for config, atoms in zip(configs, atomsl):
             dirname = '{}-{}-{}'.format(
                 dirtag, self.mgsf, config)
             self.mymkdir(dirname)
 
             os.chdir(dirname)
-            self.gn_qe_scf_tf(atoms)
+            if mtype in ['relax']:
+                self.gn_qe_relax_tf(atoms)
+            elif mtype in ['scf']:
+                self.gn_qe_scf_tf(atoms)
+
             ase.io.write('poscar.vasp', images=atoms, format='vasp')
             os.system("cp $POTDIR/{} . ".format(self.pot['file']))
             self.set_pbs(dirname)
@@ -92,6 +101,7 @@ class cal_surface(cal_qe_gsf.cal_gsf):
 
     def loop_cal_surf(self):
         vcapots = OrderedDict([
+            ('WTa50', md_pot_data.qe_pot.vca_W50Ta50)
             ('WRe00', md_pot_data.qe_pot.pbe_w),
             ('WRe05', md_pot_data.qe_pot.vca_W95Re05),
             ('WRe10', md_pot_data.qe_pot.vca_W90Re10),
