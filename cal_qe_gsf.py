@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-31 22:59:24
+# @Last Modified time: 2017-08-31 23:06:35
 
 
 from optparse import OptionParser
@@ -218,7 +218,8 @@ if __name__ == '__main__':
                   'plt': drv.plt_gsf,
                   'plttol': drv.plt_tol,
                   'loopplt': drv.loop_plt_gsf,
-                  'trans': drv.transdata}
+                  'trans': drv.transdata,
+                  'movedir': drv.move_dirs}
 
     if options.fargs is not None:
         dispatcher[options.mtype.lower()](options.fargs)
