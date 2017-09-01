@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-31 23:11:45
+# @Last Modified time: 2017-08-31 23:20:05
 
 
 import numpy as np
@@ -86,7 +86,7 @@ class cal_qe_gsf_pre(object):
                 mdir = 'Bcc_{}_gsf{}'.format(key, gsf)
                 if os.path.isdir(mdir):
                     os.chdir(mdir)
-                    os.system('cal_qe_gsf.py -t setpbs')
+                    # os.system('cal_qe_gsf.py -t setpbs')
                     os.system('cal_sub.py -t sub')
                     os.chdir(os.pardir)
         return
