@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-31 22:06:46
+# @Last Modified time: 2017-08-31 22:33:50
 
 
 import numpy as np
@@ -67,6 +67,7 @@ class cal_qe_gsf_pre(object):
 
     def loop_pot_gsf(self, tag='prep'):
         vcapots = {
+            'WTa50': md_pot_data.qe_pot.vca_W50Ta50,
             'WRe00': md_pot_data.qe_pot.pbe_w,
             'WRe05': md_pot_data.qe_pot.vca_W95Re05,
             'WRe10': md_pot_data.qe_pot.vca_W90Re10,
@@ -87,6 +88,7 @@ class cal_qe_gsf_pre(object):
 
     def loop_sub(self):
         vcapots = {
+            'WTa50': md_pot_data.qe_pot.vca_W50Ta50,
             'WRe00': md_pot_data.qe_pot.pbe_w,
             'WRe05': md_pot_data.qe_pot.vca_W95Re05,
             'WRe10': md_pot_data.qe_pot.vca_W90Re10,
