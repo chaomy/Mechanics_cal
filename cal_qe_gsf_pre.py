@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-31 23:10:34
+# @Last Modified time: 2017-08-31 23:11:45
 
 
 import numpy as np
@@ -103,7 +103,7 @@ class cal_qe_gsf_pre(object):
                     os.mkdir(mdir1)
                 os.chdir(mdir)
                 # disps = np.arange(0.02, 0.34, 0.04)
-                disps = np.arange(0.66, 0.98, 0.04)
+                disps = np.arange(0.66, 1.00, 0.04)
                 for disp in disps:
                     dirname = 'dir-{}-{:4.3f}'.format(gsf, disp)
                     os.system('mv {} ../{}'.format(dirname, mdir1))
