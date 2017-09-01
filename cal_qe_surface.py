@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-31 22:53:37
+# @Last Modified time: 2017-08-31 23:17:40
 
 
 from optparse import OptionParser
@@ -58,6 +58,7 @@ class cal_surface(cal_qe_gsf.cal_gsf):
             self.mymkdir(dirname)
 
             os.chdir(dirname)
+
             if mtype in ['relax']:
                 self.gn_qe_relax_tf(atoms)
             elif mtype in ['scf']:
