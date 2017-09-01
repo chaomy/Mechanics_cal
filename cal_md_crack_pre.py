@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 01:09:32
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-05 08:12:14
+# @Last Modified time: 2017-08-30 14:54:28
 
 
 import numpy as np
@@ -21,10 +21,6 @@ smsqrt = SM.sqrt
 
 
 class md_crack_pre(object):
-
-    def __init__(self):
-
-        return
 
     def gn_perf_plate(self):
         atoms = ase.lattice.cubic.BodyCenteredCubic(directions=[[1, 0, 0],

@@ -1,19 +1,9 @@
 #!/usr/bin/env python
-# encoding: utf-8
-
-###################################################################
-#
-# File Name : ./cal_md_surface.py
-#
-###################################################################
-#
-# Purpose :  multithreads to calculate md surface
-#
-# Creation Date :
-# Last Modified : Thu Mar 30 23:56:50 2017
-# Created By    : Chaoming Yang
-#
-###################################################################
+# -*- coding: utf-8 -*-
+# @Author: chaomy
+# @Date:   2017-06-25 14:28:58
+# @Last Modified by:   chaomy
+# @Last Modified time: 2017-08-30 15:43:20
 
 import os
 from multiprocessing import Pool

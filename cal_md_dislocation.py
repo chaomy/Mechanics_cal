@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-18 14:25:36
+# @Last Modified time: 2017-08-30 11:39:23
 
 
 import os
@@ -43,10 +43,8 @@ class md_dislocation(gn_config.bcc, gn_config.fcc, gn_config.hcp,
         #  self._alat = 3.16741543   # Mo
         #  W.set 3.1648492
 
-        print self.pot
         Intro_vasp.vasp_change_box.__init__(self, self.pot)
         gn_lmp_infile.gn_md_infile.__init__(self, self.pot)
-
         if self.structure == 'bcc':
             gn_config.bcc.__init__(self, self.pot)
 

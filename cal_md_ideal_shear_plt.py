@@ -3,11 +3,12 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-28 18:36:46
+# @Last Modified time: 2017-08-29 21:20:15
 
 
 from itertools import cycle
 from md_pot_data import unitconv
+from numpy import polyfit, polyval
 import numpy as np
 import plt_drv
 import os
@@ -78,9 +79,15 @@ class cal_bcc_ideal_shear_plt(object):
                       label='engy', **next(self.keysiter))
 
         if ptype in ['211']:
-            yy = raw[:, -3]
+            # yy = raw[:, -3]
+            yy = raw[:, -2]
         elif ptype in ['110']:
             yy = -raw[:, -1]
+
+        # call interp
+        ply = polyfit(raw[:, 0], yy, 2)
+        print polyval(ply, [0.08])
+
         self.ax2.plot(raw[:, 0], yy,
                       label='stress', **next(self.keysiter))
         self.add_legends(*axlist)

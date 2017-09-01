@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-04 20:53:50
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-28 22:18:32
+# @Last Modified time: 2017-08-29 21:16:18
 
 
 from md_pot_data import unitconv
@@ -92,7 +92,7 @@ class cal_bcc_ideal_shear_pos(object):
         vect[3], vect[4], vect[5] = mtx[0, 1], mtx[0, 2], mtx[1, 2]
         return vect
 
-    def qe_loop_stress(self, opt='clc', mtype='cal'):
+    def qe_loop_stress(self, opt='clc', mtype='out'):
         npts = self.npts
         if mtype in ['out']:
             data = np.ndarray([npts, 2 + 5 + 6])
@@ -104,9 +104,7 @@ class cal_bcc_ideal_shear_pos(object):
                 print dirname
                 if os.path.isdir(dirname):
                     os.chdir(dirname)
-                    raw = self.load_sfile_txt()
-                    raw[0] = 0.02 * i
-                    # raw = self.load_ishear_txt()
+                    raw = self.load_ishear_txt()
                     data[i, :7] = raw
                     # stress
                     if mtype in ['out']:

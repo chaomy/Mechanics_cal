@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:10:22
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-28 21:26:17
+# @Last Modified time: 2017-08-31 15:15:24
 
 
 import os
@@ -19,10 +19,19 @@ class md_crack_run(object):
         # self.Intro_Crack('cfg', self.crackcoeff)
         return
 
+    def cal_crack_anglecoeff(self):
+        self.set_plane_strain_bij()
+        self.get_scalarB()
+        self.get_coeffs()
+        s1 = self.ckcoeff.u1
+        s2 = self.ckcoeff.u2
+        return
+
     def static_crack(self):
         self.set_plane_strain_bij()
         self.get_scalarB()
         self.get_coeffs()
+
         # atoms = ase.io.read('bcc.00306.dump', format='lammps-dump')
         atoms = self.gn_perf_plate()
         atoms = self.intro_crack_k1(atoms=atoms)

@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-28 15:18:17
+# @Last Modified time: 2017-08-30 15:40:57
 
 
 import os
@@ -267,7 +267,6 @@ class cal_gsf(gn_config.bcc,
         print "unstable stacking fault {}: {}".format(self._gsf_surface_type, max(energy))
 
         if tag.lower() == "half":
-            #### get the data of half then use symmetry to plt full  ###
             npts = len(energy)
             fullnpts = 2 * npts - 1
             delta = 1. / (fullnpts - 1)

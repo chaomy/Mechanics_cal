@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:11:31
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-05 08:12:24
+# @Last Modified time: 2017-08-31 15:13:04
 
 
 import md_pot_data
@@ -28,10 +28,11 @@ class md_crack_ini(cal_md_crack_pre.md_crack_pre,
         cal_md_crack_uti.md_crack_uti.__init__(self)
         gn_config.bcc.__init__(self, self.pot)
         self.ckcoeff = cal_md_crack_uti.crack_coeff
-        self.set_params()
+        # self.set_params()
         return
 
-    def set_params(self):
+    def set_params(self, elasticconstants):
+        self.elastic = elasticconstants
         self.element = self.pot['element']
         self.surfe100, self.surfe110, self.surfe111 = \
             self.pot['surf100'], self.pot['surf110'], self.pot['surf111']

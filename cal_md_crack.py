@@ -1,19 +1,9 @@
 #!/usr/bin/env python
-# encoding: utf-8
-
-###################################################################
-#
-# File Name : ./cal_md_stat_crack.py
-#
-###################################################################
-#
-# Purpose :  introduce crack for md calculation (LAMMPS)
-#
-# Creation Date :
-# Last Modified : Sun Apr  9 20:20:57 2016
-# Created By    : Chaoming Yang
-#
-###################################################################
+# -*- coding: utf-8 -*-
+# @Author: chaomy
+# @Date:   2017-06-25 14:28:58
+# @Last Modified by:   chaomy
+# @Last Modified time: 2017-08-30 14:47:28
 
 from optparse import OptionParser
 import cal_md_crack_ini
@@ -22,7 +12,6 @@ import cal_md_crack_ini
 if __name__ == "__main__":
     usage = "usage:%prog [options] arg1 [options] arg2"
     parser = OptionParser(usage=usage)
-
     parser.add_option('-t', "--mtype", action="store",
                       type="string", dest="mtype", help="",
                       default="prp_r")
@@ -33,8 +22,9 @@ if __name__ == "__main__":
 
     (options, args) = parser.parse_args()
     drv = cal_md_crack_ini.md_crack_ini()
+    dispatcher = {'stat': drv.static_crack,
+                  'coeff': drv.cal_crack_anglecoeff}
 
-    dispatcher = {'stat': drv.static_crack}
     if options.fargs is not None:
         dispatcher[options.mtype.lower()](options.fargs)
     else:
