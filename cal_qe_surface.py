@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-31 22:44:07
+# @Last Modified time: 2017-08-31 22:53:37
 
 
 from optparse import OptionParser
@@ -84,6 +84,7 @@ class cal_surface(cal_qe_gsf.cal_gsf):
 
     def loop_pot_surf(self, intag='prep'):
         vcapots = {
+            'WTa50': md_pot_data.qe_pot.vca_W50Ta50,
             'WRe00': md_pot_data.qe_pot.pbe_w,
             'WRe05': md_pot_data.qe_pot.vca_W95Re05,
             'WRe10': md_pot_data.qe_pot.vca_W90Re10,

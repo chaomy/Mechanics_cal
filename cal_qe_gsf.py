@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-31 22:38:55
+# @Last Modified time: 2017-08-31 22:56:48
 
 
 from optparse import OptionParser
@@ -136,7 +136,7 @@ class cal_gsf(gn_config.bcc,
             if mtype in ['scf']:
                 self.gn_qe_scf_tf(local_atoms)
             elif mtype in ['relax']:
-                self.gn_qe_relax_tf(local_atoms)
+                self.gn_qe_relax_tf(local_atoms, 'xy')
 
             self.set_pbs(dirname)
             os.system("cp $POTDIR/{} . ".format(self.pot['file']))
