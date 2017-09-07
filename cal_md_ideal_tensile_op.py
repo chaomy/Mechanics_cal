@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-16 11:39:41
+# @Last Modified time: 2017-09-06 15:38:09
 
 
 import os
@@ -17,11 +17,12 @@ import gn_config
 import get_data
 import plt_drv
 import md_pot_data
+from md_pot_data import fluxdirs
 from scipy.optimize import minimize
 from optparse import OptionParser
 
 
-class cal_bcc_ideal_tensile_tp(get_data.get_data,
+class cal_bcc_ideal_tensile_op(get_data.get_data,
                                gn_pbs.gn_pbs,
                                plt_drv.plt_drv,
                                gn_config.bcc):
@@ -35,8 +36,8 @@ class cal_bcc_ideal_tensile_tp(get_data.get_data,
         gn_config.bcc.__init__(self, self.pot)
 
         self.alat = self.pot['lattice']
-        self.npts = 14
-        self.range = (0, 26)
+        self.npts = 12
+        self.range = (0, 12)
         self.delta = 0.02
         e1 = [1., 0., 0.]
         e2 = [0., 1., 0.]
@@ -48,18 +49,20 @@ class cal_bcc_ideal_tensile_tp(get_data.get_data,
         return
 
     def loop_collect_vasp(self):
-        dirlist = glob.glob("dir-*")
-        npts = len(dirlist)
+        npts = 30
         data = np.ndarray([npts, 10])
+        lat = 3.322404
+        sqrt2 = 2**(0.5)
         for i in range(npts):
-            # dirname = "dir-{:03d}".format(i)
-            dirname = dirlist[i]
-            print dirname
-            os.chdir(dirname)
-            raw = np.loadtxt("iten.txt")
+            mdir = "dir-{:4.3f}".format(0.01 * i)
+            print mdir
+            os.chdir(mdir)
             (engy, stress, vol) = self.vasp_energy_stress_vol()
-            os.chdir(self.root)
-            data[i, 0:4] = raw[0:4]
+            atoms = ase.io.read('CONTCAR', format='vasp')
+            os.chdir(os.pardir)
+            cell = atoms.get_cell() / lat
+            data[i, 0], data[i, 1], data[i, 2], data[i, 3] = \
+                cell[0, 0] - 1.0, engy, cell[1, 1] / sqrt2, cell[2, 2] / sqrt2
             data[i, 4:] = stress.transpose()
         np.savetxt("iten.txt", data)
         return
@@ -84,8 +87,7 @@ class cal_bcc_ideal_tensile_tp(get_data.get_data,
         data = np.ndarray([npts, 10])
         for i in range(npts):
             delta = self.delta * (self.range[0] + i)
-            res = minimize(self.runlmp, x0, delta,
-                           method='nelder-mead')
+            res = minimize(self.runlmp, x0, delta, method='Nelder-Mead')
             data[i][2], data[i][3] = res.x[0], res.x[1]
             x0 = res.x
             print res
@@ -120,8 +122,7 @@ class cal_bcc_ideal_tensile_tp(get_data.get_data,
         self.stress = raw[1:]
         return engy
 
-    def gn_op_convention_lmp(self, strain=np.mat(np.identity(3)),
-                             tag='lmp'):
+    def gn_op_convention_lmp(self, strain=np.mat(np.identity(3)), tag='lmp'):
         alat = self.alat
         bas = np.mat(np.mat([[1., 0., 0.],
                              [0, np.sqrt(2), 0.],
@@ -171,8 +172,7 @@ class cal_bcc_ideal_tensile_tp(get_data.get_data,
     def vasp_relax(self, given=True):
         (delta, x0) = self.load_input_params()
         data = np.zeros(10)
-        res = minimize(self.runvasp, x0, delta,
-                       method='Nelder-Mead', options={'fatol': 1e-3})
+        res = minimize(self.runvasp, x0, delta, method='Nelder-Mead')
         data[2], data[3] = res.x[0], res.x[1]
         data[0] = delta
         data[1] = res.fun
@@ -209,32 +209,34 @@ class cal_bcc_ideal_tensile_tp(get_data.get_data,
         os.system("mv va.pbs %s" % (dirname))
         return
 
+    def trans(self):
+        for i in range(30):
+            mdir = "dir-{:4.3f}".format(0.01 * i)
+            self.mymkdir(mdir)
+            fdir = fluxdirs['VA'] + \
+                'Nb/Tensile/OneTensileOpath100/{}'.format(mdir)
+            os.system('scp {}/OUTCAR {}'.format(fdir, mdir))
+            os.system('scp {}/CONTCAR {}'.format(fdir, mdir))
+        return
+
 
 if __name__ == '__main__':
     usage = "usage:%prog [options] arg1 [options] arg2"
     parser = OptionParser(usage=usage)
-    parser.add_option('-t', "--mtype",
-                      action="store",
-                      type="string",
-                      dest="mtype",
-                      default="prp_r")
-
-    parser.add_option('-c', "--delta",
-                      action="store",
-                      type='float', dest="delta",
-                      default=0.02)
+    parser.add_option('-t', "--mtype", action="store",
+                      type="string", dest="mtype")
+    parser.add_option('-p', "--param", action="store",
+                      type='float', dest="fargs")
 
     (options, args) = parser.parse_args()
-    drv = cal_bcc_ideal_tensile_tp()
-    if options.mtype.lower() == 'ilmp':
-        drv.loop_tensile_lmp()
+    drv = cal_bcc_ideal_tensile_op()
+    dispatcher = {'ilmp': drv.loop_tensile_lmp,
+                  'ivasp': drv.vasp_relax,
+                  'clcva': drv.loop_collect_vasp,
+                  'restart': drv.loop_prep_restart,
+                  'trans': drv.trans}
 
-    if options.mtype.lower() == 'ivasp':
-        drv.vasp_relax()
-
-    if options.mtype.lower() == 'clcvasp':
-        drv.loop_collect_vasp()
-
-    if options.mtype.lower() in ['qe_restart', 'va_restart']:
-        opt = options.mtype.lower().split('_')[0]
-        drv.loop_prep_restart(opt)
+    if options.fargs is not None:
+        dispatcher[options.mtype.lower()](options.fargs)
+    else:
+        dispatcher[options.mtype.lower()]()

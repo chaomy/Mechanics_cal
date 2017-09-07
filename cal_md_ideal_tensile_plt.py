@@ -3,13 +3,13 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-16 12:48:24
+# @Last Modified time: 2017-09-06 15:48:21
 
-import matplotlib.pylab as plt
+from optparse import OptionParser
 from itertools import cycle
+import matplotlib.pylab as plt
 import numpy as np
 import plt_drv
-import os
 
 
 class cal_md_ideal_tensile_plt(plt_drv.plt_drv):
@@ -47,33 +47,14 @@ class cal_md_ideal_tensile_plt(plt_drv.plt_drv):
                          **self.figsave)
         return
 
-    def plt_energy_stress_ishear(self, fname='stress.txt'):
-        til = os.getcwd().split('/')[-1].split('_')[-2:]
-        raw = np.loadtxt(fname)
-        ylabeliter = cycle(['E [eV]', r'$\tau$ [Gpa]'])
-        self.set_keys()
-        self.set_211plt()
-        axlist = [self.ax1, self.ax2]
-        self.ax1.plot(raw[:, 0], (raw[:, 1] - raw[0, 1]),
-                      label='engy', **next(self.keysiter))
-        self.ax2.plot(raw[:, 0], raw[:, -1],
-                      label='stress', **next(self.keysiter))
-        self.add_legends(*axlist)
-        self.set_tick_size(*axlist)
-        self.add_y_labels(ylabeliter, *axlist)
-        self.add_x_labels(cycle([r'$\epsilon$']), self.ax2)
-        self.ax1.set_title('{} {}'.format(*til), fontsize=self.myfontsize)
-        self.fig.savefig("fig-ishear.png", **self.figsave)
-        return
-
-    def plt_energy_stress(self, fname='ishear.txt'):
+    def plt_energy_stress(self, fname='iten.txt'):
         self.set_211plt()
         raw = np.loadtxt(fname)
         raw = raw[raw[:, 0].argsort()]
         ylabeliter = cycle(['dE', 'Sxx', 'Syy', 'Szz'])
         self.ax1.plot(raw[:, 0], (raw[:, 1] - raw[0, 1]),
                       label='engy', **next(self.keysiter))
-        self.ax2.plot(raw[:, 0], -(raw[:, 4]),
+        self.ax2.plot(raw[:, 0], -raw[:, 4],
                       label='sxx', **next(self.keysiter))
         self.add_legends(*self.axlist)
         self.add_y_labels(ylabeliter, *self.axlist)
@@ -94,15 +75,11 @@ class cal_md_ideal_tensile_plt(plt_drv.plt_drv):
             pot = potlist[i]
             fname = 'stress.txt.{}'.format(pot)
             raw = np.loadtxt(fname)
-            self.ax1.plot(raw[:, 0],
-                          (raw[:, 1] - raw[0, 1]),
-                          label=pot,
-                          **self.keyslist[i])
+            self.ax1.plot(raw[:, 0], (raw[:, 1] - raw[0, 1]),
+                          label=pot, **self.keyslist[i])
             self.ax1.legend(**self.legendarg)
-            self.ax2.plot(raw[:, 0],
-                          (raw[:, -1] - raw[0, -1]),
-                          label=pot,
-                          **self.keyslist[i + 2])
+            self.ax2.plot(raw[:, 0], (raw[:, -1] - raw[0, -1]),
+                          label=pot, **self.keyslist[i + 2])
             self.ax2.legend(**self.legendarg)
         plt.xlabel('strain', {'fontsize': self.myfontsize})
         self.fig.savefig("stress_cmp.png", **self.figsave)
@@ -184,3 +161,21 @@ class cal_md_ideal_tensile_plt(plt_drv.plt_drv):
         self.set_tick_size(*self.axlist)
         self.fig.savefig('fig-iten-cmp.png', **self.figsave)
         return
+
+
+if __name__ == '__main__':
+    usage = "usage:%prog [options] arg1 [options] arg2"
+    parser = OptionParser(usage=usage)
+    parser.add_option('-t', "--mtype", action="store",
+                      type="string", dest="mtype")
+    parser.add_option('-p', "--param", action="store",
+                      type='float', dest="fargs")
+    (options, args) = parser.parse_args()
+    drv = cal_md_ideal_tensile_plt()
+    dispatcher = {'pltengy': drv.plt_energy_stress,
+                  'adj': drv.adjust_data_format,
+                  'cmp': drv.cmp_plt}
+    if options.fargs is not None:
+        dispatcher[options.mtype.lower()](options.fargs)
+    else:
+        dispatcher[options.mtype.lower()]()

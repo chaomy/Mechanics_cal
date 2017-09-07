@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-31 23:21:29
+# @Last Modified time: 2017-09-06 14:05:28
 
 
 from optparse import OptionParser
@@ -41,7 +41,6 @@ class cal_gsf(gn_config.bcc,
     def __init__(self,
                  pot=md_pot_data.qe_pot.pbe_w,
                  mgsf='x111z110'):
-
         self.pot = pot
         self.mgsf = mgsf
         cal_sub.subjobs.__init__(self)
@@ -202,11 +201,10 @@ if __name__ == '__main__':
     parser = OptionParser(usage=usage)
     parser.add_option('-t', "--mtype", action="store",
                       type="string", dest="mtype")
-
     parser.add_option('-p', "--param", action="store",
                       type='string', dest="fargs")
-
     (options, args) = parser.parse_args()
+
     drv = cal_gsf()
     dispatcher = {'prep': drv.gn_qe_single_dir_gsf,
                   'loopprep': drv.loop_pot_gsf,

@@ -1,21 +1,14 @@
 #!/usr/bin/env python
 # encoding: utf-8
+# -*- coding: utf-8 -*-
+# @Author: yang37
+# @Date:   2017-06-12 17:03:43
+# @Last Modified by:   chaomy
+# @Last Modified time: 2017-09-06 11:17:07
 
-###################################################################
-#
-# File Name : cal_md_bcc_basic.py
-#
-###################################################################
-#
-# Purpose :
-#
-# Creation Date :
-# Last Modified :
-# Created By    : Chaoming Yang
-#
-###################################################################
 
 from optparse import OptionParser
+from os import popen
 import ase
 import ase.io
 import os
@@ -99,13 +92,13 @@ class cal_md_bcc_basic(gn_config.hcp,
 
     def cal_lattice(self, potname='pot.dat'):
         pot = md_pot_data.md_pot.Nb_adp
-        os.system("lmp_mpi -i in.bcc_adp")
+        popen("lmp_mpi -i in.bcc_adp")
         data = np.loadtxt("out.txt")
         pot['latbcc'], pot['ebcc'] = data[0], data[1]
-        os.system("lmp_mpi -i in.fcc_adp")
+        popen("lmp_mpi -i in.fcc_adp")
         data = np.loadtxt("out.txt")
         pot['latfcc'], pot['efcc'] = data[0], data[1]
-        os.system("lmp_mpi -i in.hcp_adp")
+        popen("lmp_mpi -i in.hcp_adp")
         data = np.loadtxt("out.txt")
         pot['ahcp'], pot['chcp'], pot['ehcp'] = data[0], data[1], data[2]
 

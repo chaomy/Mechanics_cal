@@ -1,3 +1,26 @@
+Sep 02
+
+/Users/yangchaoming/src/potfitadp/src/types.h
+/Users/yangchaoming/src/potfitadp/src/mpi_utils.c
+/Users/yangchaoming/src/potfitadp/src/force_adp.c
+/Users/yangchaoming/src/potfitadp/src/potential_output_lammps.c
+/Users/yangchaoming/src/potfitadp/src/potential_output.c
+/Users/yangchaoming/src/potfitadp/src/force_adp_tmp.c
+/Users/yangchaoming/src/potfitadp/src/functions.itm
+/Users/yangchaoming/src/potfitadp/src/force_eam.c
+/Users/yangchaoming/src/potfitadp/src/force_tersoff.c
+/Users/yangchaoming/src/potfitadp/src/force_meam.c
+/Users/yangchaoming/src/potfitadp/src/force_eam_elstat.c
+/Users/yangchaoming/src/potfitadp/src/force_stiweb.c
+/Users/yangchaoming/src/potfitadp/src/potential_output_imd.c
+/Users/yangchaoming/src/potfitadp/src/rescale_meam.c1,  
+
+
+
+Sep 01 
+1, generate new file
+2, 
+
 Aug 29 
 1, find out the K1 K2 K3 by in Ansotropic elasticity 
 2, calculate K1e K2e 

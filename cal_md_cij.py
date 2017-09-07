@@ -1,37 +1,23 @@
 #!/usr/bin/env python
 # encoding: utf-8
+# -*- coding: utf-8 -*-
+# @Author: yang37
+# @Date:   2017-06-12 17:03:43
+# @Last Modified by:   chaomy
+# @Last Modified time: 2017-09-06 12:58:37
 
-###################################################################
-#
-# File Name : ./cal_md_cij.py
-#
-###################################################################
-#
-# Purpose :  calculate md cij
-#
-# Creation Date :
-# Last Modified : Thu Mar 30 23:56:50 2017
-# Created By    : Chaoming Yang
-#
-###################################################################
 
+from optparse import OptionParser
 import os
-try:
-    from optparse import OptionParser
-    import get_data
-    import gn_lmp_infile
-    import gn_config
-    import md_pot_data
-
-except ImportError:
-    print "error during import"
+import get_data
+import gn_lmp_infile
+import gn_config
+import md_pot_data
 
 
 class cal_md_cij(get_data.get_data,
                  gn_lmp_infile.gn_md_infile,
-                 gn_config.bcc,
-                 gn_config.fcc,
-                 gn_config.hcp):
+                 gn_config.bcc):
 
     def __init__(self, pot=md_pot_data.md_pot.Nb_eam):
         get_data.get_data.__init__(self)
@@ -40,15 +26,8 @@ class cal_md_cij(get_data.get_data,
         self._structure = self.pot['structure']
         self._lattice_constant = self.pot['lattice']
         self._cij_potential = self.pot['file']
-
         gn_lmp_infile.gn_md_infile.__init__(self, self.pot)
-
-        if self._structure == 'bcc':
-            gn_config.bcc.__init__(self, self.pot)
-        elif self._structure == 'fcc':
-            gn_config.fcc.__init__(self, self.pot)
-        elif self._structure == 'hcp':
-            gn_config.hcp.__init__(self, self.pot)
+        gn_config.bcc.__init__(self, self.pot)
 
         self.set_lattce_constant(self._lattice_constant)
         self.root_dir = os.getcwd()
@@ -73,9 +52,7 @@ class cal_md_cij(get_data.get_data,
         os.chdir(miu_dir)
 
         self.write_lmp_config_data(atoms)
-
-        self.gn_md_shear_lattice("lmp_init.txt",
-                                 temp,
+        self.gn_md_shear_lattice("lmp_init.txt", temp,
                                  self._cij_potential,
                                  self._cij_element)
 
@@ -104,9 +81,8 @@ if __name__ == '__main__':
     parser.add_option("-t", "--mtype",
                       action="store",
                       type="string",
-                      dest="mtype",
-                      help="",
-                      default="read")
+                      dest="mtype")
+
     (options, args) = parser.parse_args()
     drv = cal_md_cij()
     print drv.cal_elastic_constant()

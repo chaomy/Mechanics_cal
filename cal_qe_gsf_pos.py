@@ -3,32 +3,51 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-31 21:39:28
+# @Last Modified time: 2017-09-06 00:46:57
 
 
 from itertools import cycle
 from numpy import arange, min, max
 from numpy import loadtxt, savetxt, ndarray
+from numpy import append, savetxt, arange
 from md_pot_data import fluxdirs
 import os
 
 
+# dirtree = {'x111z110': {
+#     '00': 'Bcc_QE_VCA_WRe00_gsfx111z110',
+#     '05': 'Bcc_QE_VCA_WRe05_gsfx111z110',
+#     '10': 'Bcc_QE_VCA_WRe10_gsfx111z110',
+#     '15': 'Bcc_QE_VCA_WRe15_gsfx111z110',
+#     '20': 'Bcc_QE_VCA_WRe20_gsfx111z110',
+#     '25': 'Bcc_QE_VCA_WRe25_gsfx111z110',
+#     '50': 'Bcc_QE_VCA_WRe50_gsfx111z110'
+# }, 'x111z112': {
+#     '00': 'Bcc_QE_VCA_WRe00_gsfx111z112',
+#     '05': 'Bcc_QE_VCA_WRe05_gsfx111z112',
+#     '10': 'Bcc_QE_VCA_WRe10_gsfx111z112',
+#     '15': 'Bcc_QE_VCA_WRe15_gsfx111z112',
+#     '20': 'Bcc_QE_VCA_WRe20_gsfx111z112',
+#     '25': 'Bcc_QE_VCA_WRe25_gsfx111z112',
+#     '50': 'Bcc_QE_VCA_WRe50_gsfx111z112'}
+# }
+
 dirtree = {'x111z110': {
-    '00': 'Bcc_QE_VCA_WRe00_gsfx111z110',
-    '05': 'Bcc_QE_VCA_WRe05_gsfx111z110',
-    '10': 'Bcc_QE_VCA_WRe10_gsfx111z110',
-    '15': 'Bcc_QE_VCA_WRe15_gsfx111z110',
-    '20': 'Bcc_QE_VCA_WRe20_gsfx111z110',
-    '25': 'Bcc_QE_VCA_WRe25_gsfx111z110',
-    '50': 'Bcc_QE_VCA_WRe50_gsfx111z110'
+    '00': 'Bcc_WRe00_gsfx111z110',
+    '05': 'Bcc_WRe05_gsfx111z110',
+    '10': 'Bcc_WRe10_gsfx111z110',
+    '15': 'Bcc_WRe15_gsfx111z110',
+    '20': 'Bcc_WRe20_gsfx111z110',
+    '25': 'Bcc_WRe25_gsfx111z110',
+    '50': 'Bcc_WRe50_gsfx111z110'
 }, 'x111z112': {
-    '00': 'Bcc_QE_VCA_WRe00_gsfx111z112',
-    '05': 'Bcc_QE_VCA_WRe05_gsfx111z112',
-    '10': 'Bcc_QE_VCA_WRe10_gsfx111z112',
-    '15': 'Bcc_QE_VCA_WRe15_gsfx111z112',
-    '20': 'Bcc_QE_VCA_WRe20_gsfx111z112',
-    '25': 'Bcc_QE_VCA_WRe25_gsfx111z112',
-    '50': 'Bcc_QE_VCA_WRe50_gsfx111z112'}
+    '00': 'Bcc_WRe00_gsfx111z112',
+    '05': 'Bcc_WRe05_gsfx111z112',
+    '10': 'Bcc_WRe10_gsfx111z112',
+    '15': 'Bcc_WRe15_gsfx111z112',
+    '20': 'Bcc_WRe20_gsfx111z112',
+    '25': 'Bcc_WRe25_gsfx111z112',
+    '50': 'Bcc_WRe50_gsfx111z112'}
 }
 
 
@@ -45,14 +64,14 @@ class cal_qe_gsf_pos(object):
         return
 
     def transdata(self, ptype='scp'):
-        disps = arange(0.02, 1., 0.04)
-        tag = '20'
+        disps = arange(0.34, 0.66, 0.04)
+        tag = '05'
         for disp in disps:
             mdir = 'dir-{}-{:4.3f}'.format(self.mgsf, disp)
             self.mymkdir(mdir)
             if ptype in ['scp']:
                 fdir = fluxdirs['QE'] + \
-                    'VC_WRe/Bcc_QE_VCA_WRe_unrelaxgsf/{}/'.format(
+                    'VC_WRe/Bcc_QE_VCA_WRe_relaxgsf/Finish/{}/'.format(
                         dirtree[self.mgsf][tag])
                 os.system('scp {}/{}/qe.out {}'.format(fdir, mdir, mdir))
                 os.system('scp {}/{}/qe.in {}'.format(fdir, mdir, mdir))
@@ -72,6 +91,28 @@ class cal_qe_gsf_pos(object):
                 dirtree[self.mgsf][tag])
         os.system('scp {}/{}/qe.out {}'.format(fdir, mdir, mdir))
         os.system('scp {}/{}/qe.in {}'.format(fdir, mdir, mdir))
+        return
+
+    def clc_qe_gsf_engy(self, fname='gsf'):
+        disps = 0.0
+        disps = append(disps, arange(0.34, 0.66, 0.04))
+        disps = append(disps, 1.0)
+        npts = len(disps)
+        data = ndarray([npts, 4])
+        for i, disp in zip(range(npts), disps):
+            if disp == 1:
+                dirname = 'dir-{}-{:4.3f}'.format(self.mgsf, 0.0)
+            else:
+                dirname = 'dir-{}-{:4.3f}'.format(self.mgsf, disp)
+            os.chdir(dirname)
+            print dirname
+            # print(self.qe_get_cell())
+            data[i, 0] = i
+            data[i, 1] = disp
+            data[i, 2] = self.cal_xy_area()
+            data[i, 3] = self.qe_get_energy_stress()[0]
+            os.chdir(os.pardir)
+        savetxt('gsf.dat', data)
         return
 
     def loop_plt_gsf(self):

@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-31 23:25:27
+# @Last Modified time: 2017-09-06 03:34:41
 
 
 import numpy as np
@@ -41,28 +41,6 @@ class cal_qe_gsf_pre(object):
             fid = self.qe_write_pos(fid, atoms)
             fid = self.qe_write_kpts(fid, (5, 5, 1))
             fid.close()
-        return
-
-    def clc_qe_gsf_engy(self, fname='gsf'):
-        disps = 0.0
-        disps = np.append(disps, np.arange(0.02, 1.00, 0.04))
-        disps = np.append(disps, 1.0)
-        npts = len(disps)
-        data = np.ndarray([npts, 4])
-        for i, disp in zip(range(npts), disps):
-            if disp == 1:
-                dirname = 'dir-{}-{:4.3f}'.format(self.mgsf, 0.0)
-            else:
-                dirname = 'dir-{}-{:4.3f}'.format(self.mgsf, disp)
-            os.chdir(dirname)
-            print dirname
-            # print(self.qe_get_cell())
-            data[i, 0] = i
-            data[i, 1] = disp
-            data[i, 2] = self.cal_xy_area()
-            data[i, 3] = self.qe_get_energy_stress()[0]
-            os.chdir(os.pardir)
-        np.savetxt('gsf.dat', data)
         return
 
     def loop_pot_gsf(self, tag='prep'):

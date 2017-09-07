@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-21 18:42:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-15 22:47:26
+# @Last Modified time: 2017-09-04 20:04:31
 
 
 from optparse import OptionParser
@@ -36,7 +36,6 @@ class cal_md_thermo(gn_config.hcp,
         self._pot = md_pot_data.md_pot.Nb_adp
         self._element = self._pot['element']
         self._pottype = self._pot['pair_style']
-
         self._size = np.array([16, 16, 16])
         self.set_lat('pot')
         self.unit_atoms = \
@@ -47,7 +46,6 @@ class cal_md_thermo(gn_config.hcp,
                                                 size=(1, 1, 1),
                                                 symbol=self._element,
                                                 pbc=(1, 1, 1))
-
         self.root = os.getcwd()
         gn_config.bcc.__init__(self, self._pot)
         plt_drv.plt_drv.__init__(self)

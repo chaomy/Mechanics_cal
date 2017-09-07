@@ -1,19 +1,11 @@
 #!/usr/bin/env python
 # encoding: utf-8
+# -*- coding: utf-8 -*-
+# @Author: yang37
+# @Date:   2017-06-12 17:03:43
+# @Last Modified by:   chaomy
+# @Last Modified time: 2017-09-06 11:27:30
 
-###################################################################
-#
-# File Name : ./mpi_md_tensile.py
-#
-###################################################################
-#
-# Purpose :  multithreads to calculate md tensile
-#
-# Creation Date :
-# Last Modified : Thu Mar 30 23:56:50 2017
-# Created By    : Chaoming Yang
-#
-###################################################################
 
 import copy
 import os
@@ -44,8 +36,7 @@ class md_tensile(get_data.get_data,
                  gn_lmp_infile.gn_md_infile):
 
     def __init__(self, element,
-                 lattice_constant,
-                 size,
+                 lattice_constant, size,
                  orientation, structure):
 
         get_data.get_data.__init__(self)
@@ -71,11 +62,8 @@ class md_tensile(get_data.get_data,
                                         dtype="float")
         return
 
-    def update_strain(self,
-                      Inputstrain,
-                      stress,
-                      Correct_strain):
-
+    def update_strain(self, Inputstrain,
+                      stress, Correct_strain):
         addedstrain = copy.deepcopy(self.addedstrain)
 
         if abs(stress[1]) > self._stress_ThrValue:
@@ -84,7 +72,6 @@ class md_tensile(get_data.get_data,
         if abs(stress[2]) > self._stress_ThrValue:
             addedstrain[2, 2] = Inputstrain[2]
             Correct_strain[2, 2] += addedstrain[2, 2]
-
         return Correct_strain
 
     def gn_bcc_tpath(self,
@@ -381,9 +368,9 @@ class md_loop_tensile(md_tensile):
                               [0, 1, 0],
                               [0, 0, 1]],
                  structure='bcc',
-                 in_potential='dummy.lammps.EAM'):
+                 in_potential='dummy.lammps.ADP'):
 
-        self._flux_exe = 'lmp_linux < in.stat_tensile'
+        self._flux_exe = 'lmp_mpi < in.stat_tensile'
 
         self._looptime = 10
         self._increment = 0.02
@@ -558,7 +545,6 @@ class md_loop_tensile(md_tensile):
         for i in range(self._looptime):
             strain.append(results[i][0])
             stress.append(results[i][1])
-
         return (strain, stress)
 
     def output_log(self, strain, stresstp, stressop):
@@ -580,16 +566,14 @@ class md_loop_tensile(md_tensile):
 
 
 if __name__ == "__main__":
-    makePot = "dummy.lammps.EAM"
+    makePot = "dummy.lammps.ADP"
     givenPot = "Nb.eam.alloy.webarchive"
-
     M = md_loop_tensile(element='Nb',
-                        lattice_constant=3.30790,
+                        lattice_constant=3.34349187552591,
                         size=[1, 1, 1],
                         orientation=[1, 0, 0, 0, 1, 0],
                         structure='bcc',
-                        in_potential=givenPot)
-
+                        in_potential=makePot)
     (strain, stress) = M.cal_md_tensile('TP')
     (strain2, stress2) = M.cal_md_tensile('OP')
     M.output_log(strain, stress, stress2)

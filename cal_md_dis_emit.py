@@ -3,11 +3,11 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-31 15:31:41
+# @Last Modified time: 2017-09-07 10:29:13
 
 
 import axes_check
-from numpy import cos, sin, sqrt, abs
+from numpy import cos, sin, sqrt
 from collections import OrderedDict
 import numpy as np
 import md_pot_data
@@ -15,6 +15,7 @@ import tool_elastic_constants
 import stroh_solve
 import cal_md_dislocation
 import cal_md_crack_ini
+
 
 matconsts = OrderedDict([('Al1', {'lat': 4.05,
                                   'ugsf': 0.167,
@@ -82,7 +83,35 @@ vcaw = OrderedDict([('WRe00', {'lat': 3.17093,
                                'c11': 528.780194,
                                'c12': 217.275650,
                                'c44': 191.632656,
-                               'surf': 1.4019})])
+                               'surf': 1.4019}),
+                    ('Ta', {'lat': 3.321,
+                            'ugsf1': 1.000,
+                            'ugsf2': 0.840,
+                            'c11': 247,
+                            'c12': 170,
+                            'c44': 67,
+                            'surf': 2.27}),
+                    ('Nb', {'lat': 3.3224040,
+                            'ugsf1': 0.772,   # 211
+                            'ugsf2': 0.677,   # 110
+                            'c11': 246,
+                            'c12': 137,
+                            'c44': 20,
+                            'surf': 2.255}),
+                    ('Nbcite', {'lat': 3.309,
+                                'ugsf1': 0.823,
+                                'ugsf2': 0.705,
+                                'c11': 251,
+                                'c12': 133,
+                                'c44': 22,
+                                'surf': 2.36}),
+                    ('Mo', {'lat': 3.169,
+                            'ugsf1': 0.835,  # 211
+                            'ugsf2': 0.719,  # 110
+                            'c11': 462,
+                            'c12': 163,
+                            'c44': 102,
+                            'surf': 3.204})])
 
 
 class cal_dis_emit(object):
@@ -107,11 +136,12 @@ class cal_dis_emit(object):
         return
 
     def loop_table(self):
-        data = np.ndarray([6, 4])
-        for key, i in zip(vcaw.keys(), range(6)):
+        npts = 10
+        data = np.ndarray([npts, 3])
+        for key, i in zip(vcaw.keys(), range(npts)):
             print key
             data[i, 0] = 0.05 * i
-            data[i, 1:] = self.get_bcc_w_result(vcaw[key])
+            data[i, 1:] = self.get_bcc_w_result110(vcaw[key])
         np.savetxt('vcaw_112_Ke.txt', data)
         return
 
@@ -141,8 +171,8 @@ class cal_dis_emit(object):
         axes = np.array([[-1, -1, 2],
                          [1, 1, 1],
                          [-1, 1, 0]])
-
         burgers = param['lat'] / np.sqrt(6.) * np.array([-1., -1., 2.])
+
         stroh = stroh_solve.Stroh(c, burgers, axes=axes)
 
         A = np.mat(np.zeros([3, 3]), dtype='complex')
@@ -162,12 +192,10 @@ class cal_dis_emit(object):
         v2 = np.array([1, 1, 2])
         theta = (np.arccos(np.dot(v1, v2) /
                            (np.linalg.norm(v1) * np.linalg.norm(v2))))
-
         omega = np.mat([[cos(theta), sin(theta), 0.0],
                         [-sin(theta), cos(theta), 0.0],
                         [0.0, 0.0, 1.0]])
-
-        # Gamma = omega * Gamma * omega
+        Gamma = omega * Gamma * omega.transpose()
         # phi = 0
         # svect = np.mat(np.array([cos(phi), 0.0, sin(phi)]))
         Gamma = np.linalg.inv(Gamma)
@@ -185,7 +213,6 @@ class cal_dis_emit(object):
             c = c.transform(axes)
 
         (coeff, Kg) = self.cal_crack(param, c)
-
         print(cos(0.5 * theta))**2 * sin(0.5 * theta)
         print coeff
 
@@ -195,21 +222,19 @@ class cal_dis_emit(object):
         # / Fmat2[1], k2e / cos(theta)
         return
 
-    def get_bcc_w_result(self, param):
+    def get_bcc_w_result211(self, param):
         c = tool_elastic_constants.elastic_constants(
             C11=param['c11'],
             C12=param['c12'],
             C44=param['c44'])
-
         e1 = [1, 0, 0]
         e2 = [0, 1, -1]
         e3 = [0, 1, 1]
-
         # glide plane [2, 1, -1]
         axes = np.array([e1, e2, e3])
-
         # x [1, 0, 0], y[0, 1, -1], z[0, 1, 1]
         burgers = param['lat'] / 2. * np.array([-1., 1., -1.])
+
         stroh = stroh_solve.Stroh(c, burgers, axes=axes)
         A = np.mat(np.zeros([3, 3]), dtype='complex')
         A[:, 0] = np.mat(stroh.A[0]).transpose()
@@ -225,6 +250,10 @@ class cal_dis_emit(object):
         Gamma = 0.5 * Linv
 
         theta = np.deg2rad(54.735610317245346)
+        omega = np.mat([[cos(theta), sin(theta), 0.0],
+                        [-sin(theta), cos(theta), 0.0],
+                        [0.0, 0.0, 1.0]])
+        Gamma = omega * Gamma * omega.transpose()
 
         Gamma = np.abs(np.linalg.inv(Gamma))
         Gamma = Gamma * 1e9  # Pa
@@ -245,10 +274,71 @@ class cal_dis_emit(object):
 
         # Gamma = (svect * Gamma * svect.transpose())[0, 0]  # in GPa
         G00 = Gamma[0, 0]
-        k2e = np.sqrt(G00 * usf) * 1e-6
-        k1e = k2e / coeff
-        print k1e, k2e, k1c
-        return (k1e, k2e, k1c)
+        k1e = np.sqrt(G00 * usf) * 1e-6
+        k1e = k1e / coeff
+        print k1e, k1c
+        return (k1e, k1c)
+
+    def get_bcc_w_result110(self, param):
+        c = tool_elastic_constants.elastic_constants(
+            C11=param['c11'],
+            C12=param['c12'],
+            C44=param['c44'])
+        e1 = [1, 0, 0]
+        e2 = [0, 1, -1]
+        e3 = [0, 1, 1]
+        # glide plane [2, 1, -1]
+        axes = np.array([e1, e2, e3])
+        # x [1, 0, 0], y[0, 1, -1], z[0, 1, 1]
+        burgers = param['lat'] / 2. * np.array([-1., 1., -1.])
+
+        stroh = stroh_solve.Stroh(c, burgers, axes=axes)
+        A = np.mat(np.zeros([3, 3]), dtype='complex')
+        A[:, 0] = np.mat(stroh.A[0]).transpose()
+        A[:, 1] = np.mat(stroh.A[2]).transpose()
+        A[:, 2] = np.mat(stroh.A[4]).transpose()
+
+        B = np.mat(np.zeros([3, 3]), dtype='complex')
+        B[:, 0] = np.mat(stroh.L[0]).transpose()
+        B[:, 1] = np.mat(stroh.L[2]).transpose()
+        B[:, 2] = np.mat(stroh.L[4]).transpose()
+
+        Linv = np.real(np.complex(0, 1) * A * np.linalg.inv(B))
+        Gamma = 0.5 * Linv
+
+        theta = np.deg2rad(90.0)
+        omega = np.mat([[cos(theta), sin(theta), 0.0],
+                        [-sin(theta), cos(theta), 0.0],
+                        [0.0, 0.0, 1.0]])
+
+        Gamma = omega * Gamma * omega.transpose()
+
+        Gamma = np.abs(np.linalg.inv(Gamma))
+        Gamma = Gamma * 1e9  # Pa
+
+        # K1c
+        G11 = Gamma[1, 1]
+        surf = param['surf']
+        k1c = sqrt(2 * surf / G11) * 1e6
+
+        # Ke
+        phi = np.deg2rad(90 - 54.735610317245346)
+        svect = np.mat(np.array([cos(phi), 0.0, sin(phi)]))
+        Gamma = (svect * Gamma * svect.transpose())[0, 0]  # in GPa
+
+        if axes is not None:
+            T = axes_check.axes_check(axes)
+            burgers = T.dot(burgers)
+            c = c.transform(axes)
+
+        (coeff, Kg) = self.cal_crack(param, c)
+        usf = param['ugsf2']  # J/m^2
+
+        G00 = Gamma
+        k1e = np.sqrt(G00 * usf) * 1e-6 / svect[0, 0]
+        k1e = k1e / coeff
+        print k1e, k1c
+        return (k1e, k1c)
 
     # def get_cutin_result_mat_k2e(self, param):
     #     c = tool_elastic_constants.elastic_constants(
@@ -308,7 +398,6 @@ class cal_dis_emit(object):
     #     k2e = np.sqrt(Gamma00 * param['ugsf']) * 1e-6   # Mpa
     #     print 'k2e', k2e
     #     return
-
 #       np.rad2deg(np.arccos(np.dot(v1, v2)/( np.linalg.norm(v1) * np.linalg.norm(v2) )))
 
 

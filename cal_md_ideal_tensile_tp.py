@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-16 12:03:56
+# @Last Modified time: 2017-09-06 15:43:50
 
 
 import os
@@ -12,27 +12,29 @@ import ase.io
 import ase.lattice
 import gn_pbs
 import numpy as np
+import md_pot_data
 import gn_config
 import get_data
-import md_pot_data
-from scipy.optimize import minimize
 import cal_md_ideal_tensile_plt
+from scipy.optimize import minimize
 from optparse import OptionParser
+from md_pot_data import fluxdirs
+from glob import glob
 
 
 class cal_bcc_ideal_tensile_tp(get_data.get_data,
-                               gn_pbs.gn_pbs,
-                               gn_config.bcc):
+                               gn_pbs.gn_pbs, gn_config.bcc):
 
-    def __init__(self):
-        # self.pot = self.load_data('../pot.dat')
-        self.pot = md_pot_data.md_pot.Nb_adp
+    def __init__(self, pot=None):
+        if pot is None:
+            self.pot = md_pot_data.md_pot.Nb_adp
+        else:
+            self.pot = self.pot
         gn_pbs.gn_pbs.__init__(self)
         get_data.get_data.__init__(self)
         gn_config.bcc.__init__(self, self.pot)
-
         self.alat = self.pot['lattice']
-        self.range = (20, 26)
+        self.range = (0, 5)
         self.npts = self.range[1] - self.range[0]
         self.delta = 0.02
         e1 = [1., 0., 0.]
@@ -40,7 +42,6 @@ class cal_bcc_ideal_tensile_tp(get_data.get_data,
         e3 = [0., 0., 1.]
         self.basis = np.mat([e1, e2, e3])
         self.stress = None
-        self.root = os.getcwd()
         return
 
     def loop_tensile_lmp(self):
@@ -50,8 +51,7 @@ class cal_bcc_ideal_tensile_tp(get_data.get_data,
         for i in range(npts):
             delta = self.delta * (self.range[0] + i)
             res = minimize(self.runlmp, x0, delta,
-                           method='Nelder-Mead',
-                           options={'fatol': 1e-4, 'disp': True})
+                           method='Nelder-Mead')
             x0 = res.x
             print res
             data[i][0] = delta
@@ -135,33 +135,43 @@ class cal_bcc_ideal_tensile_tp(get_data.get_data,
         np.savetxt("iten.txt", data)
         return
 
-    def set_pbs(self, dirname, delta):
+    def set_pbs(self, mdir, delta):
         self.set_nnodes(1)
         self.set_ppn(12)
-        self.set_job_title("%s" % (dirname))
+        self.set_job_title("%s" % (mdir))
         self.set_wall_time(50)
         self.set_main_job("""
         python ~/My_cal/Mechnical_cal/cal_md_ideal_tensile.py  -t  ivasp
                           """)
         self.write_pbs(od=False)
-        os.system("mv va.pbs %s" % (dirname))
+        os.system("mv va.pbs %s" % (mdir))
+        return
+
+    def trans(self):
+        for i in range(40):
+            mdir = "dir-{:4.3f}".format(0.01 * i)
+            self.mymkdir(mdir)
+            fdir = fluxdirs['VA'] + \
+                'Nb/Tensile/OneTensileTpath100/{}'.format(mdir)
+            # os.system('scp {}/OUTCAR {}'.format(fdir, mdir))
+            os.system('scp {}/CONTCAR {}'.format(fdir, mdir))
         return
 
     def loop_prep_restart(self, opt='va'):
         raw = np.mat(np.loadtxt("iten.txt"))
         for i in range(len(raw)):
-            dirname = "dir-{:03d}".format(i)
-            self.mymkdir(dirname)
+            mdir = "dir-{:03d}".format(i)
+            self.mymkdir(mdir)
             np.savetxt("restart.txt", raw[i])
             if opt in ['va', 'vasp']:
-                self.copy_inputs(dirname, 'KPOINTS',
+                self.copy_inputs(mdir, 'KPOINTS',
                                  'INCAR', 'POTCAR',
                                  'restart.txt')
             elif opt in ['qe']:
-                os.system("mv restart.txt {}".format(dirname))
+                os.system("mv restart.txt {}".format(mdir))
                 os.system('cp $POTDIR/{}  {}'.format(self.pot['file'],
-                                                     dirname))
-            self.set_pbs(dirname, raw[i][0])
+                                                     mdir))
+            self.set_pbs(mdir, raw[i][0])
         return
 
     def recordstrain(self, delta, x, fval):
@@ -172,9 +182,26 @@ class cal_bcc_ideal_tensile_tp(get_data.get_data,
         fid.close()
         return
 
+    def loop_collect_vasp(self):
+        npts = 40
+        data = np.ndarray([npts, 10])
+        lat = 3.322404
+        for i in range(npts):
+            mdir = "dir-{:4.3f}".format(0.01 * i)
+            print mdir
+            os.chdir(mdir)
+            (engy, stress, vol) = self.vasp_energy_stress_vol()
+            atoms = ase.io.read('CONTCAR', format='vasp')
+            os.chdir(os.pardir)
+            cell = atoms.get_cell() / lat
+            data[i, 0], data[i, 1], data[i, 2], data[i, 3] = \
+                cell[0, 0] - 1.0, engy, cell[1, 1], cell[2, 2]
+            data[i, 4:] = stress.transpose()
+        np.savetxt("iten.txt", data)
+        return
+
     def loop_clc_qe(self):
-        import glob
-        flist = glob.glob("WRe.out.*")
+        flist = glob("WRe.out.*")
         data = np.ndarray([len(flist), 7])
         for i in range(len(flist)):
             file = flist[i]
@@ -192,39 +219,21 @@ class cal_bcc_ideal_tensile_tp(get_data.get_data,
 if __name__ == '__main__':
     usage = "usage:%prog [options] arg1 [options] arg2"
     parser = OptionParser(usage=usage)
-    parser.add_option('-t', "--mtype",
-                      action="store",
-                      type="string",
-                      dest="mtype", help="",
-                      default="prp_r")
-
-    parser.add_option('-c', "--delta",
-                      action="store",
-                      type='float', dest="delta",
-                      default=0.02)
+    parser.add_option('-t', "--mtype", action="store",
+                      type="string", dest="mtype")
+    parser.add_option('-p', "--param", action="store",
+                      type='float', dest="fargs")
 
     (options, args) = parser.parse_args()
     drv = cal_bcc_ideal_tensile_tp()
-    pltdrv = cal_md_ideal_tensile_plt.cal_md_ideal_tensile_plt()
+    dispatcher = {'ilmp': drv.loop_tensile_lmp,
+                  'trans': drv.trans,
+                  'ivasp': drv.vasp_relax,
+                  'clcqe': drv.loop_clc_qe,
+                  'clcva': drv.loop_collect_vasp,
+                  'restart': drv.loop_prep_restart}
 
-    if options.mtype.lower() == 'ilmp':
-        drv.loop_tensile_lmp()
-
-    if options.mtype.lower() == 'ivasp':
-        drv.vasp_relax()
-
-    if options.mtype.lower() == 'clcqe':
-        drv.loop_clc_qe()
-
-    if options.mtype.lower() == 'plt_engy':
-        pltdrv.plt_energy_stress('iten.save.txt')
-
-    if options.mtype.lower() in ['qe_restart', 'va_restart']:
-        opt = options.mtype.lower().split('_')[0]
-        drv.loop_prep_restart(opt)
-
-    if options.mtype.lower() == 'adj':
-        pltdrv.adjust_data_format()
-
-    if options.mtype.lower() == 'cmp':
-        pltdrv.cmp_plt()
+    if options.fargs is not None:
+        dispatcher[options.mtype.lower()](options.fargs)
+    else:
+        dispatcher[options.mtype.lower()]()

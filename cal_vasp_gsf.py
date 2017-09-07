@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # encoding: utf-8
-#
-########################################
-# calculate the gsf by using vasp
-#
-# Chaoming Yang March 1 2017
-########################################
+# -*- coding: utf-8 -*-
+# @Author: yang37
+# @Date:   2017-06-12 17:03:43
+# @Last Modified by:   chaomy
+# @Last Modified time: 2017-09-06 20:45:18
+
 
 import os
 import glob
@@ -437,9 +437,7 @@ parser.add_option("-t",
                   "--mtype",
                   action="store",
                   type="string",
-                  dest="mtype",
-                  help="",
-                  default="prp_r")
+                  dest="mtype")
 (options, args) = parser.parse_args()
 
 if __name__ == '__main__':
@@ -455,11 +453,11 @@ if __name__ == '__main__':
                   in_element='Nb',
                   in_kpoints=ingsf['kpoints'])
 
-    #### cal total lists of given shift direction ####
+    # cal total lists of given shift direction #
     if options.mtype.lower() == "single":
         Job.vasp_single_dir_gsf()
 
-    #### cal given strain at given direction ####
+    # cal given strain at given direction #
     if options.mtype.lower() == "given":
         Job.cal_gsf_given_dis(0.25)
 

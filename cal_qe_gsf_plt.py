@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-30 15:40:57
+# @Last Modified time: 2017-09-06 00:48:21
 
 
 import os
@@ -144,10 +144,7 @@ class cal_gsf(gn_config.bcc,
                 atoms.pop()
             return atoms
 
-    def gn_displacement(self,
-                        atoms,
-                        displacement_vector):
-
+    def gn_displacement(self, atoms, displacement_vector):
         positions = atoms.get_positions()
         atom_num = len(positions)
         displacement = copy.deepcopy(positions)
@@ -256,7 +253,6 @@ class cal_gsf(gn_config.bcc,
         gsf_bcc_typelist = ['gsf[111](112)', 'gsf[111](110)', 'gsf[111](123)']
         #  area = 2.8772862656350346 * 4.6985887964826203
         #  data :   i    disp    area   energy
-
         disp = data[:, 1]
         area = data[:, 2]
         energy = data[:, -1]
@@ -325,7 +321,7 @@ if __name__ == '__main__':
                   in_element='Nb',
                   in_kpoints=ingsf['kpoints'])
 
-    #cal total lists of given shift direction #
+    #cal total lists of given shift direction # 
     if options.mtype.lower() == "single":
         Job.vasp_single_dir_gsf()
 
