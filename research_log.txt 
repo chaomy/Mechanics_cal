@@ -1,5 +1,8 @@
-Sep 02
+Sep 09
+1, high dimensional integration by MC method.  
+2, WRe50 110 -> 0.0 unfinished !!!!
 
+Sep 02
 /Users/yangchaoming/src/potfitadp/src/types.h
 /Users/yangchaoming/src/potfitadp/src/mpi_utils.c
 /Users/yangchaoming/src/potfitadp/src/force_adp.c
@@ -14,7 +17,6 @@ Sep 02
 /Users/yangchaoming/src/potfitadp/src/force_stiweb.c
 /Users/yangchaoming/src/potfitadp/src/potential_output_imd.c
 /Users/yangchaoming/src/potfitadp/src/rescale_meam.c1,  
-
 
 
 Sep 01 

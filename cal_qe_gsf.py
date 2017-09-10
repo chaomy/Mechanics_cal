@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-06 14:05:28
+# @Last Modified time: 2017-09-10 02:29:53
 
 
 from optparse import OptionParser
@@ -38,9 +38,8 @@ class cal_gsf(gn_config.bcc,
               Intro_vasp.vasp_change_box,
               cal_qe_gsf_pre.cal_qe_gsf_pre):
 
-    def __init__(self,
-                 pot=md_pot_data.qe_pot.pbe_w,
-                 mgsf='x111z110'):
+    def __init__(self, pot=md_pot_data.qe_pot.pbe_w,
+                 mgsf='x111z112'):
         self.pot = pot
         self.mgsf = mgsf
         cal_sub.subjobs.__init__(self)
@@ -187,11 +186,11 @@ class cal_gsf(gn_config.bcc,
     def plt_gsf(self):
         data = np.loadtxt('gsf.dat')
         print data
-        gsf = (data[:, 3] - np.min(data[:, 3])) / (2 * data[:, 2])
-        print gsf
+        gsf = (data[:, 3] - np.min(data[:, 3])) / (data[:, 2])
+        coeff = 16.021766208
+        print gsf * coeff
         self.set_111plt()
-        self.ax.plot(data[:, 1], gsf,
-                     label='gsf', **next(self.keysiter))
+        self.ax.plot(data[:, 1], gsf, label='gsf', **next(self.keysiter))
         self.fig.savefig('fig_gsf.png', **self.figsave)
         return
 
@@ -204,11 +203,10 @@ if __name__ == '__main__':
     parser.add_option('-p', "--param", action="store",
                       type='string', dest="fargs")
     (options, args) = parser.parse_args()
-
     drv = cal_gsf()
     dispatcher = {'prep': drv.gn_qe_single_dir_gsf,
                   'loopprep': drv.loop_pot_gsf,
-                  'clcengy': drv.clc_qe_gsf_engy,
+                  'clc': drv.clc_qe_gsf_engy,
                   'loopclc': drv.loop_clcenergy,
                   'usf': drv.cal_usf,
                   'setpbs': drv.loop_set_pbs,

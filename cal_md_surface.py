@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-06 14:07:24
+# @Last Modified time: 2017-09-07 22:59:58
 
 from multiprocessing import Pool
 from optparse import OptionParser
@@ -25,8 +25,8 @@ class cal_md_surface(gn_config.bcc,
                      output_data.output_data):
 
     def __init__(self):
-        # self.pot = md_pot_data.md_pot.Nb_eam
-        self.pot = self.load_data('pot.dat')
+        self.pot = md_pot_data.md_pot.Nb_adp
+        # self.pot = self.load_data('pot.dat')
         get_data.get_data.__init__(self)
         gn_lmp_infile.gn_md_infile.__init__(self, self.pot)
         output_data.output_data.__init__(self)
@@ -36,7 +36,6 @@ class cal_md_surface(gn_config.bcc,
         self.set_lattce_constant(self.pot['latbcc'])
         self.set_config_file_format("lmp")
         self.config_file = "lmp_init.txt"
-        self.root_dir = os.getcwd()
         return
 
     def set_surface_type(self, surface_type):
@@ -179,7 +178,7 @@ class cal_md_surface(gn_config.bcc,
         os.system("cp  ../%s  ." % (self.pot['file']))
         self.write_lmp_config_data(atoms)
         os.system('cp  ../in.minimize  .')
-        os.chdir(self.root_dir)
+        os.chdir(os.pardir)
         return
 
     def prepare_md_bulk(self):
@@ -190,7 +189,7 @@ class cal_md_surface(gn_config.bcc,
         os.system("cp  ../%s  ." % (self.pot['file']))
         os.system('cp  ../in.minimize  .')
         self.write_lmp_config_data(atoms)
-        os.chdir(self.root_dir)
+        os.chdir(os.pardir)
         return
 
     def cal_surface_energy(self):
@@ -201,11 +200,11 @@ class cal_md_surface(gn_config.bcc,
         energy_b = self.md_get_final_energy()
         super_cell = self.md_get_cell()
         xy_area = self.cal_poscar_xy_area(super_cell)
-        os.chdir(self.root_dir)
+        os.chdir(os.pardir)
 
         os.chdir(dir_surf)
         energy_s = self.md_get_final_energy()
-        os.chdir(self.root_dir)
+        os.chdir(os.pardir)
 
         surface_e = 0.5 * (energy_s - energy_b) / xy_area
         with open("surface_energy.dat", 'a') as fid:

@@ -4,7 +4,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-06 20:45:18
+# @Last Modified time: 2017-09-10 02:03:13
 
 
 import os
@@ -15,23 +15,15 @@ import numpy as np
 import matplotlib.pylab as plt
 from optparse import OptionParser
 import md_pot_data
-import plt_drv
-
-try:
-    import gn_config
-    import get_data
-    import gn_kpoints
-    import gn_incar
-    import gn_pbs
-    import Intro_vasp
-
-except ImportError:
-    print "error during import"
+import gn_config
+import get_data
+import gn_kpoints
+import gn_incar
+import gn_pbs
+import Intro_vasp
 
 
 class cal_gsf(gn_config.bcc,
-              gn_config.fcc,
-              gn_config.hcp,
               get_data.get_data,
               gn_kpoints.gn_kpoints,
               gn_incar.gn_incar,
@@ -45,14 +37,15 @@ class cal_gsf(gn_config.bcc,
                  in_element='W',
                  in_kpoints=[18, 18, 1]):
 
+        self._pot = md_pot_data.va_pot.Nb_pbe
+
         gn_kpoints.gn_kpoints.__init__(self)
         get_data.get_data.__init__(self)
         gn_incar.gn_incar.__init__(self)
         gn_pbs.gn_pbs.__init__(self)
-        Intro_vasp.vasp_change_box.__init__(self)
+        Intro_vasp.vasp_change_box.__init__(self, self._pot)
 
         self.exe = "mpirun vasp"
-        self._pot = md_pot_data.dft_data.Nb_pbe
         self._gsf_surface_type = gsf_surface_type
         self.figsize = (8, 5)
         self.fontsize = 16
@@ -61,17 +54,10 @@ class cal_gsf(gn_config.bcc,
         self._surface_lattice_constant = self._pot['lattice']
         self._surface_kpoints = in_kpoints
         self._structure = self._pot['structure']
-
-        if self.structure == 'bcc':
-            gn_config.bcc.__init__(self, self._pot)
-        elif self.structure == 'fcc':
-            gn_config.fcc.__init__(self, self._pot)
-        elif self.structure == 'hcp':
-            gn_config.hcp.__init__(self, self._pot)
+        gn_config.bcc.__init__(self, self._pot)
 
         self.set_lattce_constant(self._surface_lattice_constant)
         self.set_element(self._surface_element)
-        self.root_dir = os.getcwd()
         self.sample_gsf_num = 21
         self.disp_delta = 1. / (self.sample_gsf_num - 1)
         return
@@ -251,7 +237,7 @@ class cal_gsf(gn_config.bcc,
             self.set_main_job("mpirun vasp")
             self.write_pbs()
 
-            os.chdir(self.root_dir)
+            os.chdir(os.pardir)
         return
 
     def cal_gsf_given_dis(self, given_disp):
@@ -279,7 +265,7 @@ class cal_gsf(gn_config.bcc,
         local_atoms = self.add_perturbation(local_atoms, 1.0)
         self.write_poscar(local_atoms)
 
-        os.chdir(self.root_dir)
+        os.chdir(os.pardir)
         return
 
     def vasp_single_dir_gsf(self):
@@ -311,7 +297,7 @@ class cal_gsf(gn_config.bcc,
             self.prepare_vasp_inputs(dir_name)
             os.system("cp POSCAR.vasp ../POSCAR%03d.vasp" % (i))
 
-            os.chdir(self.root_dir)
+            os.chdir(os.pardir)
         return
 
     def collect_vasp_gsf_energy(self):  # to be done
@@ -327,12 +313,11 @@ class cal_gsf(gn_config.bcc,
                 os.chdir(dir_name)
                 energy_list.append(self.vasp_energy_stress_vol_quick()[0])
                 area_list.append(self.cal_xy_area_read_poscar())
-                os.chdir(self.root_dir)
+                os.chdir(os.pardir)
             else:
                 energy_list.append(0.0)
                 area_list.append(0.0)
 
-        ### save it ###
         with open("DATA", 'w') as fid:
             for i in range(len(disp_list)):
                 fid.write("%d  %f  %f  %f \n"
@@ -352,9 +337,7 @@ class cal_gsf(gn_config.bcc,
                 print disp_vector
                 disp_matrix_direct = self.gn_displacement(atoms.copy(),
                                                           disp_vector)
-
                 disp_matrix = copy.deepcopy(disp_matrix_direct)
-
                 x1 = self._atoms.get_cell()[0, 0]
                 x2 = self._atoms.get_cell()[1, 1]
 
@@ -371,7 +354,7 @@ class cal_gsf(gn_config.bcc,
                 self.add_alloy(len(disp_matrix))
 
                 os.system("cp POSCAR POSCAR-{0:03d}.vasp".format(i))
-                os.chdir(self.root_dir)
+                os.chdir(os.pardir)
         return
 
     def plot_gsf_data(self, tag="full"):

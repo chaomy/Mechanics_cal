@@ -1,37 +1,24 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# @Author: chaomy
+# @Date:   2017-06-25 14:28:58
+# @Last Modified by:   chaomy
+# @Last Modified time: 2017-09-09 21:48:12
 
-###################################################################
-#
-# File Name : ./cal_qe_cij.py
-#
-###################################################################
-#
-# Purpose : cal cij by vasp
-#
-# Creation Date :
-# Last Modified : Sat Apr  1 23:15:50 2017
-# Created By    : Chaoming Yang
-#
-###################################################################
 
+from optparse import OptionParser
+from scipy.optimize import leastsq
 import glob
 import os
 import numpy as np
 import md_pot_data
-from optparse import OptionParser
-from scipy.optimize import leastsq
-
-try:
-    import gn_config
-    import gn_qe_inputs
-    import get_data
-    import gn_kpoints
-    import gn_incar
-    import gn_pbs
-    import output_data
-
-except ImportError:
-    print "error during import"
+import gn_config
+import gn_qe_inputs
+import get_data
+import gn_kpoints
+import gn_incar
+import gn_pbs
+import output_data
 
 
 class cal_cij(gn_config.bcc,
@@ -85,6 +72,19 @@ class cal_cij(gn_config.bcc,
         a, c = r[0]
         a = a / self.volume * self.ev_angstrom3_to_GPa
         return a
+
+    def obtain_cij_old(self):
+        self.volume = 3.071**3
+        del2coeffs = np.transpose(np.zeros(3))
+        fileList = ['c11_summary', 'c12_summary', 'c44_summary']
+        for file, i in zip(fileList, range(3)):
+            raw = np.loadtxt(file)
+            self.energy0 = raw[0, 1] * 13.605698066
+            delta_list, energy_list = raw[:, 0], raw[:, 1] * 13.605698066
+            del2coeffs[i] = self.fit_para(delta_list, energy_list)
+        # convmat = np.mat([[3, 6, 0], [2, -2, 0], [0, 0, 4]])
+        # print 2 * np.linalg.pinv(convmat) * np.transpose(np.mat(del2coeffs))
+        return
 
     def obtain_cij(self, opt='np'):
         del2coeffs = np.transpose(np.zeros(3))
@@ -194,6 +194,7 @@ class cal_cij(gn_config.bcc,
             os.chdir(self.root)
         return
 
+
 if __name__ == "__main__":
     usage = "usage:%prog [options] arg1 [options] arg2"
     parser = OptionParser(usage=usage)
@@ -214,7 +215,8 @@ if __name__ == "__main__":
         Job.loop_sub_jobs()
 
     if options.mtype.lower() in ['cij']:
-        Job.obtain_cij()
+        # Job.obtain_cij()
+        Job.obtain_cij_old()
 
     if options.mtype.lower() in ['clc']:
         Job.collect_data_cij()

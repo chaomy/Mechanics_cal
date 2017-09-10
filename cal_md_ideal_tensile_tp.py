@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-06 15:43:50
+# @Last Modified time: 2017-09-07 23:25:41
 
 
 import os
@@ -15,7 +15,6 @@ import numpy as np
 import md_pot_data
 import gn_config
 import get_data
-import cal_md_ideal_tensile_plt
 from scipy.optimize import minimize
 from optparse import OptionParser
 from md_pot_data import fluxdirs
@@ -29,12 +28,12 @@ class cal_bcc_ideal_tensile_tp(get_data.get_data,
         if pot is None:
             self.pot = md_pot_data.md_pot.Nb_adp
         else:
-            self.pot = self.pot
+            self.pot = pot
         gn_pbs.gn_pbs.__init__(self)
         get_data.get_data.__init__(self)
         gn_config.bcc.__init__(self, self.pot)
         self.alat = self.pot['lattice']
-        self.range = (0, 5)
+        self.range = (0, 13)
         self.npts = self.range[1] - self.range[0]
         self.delta = 0.02
         e1 = [1., 0., 0.]

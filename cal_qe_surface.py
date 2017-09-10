@@ -3,17 +3,28 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-31 23:28:49
+# @Last Modified time: 2017-09-10 02:17:43
 
 
 from optparse import OptionParser
 from collections import OrderedDict
+from md_pot_data import fluxdirs
 import os
 import gsf_data
 import cal_qe_gsf
 import numpy as np
 import md_pot_data
 import ase.io
+
+vcapots = OrderedDict([
+    ('WRe00', md_pot_data.qe_pot.pbe_w),
+    ('WRe05', md_pot_data.qe_pot.vca_W95Re05),
+    ('WRe10', md_pot_data.qe_pot.vca_W90Re10),
+    ('WRe15', md_pot_data.qe_pot.vca_W85Re15),
+    ('WRe20', md_pot_data.qe_pot.vca_W80Re20),
+    ('WRe25', md_pot_data.qe_pot.vca_W75Re25),
+    ('WRe50', md_pot_data.qe_pot.vca_W50Re50),
+    ('WTa50', md_pot_data.qe_pot.vca_W50Ta50)])
 
 
 class cal_surface(cal_qe_gsf.cal_gsf):
@@ -53,11 +64,11 @@ class cal_surface(cal_qe_gsf.cal_gsf):
             self.setup_qe_relax()
 
         for config, atoms in zip(configs, atomsl):
-            dirname = '{}-{}-{}'.format(
+            mdir = '{}-{}-{}'.format(
                 dirtag, self.mgsf, config)
-            self.mymkdir(dirname)
+            self.mymkdir(mdir)
 
-            os.chdir(dirname)
+            os.chdir(mdir)
 
             if mtype in ['relax']:
                 self.gn_qe_relax_tf(atoms)
@@ -66,7 +77,7 @@ class cal_surface(cal_qe_gsf.cal_gsf):
 
             ase.io.write('poscar.vasp', images=atoms, format='vasp')
             os.system("cp $POTDIR/{} . ".format(self.pot['file']))
-            self.set_pbs(dirname)
+            self.set_pbs(mdir)
             os.chdir(os.pardir)
         return
 
@@ -74,9 +85,9 @@ class cal_surface(cal_qe_gsf.cal_gsf):
         configs = ['bulk', 'surf']
         data = np.zeros(len(configs))
         for i, config in zip(range(len(configs)), configs):
-            dirname = '{}-{}-{}'.format(
+            mdir = '{}-{}-{}'.format(
                 dirtag, self.mgsf, config)
-            os.chdir(dirname)
+            os.chdir(mdir)
             self.qe_get_cell()
             area = self.cal_xy_area()
             data[i] = self.qe_get_energy_stress()[0]
@@ -84,15 +95,6 @@ class cal_surface(cal_qe_gsf.cal_gsf):
         return np.array([area, data[0], data[1]])
 
     def loop_pot_surf(self, intag='prep'):
-        vcapots = {
-            'WTa50': md_pot_data.qe_pot.vca_W50Ta50,
-            'WRe00': md_pot_data.qe_pot.pbe_w,
-            'WRe05': md_pot_data.qe_pot.vca_W95Re05,
-            'WRe10': md_pot_data.qe_pot.vca_W90Re10,
-            'WRe15': md_pot_data.qe_pot.vca_W85Re15,
-            'WRe20': md_pot_data.qe_pot.vca_W80Re20,
-            'WRe25': md_pot_data.qe_pot.vca_W75Re25,
-            'WRe50': md_pot_data.qe_pot.vca_W50Re50}
         surfs = ['x100z100']
         for key in vcapots:
             for surf in surfs:
@@ -102,18 +104,10 @@ class cal_surface(cal_qe_gsf.cal_gsf):
         return
 
     def loop_cal_surf(self):
-        vcapots = OrderedDict([
-            ('WTa50', md_pot_data.qe_pot.vca_W50Ta50)
-            ('WRe00', md_pot_data.qe_pot.pbe_w),
-            ('WRe05', md_pot_data.qe_pot.vca_W95Re05),
-            ('WRe10', md_pot_data.qe_pot.vca_W90Re10),
-            ('WRe15', md_pot_data.qe_pot.vca_W85Re15),
-            ('WRe20', md_pot_data.qe_pot.vca_W80Re20),
-            ('WRe25', md_pot_data.qe_pot.vca_W75Re25),
-            ('WRe50', md_pot_data.qe_pot.vca_W50Re50)])
         surf = 'x100z100'
         npts = len(vcapots)
         data = np.ndarray([npts, 5])
+        ev2j = 1.60218
         for key, i in zip(vcapots.keys(), range(npts)):
             dirtag = 'dir-{}'.format(key)
             self.__init__(vcapots[key], surf)
@@ -122,7 +116,8 @@ class cal_surface(cal_qe_gsf.cal_gsf):
             else:
                 data[i, 0] = 0.05 * i
             data[i, 2:] = self.cal_qe_surface(dirtag)
-            data[i, 1] = 0.5 * ((data[i, -1] - data[i, -2]) / data[i, -3])
+            data[i, 1] = 0.5 * \
+                ((data[i, -1] - data[i, -2]) / data[i, -3]) * ev2j
         np.savetxt('surf.dat', data)
         return
 
@@ -134,6 +129,28 @@ class cal_surface(cal_qe_gsf.cal_gsf):
                      label='(100)', **next(self.keysiter))
         self.add_legends(*axlist)
         self.fig.savefig('fig_surfE.png')
+        return
+
+    def transdata(self, ptype='scp'):
+        npts = len(vcapots)
+        configs = ['surf', 'bulk']
+        for config in configs:
+            for key, i in zip(vcapots.keys(), range(npts)):
+                dirtag = 'dir-{}'.format(key)
+                mdir = '{}-{}-{}'.format(
+                    dirtag, self.mgsf, config)
+                print mdir
+                self.mymkdir(mdir)
+                fdir = fluxdirs['QE'] + \
+                    'VC_WRe/Bcc_QE_VCA_WRe_surf_relax/{}'.format(mdir)
+                os.system('scp {}/qe.out {}'.format(fdir, mdir, mdir))
+                os.system('scp {}/qe.in {}'.format(fdir, mdir, mdir))
+
+        # fdir = fluxdirs['QE'] + \
+        #     'VC_WRe/Bcc_QE_VCA_WRe_unrelaxgsf/{}/'.format(
+        #         dirtree[self.mgsf][tag])
+        # os.system('scp {}/{}/qe.out {}'.format(fdir, mdir, mdir))
+        # os.system('scp {}/{}/qe.in {}'.format(fdir, mdir, mdir))
         return
 
 
@@ -148,5 +165,6 @@ if __name__ == '__main__':
                   'chk': drv.check_gsf,
                   'loopprep': drv.loop_pot_surf,
                   'loopsurf': drv.loop_cal_surf,
-                  'plt': drv.plt_surf}
+                  'plt': drv.plt_surf,
+                  'trans': drv.transdata}
     dispatcher[options.mtype.lower()]()

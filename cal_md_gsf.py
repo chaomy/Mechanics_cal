@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-22 20:14:45
+# @Last Modified time: 2017-09-08 14:23:34
 
 import os
 import glob
@@ -12,18 +12,13 @@ import numpy as np
 from multiprocessing import Pool
 from optparse import OptionParser
 from itertools import cycle
-import matplotlib.pylab as plt
+import md_pot_data
 import plt_drv
-
-try:
-    import gn_config
-    import get_data
-    import gn_pbs
-    import gn_lmp_infile
-    import output_data
-
-except ImportError:
-    print "error during import"
+import gn_config
+import get_data
+import gn_pbs
+import gn_lmp_infile
+import output_data
 
 
 def unwrap_self_run_lammps(arg, **kwarg):
@@ -31,32 +26,28 @@ def unwrap_self_run_lammps(arg, **kwarg):
 
 
 class cal_md_gsf(gn_config.bcc,
-                 gn_config.fcc,
-                 gn_config.hcp,
                  get_data.get_data,
-                 gn_pbs.gn_pbs,
-                 gn_lmp_infile.gn_md_infile,
+                 gn_pbs.gn_pbs, gn_lmp_infile.gn_md_infile,
                  output_data.output_data,
                  plt_drv.plt_drv):
 
-    def __init__(self, gsf_surface_type='110'):
+    def __init__(self, pot=None, gsf_surface_type='110'):
         get_data.get_data.__init__(self)
         gn_pbs.gn_pbs.__init__(self)
         plt_drv.plt_drv.__init__(self)
         gn_lmp_infile.gn_md_infile.__init__(self)
         output_data.output_data.__init__(self)
-        self._pot = self.load_data('pot.dat')
-        #  self._pot = md_pot.Nb_adp
-
+        if pot is None:
+            self._pot = md_pot_data.md_pot.Nb_adp
+        else:
+            self._pot = pot
         self._gsf_surface_type = gsf_surface_type
         self._surface_element = self._pot['element']  # default
         self._surface_lattice_constant = self._pot['lattice']
         self._structure = self._pot['structure']
         self._gsf_potential = self._pot['file']
         self._pot_type = self._pot['pair_style']
-        if self._structure == 'bcc':
-            gn_config.bcc.__init__(self, self._pot)
-
+        gn_config.bcc.__init__(self, self._pot)
         self.set_lattce_constant(self._surface_lattice_constant)
         self.set_element(self._surface_element)
         self.set_config_file_format("lmp")
@@ -64,8 +55,6 @@ class cal_md_gsf(gn_config.bcc,
         self.sample_gsf_num = 21
         self.disp_delta = 1. / (self.sample_gsf_num - 1)
         self.config_file = "lmp_init.txt"
-
-        self.root_dir = os.getcwd()
         return
 
     def set_relax_type(self, relaxtag='relaxed'):
@@ -158,23 +147,20 @@ class cal_md_gsf(gn_config.bcc,
                 atoms.pop()
             return atoms
 
-    def gn_displacement(self,
-                        atoms,
+    def gn_displacement(self, atoms,
                         displacement_vector):
         positions = atoms.get_positions()
         atom_num = len(positions)
         displacement = copy.deepcopy(positions)
         cut = 0.5 * np.max(positions[:, 2])
         for i in range(atom_num):
-            print positions[i, 2]
             if positions[i, 2] < cut:
                 displacement[i] = [0, 0, 0]
             else:
                 displacement[i] = displacement_vector
         return displacement
 
-    def prepare_md_inputs(self,
-                          config_file=None,
+    def prepare_md_inputs(self, config_file=None,
                           in_potential=None):
         if config_file is not None:
             self.config_file = config_file
@@ -191,7 +177,13 @@ class cal_md_gsf(gn_config.bcc,
     def run_lmp_gsf(self, loc_dir):
         os.chdir(loc_dir)
         os.system("lmp_mpi -in in.md_gsf")
-        os.chdir(self.root_dir)
+        os.chdir(os.pardir)
+        return
+
+    def loop_gsf(self):
+        dir_list = glob.glob("dir-*")
+        for mdir in dir_list:
+            self.run_lmp_gsf(mdir)
         return
 
     def multi_thread_gsf(self):
@@ -199,8 +191,7 @@ class cal_md_gsf(gn_config.bcc,
         num_threads = len(dir_list)
         pool = Pool(processes=num_threads)
         pool.map(unwrap_self_run_lammps,
-                 zip([self] * num_threads,
-                     dir_list))
+                 zip([self] * num_threads, dir_list))
         return
 
     def collect_gsf_energy(self):
@@ -211,32 +202,32 @@ class cal_md_gsf(gn_config.bcc,
                 os.chdir(dir_name)
 
                 disp_list.append(i * self.disp_delta)
-                energylist.append(self.md_get_final_energy())
+                # energylist.append(self.md_get_final_energy())
+                energylist.append(np.loadtxt('out.txt'))
                 super_cell = self.md_get_cell()
                 area_list.append(self.cal_poscar_xy_area(super_cell))
-                os.chdir(self.root_dir)
+                os.chdir(os.pardir)
 
         energylist = np.array(energylist)
         energylist = energylist / np.average(np.array(area_list))
+        print energylist
         energylist = energylist - np.min(energylist)
         disp_list = np.array(disp_list)
         self.output_disp_energy(disp_list,
                                 energylist,
                                 "gsf_{}_{}.txt".format(self._pot['pair_type'],
                                                        self._gsf_surface_type))
+        print(disp_list, energylist)
         self.plot_md_gsf(disp_list, energylist)
         return (disp_list, energylist)
 
-    def plot_md_gsf(self,
-                    delta=None,
-                    energy=None,
-                    filename='md_gsf.png'):
+    def plot_md_gsf(self, delta=None,
+                    energy=None, filename='md_gsf.png'):
         self.set_keys()
         self.set_111plt((8, 4))
         self.ax.plot(delta, energy,
-                     label="$displacement-energy$",
-                     **self.pltkwargs)
-        plt.savefig(filename, **self.figsave)
+                     label="$displacement-energy$", **self.pltkwargs)
+        self.fig.savefig(filename, **self.figsave)
         return
 
     def plot_multi_gsf_curv(self,
@@ -271,32 +262,32 @@ class cal_md_gsf(gn_config.bcc,
         self.set_tick_size(*axlist)
         self.add_y_labels(ylabiter, *axlist)
         self.add_legends(*axlist)
-        plt.savefig(fname, **self.figsave)
+        self.fig.savefig(fname, **self.figsave)
         return
 
-    def plot_multi_type_gsf_curv(self, typelist, fname='gsf_compare.png'):
-        pltdrv = plt_drv.plt_drv()
-        self.set_keys()
-        self.set_111plt((8, 4))
-        plt.rc('xtick', labelsize='large')
-        plt.rc('ytick', labelsize='large')
-        cnt = 0
-        for gsftype in typelist:
-            filename = "gsf_{}_{}.txt".format(self._pot['pair_type'],
-                                              gsftype)
-            pltlabel = "{}_{}".format(self._pot['pair_type'], gsftype)
-            data = np.loadtxt(filename)
-            self.ax.plot(data[:, 0], data[:, 1],
-                         label=pltlabel,
-                         **next(self.keysiter))
-            cnt += 1
-            self.ax.legend(**self.legendarg)
-        plt.xlabel("normalized displacement along $[{}]$".format(gsftype[:3]),
-                   {'fontsize': (self.myfontsize)})   # (110): -110  (11-2) -110
-        plt.ylabel("stacking fault energy $[eV/\AA^{2}]$",
-                   {'fontsize': (self.myfontsize)})   # (110): -110  (11-2) -110
-        plt.savefig(fname, **self.figsave)
-        return
+    # def plot_multi_type_gsf_curv(self, typelist, fname='gsf_compare.png'):
+    #     pltdrv = plt_drv.plt_drv()
+    #     self.set_keys()
+    #     self.set_111plt((8, 4))
+    #     plt.rc('xtick', labelsize='large')
+    #     plt.rc('ytick', labelsize='large')
+    #     cnt = 0
+    #     for gsftype in typelist:
+    #         filename = "gsf_{}_{}.txt".format(self._pot['pair_type'],
+    #                                           gsftype)
+    #         pltlabel = "{}_{}".format(self._pot['pair_type'], gsftype)
+    #         data = np.loadtxt(filename)
+    #         self.ax.plot(data[:, 0], data[:, 1],
+    #                      label=pltlabel,
+    #                      **next(self.keysiter))
+    #         cnt += 1
+    #         self.ax.legend(**self.legendarg)
+    #     plt.xlabel("normalized displacement along $[{}]$".format(gsftype[:3]),
+    #                {'fontsize': (self.myfontsize)})   # (110): -110  (11-2) -110
+    #     plt.ylabel("stacking fault energy $[eV/\AA^{2}]$",
+    #                {'fontsize': (self.myfontsize)})   # (110): -110  (11-2) -110
+    #     plt.savefig(fname, **self.figsave)
+    #     return
 
     # trans dft to md
     def trans_data_format(self):
@@ -315,7 +306,6 @@ class cal_md_gsf(gn_config.bcc,
     def md_single_dir_gsf(self):
         atoms = self.gn_gsf_atoms()
         perf_cells = copy.deepcopy(atoms.get_cell())
-
         for i in range(0, self.sample_gsf_num):
             dir_name = 'dir-x-%03d-%s' % (i, self._gsf_surface_type)
             self.mymkdir(dir_name)
@@ -324,7 +314,6 @@ class cal_md_gsf(gn_config.bcc,
             disp_vector = [i * self.disp_delta, 0, 0]
             disp_matrix_direct = self.gn_displacement(atoms.copy(),
                                                       disp_vector)
-
             disp_matrix = copy.deepcopy(disp_matrix_direct)
 
             cell_length_x = perf_cells[0, 0]
@@ -337,42 +326,21 @@ class cal_md_gsf(gn_config.bcc,
 
             self.prepare_md_inputs()
             os.system("cp lmp_init.txt ../lmp_init_{0:03d}.txt".format(i))
-            os.chdir(self.root_dir)
+            os.chdir(os.pardir)
         return
 
-
-if __name__ == '__main__':
-    usage = "usage:%prog [options] arg1 [options] arg2"
-    parser = OptionParser(usage=usage)
-    parser.add_option("-t", "--mtype",
-                      action="store",
-                      type="string",
-                      dest="mtype",
-                      default="prp_r")
-    (options, args) = parser.parse_args()
-    drv = cal_md_gsf(gsf_surface_type='111_211')
-    if options.mtype.lower() == 'prep':
-        drv.md_single_dir_gsf()
-
-    elif options.mtype.lower() == 'run':
-        drv.multi_thread_gsf()
-
-    elif options.mtype.lower() == 'collect':
-        drv.collect_gsf_energy()
-
-    elif options.mtype.lower() == 'trans':
-        drv.trans_data_format()
-
-    elif options.mtype.lower() in ['compare', 'cmp']:
+    def drv_cmp(self):
         potlist = ['adp', 'pbe']
         typelist = ['111_211', '111_110']
         drv.plot_multi_gsf_curv(potlist, typelist)
+        return
 
-    elif options.mtype.lower() == 'twopath':
+    def drv_twopath(self):
         typelist = ['111_211', '111_110']
         drv.plot_multi_type_gsf_curv(typelist)
+        return
 
-    elif options.mtype.lower() == 'relaxed':
+    def drv_relaxed(self):
         potlist = ['adp', 'pbe']
         typelist = ['111_211', '111_110']
         drv.set_relax_type('relaxed')
@@ -382,8 +350,9 @@ if __name__ == '__main__':
             drv.multi_thread_gsf()
             drv.collect_gsf_energy()
         drv.plot_multi_gsf_curv(potlist, typelist, 'gsf_relaxed.png')
+        return
 
-    elif options.mtype.lower() == 'unrelaxed':
+    def drv_unrelaxed(self):
         potlist = ['adp', 'pbe']
         typelist = ['111_211', '111_110']
         drv.set_relax_type('unrelaxed')
@@ -394,3 +363,27 @@ if __name__ == '__main__':
             drv.collect_gsf_energy()
         #  drv.plot_multi_type_gsf_curv(typelist)
         drv.plot_multi_gsf_curv(potlist, typelist, 'gsf_unrelaxed.png')
+        return
+
+
+if __name__ == '__main__':
+    usage = "usage:%prog [options] arg1 [options] arg2"
+    parser = OptionParser(usage=usage)
+    parser.add_option("-t", "--mtype", action="store",
+                      type="string", dest="mtype")
+    parser.add_option('-p', "--param", action="store",
+                      type='string', dest="fargs")
+    (options, args) = parser.parse_args()
+    drv = cal_md_gsf(gsf_surface_type='111_211')
+    dispatcher = {'prep': drv.md_single_dir_gsf,
+                  'run': drv.multi_thread_gsf,
+                  'clc': drv.collect_gsf_energy,
+                  'loop': drv.loop_gsf,
+                  'trans': drv.trans_data_format,
+                  'cmp': drv.drv_cmp,
+                  'relaxed': drv.drv_relaxed,
+                  'unrelaxed': drv.drv_unrelaxed}
+    if options.fargs is not None:
+        dispatcher[options.mtype.lower()](options.fargs)
+    else:
+        dispatcher[options.mtype.lower()]()

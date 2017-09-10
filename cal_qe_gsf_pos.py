@@ -3,13 +3,12 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-06 00:46:57
+# @Last Modified time: 2017-09-09 21:07:12
 
 
 from itertools import cycle
-from numpy import arange, min, max
+from numpy import arange, min, max, append
 from numpy import loadtxt, savetxt, ndarray
-from numpy import append, savetxt, arange
 from md_pot_data import fluxdirs
 import os
 
@@ -39,7 +38,8 @@ dirtree = {'x111z110': {
     '15': 'Bcc_WRe15_gsfx111z110',
     '20': 'Bcc_WRe20_gsfx111z110',
     '25': 'Bcc_WRe25_gsfx111z110',
-    '50': 'Bcc_WRe50_gsfx111z110'
+    '50': 'Bcc_WRe50_gsfx111z110',
+    'ta': 'Bcc_WTa50_gsfx111z110'
 }, 'x111z112': {
     '00': 'Bcc_WRe00_gsfx111z112',
     '05': 'Bcc_WRe05_gsfx111z112',
@@ -47,7 +47,8 @@ dirtree = {'x111z110': {
     '15': 'Bcc_WRe15_gsfx111z112',
     '20': 'Bcc_WRe20_gsfx111z112',
     '25': 'Bcc_WRe25_gsfx111z112',
-    '50': 'Bcc_WRe50_gsfx111z112'}
+    '50': 'Bcc_WRe50_gsfx111z112',
+    'ta': 'Bcc_WTa50_gsfx111z112'}
 }
 
 
@@ -63,40 +64,27 @@ class cal_qe_gsf_pos(object):
             os.chdir(os.pardir)
         return
 
-    def transdata(self, ptype='scp'):
-        disps = arange(0.34, 0.66, 0.04)
-        tag = '05'
+    def transdata(self, ptype='scp', tag='ta'):
+        # disps = arange(0.46, 0.56, 0.04)
+        disps = arange(0.42, 0.48, 0.04)
+        disps = append(disps, 0.0)
         for disp in disps:
             mdir = 'dir-{}-{:4.3f}'.format(self.mgsf, disp)
             self.mymkdir(mdir)
             if ptype in ['scp']:
                 fdir = fluxdirs['QE'] + \
-                    'VC_WRe/Bcc_QE_VCA_WRe_relaxgsf/Finish/{}/'.format(
+                    'VC_WRe/Bcc_QE_VCA_WRe_relaxgsf/{}'.format(
                         dirtree[self.mgsf][tag])
                 os.system('scp {}/{}/qe.out {}'.format(fdir, mdir, mdir))
                 os.system('scp {}/{}/qe.in {}'.format(fdir, mdir, mdir))
                 print fdir
-
-        #     elif ptype in ['format']:
-        #         os.chdir(mdir)
-        #         atoms = ase.io.read('qe.out', format='espresso-out')
-        #         ase.io.write(filename='poscar', images=atoms, format='vasp')
-        #         os.system('mv poscar ../poscar_{:03}'.format(i))
-        #         os.chdir(os.pardir)
-        disp = 0.0
-        mdir = 'dir-{}-{:4.3f}'.format(self.mgsf, disp)
-        self.mymkdir(mdir)
-        fdir = fluxdirs['QE'] + \
-            'VC_WRe/Bcc_QE_VCA_WRe_unrelaxgsf/{}/'.format(
-                dirtree[self.mgsf][tag])
-        os.system('scp {}/{}/qe.out {}'.format(fdir, mdir, mdir))
-        os.system('scp {}/{}/qe.in {}'.format(fdir, mdir, mdir))
         return
 
     def clc_qe_gsf_engy(self, fname='gsf'):
         disps = 0.0
-        disps = append(disps, arange(0.34, 0.66, 0.04))
-        disps = append(disps, 1.0)
+        # disps = append(disps, arange(0.46, 0.56, 0.04))
+        disps = append(disps, arange(0.42, 0.48, 0.04))
+        # disps = append(disps, 1.0)
         npts = len(disps)
         data = ndarray([npts, 4])
         for i, disp in zip(range(npts), disps):

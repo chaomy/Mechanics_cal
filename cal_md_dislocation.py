@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-30 11:39:23
+# @Last Modified time: 2017-09-08 12:51:16
 
 
 import os
@@ -497,10 +497,8 @@ if __name__ == "__main__":
     parser = OptionParser(usage=usage)
     parser.add_option("-t", "--mtype", action="store",
                       type="string", dest="mtype")
-
     parser.add_option('-p', "--param", action="store",
                       type='string', dest="fargs")
-
     (options, args) = parser.parse_args()
     drv = md_dislocation()
     dispatcher = {'kink': drv.intro_kink_pair,
