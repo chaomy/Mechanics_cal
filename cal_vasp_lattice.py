@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-20 14:40:22
+# @Last Modified time: 2017-09-21 11:54:12
 
 
 import numpy as np
@@ -170,9 +170,8 @@ class cal_lattice(gn_config.bcc,
         return
 
     def collect_data(self, tag='hcp'):
-        rng = [-15, 15]
         rng = [-8, 8]
-        rng = [-20, 50]
+        rng = [-15, 15]
 
         data = np.zeros([rng[1] - rng[0], 2])
         cnt = 0
