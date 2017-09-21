@@ -3,15 +3,13 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-10 02:17:43
+# @Last Modified time: 2017-09-20 00:16:59
 
 
 from optparse import OptionParser
 from collections import OrderedDict
 from md_pot_data import fluxdirs
 import os
-import gsf_data
-import cal_qe_gsf
 import numpy as np
 import md_pot_data
 import ase.io
@@ -27,32 +25,7 @@ vcapots = OrderedDict([
     ('WTa50', md_pot_data.qe_pot.vca_W50Ta50)])
 
 
-class cal_surface(cal_qe_gsf.cal_gsf):
-
-    def __init__(self,
-                 pot=md_pot_data.qe_pot.pbe_w,
-                 msurf='x100z100'):
-        self.pot = pot
-        self.msurf = msurf
-        cal_qe_gsf.cal_gsf.__init__(self, self.pot, self.msurf)
-        self.sample_gsf_num = 21
-        self.disp_delta = 1. / (self.sample_gsf_num - 1)
-        return
-
-    def gn_surface_atoms(self):
-        mgsf = self.mgsf
-        atomss = self.set_bcc_convention(
-            in_direction=gsf_data.gsfbase[mgsf],
-            in_size=gsf_data.gsfsize[mgsf])
-        for i in range(gsf_data.gsfpopn[mgsf]):
-            atomss.pop()
-
-        atomsb = self.set_bcc_convention(
-            in_direction=gsf_data.gsfbase[mgsf],
-            in_size=gsf_data.bulksize[mgsf])
-        atomss.wrap()
-        atomsb.wrap()
-        return [atomss, atomsb]
+class cal_qe_surface(object):
 
     def prep_qe_surface(self, dirtag='dir', mtype='relax'):
         configs = ['surf', 'bulk']
@@ -64,8 +37,7 @@ class cal_surface(cal_qe_gsf.cal_gsf):
             self.setup_qe_relax()
 
         for config, atoms in zip(configs, atomsl):
-            mdir = '{}-{}-{}'.format(
-                dirtag, self.mgsf, config)
+            mdir = '{}-{}-{}'.format(dirtag, self.mgsf, config)
             self.mymkdir(mdir)
 
             os.chdir(mdir)
@@ -77,7 +49,7 @@ class cal_surface(cal_qe_gsf.cal_gsf):
 
             ase.io.write('poscar.vasp', images=atoms, format='vasp')
             os.system("cp $POTDIR/{} . ".format(self.pot['file']))
-            self.set_pbs(mdir)
+            self.set_pbs(mdir, 'qe')
             os.chdir(os.pardir)
         return
 
@@ -152,19 +124,3 @@ class cal_surface(cal_qe_gsf.cal_gsf):
         # os.system('scp {}/{}/qe.out {}'.format(fdir, mdir, mdir))
         # os.system('scp {}/{}/qe.in {}'.format(fdir, mdir, mdir))
         return
-
-
-if __name__ == '__main__':
-    usage = "usage:%prog [options] arg1 [options] arg2"
-    parser = OptionParser(usage=usage)
-    parser.add_option("-t", "--mtype", action="store",
-                      type="string", dest="mtype")
-    (options, args) = parser.parse_args()
-    drv = cal_surface()
-    dispatcher = {'prep': drv.prep_qe_surface,
-                  'chk': drv.check_gsf,
-                  'loopprep': drv.loop_pot_surf,
-                  'loopsurf': drv.loop_cal_surf,
-                  'plt': drv.plt_surf,
-                  'trans': drv.transdata}
-    dispatcher[options.mtype.lower()]()

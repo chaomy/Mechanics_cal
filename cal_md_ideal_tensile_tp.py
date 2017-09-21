@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-07 23:25:41
+# @Last Modified time: 2017-09-16 14:33:21
 
 
 import os
@@ -12,7 +12,6 @@ import ase.io
 import ase.lattice
 import gn_pbs
 import numpy as np
-import md_pot_data
 import gn_config
 import get_data
 from scipy.optimize import minimize
@@ -26,7 +25,8 @@ class cal_bcc_ideal_tensile_tp(get_data.get_data,
 
     def __init__(self, pot=None):
         if pot is None:
-            self.pot = md_pot_data.md_pot.Nb_adp
+            # self.pot = md_pot_data.md_pot.Nb_adp
+            self.pot = self.load_data('pot.dat')
         else:
             self.pot = pot
         gn_pbs.gn_pbs.__init__(self)
@@ -47,10 +47,11 @@ class cal_bcc_ideal_tensile_tp(get_data.get_data,
         x0 = 0.91
         npts = self.range[1] - self.range[0]
         data = np.ndarray([npts, 10])
+        inpath = "/Users/yangchaoming/My_cal/Fit_md_potential/Bcc_Ideal_tensile_tp/in.init"
+        os.system("cp {} .".format(inpath))
         for i in range(npts):
             delta = self.delta * (self.range[0] + i)
-            res = minimize(self.runlmp, x0, delta,
-                           method='Nelder-Mead')
+            res = minimize(self.runlmp, x0, delta, method='Nelder-Mead')
             x0 = res.x
             print res
             data[i][0] = delta

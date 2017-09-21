@@ -1,13 +1,19 @@
 #!/usr/bin/env python
 # encoding: utf-8
-#
+# -*- coding: utf-8 -*-
+# @Author: chaomy
+# @Date:   2017-07-05 08:12:30
+# @Last Modified by:   chaomy
+# @Last Modified time: 2017-09-21 11:28:44
 
-import os
+
 import numpy as np
 import math
 from ase import Atoms
 import cal_add_strain
+import cal_cut_cell
 import cal_intro_iso_dis
+import cal_intro_iso_dis_image
 import cal_intro_ani_dis
 
 
@@ -17,64 +23,30 @@ class cubic_cij:
     c44 = None
 
 
-class vasp_change_box(object):
+class vasp_change_box(cal_intro_iso_dis.cal_intro_iso_dis,
+                      cal_intro_ani_dis.cal_intro_ani_dis,
+                      cal_intro_iso_dis_image.cal_intro_iso_dis_image,
+                      cal_add_strain.cal_add_strain,
+                      cal_cut_cell.cal_cut_cell):
 
     def __init__(self, pot=None):
         print pot
         self.pot = pot
-        self.screw_coeff = None
-        self.Edge_coeff = None
-        self.lattice_constant = self.pot['lattice']
-        self.add_strain_drv = cal_add_strain.cal_add_strain()
-        self.add_iso_dis_drv = cal_intro_iso_dis.cal_intro_iso_dis(
-            self.lattice_constant)
-        self.add_ani_dis_drv = cal_intro_ani_dis.cal_intro_iso_dis()
         self.set_intro_coeff()
         return
 
     def set_intro_coeff(self):
         self.pi = 3.141592653589793
-        self.burger = np.sqrt(3.) / 2. * self.lattice_constant
+        self.burger = np.sqrt(3.) / 2. * self.pot['lattice']
         self.screw_coeff = self.burger / (2. * self.pi)
         self.Edge_coeff = self.burger / (2. * self.pi)
         print self.screw_coeff
         self.P = 0.33
         return
 
-    def set_intro_lattice_constnat(self, lattice_constant):
-        self.lattice_constant = lattice_constant
-        return
-
-    def volume_conserving_ortho_strain(self, delta):
-        self.add_strain_drv._volume_conserving_ortho_strain(delta)
-        return
-
-    def add_volumeric_strain(self, atoms, delta):
-        atoms = self.add_strain_drv._add_volumeric_strain(atoms, delta)
-        return atoms
-
-    def volume_conserving_ortho_strain_atoms(self, delta, atoms):
-        atoms = self.add_strain_drv._volume_conserving_ortho_strain_atoms(
-            delta, atoms)
-        return atoms
-
-    def volume_conserving_mono_strain_atoms(self, delta, atoms):
-        atoms = self.add_strain_drv._volume_conserving_mono_strain_atoms(
-            delta, atoms)
-        return atoms
-
-    def volume_conserving_mono_strain(self, delta):
-        self.add_strain_drv._volume_conserving_mono_strain(delta)
-        return
-
-    def intro_single_screw(self):
-        self.add_iso_dis_drv._intro_single_screw()
-        return
-
     def intro_edge_nuclei(self, atoms, center=None,
                           sign=1, orient=None,
                           zzone=None):
-
         if orient is not None:
             bdir = orient[0]
             ndir = orient[1]
@@ -141,10 +113,10 @@ class vasp_change_box(object):
         alpha = 0.1
         xc0, yc0 = center1[0], center1[1]
 
-        #### cut atoms (do not need for peierodic boundary condition ) ###
+        # cut atoms (do not need for peierodic boundary condition ) ###
         if not boundary == 'ppp':
-            #### not using the ppp bounary condition ####
-            #### we have some other treaments ####
+            # not using the ppp bounary condition ####
+            # we have some other treaments ####
             lowx = 5 * (0.5 * (2.56656))
             higx = cell[0, 0] - lowx
 
@@ -183,18 +155,18 @@ class vasp_change_box(object):
                     if ((pos[lyid] > higy) or (pos[lyid] < lowy)):
                         index_list.append(atom.index)
 
-            #### calculate the h #####
+            # calculate the h #####
             h = H * (1 + math.tanh(alpha * (pos[lzid] - nleft))) - \
                 H * (1 + math.tanh(alpha * (pos[lzid] - nrigh)))
 
             xc = xc0 + h
             yc = yc0
 
-            #### calculate the displacement #####
+            # calculate the displacement #####
             dx = pos[lxid] - xc
             dy = pos[lyid] - yc
 
-            ###### add shift if peierodic along x   ######
+            # add shift if peierodic along x   ######
             if shift is True:
                 if pos[lxid] > xc:
                     # 0.3 or 0.2 for e1 = 1 -1 0
@@ -204,31 +176,12 @@ class vasp_change_box(object):
             dz = sign * self.screw_coeff * theta
             pos[lzid] -= dz
 
-            ### assign the position ###
+            # assign the position ###
             atom.position = pos
 
         if not boundary == 'ppp':
-            #### delete boundary atoms ####
+            # delete boundary atoms ####
             del atoms[index_list]
-        return atoms
-
-    ################################################
-    # add single screw dislocation
-    # with shiftment used for (peierodic along x direction)
-    # Sun Mar 26 13:03:27 2017
-    ################################################
-    def intro_single_screw_atoms(self,
-                                 atoms,
-                                 center=None, sign=None):
-        atoms = self.add_iso_dis_drv._intro_single_screw_atoms(atoms,
-                                                               center,
-                                                               sign)
-        return atoms
-
-    def intro_single_screw_with_image_atoms(self,
-                                            atoms):
-        atoms = self.add_iso_dis_drv._intro_single_screw_with_image_atoms(
-            atoms)
         return atoms
 
     def intro_single_screw_atoms_xdirection(self,
@@ -249,30 +202,6 @@ class vasp_change_box(object):
             atom_position[i, 0] += ux
 
         atoms.set_positions(atom_position)
-        return atoms
-
-    def intro_single_edge_atoms(self,
-                                atoms,
-                                center=None,
-                                sign=1,
-                                orient=None):
-        atoms = self.add_iso_dis_drv._intro_single_edge_atoms(atoms,
-                                                              center,
-                                                              sign,
-                                                              orient)
-        return atoms
-
-    def intro_dipole_edge_atoms(self, atoms):
-        atoms = self.add_iso_dis_drv._intro_dipole_edge_atoms(atoms)
-        return atoms
-
-    def intro_dipole_edge_with_image_atoms(self, atoms):
-        atoms = self.add_iso_dis_drv._intro_dipole_edge_with_image_atoms(atoms)
-        return atoms
-
-    def intro_dipole_screw_with_image_atoms(self, atoms):
-        atoms = self.add_iso_dis_drv._intro_dipole_screw_with_image_atoms(
-            atoms)
         return atoms
 
     def core_center(self):
@@ -311,14 +240,6 @@ class vasp_change_box(object):
         return ([aeasy_core, ahard_core, asplit, aM_point, aeasy_core2],
                 [beasy_core, bhard_core, bsplit, bM_point, beasy_core2])
 
-    def core_center_by_atom_index(self, atoms):
-        ([aeasy_core, ahard_core, asplit, aM_point, aeasy_core2],
-         [beasy_core, bhard_core, bsplit, bM_point, beasy_core2]) = \
-            self.add_iso_dis_drv._core_center_by_atom_index(atoms)
-
-        return ([aeasy_core, ahard_core, asplit, aM_point, aeasy_core2],
-                [beasy_core, bhard_core, bsplit, bM_point, beasy_core2])
-
     ###########################################################################
     # Sun Mar 26 13:01:49 2017
     # intro dipole screw used for LAMMPS
@@ -341,7 +262,6 @@ class vasp_change_box(object):
 
         supercell_base = atoms.get_cell()
         atom_position = atoms.get_positions()
-
         if center is None:
             add_disp = [0.25 * (supercell_base[lxid, lxid] + supercell_base[lyid, lxid]),
                         0.50 * (supercell_base[lxid, lyid] + supercell_base[lyid, lyid])]
@@ -376,202 +296,6 @@ class vasp_change_box(object):
             atom_position[i, lzid] = atom_position[i, lzid] + dz1 - dz2
 
         atoms.set_positions(atom_position)
-        return atoms
-
-    ###########################################################################
-    # normal way of intro_dipole_screw_atoms used for vasp calculation
-    ###########################################################################
-    def intro_dipole_screw_atoms(self,
-                                 atoms,
-                                 lattice=3.307,
-                                 move_x=0,
-                                 in_tag='easy_easy',
-                                 input_s=1.0):
-
-        atoms = self.add_iso_dis_drv._intro_dipole_screw_atoms_vasp(atoms,
-                                                                    lattice,
-                                                                    move_x,
-                                                                    in_tag,
-                                                                    input_s)
-
-        return atoms
-
-    def intro_split_core(self, atoms, lattice=None,
-                         move_x=None,
-                         in_tag=None, input_s=None):
-        atoms = self.add_iso_dis_drv._intro_split_core(atoms,
-                                                       lattice,
-                                                       move_x,
-                                                       in_tag,
-                                                       input_s)
-        return atoms
-
-    def cut_half_atoms_new(self, atoms, tag="cuty"):
-
-        cell = atoms.get_cell()
-        positions = atoms.get_positions()
-        scale_positions = atoms.get_scaled_positions()
-
-        if (tag == "cuty"):
-            # cut along y direction #
-            cutIndx = 1
-
-        elif (tag == "cutx"):
-            # cut along x direction #
-            cutIndx = 0
-
-        elif (tag == "cutz"):
-            # cut along z direction #
-            cutIndx = 2
-
-        yy_max = 0.5 * np.max(positions[:, cutIndx])
-        y_max = 0.499 * np.max(scale_positions[:, cutIndx])
-
-        index_list = []
-        # delele half atoms
-        print yy_max
-        inv_cell_t = np.linalg.inv(cell.transpose())
-
-        for i in range(len(atoms)):
-            atom = atoms[i]
-            b = (inv_cell_t * np.mat(atom.position).transpose())[cutIndx]
-
-            if b >= y_max:
-                index_list.append(atom.index)
-
-        print len(index_list)
-        del atoms[index_list]
-
-        # change the supercell
-        cell[cutIndx, :] = cell[cutIndx, :] * 0.5
-
-        atoms.set_cell(cell)
-        print len(atoms.get_positions())
-        return atoms
-
-    def cut_half_atoms(self, atoms):
-        cell = atoms.get_cell()
-        positions = atoms.get_positions()
-        scale_positions = atoms.get_scaled_positions()
-
-        print np.max(scale_positions[:, 0])
-        yy_max = 0.5 * np.max(positions[:, 1])
-        y_max = 0.5 * np.max(scale_positions[:, 1])
-
-        index_list = []
-
-        # delele half atoms
-        print yy_max
-        inv_cell_t = np.linalg.inv(cell.transpose())
-
-        for i in range(len(atoms)):
-            atom = atoms[i]
-            b = (inv_cell_t * np.mat(atom.position).transpose())[1]
-
-            if b > y_max:
-                index_list.append(atom.index)
-
-        print len(index_list)
-
-        del atoms[index_list]
-
-        # change the supercell
-        cell[1, :] = cell[1, :] * 0.4999
-        atoms.set_cell(cell)
-        print len(atoms.get_positions())
-        return atoms
-
-    def assign_ynormal_fixatoms(self, atoms, gp_n=1):
-        cell = atoms.get_cell()
-        dh = 28.
-        y_above = cell[gp_n, gp_n] - dh
-        y_below = dh
-        for i in range(len(atoms)):
-            atom = atoms[i]
-            atom.symbol = 'W'
-            if (atom.position[gp_n] > y_above):
-                atom.symbol = 'Mo'
-            if (atom.position[gp_n] < y_below):
-                atom.symbol = 'Nb'
-        return atoms
-
-    def cut_y_normal_atoms(self, atoms, gp_n=1):
-        cell = atoms.get_cell()
-
-        # cut along glide plane normal
-        dh = 20.
-        y_above = cell[gp_n, gp_n] - dh
-        y_below = dh
-
-        # y_above = 7. / 8. * cell[gp_n, gp_n]  # edge
-        # y_below = 1. / 8. * cell[gp_n, gp_n]  # edge
-
-        index = []
-        for i in range(len(atoms)):
-            atom = atoms[i]
-            if ((atom.position[gp_n] > y_above) or (atom.position[gp_n] < y_below)):
-                index.append(atom.index)
-        del atoms[index]
-        return atoms
-
-    def cut_z_normal_top_atoms(self, atoms):
-        cell = atoms.get_cell()
-        # cut along y
-        print cell
-
-        y_above = 7. / 8. * cell[2, 2]  # edge
-        y_below = 1. / 8. * cell[2, 2]  # edge
-
-        print y_above, y_below
-
-        index_list = []
-
-        for i in range(len(atoms)):
-            atom = atoms[i]
-            if ((atom.position[2] > y_above) or (atom.position[2] < y_below)):
-                index_list.append(atom.index)
-
-        del atoms[index_list]
-        return atoms
-
-    def cut_z_normal_atoms(self, atoms):
-        cell = atoms.get_cell()
-        positions = atoms.get_positions()
-
-        index_list = []
-        # z_crit = -0.2 * np.sqrt(3.) / 4. * lattice_constant
-        z_crit = -0.2 * np.sqrt(3.) / 2.0 * self.pot['lattice']
-
-        for i in range(len(atoms)):
-            atom = atoms[i]
-            if (atom.position[2] < z_crit):
-                index_list.append(atom.index)
-
-        if index_list is not []:
-            print "delete %s atoms" % (len(index_list))
-            # del atoms[index_list]
-        return atoms
-
-    def cut_x_normal_atoms(self, atoms,
-                           lattice_constant, bdir=0,
-                           ratio=np.sqrt(3) / 2.5):
-
-        index_list = []
-        # #####################################################
-        # be careful, to delete
-        # x_crit =  np.sqrt(3.)/2.5 * lattice constant
-        # #####################################################
-        #  x_crit = np.sqrt(3.) / 2.5 * lattice_constant
-
-        x_crit = ratio * lattice_constant
-        for i in range(len(atoms)):
-            atom = atoms[i]
-            if (atom.position[bdir] < x_crit):
-                index_list.append(atom.index)
-
-        if index_list is not []:
-            print "delete %s atoms" % (len(index_list))
-            del atoms[index_list]
         return atoms
 
     def intro_dipole_screw(self):
@@ -657,8 +381,4 @@ class vasp_change_box(object):
         return new_atoms
 
     def intro_ani_edge_fcc(self):
-        self.add_ani_dis_drv._fcc_edge()
-
-
-if __name__ == "__main__":
-    N = vasp_change_box()
+        self.fcc_edge()

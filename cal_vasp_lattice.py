@@ -1,19 +1,11 @@
 #!/usr/bin/env python
 # encoding: utf-8
-#
-###################################################################
-#
-# File Name : ./cal_vasp_lattice.py
-#
-###################################################################
-#
-# Purpose :     multithreads to calculate lattice constant
-#
-# Creation Date :
-# Last Modified : Thu Mar 30 23:56:50 2017
-# Created By    : Chaoming Yang
-#
-###################################################################
+# -*- coding: utf-8 -*-
+# @Author: chaomy
+# @Date:   2017-07-05 08:12:30
+# @Last Modified by:   chaomy
+# @Last Modified time: 2017-09-20 14:40:22
+
 
 import numpy as np
 import glob
@@ -49,10 +41,7 @@ class cal_lattice(gn_config.bcc,
         self.figsize = (8, 6)
         self.npts = 20
         self.kpoints = [31, 31, 31]
-        self._element = 'Nb'
-        self.root = os.getcwd()
-        self.pot = md_pot_data.dft_data.W_pbe
-
+        self.pot = md_pot_data.va_pot.Mg_pbe
         gn_kpoints.gn_kpoints.__init__(self)
         get_data.get_data.__init__(self)
         gn_incar.gn_incar.__init__(self)
@@ -70,7 +59,7 @@ class cal_lattice(gn_config.bcc,
         i = np.argmin(Ynew)
         print "min energy ", np.min(energy)
         print "num", np.argmin(energy), "lattice", InterPoints[i]
-        print (np.min(Ynew))
+        print(np.min(Ynew))
 
         fig = plt.figure(figsize=self.figsize)
         ax = fig.add_subplot(111)
@@ -79,27 +68,29 @@ class cal_lattice(gn_config.bcc,
         plt.show()
         return
 
+    def set_pbs(self, mdir):
+        self.set_pbs_type('va')
+        self.set_wall_time(10)
+        self.set_job_title(mdir)
+        self.set_nnodes(1)
+        self.set_ppn(12)
+        self.set_main_job("mpirun vasp")
+        self.write_pbs(od=None)
+        return
+
     def loop_kpts(self):
         files = glob.glob('./DATA*')
         for file in files:
             cal_lattice(file)
         return
 
-    def prepare_vasp_inputs(self, dirname):
+    def prepare_vasp_inputs(self, mdir):
         self.set_incar_type('dftunrelax')
         self.write_incar()
-
         self.set_diff_kpoints([31, 31, 31])
         self.set_intype('gamma')
         self.write_kpoints()
-
-        self.set_pbs_type('va')
-        self.set_wall_time(10)
-        self.set_job_title(dirname)
-        self.set_nnodes(1)
-        self.set_ppn(12)
-        self.set_main_job("mpirun vasp")
-        self.write_pbs(od=None)
+        self.set_pbs(mdir)
         os.system("cp ../../POTCAR .")
         return
 
@@ -113,19 +104,19 @@ class cal_lattice(gn_config.bcc,
             alat = alat0 + i * delta
 
             if i >= 0:
-                dirname = "dir-p-{:03d}".format(i)
+                mdir = "dir-p-{:03d}".format(i)
             else:
-                dirname = "dir-n-{:03d}".format(abs(i))
+                mdir = "dir-n-{:03d}".format(abs(i))
 
-            self.mymkdir(dirname)
-            os.chdir(dirname)
+            self.mymkdir(mdir)
+            os.chdir(mdir)
 
             bcc_drv.set_lattce_constant(alat)
             atoms = bcc_drv.set_bcc_primitive((1, 1, 1))
             ase.io.write(filename="POSCAR", images=atoms, format='vasp')
 
-            self.prepare_vasp_inputs(dirname)
-            os.chdir(self.root)
+            self.prepare_vasp_inputs(mdir)
+            os.chdir(os.pardir)
         return
 
     def gn_fcc(self):
@@ -138,19 +129,44 @@ class cal_lattice(gn_config.bcc,
         for i in range(rng[0], rng[1]):
             alat = alat0 + i * delta
             if i >= 0:
-                dirname = "dir-p-{:03d}".format(i)
+                mdir = "dir-p-{:03d}".format(i)
             else:
-                dirname = "dir-n-{:03d}".format(abs(i))
+                mdir = "dir-n-{:03d}".format(abs(i))
 
-            self.mymkdir(dirname)
-            os.chdir(dirname)
+            self.mymkdir(mdir)
+            os.chdir(mdir)
 
             fcc_drv.set_lattce_constant(alat)
             atoms = fcc_drv.set_fcc_primitive((1, 1, 1))
             ase.io.write(filename="POSCAR", images=atoms, format='vasp')
 
-            self.prepare_vasp_inputs(dirname)
-            os.chdir(self.root)
+            self.prepare_vasp_inputs(mdir)
+            os.chdir(os.pardir)
+        return
+
+    def gn_hcp(self):
+        alat0 = self.pot['ahcp']
+        hcp_drv = gn_config.hcp(self.pot)
+        for i in range(-15, 15):
+            delta = 0.01
+            alat = alat0 + i * delta
+            if i >= 0:
+                mdir = "dir-p-{:03d}".format(i)
+            else:
+                mdir = "dir-n-{:03d}".format(abs(i))
+            self.mymkdir(mdir)
+            os.chdir(mdir)
+            hcp_drv.write_hcp_poscar(alat)
+
+            self.set_incar_type("isif4")
+            self.write_incar()
+
+            self.set_diff_kpoints([36, 36, 19])
+            self.set_intype('gamma')
+            self.write_kpoints()
+            self.set_pbs(mdir)
+            os.system("cp ../POTCAR .")
+            os.chdir(os.pardir)
         return
 
     def collect_data(self, tag='hcp'):
@@ -162,10 +178,10 @@ class cal_lattice(gn_config.bcc,
         cnt = 0
         for i in range(rng[0], rng[1]):
             if i >= 0:
-                dirname = "dir-p-{:03d}".format(i)
+                mdir = "dir-p-{:03d}".format(i)
             else:
-                dirname = "dir-n-{:03d}".format(abs(i))
-            os.chdir(dirname)
+                mdir = "dir-n-{:03d}".format(abs(i))
+            os.chdir(mdir)
 
             (energy, vol, atoms) = self.vasp_energy_stress_vol_quick()
             if (tag == 'fcc') or (tag == 'bcc'):
@@ -177,79 +193,28 @@ class cal_lattice(gn_config.bcc,
                 data[cnt, 1] = (energy)
 
             cnt += 1
-            os.chdir(self.root)
+            os.chdir(os.pardir)
         np.savetxt('lat.dat', data)
-        return
-
-    def gn_hcp(self):
-        alat0 = self.pot['ahcp']
-        hcp_drv = gn_config.hcp(self.pot)
-        for i in range(-10, 10):
-            delta = 0.01
-            alat = alat0 + i * delta
-            if i >= 0:
-                dirname = "dir-%03d" % (i)
-            else:
-                dirname = "dir-n%03d" % (i)
-            if not os.path.isdir(dirname):
-                os.mkdir(dirname)
-
-            os.chdir(dirname)
-            hcp_drv.write_hcp_poscar(alat)
-
-            self.set_incar_type("isif4")
-            self.write_incar()
-
-            self.set_diff_kpoints([23, 23, 23])
-            self.set_intype('gamma')
-            self.write_kpoints()
-
-            self.set_pbs_type('va')
-            self.set_wall_time(40)
-            self.set_job_title(dirname)
-            self.set_nnodes(1)
-            self.set_ppn(12)
-            self.set_main_job("mpirun vasp")
-            self.write_pbs(od=None)
-
-            os.system("cp ../../POTCAR .")
-            os.chdir(self.root)
         return
 
 
 if __name__ == '__main__':
     usage = "usage:%prog [options] arg1 [options] arg2"
     parser = OptionParser(usage=usage)
-    parser.add_option("-t",
-                      "--mtype",
-                      action="store",
-                      type="string",
-                      dest="mtype",
-                      help="",
-                      default="prp_r")
-
+    parser.add_option("-t", "--mtype", action="store",
+                      type="string", dest="mtype")
+    parser.add_option('-p', "--param", action="store",
+                      type='string', dest="fargs")
     (options, args) = parser.parse_args()
     drv = cal_lattice()
-    if options.mtype.lower() == 'plt':
-        drv.interpolate_lattice("lat.dat")
+    dispatcher = {'plt': drv.interpolate_lattice,
+                  'loop': drv.loop_kpts,
+                  'bcc': drv.gn_bcc,
+                  'fcc': drv.gn_fcc,
+                  'hcp': drv.gn_hcp,
+                  'clc': drv.collect_data}
 
-    elif options.mtype.lower() == 'loop':
-        drv.loop_kpts()
-
-    elif options.mtype.lower() == 'bcc':
-        drv.gn_bcc()
-
-    elif options.mtype.lower() == 'fcc':
-        drv.gn_fcc()
-
-    elif options.mtype.lower() == 'hcp':
-        drv.gn_hcp()
-
-    elif options.mtype.lower() == 'clcbcc':
-        drv.collect_data('bcc')
-
-    elif options.mtype.lower() == 'clchcp':
-        drv.collect_data('hcp')
-
-    elif options.mtype.lower() == 'clcfcc':
-        drv.collect_data('fcc')
+    if options.fargs is not None:
+        dispatcher[options.mtype.lower()](options.fargs)
+    else:
+        dispatcher[options.mtype.lower()]()

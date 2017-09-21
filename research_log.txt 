@@ -1,3 +1,31 @@
+Sep 20
+1, Add HCP and Surface Configurations 
+2, Does TP and OP so significant?
+   
+
+Sep 18 
+1, loop of the weight of the energy  
+2, loop of the cutoff length  
+
+Sep 13 
+For the Edge:
+x: 1 1 1 
+y: -1 1 0
+z: -1 -1 2 
+
+For the Screw: 
+x: 1 -1 0 
+y: 1 1 -2 
+z: 1 1 1
+
+Sep 12 
+1, clean potfit data 
+2, check the formula one more time!
+
+Sep 11
+1, Think about how to tune the EMF potential 
+2, generate more DFT data !!!! 
+
 Sep 09
 1, high dimensional integration by MC method.  
 2, WRe50 110 -> 0.0 unfinished !!!!

@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-07 22:59:58
+# @Last Modified time: 2017-09-12 23:39:45
 
 from multiprocessing import Pool
 from optparse import OptionParser
@@ -76,17 +76,6 @@ class cal_md_surface(gn_config.bcc,
                 atoms.pop()
             return atoms
 
-        elif self._surface_type == '112':
-            self._surdir = [[1, 1, -2],
-                            [-1, 1, 0],
-                            [1, 1, 1]]
-            atoms = self.set_bcc_convention(
-                in_direction=self._surdir,
-                in_size=(1, 1, 14))
-            for i in range(24):
-                atoms.pop()
-            return atoms
-
     def gn_bulk_atoms(self):
         if self._surface_type == '100':
             self._surdir = [[1, 0, 0],
@@ -107,15 +96,6 @@ class cal_md_surface(gn_config.bcc,
             return atoms
 
         elif self._surface_type == '111':
-            self._surdir = [[1, 1, -2],
-                            [-1, 1, 0],
-                            [1, 1, 1]]
-            atoms = self.set_bcc_convention(
-                in_direction=self._surdir,
-                in_size=(1, 1, 10))
-            return atoms
-
-        elif self._surface_type == '112':
             self._surdir = [[1, 1, -2],
                             [-1, 1, 0],
                             [1, 1, 1]]

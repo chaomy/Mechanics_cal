@@ -1,23 +1,13 @@
 #!/usr/bin/env python
 # encoding: utf-8
-
-###################################################################
-#
-# File Name : cal_intro_ani_dis.py
-#
-###################################################################
-#
-# Purpose : introduce anisotropic dislocation
-#
-# Creation Date :
-# Last Modified :
-# Created By    : Chaoming Yang
-#
-###################################################################
+# -*- coding: utf-8 -*-
+# @Author: chaomy
+# @Date:   2017-07-05 08:12:30
+# @Last Modified by:   chaomy
+# @Last Modified time: 2017-09-20 23:25:21
 
 try:
     import numpy as np
-    import math
     import atomman as am
     import atomman.unitconvert as uc
     import matplotlib.pyplot as plt
@@ -32,14 +22,9 @@ class cubic_cij:
     c44 = None
 
 
-class cal_intro_iso_dis(object):
-    def __init__(self, lattice_constant=3.16):
-        self.lattice_constant = lattice_constant
-        return
-
+class cal_intro_ani_dis(object):
     def calQ(self):
         c11, c12, c44 = self.cij.c11, self.cij.c12, self.cij.c44
-
         e = c44 / (c12 + c44)
         f = (c11 - c44) / (c12 + c44)
         n1sqr = n1 * n1
@@ -51,16 +36,16 @@ class cal_intro_iso_dis(object):
             + (f - 1) * (f - 1) * (f + 2) * n1sqr * n2sqr * n3sqr
         Dp = (c12 + c44) * D
 
-        nn11 = e * (e + f) - e * f * n1 * n1 + (f * f - 1) * (n2 * n3) * (n2 * n3)
+        nn11 = e * (e + f) - e * f * n1 * n1 + \
+            (f * f - 1) * (n2 * n3) * (n2 * n3)
         nn11 /= Dp
 
         nn12 = -n1 * n2 * ((f - 1) * n3sqr + e)
         nn12 /= Dp
-
         Q11 = self.integrate(nn11)
         return
 
-    def _fcc_edge(self):
+    def fcc_edge(self):
         axes = np.array([[1, 0, -1],
                          [1, 1, 1],
                          [1, -2, 1]])
@@ -92,7 +77,8 @@ class cal_intro_iso_dis(object):
         ucell = am.System(atoms=atoms, box=box, scale=True)
         system = am.rotate_cubic(ucell, axes)
 
-        shift = np.array([0.12500000000000, 0.50000000000000, 0.00000000000000])
+        shift = np.array(
+            [0.12500000000000, 0.50000000000000, 0.00000000000000])
         new_pos = system.atoms_prop(key='pos', scale=True) + shift
         system.atoms_prop(key='pos', value=new_pos, scale=True)
 

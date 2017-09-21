@@ -4,7 +4,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-06 11:17:07
+# @Last Modified time: 2017-09-12 13:49:14
 
 
 from optparse import OptionParser
@@ -44,26 +44,28 @@ class cal_md_bcc_basic(gn_config.hcp,
         self._pottype = 'eam/alloy'
         self._pot = '../Nb.eam.alloy.webarchive'
         self._lat = 3.308
-        self.atoms = ase.lattice.cubic.BodyCenteredCubic(directions=[[1, 0, 0],
-                                                                     [0, 1, 0],
-                                                                     [0, 0, 1]],
-                                                         latticeconstant=self._lat,
-                                                         size=(1, 1, 1),
-                                                         symbol=self._element,
-                                                         pbc=(1, 1, 1))
+        self.atoms = ase.lattice.cubic.BodyCenteredCubic(
+            directions=[[1, 0, 0],
+                        [0, 1, 0],
+                        [0, 0, 1]],
+            latticeconstant=self._lat,
+            size=(1, 1, 1),
+            symbol=self._element,
+            pbc=(1, 1, 1))
         plt_drv.plt_drv.__init__(self)
         self.root = os.getcwd()
         return
 
     def loop_shear(self):
         for dim in range(20, 100, 10):
-            atoms = ase.lattice.cubic.BodyCenteredCubic(directions=[[1, 0, 0],
-                                                                    [0, 1, 0],
-                                                                    [0, 0, 1]],
-                                                        latticeconstant=3.308,
-                                                        size=(10, dim, dim),
-                                                        symbol=self._element,
-                                                        pbc=(1, 1, 1))
+            atoms = ase.lattice.cubic.BodyCenteredCubic(
+                directions=[[1, 0, 0],
+                            [0, 1, 0],
+                            [0, 0, 1]],
+                latticeconstant=3.308,
+                size=(10, dim, dim),
+                symbol=self._element,
+                pbc=(1, 1, 1))
 
             cell = atoms.get_cell()
             dirname = "dir-{}".format(dim)
