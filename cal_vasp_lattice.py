@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-24 10:45:10
+# @Last Modified time: 2017-09-24 10:51:25
 
 
 import numpy as np
@@ -172,7 +172,7 @@ class cal_lattice(gn_config.bcc,
     def collect_data(self, tag='hcp'):
         rng = [-8, 8]
         rng = [-15, 15]
-        data = np.zeros([rng[1] - rng[0], 2])
+        data = np.zeros([rng[1] - rng[0], 3])
         cnt = 0
         for i in range(rng[0], rng[1]):
             if i >= 0:
@@ -181,12 +181,14 @@ class cal_lattice(gn_config.bcc,
                 mdir = "dir-n-{:03d}".format(abs(i))
             os.chdir(mdir)
             (energy, vol, atoms) = self.vasp_energy_stress_vol_quick()
-            if (tag == 'fcc') or (tag == 'bcc'):
+            if (tag in 'fcc') or (tag == 'bcc'):
                 data[cnt, 0] = atoms.get_cell()[0, 1]
                 data[cnt, 1] = (energy)
-            if tag == 'hcp':
+                data[cnt, 2] = i
+            if tag in 'hcp':
                 data[cnt, 0] = atoms.get_cell()[0, 0]
                 data[cnt, 1] = (energy)
+                data[cnt, 2] = i
             cnt += 1
             os.chdir(os.pardir)
         np.savetxt('lat.dat', data)
@@ -208,7 +210,6 @@ if __name__ == '__main__':
                   'fcc': drv.gn_fcc,
                   'hcp': drv.gn_hcp,
                   'clc': drv.collect_data}
-
     if options.fargs is not None:
         dispatcher[options.mtype.lower()](options.fargs)
     else:
