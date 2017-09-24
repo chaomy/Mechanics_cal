@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-21 11:54:12
+# @Last Modified time: 2017-09-24 10:45:10
 
 
 import numpy as np
@@ -172,7 +172,6 @@ class cal_lattice(gn_config.bcc,
     def collect_data(self, tag='hcp'):
         rng = [-8, 8]
         rng = [-15, 15]
-
         data = np.zeros([rng[1] - rng[0], 2])
         cnt = 0
         for i in range(rng[0], rng[1]):
@@ -181,16 +180,13 @@ class cal_lattice(gn_config.bcc,
             else:
                 mdir = "dir-n-{:03d}".format(abs(i))
             os.chdir(mdir)
-
             (energy, vol, atoms) = self.vasp_energy_stress_vol_quick()
             if (tag == 'fcc') or (tag == 'bcc'):
                 data[cnt, 0] = atoms.get_cell()[0, 1]
                 data[cnt, 1] = (energy)
-
             if tag == 'hcp':
                 data[cnt, 0] = atoms.get_cell()[0, 0]
                 data[cnt, 1] = (energy)
-
             cnt += 1
             os.chdir(os.pardir)
         np.savetxt('lat.dat', data)

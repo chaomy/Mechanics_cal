@@ -1,26 +1,15 @@
 #!/usr/bin/env python
-# encoding: utf-8
+# -*- coding: utf-8 -*-
+# @Author: chaomy
+# @Date:   2017-06-28 00:35:14
+# @Last Modified by:   chaomy
+# @Last Modified time: 2017-09-23 22:22:14
 
-###################################################################
-#
-# File Name : ./cal_vasp_dislocation.py
-#
-###################################################################
-#
-# Purpose : calculate the interstitials atom
-# and generate structure with designed densities
-# preprare the configs for potential fitting
-#
-# Creation Date :
-# Last Modified : Sat Apr  1 23:15:50 2017
-# Created By    : Chaoming Yang
-#
-###################################################################
 
 import os
 import glob
 import numpy as np
-from md_pot_data import dft_data
+from md_pot_data import va_pot
 import ase
 from optparse import OptionParser
 
@@ -46,31 +35,29 @@ class vasp_inters(gn_config.bcc,
                   Intro_vasp.vasp_change_box):
 
     def __init__(self, structure=None):
-        self.pot = dft_data.Nb_pbe
-        self.lat = self.pot['latbcc']
-        self.set_element(self.pot['element'])
-
+        self.pot = va_pot.W_pbe
+        self.pot['lattice'] = self.pot['latbcc']
         gn_incar.gn_incar.__init__(self)
         gn_kpoints.gn_kpoints.__init__(self)
         gn_pbs.gn_pbs.__init__(self)
         gn_config.bcc.__init__(self, self.pot)
-        Intro_vasp.vasp_change_box.__init__(self,
-                                            self.pot)
+        Intro_vasp.vasp_change_box.__init__(self, self.pot)
 
-        e1 = np.array([1., 0., 0.]) * self.lat
-        e2 = np.array([0., 1., 0.]) * self.lat
-        e3 = np.array([0., 0., 1.]) * self.lat
-
-        self.set_lattce_constant(self.lat)
-        #  self.set_hcp_lat(self.lat,
-        #  np.sqrt(8) / 3. * self.lat)
+        e1 = np.array([1., 0., 0.]) * self.pot['lattice']
+        e2 = np.array([0., 1., 0.]) * self.pot['lattice']
+        e3 = np.array([0., 0., 1.]) * self.pot['lattice']
+        #  self.set_hcp_lat(self.pot['lattice'],
+        #  np.sqrt(8) / 3. * self.pot['lattice'])
         self.root = os.getcwd()
 
         #############################################################
         # self.atoms is body centered cubic
         # self.atoms_new is simple cubic
         #############################################################
-        self.atoms = self.set_bcc_convention([e1, e2, e3], (1, 1, 1))
+        self.atoms = self.set_bcc_convention([[e1[0], e1[1], e1[2]],
+                                              [e2[0], e2[1], e2[2]],
+                                              [e3[0], e3[1], e3[2]]],
+                                             (1, 1, 1))
 
         atoms_new = self.atoms.copy()
         for atom in self.atoms:
@@ -98,7 +85,7 @@ class vasp_inters(gn_config.bcc,
         return
 
     def cal_dumbbell_100(self, atoms):
-        alat = self.lat
+        alat = self.pot['lattice']
         dirname = "dir-dumb100"
         self.mymkdir(dirname)
         os.chdir(dirname)
@@ -131,11 +118,11 @@ class vasp_inters(gn_config.bcc,
         b2 = 1 - b1
 
         # add atoms #
-        pos1 = np.array([b1, b1, 0.5]) * self.lat
+        pos1 = np.array([b1, b1, 0.5]) * self.pot['lattice']
         atoms.append(ase.atom.Atom(self._element,
                                    position=pos1))
 
-        pos2 = np.array([b2, b2, 0.5]) * self.lat
+        pos2 = np.array([b2, b2, 0.5]) * self.pot['lattice']
         atoms.append(ase.atom.Atom(self._element,
                                    position=pos2))
 
@@ -156,11 +143,11 @@ class vasp_inters(gn_config.bcc,
         b2 = 2. / 3.
 
         # add atoms #
-        pos1 = np.array([b1, b1, b1]) * self.lat
+        pos1 = np.array([b1, b1, b1]) * self.pot['lattice']
         atoms.append(ase.atom.Atom(self._element,
                                    position=pos1))
 
-        pos2 = np.array([b2, b2, b2]) * self.lat
+        pos2 = np.array([b2, b2, b2]) * self.pot['lattice']
         atoms.append(ase.atom.Atom(self._element,
                                    position=pos2))
 
@@ -177,7 +164,7 @@ class vasp_inters(gn_config.bcc,
 
         b1 = 0.25
         # add atoms #
-        pos1 = np.array([b1, b1, b1]) * self.lat
+        pos1 = np.array([b1, b1, b1]) * self.pot['lattice']
         atoms.append(ase.atom.Atom(self._element,
                                    position=pos1))
 
@@ -194,7 +181,7 @@ class vasp_inters(gn_config.bcc,
         os.chdir(dirname)
 
         b = 0.5
-        pos1 = np.array([b, b, 0]) * self.lat
+        pos1 = np.array([b, b, 0]) * self.pot['lattice']
         atoms.append(ase.atom.Atom(self._element,
                                    position=pos1))
 
@@ -210,7 +197,7 @@ class vasp_inters(gn_config.bcc,
         self.mymkdir(dirname)
         os.chdir(dirname)
 
-        pos1 = np.array([0.25, 0.5, 0]) * self.lat
+        pos1 = np.array([0.25, 0.5, 0]) * self.pot['lattice']
         atoms.append(ase.atom.Atom(self._element,
                                    position=pos1))
 
@@ -245,29 +232,24 @@ class vasp_inters(gn_config.bcc,
         ase.io.write(filename="POSCAR.vasp", images=atoms, format='vasp')
         return
 
-    def monos(self,
-              tag='read'):
-        lat = self.lat
+    def monos(self, tag='bcc'):
+        self.pot['latbcc'] = 0.85**(1. / 3.) * self.pot['latbcc']
         #  strain = [1.26, 1.0196, 0.8153]
-        strain = [1.28, 1.0106, 0.81]
-
-        e1 = np.array([1., 0., 0.]) * lat * strain[0]
-        e2 = np.array([0., 1., 0.]) * lat * strain[1]
-        e3 = np.array([0., 0., 1.]) * lat * strain[2]
-
-        if tag == "bcc":
-            self.set_lattce_constant(lat)
-            atoms = self.set_bcc_convention([e1, e2, e3], (4, 4, 4))
-
-        elif tag == "fcc":
+        strain = [1., 1., 1.]
+        # e1 = np.array([1., 0., 0.]) * lat * strain[0]
+        # e2 = np.array([0., 1., 0.]) * lat * strain[1]
+        # e3 = np.array([0., 0., 1.]) * lat * strain[2]
+        if tag in ["bcc"]:
+            atoms = self.set_bcc_convention([[1, 0, 0],
+                                             [0, 1, 0],
+                                             [0, 0, 1]], (4, 4, 4))
+        elif tag in ["fcc"]:
             self.set_lattce_constant(self.pot['latfcc'])
             atoms = self.set_fcc_convention([e1, e2, e3], (3, 3, 3))
-
-        elif tag == "hcp":
+        elif tag in ["hcp"]:
             self.set_hcp_lattice_constant(self.pot['ahcp'],
                                           self.pot['chcp'])
             atoms = self.set_hcp_convention((4, 4, 4))
-
         elif tag == "read":
             atoms = ase.io.read("POSCAR", format='vasp')
             style = 'tp'
@@ -280,10 +262,10 @@ class vasp_inters(gn_config.bcc,
 
         elif tag == "prim":
             atoms = self.set_bcc_primitive((5, 5, 5))
-
         elif tag == "vac":
             atoms = self.set_bcc_convention([e1, e2, e3], (5, 5, 5))
             atoms.pop(150)
+
         #  add strain
         #  atoms = self.volume_conserving_ortho_strain_atoms(0.03, atoms)
         #  atoms = self.volume_conserving_mono_strain_atoms(0.03, atoms)
@@ -296,7 +278,7 @@ class vasp_inters(gn_config.bcc,
         add_perturbation = True
         if add_perturbation is True:
             while True:
-                atoms_copy = self.add_perturbation(atoms, 0.13)  # 0.5;  0.4
+                atoms_copy = self.add_perturbation(atoms, 0.1)  # 0.5;  0.4
                 if self.check_min(atoms_copy):
                     atoms = atoms_copy
                     break
@@ -305,11 +287,9 @@ class vasp_inters(gn_config.bcc,
                     break
                 else:
                     cnt += 1
-
         ase.io.write(filename="POSCAR.vasp",
                      images=atoms,
                      format='vasp')
-        os.system("cp POSCAR.vasp  output")
         return
 
     def collect_energy(self):
@@ -319,7 +299,7 @@ class vasp_inters(gn_config.bcc,
 
             (energy, vol, atomnum) = self.vasp_energy_stress_vol_quick()
             print dirname
-            print (energy / atomnum)
+            print(energy / atomnum)
             print
             os.chdir(self.root)
         return
@@ -385,7 +365,7 @@ class vasp_inters(gn_config.bcc,
 
     def prep_interstitials(self):
         # reported size 5 x 5 x 5
-        alat = self.lat
+        alat = self.pot['lattice']
         sizen = 5
         atoms = self.atoms.copy().repeat((sizen, sizen, sizen))
         pos = np.array([alat,  alat,  alat]) * 0.5

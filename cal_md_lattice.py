@@ -1,19 +1,10 @@
 #!/usr/bin/env python
-# encoding: utf-8
-#
-###################################################################
-#
-# File Name : ./cal_md_lattice.py
-#
-###################################################################
-#
-# Purpose :  prepare the potfit calculation
-#
-# Creation Date : Tue Mar 28 21:20:43 2017
-# Last Modified :
-# Created By    : Chaoming Yang
-#
-###################################################################
+# -*- coding: utf-8 -*-
+# @Author: yang37
+# @Date:   2017-06-21 18:42:47
+# @Last Modified by:   chaomy
+# @Last Modified time: 2017-09-24 10:44:41
+
 
 import os
 import ase.io
@@ -64,10 +55,9 @@ class cal_md_lattice(gn_config.bcc,
     def gn_lattice_atoms(self):
         self.set_lattce_constant(self._in_lattice_constant)
 
-        lattice_direction = [[1,  0,  0],
-                             [0,  1,  0],
-                             [0,  0,  1]]
-
+        lattice_direction = [[1, 0, 0],
+                             [0, 1, 0],
+                             [0, 0, 1]]
         atoms = self.set_bcc_convention(in_direction=lattice_direction,
                                         in_size=(1, 1, 1))
         return atoms
@@ -76,10 +66,9 @@ class cal_md_lattice(gn_config.bcc,
         #  self.set_lattce_constant(self._in_lattice_constant)
         self.set_lattce_constant(3.1652000015)
 
-        lattice_direction = [[1,  0,  0],
-                             [0,  1,  0],
-                             [0,  0,  1]]
-
+        lattice_direction = [[1, 0, 0],
+                             [0, 1, 0],
+                             [0, 0, 1]]
         atoms = self.set_bcc_convention(in_direction=lattice_direction,
                                         in_size=(3, 3, 3))
 

@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-12 23:39:45
+# @Last Modified time: 2017-09-22 10:56:11
 
 from multiprocessing import Pool
 from optparse import OptionParser
@@ -33,7 +33,6 @@ class cal_md_surface(gn_config.bcc,
 
         self._surface_type = '100'
         gn_config.bcc.__init__(self, self.pot)
-        self.set_lattce_constant(self.pot['latbcc'])
         self.set_config_file_format("lmp")
         self.config_file = "lmp_init.txt"
         return
