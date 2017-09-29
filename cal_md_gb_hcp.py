@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-29 16:02:52
+# @Last Modified time: 2017-09-29 16:09:00
 
 inhcp = """
 # ---------- Initialize Simulation --------------------- 
@@ -89,7 +89,7 @@ pair_coeff     * *  ../lib_MgNdPb.meam  Mg  ../MgNd_para.meam  Mg  Mg  Mg  Mg
 neighbor 	 2.0  bin 
 neigh_modify delay 5 check yes  
 # ---------- Displace atoms and delete overlapping atoms --------------------- 
-displace_atoms upper move  %f  0 zmove units box
+displace_atoms upper move  %f  0.0  0.0  units box
 
 delete_atoms overlap 0.1 lower upper   # default
 #delete_atoms overlap 0.1 lower upper 
