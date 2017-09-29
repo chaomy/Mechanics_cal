@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-29 16:08:15
+# @Last Modified time: 2017-09-29 16:12:47
 
 import numpy as np
 import os
@@ -75,7 +75,7 @@ class md_gb_indx(object):
 	    		self.mymkdir('{}/out'.format(mdir))
 	    	elif opt in ['run']:
 	    		os.chdir(mdir)
-	    		os.system('mpirun -n 8 lmp_linux -i in.gb')
+	    		os.system('mpirun lmp_linux -i in.gb')
 	    		os.chdir(os.pardir)
     	return
 
