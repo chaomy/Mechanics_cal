@@ -4,7 +4,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-12 13:49:14
+# @Last Modified time: 2017-09-24 23:19:54
 
 
 from optparse import OptionParser
@@ -38,22 +38,13 @@ class cal_md_bcc_basic(gn_config.hcp,
                        gn_lmp_infile.gn_md_infile,
                        plt_drv.plt_drv):
 
-    def __init__(self):
+    def __init__(self, pot=None):
+        if pot is None:
+            self.pot = md_pot_data.md_pot.Nb_my
+        else:
+            self.pot = pot
         gn_lmp_infile.gn_md_infile.__init__(self)
-        self._element = 'Nb'
-        self._pottype = 'eam/alloy'
-        self._pot = '../Nb.eam.alloy.webarchive'
-        self._lat = 3.308
-        self.atoms = ase.lattice.cubic.BodyCenteredCubic(
-            directions=[[1, 0, 0],
-                        [0, 1, 0],
-                        [0, 0, 1]],
-            latticeconstant=self._lat,
-            size=(1, 1, 1),
-            symbol=self._element,
-            pbc=(1, 1, 1))
         plt_drv.plt_drv.__init__(self)
-        self.root = os.getcwd()
         return
 
     def loop_shear(self):
@@ -64,13 +55,12 @@ class cal_md_bcc_basic(gn_config.hcp,
                             [0, 0, 1]],
                 latticeconstant=3.308,
                 size=(10, dim, dim),
-                symbol=self._element,
+                symbol=self.pot['element'],
                 pbc=(1, 1, 1))
 
             cell = atoms.get_cell()
             dirname = "dir-{}".format(dim)
             os.system("mkdir %s" % (dirname))
-
             for i in range(10):
                 delta = i * 0.02
                 strain = np.mat([[1.0, 0, 0.0],
@@ -158,7 +148,6 @@ if __name__ == '__main__':
                       action="store",
                       type="string",
                       dest="mtype",
-                      help="",
                       default="prp_r")
     (options, args) = parser.parse_args()
     drv = cal_md_bcc_basic()

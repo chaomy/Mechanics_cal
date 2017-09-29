@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-22 10:56:11
+# @Last Modified time: 2017-09-24 23:11:57
 
 from multiprocessing import Pool
 from optparse import OptionParser
@@ -24,9 +24,11 @@ class cal_md_surface(gn_config.bcc,
                      gn_lmp_infile.gn_md_infile,
                      output_data.output_data):
 
-    def __init__(self):
-        self.pot = md_pot_data.md_pot.Nb_adp
-        # self.pot = self.load_data('pot.dat')
+    def __init__(self, pot=None):
+        if pot is None:
+            self.pot = md_pot_data.md_pot.Nb_adp
+        else:
+            self.pot = pot
         get_data.get_data.__init__(self)
         gn_lmp_infile.gn_md_infile.__init__(self, self.pot)
         output_data.output_data.__init__(self)

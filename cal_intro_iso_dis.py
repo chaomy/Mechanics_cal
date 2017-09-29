@@ -45,7 +45,7 @@ class cal_intro_iso_dis(object):
         # default
         bdir = 0  # burger
         ndir = 1  # glide plane normal
-        tdir = 2  # line direction
+        # tdir = 2  # line direction
 
         # # hcp
         # tdir = 0
@@ -56,16 +56,16 @@ class cal_intro_iso_dis(object):
         atom_position = atoms.get_positions()
 
         if center is None:
-            center = [0.5 * ucell[0, 0],
+            center = [0.25 * ucell[0, 0],
                       0.5 * ucell[1, 1],
                       0.5 * ucell[2, 2]]
 
         if orient is not None:
             bdir = orient[0]
             ndir = orient[1]
-            tdir = orient[2]
-        print center
+            # tdir = orient[2]
 
+        print center
         xc1 = center[bdir]
         yc1 = center[ndir]
         coeff = self.Edge_coeff
@@ -88,13 +88,10 @@ class cal_intro_iso_dis(object):
         return atoms
 
     def intro_dipole_edge_atoms(self, atoms, c1, c2):
-        ucell = atoms.get_cell()
         atom_position = atoms.get_positions()
-
         bdir = 0  # burger
         ndir = 2  # glide plane normal
-        tdir = 1  # line direction
-
+        # tdir = 1  # line direction
         xc1 = c1[bdir]
         yc1 = c1[ndir]
         xc2 = c2[bdir]

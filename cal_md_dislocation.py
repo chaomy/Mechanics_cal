@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-21 10:45:51
+# @Last Modified time: 2017-09-28 14:33:11
 
 
 from optparse import OptionParser
@@ -36,7 +36,8 @@ class md_dislocation(gn_config.bcc,
 
     def __init__(self, pot=None):
         if pot is None:
-            self.pot = md_pot_data.md_pot.Nb_eam
+            self.pot = md_pot_data.md_pot.feyo
+            # self.pot = md_pot_data.md_pot.Nb_eam
         else:
             self.pot = pot
         gn_pbs.gn_pbs.__init__(self)
@@ -257,7 +258,7 @@ class md_dislocation(gn_config.bcc,
         e2 = np.array([-1., 1., 0.])
         e3 = np.array([1., 1., 1.])
         atoms = self.set_bcc_convention(
-            [e1, e2, e3], (80, 50, 12))  # z periodic 12
+            [e1, e2, e3], (80, 50, 40))  # z periodic 12
         atoms = self.intro_single_screw_atoms(atoms)
         self.write_lmp_config_data(atoms)
 
@@ -314,7 +315,7 @@ if __name__ == "__main__":
                   'modify': drv.modified_cal_disp_dipo,
                   'hcpedge': drv.hcp_edge_dislocation,
                   'bccedge': drv.cal_single_edge_dislocations,
-                  'bccscrew': drv.cal_single_screw_dislocatoins,
+                  'bccscrew': drv.cal_single_screw_dislocations,
                   'nye': drv.cal_nye,
                   'cuau': drv.cal_cu3Au_dis,
                   'ani': drv.intro_ani_edge_fcc,

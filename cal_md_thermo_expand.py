@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-21 18:42:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-04 20:04:31
+# @Last Modified time: 2017-09-27 01:26:23
 
 
 from optparse import OptionParser
@@ -46,7 +46,6 @@ class cal_md_thermo(gn_config.hcp,
                                                 size=(1, 1, 1),
                                                 symbol=self._element,
                                                 pbc=(1, 1, 1))
-        self.root = os.getcwd()
         gn_config.bcc.__init__(self, self._pot)
         plt_drv.plt_drv.__init__(self)
         return
@@ -67,7 +66,7 @@ class cal_md_thermo(gn_config.hcp,
                 dirname = "dir-{:05.0f}".format(tend)
                 os.chdir(dirname)
                 os.system("mpirun -n 24 lmp_linux -i in.npt")
-                os.chdir(self.root)
+                os.chdir(os.pardir)
         elif tag == 'loopclc':
             temp_lx = []
             for i in range(1, 51):
@@ -75,7 +74,7 @@ class cal_md_thermo(gn_config.hcp,
                 dirname = "dir-{:05.0f}".format(tend)
                 os.chdir(dirname)
                 temp_lx.append(self.get_temp_lat())
-                os.chdir(self.root)
+                os.chdir(os.pardir)
             print temp_lx
         temp_lx = np.array(temp_lx)
         np.savetxt("temp_lx.txt", temp_lx)
@@ -104,13 +103,11 @@ class cal_md_thermo(gn_config.hcp,
         tstart = 0.1
         initt = 50
         deltat = 50
-
         # initial
         dirname = "dir-{:05.0f}".format(0)
         self.mymkdir(dirname)
         self.indrv.write_md_thermo_expand('init')
         shutil.copy2("in.npt", dirname)
-
         # increase temp
         for i in range(50):
             # 2500  K
@@ -188,7 +185,7 @@ class cal_md_thermo(gn_config.hcp,
             elif opt == 'run':
                 os.chdir(dirname)
                 os.system("lmp_mpi -i in.init")
-                os.chdir(self.root)
+                os.chdir(os.pardir)
 
             elif opt == 'clc':
                 os.chdir(dirname)
@@ -196,7 +193,7 @@ class cal_md_thermo(gn_config.hcp,
                 print data
                 vol[i] = data[0]
                 press[i] = data[1]
-                os.chdir(self.root)
+                os.chdir(os.pardir)
                 shutil.rmtree(dirname)
 
         if opt == 'clc':
@@ -292,9 +289,10 @@ if __name__ == '__main__':
 
     if options.mtype.lower() == 'p2vauto':
         if not os.path.isfile("in.init"):
-            os.system("cp ~/My_cal/Mechnical_cal/Bcc_Press_to_Vol/in.lat .")
-            os.system("cp ~/My_cal/Mechnical_cal/Bcc_Press_to_Vol/in.init .")
-
+            os.system(
+                "cp ~/My_cal/Mechnical_cal/Bcc_Press_to_Vol/in.lat_adp in.lat")
+            os.system(
+                "cp ~/My_cal/Mechnical_cal/Bcc_Press_to_Vol/in.init_adp in.init")
         drv.set_lat('cal')
         drv.pressure_vs_vol('prep')
         drv.pressure_vs_vol('run')

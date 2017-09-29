@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-23 22:22:14
+# @Last Modified time: 2017-09-24 11:29:54
 
 
 import os
@@ -35,36 +35,31 @@ class vasp_inters(gn_config.bcc,
                   Intro_vasp.vasp_change_box):
 
     def __init__(self, structure=None):
-        self.pot = va_pot.W_pbe
-        self.pot['lattice'] = self.pot['latbcc']
+        self.pot = va_pot.Mg_pbe
         gn_incar.gn_incar.__init__(self)
         gn_kpoints.gn_kpoints.__init__(self)
         gn_pbs.gn_pbs.__init__(self)
         gn_config.bcc.__init__(self, self.pot)
         Intro_vasp.vasp_change_box.__init__(self, self.pot)
-
-        e1 = np.array([1., 0., 0.]) * self.pot['lattice']
-        e2 = np.array([0., 1., 0.]) * self.pot['lattice']
-        e3 = np.array([0., 0., 1.]) * self.pot['lattice']
-        #  self.set_hcp_lat(self.pot['lattice'],
-        #  np.sqrt(8) / 3. * self.pot['lattice'])
-        self.root = os.getcwd()
-
         #############################################################
         # self.atoms is body centered cubic
         # self.atoms_new is simple cubic
         #############################################################
-        self.atoms = self.set_bcc_convention([[e1[0], e1[1], e1[2]],
-                                              [e2[0], e2[1], e2[2]],
-                                              [e3[0], e3[1], e3[2]]],
-                                             (1, 1, 1))
+        if self.pot['structure'] in ['bcc']:
+            e1 = np.array([1., 0., 0.]) * self.pot['lattice']
+            e2 = np.array([0., 1., 0.]) * self.pot['lattice']
+            e3 = np.array([0., 0., 1.]) * self.pot['lattice']
+            self.atoms = self.set_bcc_convention([[e1[0], e1[1], e1[2]],
+                                                  [e2[0], e2[1], e2[2]],
+                                                  [e3[0], e3[1], e3[2]]],
+                                                 (1, 1, 1))
 
-        atoms_new = self.atoms.copy()
-        for atom in self.atoms:
-            if atom.position[1] > 1.0:
-                print atom.index
-                del atoms_new[atom.index]
-        self.atoms_simple = atoms_new
+            atoms_new = self.atoms.copy()
+            for atom in self.atoms:
+                if atom.position[1] > 1.0:
+                    print atom.index
+                    del atoms_new[atom.index]
+            self.atoms_simple = atoms_new
         return
 
     def prepare_dislocation_vasp_infiles(self, dirname='inters'):
@@ -106,7 +101,7 @@ class vasp_inters(gn_config.bcc,
         os.system("cp POSCAR ../POSCAR_dumbel_100.vasp")
 
         self.prepare_dislocation_vasp_infiles(dirname)
-        os.chdir(self.root)
+        os.chdir(os.pardir)
         return
 
     def cal_dumbbell_110(self, atoms):
@@ -130,7 +125,7 @@ class vasp_inters(gn_config.bcc,
         os.system("cp POSCAR ../POSCAR_dumbel_110.vasp")
 
         self.prepare_dislocation_vasp_infiles(dirname)
-        os.chdir(self.root)
+        os.chdir(os.pardir)
         return
 
     def cal_dumbbell_111(self, atoms):
@@ -154,7 +149,7 @@ class vasp_inters(gn_config.bcc,
         self.write_poscar(atoms)
         os.system("cp POSCAR ../POSCAR_dumbel_111.vasp")
         self.prepare_dislocation_vasp_infiles(dirname)
-        os.chdir(self.root)
+        os.chdir(os.pardir)
         return
 
     def cal_crowdion(self, atoms):
@@ -172,7 +167,7 @@ class vasp_inters(gn_config.bcc,
         os.system("cp POSCAR ../POSCAR_crowdion.vasp")
 
         self.prepare_dislocation_vasp_infiles(dirname)
-        os.chdir(self.root)
+        os.chdir(os.pardir)
         return
 
     def cal_octahedral(self, atoms):
@@ -189,7 +184,7 @@ class vasp_inters(gn_config.bcc,
         os.system("cp POSCAR ../POSCAR_octahedral.vasp")
 
         self.prepare_dislocation_vasp_infiles(dirname)
-        os.chdir(self.root)
+        os.chdir(os.pardir)
         return
 
     def cal_tetrahedral(self, atoms):
@@ -205,7 +200,7 @@ class vasp_inters(gn_config.bcc,
         os.system("cp POSCAR ../POSCAR_tetrahedral.vasp")
 
         self.prepare_dislocation_vasp_infiles(dirname)
-        os.chdir(self.root)
+        os.chdir(os.pardir)
         return
 
     def surf(self, tag):
@@ -232,14 +227,13 @@ class vasp_inters(gn_config.bcc,
         ase.io.write(filename="POSCAR.vasp", images=atoms, format='vasp')
         return
 
-    def monos(self, tag='bcc'):
-        self.pot['latbcc'] = 0.85**(1. / 3.) * self.pot['latbcc']
+    def monos(self, tag='hcp'):
         #  strain = [1.26, 1.0196, 0.8153]
-        strain = [1., 1., 1.]
         # e1 = np.array([1., 0., 0.]) * lat * strain[0]
         # e2 = np.array([0., 1., 0.]) * lat * strain[1]
         # e3 = np.array([0., 0., 1.]) * lat * strain[2]
         if tag in ["bcc"]:
+            self.pot['latbcc'] = 0.85**(1. / 3.) * self.pot['latbcc']
             atoms = self.set_bcc_convention([[1, 0, 0],
                                              [0, 1, 0],
                                              [0, 0, 1]], (4, 4, 4))
@@ -247,8 +241,6 @@ class vasp_inters(gn_config.bcc,
             self.set_lattce_constant(self.pot['latfcc'])
             atoms = self.set_fcc_convention([e1, e2, e3], (3, 3, 3))
         elif tag in ["hcp"]:
-            self.set_hcp_lattice_constant(self.pot['ahcp'],
-                                          self.pot['chcp'])
             atoms = self.set_hcp_convention((4, 4, 4))
         elif tag == "read":
             atoms = ase.io.read("POSCAR", format='vasp')
@@ -259,7 +251,6 @@ class vasp_inters(gn_config.bcc,
                 atoms = atoms.repeat((4, 4, 4))  # TP
             elif style == 'shear':
                 atoms = atoms.repeat((5, 5, 5))  # shear
-
         elif tag == "prim":
             atoms = self.set_bcc_primitive((5, 5, 5))
         elif tag == "vac":
@@ -274,7 +265,6 @@ class vasp_inters(gn_config.bcc,
         ###################################################################
         cnt = 0
         print atoms.get_positions()
-
         add_perturbation = True
         if add_perturbation is True:
             while True:
@@ -301,7 +291,7 @@ class vasp_inters(gn_config.bcc,
             print dirname
             print(energy / atomnum)
             print
-            os.chdir(self.root)
+            os.chdir(os.pardir)
         return
 
     def check_min(self, in_atoms=None):
