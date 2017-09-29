@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-29 16:09:00
+# @Last Modified time: 2017-09-29 16:10:35
 
 inhcp = """
 # ---------- Initialize Simulation --------------------- 
@@ -108,7 +108,7 @@ dump	 1 all custom 100 out/rel.chkpt.*  id type mass x y z c_eng
 #restart 1 out/rel.restart
 
 min_style cg 
-minimize 1e-15 1e-15 10000 10000 
+minimize 1e-8 1e-8 10000 10000 
 
 variable Ecoh equal %f 
 variable Ntot equal "count(gbregion)"
