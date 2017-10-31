@@ -3,14 +3,13 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-06 15:38:09
+# @Last Modified time: 2017-10-01 13:34:29
 
 
 import os
 import ase
 import ase.io
 import ase.lattice
-import glob
 import gn_pbs
 import numpy as np
 import gn_config
@@ -36,8 +35,8 @@ class cal_bcc_ideal_tensile_op(get_data.get_data,
         gn_config.bcc.__init__(self, self.pot)
 
         self.alat = self.pot['lattice']
-        self.npts = 12
-        self.range = (0, 12)
+        self.npts = 13
+        self.range = (0, 13)
         self.delta = 0.02
         e1 = [1., 0., 0.]
         e2 = [0., 1., 0.]
@@ -87,7 +86,8 @@ class cal_bcc_ideal_tensile_op(get_data.get_data,
         data = np.ndarray([npts, 10])
         for i in range(npts):
             delta = self.delta * (self.range[0] + i)
-            res = minimize(self.runlmp, x0, delta, method='Nelder-Mead')
+            res = minimize(self.runlmp, x0, delta, method='Nelder-Mead',
+                           options={'fatol': 5e-4, 'disp': True})
             data[i][2], data[i][3] = res.x[0], res.x[1]
             x0 = res.x
             print res

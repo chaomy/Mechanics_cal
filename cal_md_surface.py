@@ -3,13 +3,14 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-24 23:11:57
+# @Last Modified time: 2017-10-01 12:48:38
 
 from multiprocessing import Pool
 from optparse import OptionParser
 import os
 import gn_config
 import get_data
+import gsf_data
 import gn_lmp_infile
 import md_pot_data
 import output_data
@@ -26,13 +27,12 @@ class cal_md_surface(gn_config.bcc,
 
     def __init__(self, pot=None):
         if pot is None:
-            self.pot = md_pot_data.md_pot.Nb_adp
+            self.pot = md_pot_data.md_pot.Nb_eam
         else:
             self.pot = pot
         get_data.get_data.__init__(self)
         gn_lmp_infile.gn_md_infile.__init__(self, self.pot)
         output_data.output_data.__init__(self)
-
         self._surface_type = '100'
         gn_config.bcc.__init__(self, self.pot)
         self.set_config_file_format("lmp")
@@ -44,66 +44,32 @@ class cal_md_surface(gn_config.bcc,
         return
 
     def gn_surface_atoms(self):
-        if self._surface_type == '100':
-            self._surdir = [[1, 0, 0],
-                            [0, 1, 0],
-                            [0, 0, 1]]
-            atoms = self.set_bcc_convention(
-                in_direction=self._surdir,
-                in_size=(1, 1, 20))
-            for i in range(12):
-                atoms.pop()
-            return atoms
-
-        elif self._surface_type == '110':
-            self._surdir = [[-1, 1, 0],
-                            [0, 0, 1],
-                            [1, 1, 0]]
-            atoms = self.set_bcc_convention(
-                in_direction=self._surdir,
-                in_size=(1, 1, 14))
-            for i in range(12):
-                atoms.pop()
-            return atoms
-
-        elif self._surface_type == '111':
-            self._surdir = [[1, 1, -2],
-                            [-1, 1, 0],
-                            [1, 1, 1]]
-            atoms = self.set_bcc_convention(
-                in_direction=self._surdir,
-                in_size=(1, 1, 14))
-            for i in range(24):
-                atoms.pop()
-            return atoms
+        if self._surface_type in ['100']:
+            tag = 'x100z100'
+        elif self._surface_type in ['110']:
+            tag = 'x110z110'
+        elif self._surface_type in ['111']:
+            tag = 'x112z111'
+        self._surdir = gsf_data.gsfbase[tag]
+        atoms = self.set_bcc_convention(
+            in_direction=self._surdir,
+            in_size=gsf_data.gsfsize[tag])
+        for i in range(gsf_data.gsfpopn[tag]):
+            atoms.pop()
+        return atoms
 
     def gn_bulk_atoms(self):
-        if self._surface_type == '100':
-            self._surdir = [[1, 0, 0],
-                            [0, 1, 0],
-                            [0, 0, 1]]
-            atoms = self.set_bcc_convention(
-                in_direction=self._surdir,
-                in_size=(1, 1, 14))
-            return atoms
-
-        elif self._surface_type == '110':
-            self._surdir = [[-1, 1, 0],
-                            [0, 0, 1],
-                            [1, 1, 0]]
-            atoms = self.set_bcc_convention(
-                in_direction=self._surdir,
-                in_size=(1, 1, 11))
-            return atoms
-
-        elif self._surface_type == '111':
-            self._surdir = [[1, 1, -2],
-                            [-1, 1, 0],
-                            [1, 1, 1]]
-            atoms = self.set_bcc_convention(
-                in_direction=self._surdir,
-                in_size=(1, 1, 10))
-            return atoms
+        if self._surface_type in ['100']:
+            tag = 'x100z100'
+        elif self._surface_type in ['110']:
+            tag = 'x110z110'
+        elif self._surface_type in ['111']:
+            tag = 'x112z111'
+        self._surdir = gsf_data.gsfbase[tag]
+        atoms = self.set_bcc_convention(
+            in_direction=self._surdir,
+            in_size=gsf_data.bulksize[tag])
+        return atoms
 
     def run_lmp_minimize(self, loc_dir):
         os.chdir(loc_dir)
@@ -213,6 +179,7 @@ if __name__ == '__main__':
     (options, args) = parser.parse_args()
     drv = cal_md_surface()
     dispatcher = {'run': drv.wrap_run}
+
     if options.fargs is not None:
         dispatcher[options.mtype.lower()](options.fargs)
     else:

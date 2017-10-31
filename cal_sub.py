@@ -4,19 +4,12 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-27 22:59:31
+# @Last Modified time: 2017-10-24 00:16:06
 
 
 import os
 import glob
 from optparse import OptionParser
-
-usage = "usage:%prog [options] arg1 [options] arg2"
-parser = OptionParser(usage=usage)
-parser.add_option("-t", "--mtype", action="store",
-                  type="string", dest="mtype", help="",
-                  default="curv")
-(options, args) = parser.parse_args()
 
 
 class subjobs(object):
@@ -61,6 +54,12 @@ class subjobs(object):
 
 
 if __name__ == "__main__":
+    usage = "usage:%prog [options] arg1 [options] arg2"
+    parser = OptionParser(usage=usage)
+    parser.add_option("-t", "--mtype", action="store",
+                      type="string", dest="mtype", help="",
+                      default="curv")
+    (options, args) = parser.parse_args()
     drv = subjobs()
     dispatcher = {'sub': drv.loop_sub_jobs,
                   'shearcnt': drv.loop_shear_cnt}

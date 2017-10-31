@@ -4,14 +4,13 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-29 02:11:54
+# @Last Modified time: 2017-10-17 01:07:28
 
 import os
 from glob import glob
-from subprocess import Popen
+
 
 class md_gb_run(object):
-
     def loop_run(self):
         dlist = glob("gb-*")
         for mdir in dlist:

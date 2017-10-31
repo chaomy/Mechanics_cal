@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-29 15:51:28
+# @Last Modified time: 2017-10-17 09:48:45
 
 
 from get_data import get_data
@@ -19,13 +19,16 @@ class md_gb(md_gb_pre,
             md_gb_run,
             md_gb_indx,
             get_data):
+
     def __init__(self):
-    	self.pot = md_pot.mg_kim
+        # self.pot = md_pot.mg_kim
+        self.pot = md_pot.mg_Poco
         md_gb_pre.__init__(self)
         md_gb_run.__init__(self)
         md_gb_indx.__init__(self)
         get_data.__init__(self)
         return
+
 
 if __name__ == "__main__":
     usage = "usage:%prog [options] arg1 [options] arg2"
@@ -37,7 +40,7 @@ if __name__ == "__main__":
     (options, args) = parser.parse_args()
     drv = md_gb()
     dispatcher = {'gblist': drv.loop_gb_list,
-                  'run': drv.loop_run, 
+                  'run': drv.loop_run,
                   'index': drv.hcp_tilt_index,
                   'mat': drv.hcp_til_mtx,
                   'build': drv.build_hcp_gb,

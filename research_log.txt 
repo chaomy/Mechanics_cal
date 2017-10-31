@@ -1,12 +1,57 @@
-24863979.nyx.arc-ts.um  chaomy      flux     T3000             30385     4     48       2gb  50:00:00 R  00:10:40
-24864046.nyx.arc-ts.um  chaomy      flux     T2600             10866     4     48       2gb  50:00:00 R  00:05:59
-24864114.nyx.arc-ts.um  chaomy      flux     T2400               --      4     48       2gb  50:00:00 Q       -- 
-24864115.nyx.arc-ts.um  chaomy      flux     T2800               --      4     48       2gb  50:00:00 Q       -- 
+Oct 28 
+1. LAMMPS do what kind of extrapolation beyond the nodes 
+(linear extropolation or high order extropolation)
+
+Oct 27  
+1. add specific boundaries  !!! hilim and lolim (as reading the potential) 
+
+Oct 25 
+1. try start with less points 
+
+Oct 24 
+1. analysize the data to find out what we can do out fitting procedure !!!!
+
+Oct 18 
+1, solve the first order dirivative problem at the boundary; 
+recheck the original ADP; Three Order ADP; as well as only three order ADP 
 
 
-Introduction: 
-	Early eam potential for Nb
-	
+Oct 17 
+1, /home/chaomy/My_cal/MgNd_2NNmeam  last run  
+
+Oct 6 
+1, solve the first / end derivative problem => 
+	=> current use pyhton to achieve it! 
+2, implement the rescale function 
+3, check the three body interaction calcualtion 
+
+Oct 4 
+1, apply adp to meam-> modifies adp to execute the meam function 
+2, check how to boardcast angles  (mpi_utils.c -> broadcast_angles)  
+3, check why some atoms has 0 neighbors 
+
+Oct 3 
+1, write SingleLinked list   SLinkedList
+2, write DoubleLinked List   DLinkedList 
+3, Continue write the meam files 
+
+1. lmp.exe is still useful. 
+lmp.exe -i ~/lmpInputParam 
+lmp.exe -i ~/lmpInputParam2
+
+
+PeiFeng's Command: compiling nlopt and atomicrex:  
+for nlopt: 
+ ./configure --enable-shared --prefix=$HOME/install 
+ rm -rf ~/install/
+ make install 
+
+for atomicrex:  
+ make -j10
+
+ Introduction:
+ Early eam potential for Nb	
+
 
 Sep 20
 1, Add HCP and Surface Configurations 

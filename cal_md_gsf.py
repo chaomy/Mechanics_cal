@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-20 00:19:59
+# @Last Modified time: 2017-10-24 00:28:23
 
 
 import os
@@ -24,7 +24,6 @@ class cal_md_gsf(output_data.output_data):
 
     def __init__(self):
         output_data.output_data.__init__(self)
-        self.set_config_file_format("lmp")
         self.set_relax_type()
         self.config_file = "lmp_init.txt"
         return
@@ -55,7 +54,7 @@ class cal_md_gsf(output_data.output_data):
         os.chdir(os.pardir)
         return
 
-    def loop_gsf(self):
+    def loop_md_gsf(self):
         dir_list = glob.glob("dir-*")
         for mdir in dir_list:
             self.run_lmp_gsf(mdir)
@@ -105,10 +104,8 @@ class cal_md_gsf(output_data.output_data):
         self.fig.savefig(filename, **self.figsave)
         return
 
-    def plot_multi_gsf_curv(self,
-                            potlist,
-                            typelist,
-                            fname='gsf_compare.png'):
+    def plot_multi_gsf_curv(self, potlist,
+                            typelist, fname='gsf_compare.png'):
         self.set_keys()
         self.set_211plt()
         axlist = [self.ax1, self.ax2]
@@ -225,11 +222,10 @@ if __name__ == '__main__':
     parser.add_option('-p', "--param", action="store",
                       type='string', dest="fargs")
     (options, args) = parser.parse_args()
-    drv = cal_md_gsf(mgsf='111_211')
+    drv = cal_md_gsf()
     dispatcher = {'prep': drv.md_single_dir_gsf,
                   'run': drv.multi_thread_gsf,
                   'clc': drv.collect_gsf_energy,
-                  'loop': drv.loop_gsf,
                   'trans': drv.trans_data_format,
                   'cmp': drv.drv_cmp,
                   'relaxed': drv.drv_relaxed,
@@ -238,27 +234,3 @@ if __name__ == '__main__':
         dispatcher[options.mtype.lower()](options.fargs)
     else:
         dispatcher[options.mtype.lower()]()
-
-    # def plot_multi_type_gsf_curv(self, typelist, fname='gsf_compare.png'):
-    #     pltdrv = plt_drv.plt_drv()
-    #     self.set_keys()
-    #     self.set_111plt((8, 4))
-    #     plt.rc('xtick', labelsize='large')
-    #     plt.rc('ytick', labelsize='large')
-    #     cnt = 0
-    #     for gsftype in typelist:
-    #         filename = "gsf_{}_{}.txt".format(self.pot['pair_type'],
-    #                                           gsftype)
-    #         pltlabel = "{}_{}".format(self.pot['pair_type'], gsftype)
-    #         data = np.loadtxt(filename)
-    #         self.ax.plot(data[:, 0], data[:, 1],
-    #                      label=pltlabel,
-    #                      **next(self.keysiter))
-    #         cnt += 1
-    #         self.ax.legend(**self.legendarg)
-    #     plt.xlabel("normalized displacement along $[{}]$".format(gsftype[:3]),
-    #                {'fontsize': (self.myfontsize)})   # (110): -110  (11-2) -110
-    #     plt.ylabel("stacking fault energy $[eV/\AA^{2}]$",
-    #                {'fontsize': (self.myfontsize)})   # (110): -110  (11-2) -110
-    #     plt.savefig(fname, **self.figsave)
-    #     return

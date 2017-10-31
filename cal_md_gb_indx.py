@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-29 16:12:47
+# @Last Modified time: 2017-10-17 09:58:04
 
 import numpy as np
 import os
@@ -16,7 +16,7 @@ from math import sqrt
 class md_gb_indx(object):
 
     def hcp_tilt_index(self, thetarange=[0., 60.]):
-        lo = np.deg2rad(thetarange[0])
+        # lo = np.deg2rad(thetarange[0])
         hi = np.deg2rad(thetarange[1])
         v0 = np.array([1, 0, 0])
         vn = np.array([0, 0, 1])
@@ -27,7 +27,7 @@ class md_gb_indx(object):
         rot = {'x': None,
                'y': None,
                'z': None,
-               'theta': None} 
+               'theta': None}
         for xidx in range(1, 100):
             for yidx in range(1, 80):
                 vec = np.array([xidx, yidx * SQRT3, 0])
@@ -65,19 +65,22 @@ class md_gb_indx(object):
         return nmat
 
     def loop_dispx_hcp(self, opt='prep'):
-    	for i in range(20):
-    		dispx = 0.05 * i 
-    		mdir = 'dispx-{:4.3f}'.format(dispx) 
-    		if opt in ['prep']:
-	    		self.mymkdir(mdir)
-	    		self.build_hcp_gb(20, (dispx, 0.0, 0.0))
-	    		os.system('mv in.gb {}'.format(mdir))
-	    		self.mymkdir('{}/out'.format(mdir))
-	    	elif opt in ['run']:
-	    		os.chdir(mdir)
-	    		os.system('mpirun lmp_linux -i in.gb')
-	    		os.chdir(os.pardir)
-    	return
+        for i in range(20):
+            dispx = 0.05 * i
+            mdir = 'dispx-{:4.3f}'.format(dispx)
+
+            if opt in ['prep']:
+                self.mymkdir(mdir)
+                self.build_hcp_gb(30, (dispx, 0.0, 0.0))
+                os.system('mv in.gb {}'.format(mdir))
+                self.mymkdir('{}/out'.format(mdir))
+
+            elif opt in ['run']:
+                os.chdir(mdir)
+                os.system('mpirun -n 4 lmp_mpi -i in.gb')
+                os.chdir(os.pardir)
+
+        return
 
     def build_hcp_gb(self, ang=20., disp=(0, 0, 0)):
         fid = open("in.gb", 'w')
@@ -90,6 +93,7 @@ class md_gb_indx(object):
                            nmat[0, 0], nmat[0, 1], nmat[0, 2],
                            nmat[1, 0], nmat[1, 1], nmat[1, 2],
                            nmat[2, 0], nmat[2, 1], nmat[2, 2],
-                           self.pot['pair_style'], self.pot['file'],
+                           self.pot['pair_style'],
+                           self.pot['file'],
                            disp[0], self.pot['ehcp']))
         return

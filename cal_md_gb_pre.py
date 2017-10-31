@@ -4,11 +4,10 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-29 13:17:18
+# @Last Modified time: 2017-10-31 00:32:27
 
 import shutil
 import re
-from optparse import OptionParser
 from math import sqrt
 
 
@@ -34,7 +33,7 @@ class md_gb_pre(object):
         l_mult = int(bicrystal[9])
         xsh = bicrystal[10]
         zsh = bicrystal[11]
-        alat = 3.1433632      # 3.164812986 #BCC W!!!
+        alat = 3.1433632
         # symmetric for now but change for asymmetric
         Lx = alat * sqrt(float(xupper.split()[0])**2 + float(
             xupper.split()[1])**2 + float(xupper.split()[2])**2) * u_mult
@@ -111,7 +110,9 @@ class md_gb_pre(object):
                 xsh = lines.split()[24]
                 zsh = lines.split()[25]
                 # print xlower+' '+ylower+' '+zlower
-                bicrystals.append([angle, angle_phi, xupper, yupper, zupper,
-                                   xlower, ylower, zlower, u_mult, l_mult, xsh, zsh])
+                bicrystals.append([angle, angle_phi,
+                                   xupper, yupper, zupper,
+                                   xlower, ylower, zlower,
+                                   u_mult, l_mult, xsh, zsh])
         f.close()
         return bicrystals

@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-21 18:42:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-27 01:26:23
+# @Last Modified time: 2017-10-27 15:54:13
 
 
 from optparse import OptionParser
@@ -223,14 +223,6 @@ class cal_md_thermo(gn_config.hcp,
             cnt += 1
         return
 
-    def delete_some_cands(self):
-        raw = self.mreadlines("candlist.txt")
-        self.mymkdir("save")
-        for line in raw:
-            figname = "fig-{}.png".format(line.split()[0])
-            os.system("mv {} save".format(figname))
-        return
-
     def vasp_energy_stress_vol_plt(self,
                                    inlabel='p-v',
                                    npt=30):
@@ -258,58 +250,40 @@ class cal_md_thermo(gn_config.hcp,
         self.fig.savefig("p2v.png", **self.figsave)
         return
 
+    def p2v_wrap(self, ptype='eam'):
+        pth = "~/My_cal/Mechnical_cal/Bcc_Press_to_Vol/"
+        if not os.path.isfile("in.init"):
+            os.system(
+                "cp {}in.lat_{} in.lat".format(pth, ptype))
+            os.system(
+                "cp {}in.init_{} in.init".format(pth, ptype))
+        drv.set_lat('cal')
+        drv.pressure_vs_vol('prep')
+        drv.pressure_vs_vol('run')
+        drv.pressure_vs_vol('clc')
+        drv.vasp_energy_stress_vol_plt(25)
+        return
+
 
 if __name__ == '__main__':
     usage = "usage:%prog [options] arg1 [options] arg2"
     parser = OptionParser(usage=usage)
     parser.add_option("-t", "--mtype", action="store",
-                      type="string", dest="mtype", help="",
-                      default="prp_r")
+                      type="string", dest="mtype")
+    parser.add_option('-p', "--param", action="store",
+                      type='string', dest="fargs")
+
     (options, args) = parser.parse_args()
-
     drv = cal_md_thermo()
-    if options.mtype.lower() == 'thermo':
-        drv.given_temp_prep()
-
-    if options.mtype.lower() == 'runjob':
-        drv.run_thermo()
-
-    if options.mtype.lower() == 'clc':
-        #  drv.get_temp_lat()
-        drv.run_thermo('loopclc')
-
-    if options.mtype.lower() == 'p2vprep':
-        drv.pressure_vs_vol('prep')
-
-    if options.mtype.lower() == 'p2vrun':
-        drv.pressure_vs_vol('run')
-
-    if options.mtype.lower() == 'p2vclc':
-        drv.pressure_vs_vol('clc')
-
-    if options.mtype.lower() == 'p2vauto':
-        if not os.path.isfile("in.init"):
-            os.system(
-                "cp ~/My_cal/Mechnical_cal/Bcc_Press_to_Vol/in.lat_adp in.lat")
-            os.system(
-                "cp ~/My_cal/Mechnical_cal/Bcc_Press_to_Vol/in.init_adp in.init")
-        drv.set_lat('cal')
-        drv.pressure_vs_vol('prep')
-        drv.pressure_vs_vol('run')
-        drv.pressure_vs_vol('clc')
-        drv.vasp_energy_stress_vol_plt(30)
-
-    if options.mtype.lower() == 'p2vplt':
-        drv.vasp_energy_stress_vol_plt(30)
-
-    if options.mtype.lower() == 'plot':
-        drv.draw_temp_vol()
-
-    if options.mtype.lower() == 'expandplt':
-        drv.theormo_expand_plt()
-
-    if options.mtype.lower() == 'loopp2v':
-        drv.loop_pressure_vs_vol()
-
-    if options.mtype.lower() == 'del':
-        drv.delete_some_cands()
+    dispatcher = {'thermo': drv.given_temp_prep,
+                  'runthermo': drv.run_thermo,
+                  'clc': drv.run_thermo,
+                  'p2vauto': drv.p2v_wrap,
+                  'loopp2v': drv.loop_pressure_vs_vol,
+                  'p2vplt': drv.vasp_energy_stress_vol_plt,
+                  'plt': drv.draw_temp_vol,
+                  'themoplt': drv.theormo_expand_plt}
+    if options.fargs is not None:
+        dispatcher[options.mtype.lower()](options.fargs)
+    else:
+        dispatcher[options.mtype.lower()]()

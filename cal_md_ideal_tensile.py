@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-04 20:35:48
+# @Last Modified time: 2017-10-01 13:30:22
 
 
 import os
@@ -32,7 +32,7 @@ class cal_bcc_ideal_tensile(get_data.get_data,
         gn_pbs.gn_pbs.__init__(self)
         plt_drv.plt_drv.__init__(self)
         self.alat = self.pot['lattice']
-        self.npts = 25
+        self.npts = 12
         self.delta = 0.02
 
         e1 = np.array([1., 0., 0.])
