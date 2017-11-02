@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-01 23:54:01
+# @Last Modified time: 2017-11-01 23:55:44
 
 import os
 import numpy as np
@@ -60,11 +60,11 @@ class cal_lattice(gn_config.bcc,
         return
 
     def loop_pots(self):
-        potlist = {'WTa25': md_pot_data.qe_pot.vca_W75Ta25,
-                   'WTa20': md_pot_data.qe_pot.vca_W80Ta20,
-                   'WTa15': md_pot_data.qe_pot.vca_W85Ta15,
-                   'WTa10': md_pot_data.qe_pot.vca_W90Ta10,
-                   'WTa05': md_pot_data.qe_pot.vca_W95Ta05}
+        potlist = {'WTa0.25': md_pot_data.qe_pot.vca_W75Ta25,
+                   'WTa0.20': md_pot_data.qe_pot.vca_W80Ta20,
+                   'WTa0.15': md_pot_data.qe_pot.vca_W85Ta15,
+                   'WTa0.10': md_pot_data.qe_pot.vca_W90Ta10,
+                   'WTa0.05': md_pot_data.qe_pot.vca_W95Ta05}
         for key in potlist.keys():
             os.mymkdir(key)
             self.__init__(potlist[key])           
