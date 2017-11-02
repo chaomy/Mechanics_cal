@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-02 14:59:09
+# @Last Modified time: 2017-11-02 14:59:57
 
 import os
 import numpy as np
@@ -30,7 +30,7 @@ class cal_lattice(gn_config.bcc,
 
     def __init__(self, inpot=None):
         if inpot is None: 
-            self.pot = md_pot_data.qe_pot.pbe_W
+            self.pot = md_pot_data.qe_pot.pbe_w
         else: 
             self.pot = inpot
         output_data.output_data.__init__(self)
