@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-02 14:00:43
+# @Last Modified time: 2017-11-02 14:06:37
 
 import os
 import numpy as np
@@ -259,7 +259,7 @@ def loop_pots(self):
                'WTa0.10': md_pot_data.qe_pot.vca_W90Ta10,
                'WTa0.05': md_pot_data.qe_pot.vca_W95Ta05}
     for key in potlist.keys():
-        drv = cal_lattice()
+        drv = cal_lattice(potlist[key])
         drv.mymkdir(key)
         os.chdir(key)
         drv.cal_bcc_lattice()
