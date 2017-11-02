@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-02 00:18:11
+# @Last Modified time: 2017-11-02 00:43:52
 
 import os
 import numpy as np
@@ -157,18 +157,18 @@ class cal_lattice(gn_config.bcc,
         return
 
     def clc_lattice(self, tag='bcc'):
-        rng = [-10, 10]
+        rng = [-15, 15]
         cnt = 0
         data = np.zeros([rng[1] - rng[0], 2])
         for i in range(rng[0], rng[1]):
-            if i >= 0:
+            if i >= 0: 
                 mdir = "dir-p-{:03d}".format(i)
-            else:
+            else: 
                 mdir = "dir-n-{:03d}".format(abs(i))
             os.chdir(mdir)
             (energy, vol, stress) = self.qe_get_energy_stress('qe.out')
             cellmtx = self.qe_get_cell('qe.in')
-            if (tag == 'fcc') or (tag == 'bcc'):
+            if tag in ['fcc', 'bcc']:
                 data[cnt, 0] = 2 * cellmtx[0, 1]
                 data[cnt, 1] = (energy)
             cnt += 1

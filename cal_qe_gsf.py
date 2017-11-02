@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-19 22:55:52
+# @Last Modified time: 2017-11-02 00:33:44
 
 
 from copy import deepcopy
@@ -59,7 +59,7 @@ class cal_qe_gsf(object):
         disps = np.arange(0.02, 1.0, 0.04)
         disps = np.append(disps, 0.0)
         npts = len(disps)
-
+        
         if mtype in ['scf']:
             self.setup_qe_scf()
         elif mtype in ['relax']:
