@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-02 00:11:52
+# @Last Modified time: 2017-11-02 00:18:11
 
 import os
 import numpy as np
@@ -255,6 +255,7 @@ class cal_lattice(gn_config.bcc,
     def set_my_pbs(self, mdir, od=True):
         self.set_nnodes(1)
         self.set_ppn(4)
+        self.set_mem(1)
         self.set_job_title("%s" % (mdir))
         self.set_wall_time(8)
         self.set_main_job("""
