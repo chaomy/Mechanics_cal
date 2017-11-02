@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-02 00:03:38
+# @Last Modified time: 2017-11-02 00:04:06
 
 import os
 import numpy as np
@@ -70,7 +70,7 @@ class cal_lattice(gn_config.bcc,
             self.__init__(potlist[key])           
             os.chdir(key)
             self.cal_bcc_lattice()
-            os.chdir(os.parser)
+            os.chdir(os.pardir)
         return 
 
     def goandsub(self, mdir, rootdir):
