@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-02 00:08:43
+# @Last Modified time: 2017-11-02 00:11:52
 
 import os
 import numpy as np
@@ -54,7 +54,7 @@ class cal_lattice(gn_config.bcc,
             self.pot['latbcc'] = self.alat0 + i * 0.006
             atoms = self.set_bcc_primitive((1, 1, 1))
             self.gn_qe_bcc_lattice_infile(atoms)
-            self.set_pbs(mdir)  
+            self.set_my_pbs(mdir)  
             os.system("mv qe.in {}".format(mdir))
             os.system('cp $POTDIR/{} {}'.format(self.pot['file'],
                                                 mdir))
@@ -252,7 +252,7 @@ class cal_lattice(gn_config.bcc,
         print "min lat", interps[np.argmin(spl(interps))]
         return data
 
-    def set_pbs(self, mdir, od=True):
+    def set_my_pbs(self, mdir, od=True):
         self.set_nnodes(1)
         self.set_ppn(4)
         self.set_job_title("%s" % (mdir))
