@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-01 23:55:44
+# @Last Modified time: 2017-11-02 00:03:38
 
 import os
 import numpy as np
@@ -66,7 +66,7 @@ class cal_lattice(gn_config.bcc,
                    'WTa0.10': md_pot_data.qe_pot.vca_W90Ta10,
                    'WTa0.05': md_pot_data.qe_pot.vca_W95Ta05}
         for key in potlist.keys():
-            os.mymkdir(key)
+            self.mymkdir(key)
             self.__init__(potlist[key])           
             os.chdir(key)
             self.cal_bcc_lattice()
