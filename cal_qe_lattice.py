@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-06-29 00:47:45
+# @Last Modified time: 2017-11-01 23:54:01
 
 import os
 import numpy as np
@@ -29,12 +29,14 @@ class cal_lattice(gn_config.bcc,
                   gn_pbs.gn_pbs):
 
     def __init__(self, inpot=None):
-        self.pot = md_pot_data.qe_pot.vca_W75Re25
+        if inpot is None: 
+            self.pot = md_pot_data.qe_pot.vca_W75Ta25
         output_data.output_data.__init__(self)
         get_data.get_data.__init__(self)
         gn_pbs.gn_pbs.__init__(self)
         gn_qe_inputs.gn_qe_infile.__init__(self, self.pot)
         plt_drv.plt_drv.__init__(self)
+        gn_config.bcc.__init__(self, self.pot)
         self.alat0 = self.pot['lattice']
         self.element = self.pot['element']
         self.mass = self.pot['mass']
@@ -43,47 +45,36 @@ class cal_lattice(gn_config.bcc,
         return
 
     def cal_bcc_lattice(self):
-        bcc_drv = gn_config.bcc(self.pot)
-        for i in range(-10, 10):
+        for i in range(-15, 15):
             if i >= 0:
-                dirname = "dir-p-{:03d}".format(i)
+                mdir = "dir-p-{:03d}".format(i)
             else:
-                dirname = "dir-n-{:03d}".format(abs(i))
-            self.mymkdir(dirname)
-            alat = self.alat0 + i * 0.006
-            bcc_drv.set_lattce_constant(alat)
-            atoms = bcc_drv.set_bcc_primitive((1, 1, 1))
+                mdir = "dir-n-{:03d}".format(abs(i))
+            self.mymkdir(mdir)
+            self.pot['latbcc'] = self.alat0 + i * 0.006
+            atoms = self.set_bcc_primitive((1, 1, 1))
             self.gn_qe_bcc_lattice_infile(atoms)
-            os.system("mv qe.in {}".format(dirname))
+            os.system("mv qe.in {}".format(mdir))
             os.system('cp $POTDIR/{} {}'.format(self.pot['file'],
-                                                dirname))
+                                                mdir))
         return
 
     def loop_pots(self):
-        count = 0
-        potlist = None
-        for pot in potlist:
-            count += 1
-            latticeList = []
-            energy = []
-            stress = []
-            for i in range(-10, 10):
-                alat = self.alat0 + i * 0.005
-                latticeList.append(alat)
-                self.gnInfile(alat,
-                              self._kpoint,
-                              pot)
-                data = self.qe_get_energy_stress()
-                energy.append(data[0])
-                stress.append(data[1])
-                self.output_delta_energy(delta=latticeList,
-                                         energy=energy,
-                                         stress=stress,
-                                         file_name='lat.txt')
-        return
+        potlist = {'WTa25': md_pot_data.qe_pot.vca_W75Ta25,
+                   'WTa20': md_pot_data.qe_pot.vca_W80Ta20,
+                   'WTa15': md_pot_data.qe_pot.vca_W85Ta15,
+                   'WTa10': md_pot_data.qe_pot.vca_W90Ta10,
+                   'WTa05': md_pot_data.qe_pot.vca_W95Ta05}
+        for key in potlist.keys():
+            os.mymkdir(key)
+            self.__init__(potlist[key])           
+            os.chdir(key)
+            self.cal_bcc_lattice()
+            os.chdir(os.parser)
+        return 
 
-    def goandsub(self, dirname, rootdir):
-        os.chdir(dirname)
+    def goandsub(self, mdir, rootdir):
+        os.chdir(mdir)
         os.system('qsub va.pbs')
         os.chdir(rootdir)
         return
@@ -108,19 +99,17 @@ class cal_lattice(gn_config.bcc,
         return
 
     def loop_kpoints(self):
-        bcc_drv = gn_config.bcc(self.pot)
-        bcc_drv.set_lattce_constant(self.alat0)
         self.set_ecut('{}'.format(48))
         self.set_disk_io('none')
         for kpts in range(32, 50):
             self.set_kpnts((kpts, kpts, kpts))
-            dirname = 'dir-kpt-{}'.format(kpts)
-            self.mymkdir(dirname)
-            atoms = bcc_drv.set_bcc_primitive((1, 1, 1))
+            mdir = 'dir-kpt-{}'.format(kpts)
+            self.mymkdir(mdir)
+            atoms = self.set_bcc_primitive((1, 1, 1))
             self.gn_qe_bcc_lattice_infile(atoms)
-            os.system('mv qe.in {}'.format(dirname))
+            os.system('mv qe.in {}'.format(mdir))
             os.system('cp $POTDIR/{} {}'.format(self.pot['file'],
-                                                dirname))
+                                                mdir))
         return
 
     def loop_kpoints_ecut(self, opt='clc'):
@@ -141,17 +130,15 @@ class cal_lattice(gn_config.bcc,
         return
 
     def loop_ecut(self):
-        bcc_drv = gn_config.bcc(self.pot)
-        bcc_drv.set_lattce_constant(self.alat0)
         for ecut in range(28, 52):
             self.set_ecut('{}'.format(ecut))
-            dirname = 'dir-ecut-{}'.format(ecut)
-            self.mymkdir(dirname)
-            atoms = bcc_drv.set_bcc_primitive((1, 1, 1))
+            mdir = 'dir-ecut-{}'.format(ecut)
+            self.mymkdir(mdir)
+            atoms = self.set_bcc_primitive((1, 1, 1))
             self.gn_qe_bcc_lattice_infile(atoms)
-            os.system('mv qe.in {}'.format(dirname))
+            os.system('mv qe.in {}'.format(mdir))
             os.system('cp $POTDIR/{} {}'.format(self.pot['file'],
-                                                dirname))
+                                                mdir))
         return
 
     def clc_data(self, tag='ecut'):
@@ -174,10 +161,10 @@ class cal_lattice(gn_config.bcc,
         data = np.zeros([rng[1] - rng[0], 2])
         for i in range(rng[0], rng[1]):
             if i >= 0:
-                dirname = "dir-p-{:03d}".format(i)
+                mdir = "dir-p-{:03d}".format(i)
             else:
-                dirname = "dir-n-{:03d}".format(abs(i))
-            os.chdir(dirname)
+                mdir = "dir-n-{:03d}".format(abs(i))
+            os.chdir(mdir)
             (energy, vol, stress) = self.qe_get_energy_stress('qe.out')
             cellmtx = self.qe_get_cell('qe.in')
             if (tag == 'fcc') or (tag == 'bcc'):
@@ -190,6 +177,8 @@ class cal_lattice(gn_config.bcc,
         return
 
     def plt_data(self, tag='ecut', data=None):
+        if tag in ['lat']:
+            data = self.find_lattice()
         if data is None:
             [val, engy] = np.loadtxt('{}.txt'.format(tag))
         else:
@@ -229,16 +218,16 @@ class cal_lattice(gn_config.bcc,
 
     def loop_run(self):
         dirlist = glob.glob("dir-*")
-        for dirname in dirlist:
-            print dirname
-            os.chdir(dirname)
+        for mdir in dirlist:
+            print mdir
+            os.chdir(mdir)
             os.system("mpirun pw.x < qe.in > qe.out")
             os.chdir(self.root)
         return
 
     def gn_qe_bcc_lattice_infile(self, atoms):
         self.set_thr('1.0D-6')
-        self.set_ecut('48')
+        self.set_ecut('40')
         self.set_kpnts((44, 44, 44))
         self.set_degauss('0.03D0')
         with open('qe.in', 'w') as fid:
@@ -262,78 +251,41 @@ class cal_lattice(gn_config.bcc,
         print "min lat", interps[np.argmin(spl(interps))]
         return data
 
-    def set_pbs(self, dirname, od=True):
+    def set_pbs(self, mdir, od=True):
         self.set_nnodes(2)
         self.set_ppn(12)
-        self.set_job_title("%s" % (dirname))
+        self.set_job_title("%s" % (mdir))
         self.set_wall_time(7)
         self.set_main_job("""
 cal_qe_lattice.py -t run
                         """)
         self.write_pbs(od=od)
-        #os.system("mv va.pbs %s" % (dirname))
+        #os.system("mv va.pbs %s" % (mdir))
         return
 
 if __name__ == '__main__':
     usage = "usage:%prog [options] arg1 [options] arg2"
     parser = OptionParser(usage=usage)
-    parser.add_option("-t",
-                      "--mtype",
-                      action="store",
-                      type="string",
-                      dest="mtype",
-                      help="",
-                      default="prp_r")
-
+    parser.add_option("-t", "--mtype", action="store",
+                      type="string", dest="mtype")
+    parser.add_option('-p', "--param", action="store",
+                      type='string', dest="fargs")
     (options, args) = parser.parse_args()
     drv = cal_lattice()
 
-    if options.mtype.lower() in ['kpts', 'prepkpts', 'loopkpts']:
-        drv.loop_kpoints()
+    dispatcher = {'kpts': drv.loop_kpoints,
+                  'degauss': drv.loop_degauss,
+                  'ecut': drv.loop_ecut,
+                  'kpt_ecut': drv.loop_kpoints_ecut,
+                  'pots': drv.loop_pots,
+                  'bcc': drv.cal_bcc_lattice,
+                  'run': drv.loop_run,
+                  'clcdata': drv.clc_data,
+                  'clclat': drv.clc_lattice,
+                  'plt': drv.plt_data,
+                  'loop': drv.loop_clc_data}
 
-    if options.mtype.lower() in ['degauss_prep', 'degauss_sub', 'degauss_clc']:
-        drv.loop_degauss(opt=options.mtype.lower().split('_')[-1])
-
-    elif options.mtype.lower() in ['ecut', 'loopecut']:
-        drv.loop_ecut()
-
-    elif options.mtype.lower() in ['kptsecut_prep',
-                                   'kptsecut_clc',
-                                   'kptsecut_dat']:
-        tag = options.mtype.lower().split('_')[-1]
-        drv.loop_kpoints_ecut(tag)
-
-    elif options.mtype.lower() == 'pot':
-        drv.loop_pots()
-
-    elif options.mtype.lower() == 'bcc':
-        drv.cal_bcc_lattice()
-
-    elif options.mtype.lower() == 'run':
-        drv.loop_run()
-
-    elif options.mtype.lower() in ['clcecut', 'clckpts']:
-        tag = options.mtype.lower()[3:]
-        drv.clc_data(tag=tag)
-
-    elif options.mtype.lower() == 'clclat':
-        drv.clc_lattice()
-
-    elif options.mtype.lower() == 'pltecut':
-        drv.plt_data(tag='ecut')
-
-    elif options.mtype.lower() == 'pltlat':
-        data = drv.find_lattice()
-        drv.plt_data(tag='lat', data=data)
-
-    elif options.mtype.lower() in ['pltkpts', 'pltecut']:
-        tag = options.mtype.lower()[3:]
-        drv.plt_data(tag=tag)
-
-    elif options.mtype.lower() in ['loopclckpts', 'loopclcecut']:
-        tag = options.mtype.lower()[7:]
-        drv.loop_clc_data(opt=tag)
-
-    elif options.mtype.lower() in ['loopplt_kpts', 'loopplt_ecut']:
-        tag = options.mtype.lower().split('_')[-1]
-        drv.loop_plt_data(tag)
+    if options.fargs is not None:
+        dispatcher[options.mtype.lower()](options.fargs)
+    else:
+        dispatcher[options.mtype.lower()]()

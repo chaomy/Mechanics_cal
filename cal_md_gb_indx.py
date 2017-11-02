@@ -4,11 +4,10 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-10-17 09:58:04
+# @Last Modified time: 2017-11-01 02:08:43
 
 import numpy as np
 import os
-from cal_md_gb_hcp import inhcp
 from math import cos, sin
 from math import sqrt
 
@@ -52,7 +51,7 @@ class md_gb_indx(object):
         print cnt
         return
 
-    def hcp_til_mtx(self, angdeg=30.):
+    def hcp_til_mtx(self, angdeg=15.):
         crat = self.pot['chcp'] / self.pot['ahcp']
         theta = np.deg2rad(angdeg)
         base = np.mat([[1.0, 0.0, 0.0],
@@ -64,14 +63,13 @@ class md_gb_indx(object):
         nmat = (matx * base.transpose()).transpose()
         return nmat
 
-    def loop_dispx_hcp(self, opt='prep'):
-        for i in range(20):
-            dispx = 0.05 * i
-            mdir = 'dispx-{:4.3f}'.format(dispx)
-
+    def loop_thickness(self, opt='prep'):
+        for i in range(30, 100, 10):
+            thk = (i, i + 10)
+            mdir = 'thk_{:4.3f}'.format(thk[0])
             if opt in ['prep']:
                 self.mymkdir(mdir)
-                self.build_hcp_gb(30, (dispx, 0.0, 0.0))
+                self.build_hcp_gb(15, thk, (0.0, 0.0, 0.0))
                 os.system('mv in.gb {}'.format(mdir))
                 self.mymkdir('{}/out'.format(mdir))
 
@@ -80,20 +78,18 @@ class md_gb_indx(object):
                 os.system('mpirun -n 4 lmp_mpi -i in.gb')
                 os.chdir(os.pardir)
 
-        return
+    def loop_dispx_hcp(self, opt='prep'):
+        for i in range(20):
+            dispx = 0.05 * i
+            mdir = 'dispx-{:4.3f}'.format(dispx)
+            if opt in ['prep']:
+                self.mymkdir(mdir)
+                self.build_hcp_gb(0., (30, 40), (dispx, 0.0, 0.0))
+                os.system('mv in.gb {}'.format(mdir))
+                self.mymkdir('{}/out'.format(mdir))
 
-    def build_hcp_gb(self, ang=20., disp=(0, 0, 0)):
-        fid = open("in.gb", 'w')
-        pmat = self.hcp_til_mtx(ang)
-        nmat = self.hcp_til_mtx(-ang)
-        fid.write(inhcp % (self.pot['ahcp'], self.pot['chcp'],
-                           pmat[0, 0], pmat[0, 1], pmat[0, 2],
-                           pmat[1, 0], pmat[1, 1], pmat[1, 2],
-                           pmat[2, 0], pmat[2, 1], pmat[2, 2],
-                           nmat[0, 0], nmat[0, 1], nmat[0, 2],
-                           nmat[1, 0], nmat[1, 1], nmat[1, 2],
-                           nmat[2, 0], nmat[2, 1], nmat[2, 2],
-                           self.pot['pair_style'],
-                           self.pot['file'],
-                           disp[0], self.pot['ehcp']))
+            elif opt in ['run']:
+                os.chdir(mdir)
+                os.system('mpirun -n 4 lmp_mpi -i in.gb')
+                os.chdir(os.pardir)
         return
