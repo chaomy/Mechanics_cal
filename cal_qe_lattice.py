@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-02 00:43:52
+# @Last Modified time: 2017-11-02 14:00:43
 
 import os
 import numpy as np
@@ -59,20 +59,6 @@ class cal_lattice(gn_config.bcc,
             os.system('cp $POTDIR/{} {}'.format(self.pot['file'],
                                                 mdir))
         return
-
-    def loop_pots(self):
-        potlist = {'WTa0.25': md_pot_data.qe_pot.vca_W75Ta25,
-                   'WTa0.20': md_pot_data.qe_pot.vca_W80Ta20,
-                   'WTa0.15': md_pot_data.qe_pot.vca_W85Ta15,
-                   'WTa0.10': md_pot_data.qe_pot.vca_W90Ta10,
-                   'WTa0.05': md_pot_data.qe_pot.vca_W95Ta05}
-        for key in potlist.keys():
-            self.mymkdir(key)
-            self.__init__(potlist[key])           
-            os.chdir(key)
-            self.cal_bcc_lattice()
-            os.chdir(os.pardir)
-        return 
 
     def goandsub(self, mdir, rootdir):
         os.chdir(mdir)
@@ -265,6 +251,21 @@ mpirun pw.x < qe.in > qe.out
         os.system("mv va.pbs %s" % (mdir))
         return
 
+
+def loop_pots(self):
+    potlist = {'WTa0.25': md_pot_data.qe_pot.vca_W75Ta25,
+               'WTa0.20': md_pot_data.qe_pot.vca_W80Ta20,
+               'WTa0.15': md_pot_data.qe_pot.vca_W85Ta15,
+               'WTa0.10': md_pot_data.qe_pot.vca_W90Ta10,
+               'WTa0.05': md_pot_data.qe_pot.vca_W95Ta05}
+    for key in potlist.keys():
+        drv = cal_lattice()
+        drv.mymkdir(key)
+        os.chdir(key)
+        drv.cal_bcc_lattice()
+        os.chdir(os.pardir)
+    return 
+
 if __name__ == '__main__':
     usage = "usage:%prog [options] arg1 [options] arg2"
     parser = OptionParser(usage=usage)
@@ -279,7 +280,7 @@ if __name__ == '__main__':
                   'degauss': drv.loop_degauss,
                   'ecut': drv.loop_ecut,
                   'kpt_ecut': drv.loop_kpoints_ecut,
-                  'pots': drv.loop_pots,
+                  'pots': loop_pots,
                   'bcc': drv.cal_bcc_lattice,
                   'run': drv.loop_run,
                   'clcdata': drv.clc_data,
