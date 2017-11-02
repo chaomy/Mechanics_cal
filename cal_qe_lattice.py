@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-02 14:09:01
+# @Last Modified time: 2017-11-02 14:13:10
 
 import os
 import numpy as np
@@ -31,6 +31,8 @@ class cal_lattice(gn_config.bcc,
     def __init__(self, inpot=None):
         if inpot is None: 
             self.pot = md_pot_data.qe_pot.vca_W75Ta25
+        else: 
+            self.pot = inpot
         output_data.output_data.__init__(self)
         get_data.get_data.__init__(self)
         gn_pbs.gn_pbs.__init__(self)
@@ -252,19 +254,19 @@ mpirun pw.x < qe.in > qe.out
         return
 
 
-def loop_pots():
-    potlist = {'WTa0.25': md_pot_data.qe_pot.vca_W75Ta25,
-               'WTa0.20': md_pot_data.qe_pot.vca_W80Ta20,
-               'WTa0.15': md_pot_data.qe_pot.vca_W85Ta15,
-               'WTa0.10': md_pot_data.qe_pot.vca_W90Ta10,
-               'WTa0.05': md_pot_data.qe_pot.vca_W95Ta05}
-    for key in potlist.keys():
-        drv = cal_lattice(potlist[key])
-        drv.mymkdir(key)
-        os.chdir(key)
-        drv.cal_bcc_lattice()
-        os.chdir(os.pardir)
-    return 
+    def loop_pots(self):
+        potlist = {'WTa0.25': md_pot_data.qe_pot.vca_W75Ta25,
+                   'WTa0.20': md_pot_data.qe_pot.vca_W80Ta20,
+                   'WTa0.15': md_pot_data.qe_pot.vca_W85Ta15,
+                   'WTa0.10': md_pot_data.qe_pot.vca_W90Ta10,
+                   'WTa0.05': md_pot_data.qe_pot.vca_W95Ta05}
+        for key in potlist.keys():
+            self.mymkdir(key)
+            self.__init__(potlist[key])
+            os.chdir(key)
+            self.cal_bcc_lattice()
+            os.chdir(os.pardir)
+        return 
 
 if __name__ == '__main__':
     usage = "usage:%prog [options] arg1 [options] arg2"
@@ -275,12 +277,11 @@ if __name__ == '__main__':
                       type='string', dest="fargs")
     (options, args) = parser.parse_args()
     drv = cal_lattice()
-
     dispatcher = {'kpts': drv.loop_kpoints,
                   'degauss': drv.loop_degauss,
                   'ecut': drv.loop_ecut,
                   'kpt_ecut': drv.loop_kpoints_ecut,
-                  'pots': loop_pots,
+                  'pots': drv.loop_pots,
                   'bcc': drv.cal_bcc_lattice,
                   'run': drv.loop_run,
                   'clcdata': drv.clc_data,
