@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-02 14:07:17
+# @Last Modified time: 2017-11-02 14:09:01
 
 import os
 import numpy as np
@@ -252,7 +252,7 @@ mpirun pw.x < qe.in > qe.out
         return
 
 
-def loop_pots(self):
+def loop_pots():
     potlist = {'WTa0.25': md_pot_data.qe_pot.vca_W75Ta25,
                'WTa0.20': md_pot_data.qe_pot.vca_W80Ta20,
                'WTa0.15': md_pot_data.qe_pot.vca_W85Ta15,
