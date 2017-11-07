@@ -3,11 +3,10 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-07 00:53:10
+# @Last Modified time: 2017-11-07 01:31:54
 
 
 import gn_lmp_infile
-import numpy as np
 import plt_drv
 import md_pot_data
 import gn_qe_inputs
@@ -17,13 +16,14 @@ import get_data
 import gn_kpoints
 import gn_incar
 import gn_pbs
-import Intro_vasp
-import cal_sub
-import cal_qe_gsf
-import cal_qe_gsf_pos
-import cal_qe_gsf_pre
-import cal_md_gsf
-import cal_va_gsf
+from utils import Intro_vasp
+from utils import cal_sub
+from gsf import cal_qe_gsf
+from gsf import cal_qe_gsf_pos
+from gsf import cal_qe_gsf_pre
+from gsf import cal_md_gsf
+from gsf import cal_va_gsf
+import numpy as np
 from copy import deepcopy
 from math import sqrt
 from optparse import OptionParser
