@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-06 23:19:32
+# @Last Modified time: 2017-11-06 23:53:41
 
 
 from itertools import cycle
@@ -39,7 +39,12 @@ dirtree = {'x111z110': {
     '20': 'Bcc_WRe20_gsfx111z110',
     '25': 'Bcc_WRe25_gsfx111z110',
     '50': 'Bcc_WRe50_gsfx111z110',
-    'ta': 'Bcc_WTa50_gsfx111z110'
+    'ta': 'Bcc_WTa50_gsfx111z110',
+    'ta05': 'WTa0.05',
+    'ta10': 'WTa0.10',
+    'ta15': 'WTa0.15',
+    'ta20': 'WTa0.20',
+    'ta25': 'WTa0.25'
 }, 'x111z112': {
     '00': 'Bcc_WRe00_gsfx111z112',
     '05': 'Bcc_WRe05_gsfx111z112',
@@ -64,16 +69,16 @@ class cal_qe_gsf_pos(object):
             os.chdir(os.pardir)
         return
 
-    def transdata(self, ptype='scp', tag='ta'):
+    def transdata(self, ptype='scp', tag='ta25'):
         # disps = arange(0.46, 0.56, 0.04)
-        disps = arange(0.42, 0.48, 0.04)
+        disps = arange(0.42, 0.56, 0.04)
         disps = append(disps, 0.0)
         for disp in disps:
             mdir = 'dir-{}-{:4.3f}'.format(self.mgsf, disp)
             self.mymkdir(mdir)
             if ptype in ['scp']:
                 fdir = fluxdirs['QE'] + \
-                    'VC_WRe/Bcc_QE_VCA_WRe_relaxgsf/{}'.format(
+                    'VC_WTa/gsf/{}'.format(
                         dirtree[self.mgsf][tag])
                 os.system('scp {}/{}/qe.out {}'.format(fdir, mdir, mdir))
                 os.system('scp {}/{}/qe.in {}'.format(fdir, mdir, mdir))
@@ -82,7 +87,7 @@ class cal_qe_gsf_pos(object):
 
     def clc_qe_gsf_engy(self, fname='gsf'):
         disps = 0.0
-        disps = append(disps, arange(0.42, 0.56, 0.04))
+        disps = append(disps, arange(0.46, 0.55, 0.04))
         # disps = append(disps, arange(0.42, 0.48, 0.04))
         # disps = append(disps, 1.0)
         npts = len(disps)

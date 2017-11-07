@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-02 18:03:20
+# @Last Modified time: 2017-11-06 23:42:57
 
 
 from copy import deepcopy
@@ -22,7 +22,6 @@ class cal_qe_gsf(object):
                        'WTa0.15': md_pot_data.qe_pot.vca_W85Ta15,
                        'WTa0.20': md_pot_data.qe_pot.vca_W80Ta20,
                        'WTa0.25': md_pot_data.qe_pot.vca_W75Ta25}
-
         self.vcapots = {
             'WTa50': md_pot_data.qe_pot.vca_W50Ta50,
             'WRe00': md_pot_data.qe_pot.pbe_w,
