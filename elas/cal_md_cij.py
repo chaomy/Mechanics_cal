@@ -4,7 +4,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-06 12:58:37
+# @Last Modified time: 2017-11-07 15:13:34
 
 
 from optparse import OptionParser
@@ -22,19 +22,11 @@ class cal_md_cij(get_data.get_data,
     def __init__(self, pot=md_pot_data.md_pot.Nb_eam):
         get_data.get_data.__init__(self)
         self.pot = pot
-        self._cij_element = self.pot['element']
-        self._structure = self.pot['structure']
-        self._lattice_constant = self.pot['lattice']
-        self._cij_potential = self.pot['file']
         gn_lmp_infile.gn_md_infile.__init__(self, self.pot)
         gn_config.bcc.__init__(self, self.pot)
-
-        self.set_lattce_constant(self._lattice_constant)
-        self.root_dir = os.getcwd()
         return
 
     def gn_temp_atoms(self):
-        self.set_lattce_constant(self._lattice_constant)
         lattice_direction = [[1, 0, 0],
                              [0, 1, 0],
                              [0, 0, 1]]
@@ -53,12 +45,12 @@ class cal_md_cij(get_data.get_data,
 
         self.write_lmp_config_data(atoms)
         self.gn_md_shear_lattice("lmp_init.txt", temp,
-                                 self._cij_potential,
-                                 self._cij_element)
+                                 self.pot["file"],
+                                 self.pot['element'])
 
-        os.system("cp ../%s  ." % (self._cij_potential))
+        os.system("cp ../%s  ." % (self.pot["file"]))
         os.system("mpirun -n 8 lmp_mpi -in in.shear")
-        os.chdir(self.root_dir)
+        os.chdir(os.pardir)
         return
 
     def cal_elastic_constant(self):
@@ -71,7 +63,7 @@ class cal_md_cij(get_data.get_data,
         os.system("cp ../displace.mod .")
         os.system("lmp_mpi -in in.elastic > log.md_cij")
         elastic_constants = self.get_lmp_elastic_constants()
-        os.chdir(self.root_dir)
+        os.chdir(os.pardir)
         return elastic_constants
 
 

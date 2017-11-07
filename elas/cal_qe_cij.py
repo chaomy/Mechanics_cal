@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-09 21:48:12
+# @Last Modified time: 2017-11-07 15:26:35
 
 
 from optparse import OptionParser
@@ -31,19 +31,16 @@ class cal_cij(gn_config.bcc,
               output_data.output_data,
               gn_qe_inputs.gn_qe_infile):
 
-    def __init__(self):
+    def __init__(self, inpot=md_pot_data.qe_pot.vca_W95Ta05):
         self.unit_delta = 0.005
         self.looptimes = 8
         self.volume = None
         self.energy0 = None
-
-        self.pot = md_pot_data.qe_pot.vca_W75Re25
+        self.pot = inpot
         self.alat = self.pot['lattice']
         self.elem = self.pot['element']
         self.cij_type_list = ['c11', 'c12', 'c44']
         self.cij_type = 'c11'
-        self.struct = self.pot['structure']
-        self.root = os.getcwd()
 
         gn_kpoints.gn_kpoints.__init__(self)
         get_data.get_data.__init__(self)
@@ -52,11 +49,11 @@ class cal_cij(gn_config.bcc,
         output_data.output_data.__init__(self)
         gn_qe_inputs.gn_qe_infile.__init__(self, self.pot)
 
-        if self.struct == 'bcc':
+        if self.pot['structure'] == 'bcc':
             gn_config.bcc.__init__(self, self.pot)
-        elif self.struct == 'fcc':
+        elif self.pot['structure'] == 'fcc':
             gn_config.fcc.__init__(self, self.pot)
-        elif self.struct == 'hcp':
+        elif self.pot['structure'] == 'hcp':
             gn_config.hcp.__init__(self, self.pot)
         return
 
@@ -121,8 +118,8 @@ class cal_cij(gn_config.bcc,
 
     def gn_qe_cij_infile(self, atoms):
         self.set_thr('1.0D-6')
-        self.set_ecut('48')
-        self.set_kpnts((39, 39, 39))
+        self.set_ecut('40')
+        self.set_kpnts((44, 44, 44))
         self.set_degauss('0.03D0')
         with open('qe.in', 'w') as fid:
             fid = self.qe_write_control(fid, atoms)
@@ -154,7 +151,7 @@ class cal_cij(gn_config.bcc,
                                                              write=False)
                 self.gn_qe_cij_infile(atoms)
                 os.system("cp $POTDIR/{} .".format(self.pot['file']))
-                os.chdir(self.root)
+                os.chdir(os.pardir)
         return
 
     def collect_data_cij(self):
@@ -171,7 +168,7 @@ class cal_cij(gn_config.bcc,
                 os.chdir(dirname)
                 print "i am in ", dirname
                 (energy, vol, stress) = self.qe_get_energy_stress()
-                os.chdir(self.root)
+                os.chdir(os.pardir)
                 self.output_delta_energy(delta,
                                          energy,
                                          file_name=out_file_name)
@@ -186,40 +183,49 @@ class cal_cij(gn_config.bcc,
         self.write_pbs(od=True)
         return
 
-    def loop_sub_jobs(self):
+    def loop_sub_drvs(self):
         dir_list = glob.glob("dir-*")
         for i in range(len(dir_list)):
             os.chdir(dir_list[i])
             os.system("qsub va.pbs")
-            os.chdir(self.root)
+            os.chdir(os.pardir)
+        return
+
+    def loop_pots(self):
+        potlist = {'WTa0.25': md_pot_data.qe_pot.vca_W75Ta25,
+                   'WTa0.20': md_pot_data.qe_pot.vca_W80Ta20,
+                   'WTa0.15': md_pot_data.qe_pot.vca_W85Ta15,
+                   'WTa0.10': md_pot_data.qe_pot.vca_W90Ta10,
+                   'WTa0.05': md_pot_data.qe_pot.vca_W95Ta05}
+        for key in potlist.keys():
+            self.mymkdir(key)
+            self.__init__(potlist[key])
+            os.chdir(key)
+            self.loop_prepare_cij()
+            os.chdir(os.pardir)
         return
 
 
 if __name__ == "__main__":
     usage = "usage:%prog [options] arg1 [options] arg2"
     parser = OptionParser(usage=usage)
-    parser.add_option("-t",
-                      "--mtype",
-                      action="store",
-                      type="string",
-                      dest="mtype",
-                      help="",
-                      default="prep")
+    parser.add_option("-t", "--mtype", action="store",
+                      type="string", dest="mtype")
+    parser.add_option('-p', "--param", action="store",
+                      type='string', dest="fargs")
 
     (options, args) = parser.parse_args()
-    Job = cal_cij()
-    if options.mtype.lower() in ['prep']:
-        Job.loop_prepare_cij()
-
-    if options.mtype.lower() in ['sub']:
-        Job.loop_sub_jobs()
-
-    if options.mtype.lower() in ['cij']:
-        # Job.obtain_cij()
-        Job.obtain_cij_old()
-
-    if options.mtype.lower() in ['clc']:
-        Job.collect_data_cij()
+    drv = cal_cij()
+    dispatcher = {'pots': drv.loop_pots,
+                  'prep': drv.loop_prepare_cij,
+                  'sub': drv.loop_sub_drvs,
+                  'cij': drv.obtain_cij,  # obtain_cij_old
+                  'clc': drv.collect_data_cij}
+                  
+    if options.fargs is not None:
+        dispatcher[options.mtype.lower()](options.fargs)
+    else:
+        dispatcher[options.mtype.lower()]()
 
     #  A.set_volume_energy0()
     #  A.obtain_cij_old()
