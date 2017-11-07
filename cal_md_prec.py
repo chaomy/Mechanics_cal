@@ -1,20 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-###################################################################
-#
-# File Name : cal_md_prec.py
-#
-###################################################################
-#
-# Purpose :
-#
-# Creation Date :
-# Last Modified :
-# Created By    : Chaoming Yang
-#
-###################################################################
-
 import os
 import ase
 from optparse import OptionParser

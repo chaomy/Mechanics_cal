@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-06 23:42:57
+# @Last Modified time: 2017-11-07 00:49:31
 
 
 from copy import deepcopy
@@ -60,7 +60,8 @@ class cal_qe_gsf(object):
         perf_cells = deepcopy(atoms.get_cell())
         ase.io.write('perf_poscar', images=atoms, format='vasp')
 
-        disps = np.arange(0.42, 0.58, 0.04)
+        # disps = np.arange(0.42, 0.58, 0.04)
+        disps = np.arange(0.34, 0.48, 0.04)
         disps = np.append(disps, 0.0)
         npts = len(disps)
 

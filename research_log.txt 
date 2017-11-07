@@ -1,3 +1,7 @@
+1. check if the GSF 110 calculation is correct ???  (the worst case, use shift)
+2. check if gsf 211 calculation is corret ??? (recalculate WTa00 and WTa50) so we can check
+3, calculate the elastic constants !!!!!!
+
 Nov 3 
 1-> read different files to see where goes wrong 
 2-> use Bcast to Bcast atomic data 

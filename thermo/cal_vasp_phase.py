@@ -1,19 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-###################################################################
-#
-# File Name : cal_vasp_phase.py
-#
-###################################################################
-#
-# Purpose :
-#
-# Creation Date :
-# Last Modified :
-# Created By    : Chaoming Yang
-#
-###################################################################
 import os
 import glob
 import numpy as np
