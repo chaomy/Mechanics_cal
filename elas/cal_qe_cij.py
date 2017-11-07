@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-07 15:26:35
+# @Last Modified time: 2017-11-07 15:31:22
 
 
 from optparse import OptionParser
@@ -119,7 +119,7 @@ class cal_cij(gn_config.bcc,
     def gn_qe_cij_infile(self, atoms):
         self.set_thr('1.0D-6')
         self.set_ecut('40')
-        self.set_kpnts((44, 44, 44))
+        self.set_kpnts((39, 39, 39))
         self.set_degauss('0.03D0')
         with open('qe.in', 'w') as fid:
             fid = self.qe_write_control(fid, atoms)
@@ -221,7 +221,7 @@ if __name__ == "__main__":
                   'sub': drv.loop_sub_drvs,
                   'cij': drv.obtain_cij,  # obtain_cij_old
                   'clc': drv.collect_data_cij}
-                  
+
     if options.fargs is not None:
         dispatcher[options.mtype.lower()](options.fargs)
     else:
