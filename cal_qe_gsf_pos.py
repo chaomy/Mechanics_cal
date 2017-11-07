@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-06 23:53:41
+# @Last Modified time: 2017-11-07 00:19:41
 
 
 from itertools import cycle
@@ -11,25 +11,6 @@ from numpy import arange, min, max, append
 from numpy import loadtxt, savetxt, ndarray
 from md_pot_data import fluxdirs
 import os
-
-
-# dirtree = {'x111z110': {
-#     '00': 'Bcc_QE_VCA_WRe00_gsfx111z110',
-#     '05': 'Bcc_QE_VCA_WRe05_gsfx111z110',
-#     '10': 'Bcc_QE_VCA_WRe10_gsfx111z110',
-#     '15': 'Bcc_QE_VCA_WRe15_gsfx111z110',
-#     '20': 'Bcc_QE_VCA_WRe20_gsfx111z110',
-#     '25': 'Bcc_QE_VCA_WRe25_gsfx111z110',
-#     '50': 'Bcc_QE_VCA_WRe50_gsfx111z110'
-# }, 'x111z112': {
-#     '00': 'Bcc_QE_VCA_WRe00_gsfx111z112',
-#     '05': 'Bcc_QE_VCA_WRe05_gsfx111z112',
-#     '10': 'Bcc_QE_VCA_WRe10_gsfx111z112',
-#     '15': 'Bcc_QE_VCA_WRe15_gsfx111z112',
-#     '20': 'Bcc_QE_VCA_WRe20_gsfx111z112',
-#     '25': 'Bcc_QE_VCA_WRe25_gsfx111z112',
-#     '50': 'Bcc_QE_VCA_WRe50_gsfx111z112'}
-# }
 
 dirtree = {'x111z110': {
     '00': 'Bcc_WRe00_gsfx111z110',
@@ -53,7 +34,12 @@ dirtree = {'x111z110': {
     '20': 'Bcc_WRe20_gsfx111z112',
     '25': 'Bcc_WRe25_gsfx111z112',
     '50': 'Bcc_WRe50_gsfx111z112',
-    'ta': 'Bcc_WTa50_gsfx111z112'}
+    'ta': 'Bcc_WTa50_gsfx111z112',
+    'ta05': 'WTa0.05',
+    'ta10': 'WTa0.10',
+    'ta15': 'WTa0.15',
+    'ta20': 'WTa0.20',
+    'ta25': 'WTa0.25'}
 }
 
 
@@ -69,7 +55,7 @@ class cal_qe_gsf_pos(object):
             os.chdir(os.pardir)
         return
 
-    def transdata(self, ptype='scp', tag='ta25'):
+    def transdata(self, ptype='scp', tag='ta20'):
         # disps = arange(0.46, 0.56, 0.04)
         disps = arange(0.42, 0.56, 0.04)
         disps = append(disps, 0.0)
@@ -78,7 +64,7 @@ class cal_qe_gsf_pos(object):
             self.mymkdir(mdir)
             if ptype in ['scp']:
                 fdir = fluxdirs['QE'] + \
-                    'VC_WTa/gsf/{}'.format(
+                    'VC_WTa/gsfz112/{}'.format(
                         dirtree[self.mgsf][tag])
                 os.system('scp {}/{}/qe.out {}'.format(fdir, mdir, mdir))
                 os.system('scp {}/{}/qe.in {}'.format(fdir, mdir, mdir))
@@ -87,7 +73,7 @@ class cal_qe_gsf_pos(object):
 
     def clc_qe_gsf_engy(self, fname='gsf'):
         disps = 0.0
-        disps = append(disps, arange(0.46, 0.55, 0.04))
+        disps = append(disps, arange(0.42, 0.58, 0.04))
         # disps = append(disps, arange(0.42, 0.48, 0.04))
         # disps = append(disps, 1.0)
         npts = len(disps)

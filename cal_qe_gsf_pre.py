@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-02 18:03:51
+# @Last Modified time: 2017-11-07 00:02:22
 
 
 import numpy as np
@@ -44,7 +44,7 @@ class cal_qe_gsf_pre(object):
 
     def loop_pot_gsf(self, tag='prep'):
         vcapots = self.vcaWTa
-        gsf = 'x111z112' 
+        gsf = 'x111z110' 
         for key in vcapots.keys():
             mdir = key
             self.mymkdir(mdir)

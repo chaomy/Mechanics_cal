@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-06 23:49:07
+# @Last Modified time: 2017-11-07 00:20:22
 
 
 from optparse import OptionParser
@@ -23,14 +23,14 @@ import cal_md_dis_emit_plt
 
 vcaw = OrderedDict([('WTa05', {'ugsf1': None,
                                'ugsf2': None}),
-                    ('WTa10', {'ugsf1': None, 
+                    ('WTa10', {'ugsf1': None,    # 2.239 
                                'ugsf2': None}),
-                    ('WTa15', {'ugsf1': None,
-                               'ugsf2': }),
-                    ('WTa20', {'ugsf1': None,
-                               'ugsf2': }),
+                    ('WTa15', {'ugsf1': None,    # 2.241
+                               'ugsf2': None}),  # 3.109 
+                    ('WTa20', {'ugsf1': None,    # 2.191
+                               'ugsf2': None}),  # 3.0433
                     ('WTa25', {'ugsf1': None,
-                               'ugsf2': }), 
+                               'ugsf2': None}),  # 2.953 
                     ('WTa50', {'lat': 3.2502,
                                'ugsf1': 1.5988,
                                'ugsf2': 1.2763,
