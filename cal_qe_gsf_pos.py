@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-09 21:07:12
+# @Last Modified time: 2017-11-06 23:19:32
 
 
 from itertools import cycle
@@ -82,8 +82,8 @@ class cal_qe_gsf_pos(object):
 
     def clc_qe_gsf_engy(self, fname='gsf'):
         disps = 0.0
-        # disps = append(disps, arange(0.46, 0.56, 0.04))
-        disps = append(disps, arange(0.42, 0.48, 0.04))
+        disps = append(disps, arange(0.42, 0.56, 0.04))
+        # disps = append(disps, arange(0.42, 0.48, 0.04))
         # disps = append(disps, 1.0)
         npts = len(disps)
         data = ndarray([npts, 4])

@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-02 00:33:44
+# @Last Modified time: 2017-11-02 18:03:20
 
 
 from copy import deepcopy
@@ -17,6 +17,12 @@ import gsf_data
 class cal_qe_gsf(object):
 
     def __init__(self):
+        self.vcaWTa = {'WTa0.05': md_pot_data.qe_pot.vca_W95Ta05,
+                       'WTa0.10': md_pot_data.qe_pot.vca_W90Ta10,
+                       'WTa0.15': md_pot_data.qe_pot.vca_W85Ta15,
+                       'WTa0.20': md_pot_data.qe_pot.vca_W80Ta20,
+                       'WTa0.25': md_pot_data.qe_pot.vca_W75Ta25}
+
         self.vcapots = {
             'WTa50': md_pot_data.qe_pot.vca_W50Ta50,
             'WRe00': md_pot_data.qe_pot.pbe_w,
@@ -47,19 +53,18 @@ class cal_qe_gsf(object):
         return
 
     def gn_qe_single_dir_gsf(self, mtype='relax'):
-        atoms = self.gn_gsf_atoms()
+        if self.mgsf in ['x111z110']:
+            atoms = self.gn_bcc110()
+        elif self.mgsf in ['x111z112']:
+            atoms = self.gn_gsf_atoms()
         atoms.wrap()
         perf_cells = deepcopy(atoms.get_cell())
         ase.io.write('perf_poscar', images=atoms, format='vasp')
 
-        # original  npts = 5
-        # disps = np.linspace(0.42, 0.58, npts)
-        # disps = np.append(disps, 0.0)
-
-        disps = np.arange(0.02, 1.0, 0.04)
+        disps = np.arange(0.42, 0.58, 0.04)
         disps = np.append(disps, 0.0)
         npts = len(disps)
-        
+
         if mtype in ['scf']:
             self.setup_qe_scf()
         elif mtype in ['relax']:
@@ -69,9 +74,12 @@ class cal_qe_gsf(object):
             dirname = 'dir-{}-{:4.3f}'.format(self.mgsf, disp)
             self.mymkdir(dirname)
             os.chdir(dirname)
-            disp_vector = [disp, 0, 0]
-            disp_matrix_direct = self.gn_displacement(atoms.copy(),
-                                                      disp_vector)
+            if self.mgsf in ['x111z110']:
+                disp_vector = [disp, disp, 0]
+            else:
+                disp_vector = [disp, 0.0, 0.0]
+            disp_matrix_direct = self.gn_displacement(
+                atoms.copy(), disp_vector)
             disp_matrix = deepcopy(disp_matrix_direct)
             disp_matrix[:, 0] = disp_matrix_direct[:, 0] * perf_cells[0, 0]
             print disp_matrix

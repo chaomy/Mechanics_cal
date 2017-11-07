@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-06 03:34:41
+# @Last Modified time: 2017-11-02 18:03:51
 
 
 import numpy as np
@@ -17,7 +17,6 @@ from glob import glob
 
 
 class cal_qe_gsf_pre(object):
-
     def loop_set_pbs(self):
         dirlist = glob('dir-*')
         for mdir in dirlist:
@@ -44,16 +43,15 @@ class cal_qe_gsf_pre(object):
         return
 
     def loop_pot_gsf(self, tag='prep'):
-        vcapots = self.vcapots
-        gsfs = ['x111z112', 'x111z110']
-        for key in vcapots:
-            for gsf in gsfs:
-                mdir = 'Bcc_{}_gsf{}'.format(key, gsf)
-                self.mymkdir(mdir)
-                os.chdir(mdir)
-                self.__init__(vcapots[key], gsf)
-                self.gn_qe_single_dir_gsf()
-                os.chdir(os.pardir)
+        vcapots = self.vcaWTa
+        gsf = 'x111z112' 
+        for key in vcapots.keys():
+            mdir = key
+            self.mymkdir(mdir)
+            os.chdir(mdir)
+            self.__init__(vcapots[key], gsf)
+            self.gn_qe_single_dir_gsf()
+            os.chdir(os.pardir)
         return
 
     def loop_sub(self):

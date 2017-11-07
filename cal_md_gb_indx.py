@@ -4,13 +4,12 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-01 02:08:43
+# @Last Modified time: 2017-11-02 15:37:50
 
 import numpy as np
 import os
 from math import cos, sin
 from math import sqrt
-
 
 class md_gb_indx(object):
 

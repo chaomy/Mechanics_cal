@@ -3,10 +3,9 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-10-24 00:29:24
+# @Last Modified time: 2017-11-02 18:00:28
 
 
-from copy import deepcopy
 import gn_lmp_infile
 import numpy as np
 import plt_drv
@@ -25,7 +24,20 @@ import cal_qe_gsf_pos
 import cal_qe_gsf_pre
 import cal_md_gsf
 import cal_va_gsf
+from copy import deepcopy
+from math import sqrt
 from optparse import OptionParser
+import ase.io
+import ase.lattice.orthorhombic as otho
+import ase.lattice.cubic as cubic
+
+# x [sqrt(2) a ; y = a; z = sqrt(2) a]
+class othoBccp110Factory(otho.SimpleOrthorhombicFactory):
+    bravais_basis = [[0.0, 0.0, 0.0],
+                     [0.5, 0.5, 0.0],
+                     [0.5, 0.0, 0.5],
+                     [0.0, 0.5, 0.5]]
+othoBccp110 = othoBccp110Factory()
 
 
 class cal_gsf(gn_config.bcc,
@@ -45,10 +57,9 @@ class cal_gsf(gn_config.bcc,
               cal_va_gsf.cal_va_gsf):
 
     def __init__(self,
-                 pot=md_pot_data.va_pot.Nb_pbe,
+                 pot=md_pot_data.qe_pot.vca_W95Ta05, 
                  mgsf='x111z112'):
         self.pot = pot
-        self.pot = self.load_data('pot.dat')
         self.mgsf = mgsf
         self.sample_gsf_num = 21
         self.disp_delta = 1. / (self.sample_gsf_num - 1)
@@ -73,6 +84,18 @@ class cal_gsf(gn_config.bcc,
         cal_va_gsf.cal_va_gsf.__init__(self)
         return
 
+    def gn_bcc110(self):
+        atoms = othoBccp110(latticeconstant=(self.pot['latbcc'] * sqrt(2),
+                                             self.pot['latbcc'],
+                                             self.pot['latbcc'] * sqrt(2)),
+                            size=(1, 1, 15),
+                            symbol=self.pot['element'])
+        print atoms
+        for i in range(12):
+          atoms.pop() 
+        ase.io.write('poscar', images=atoms, format='vasp')
+        return atoms
+
     def gn_gsf_atoms(self):
         mgsf = self.mgsf
         atoms = self.set_bcc_convention(
@@ -83,7 +106,7 @@ class cal_gsf(gn_config.bcc,
         return atoms
 
     def set_pbs(self, dirname, opt='qe'):
-        self.set_nnodes(1)
+        self.set_nnodes(2)
         self.set_ppn(12)
         self.set_job_title("{}".format(dirname))
         self.set_wall_time(110)
@@ -91,7 +114,11 @@ class cal_gsf(gn_config.bcc,
             self.set_main_job("""mpirun pw.x < qe.in > qe.out""")
         if opt in ['va']:
             self.set_main_job("""mpirun vasp > vasp.log""")
-        self.write_pbs(od=False)
+        if self.pot in [md_pot_data.qe_pot.vca_W80Ta20, 
+                        md_pot_data.qe_pot.vca_W85Ta15]: 
+          self.write_pbs(od=True)
+        else:
+          self.write_pbs(od=False)
         return
 
     def gn_displacement(self, atoms,
@@ -162,7 +189,9 @@ if __name__ == '__main__':
                   'plt': drv.plt_gsf,
                   'plttol': drv.plt_tol,
                   'trans': drv.transdata,
-                  'movedir': drv.move_dirs}
+                  'movedir': drv.move_dirs,
+                  'bcc110': drv.gn_bcc110}
+
     if options.fargs is not None:
         dispatcher[options.mtype.lower()](options.fargs)
     else:
