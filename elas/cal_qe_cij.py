@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-08 00:03:36
+# @Last Modified time: 2017-11-08 00:08:05
 
 
 from optparse import OptionParser
@@ -117,7 +117,8 @@ class cal_cij(gn_config.bcc,
     def gn_qe_cij_infile(self, atoms):
         self.set_thr('1.0D-6')
         self.set_ecut('40')
-        self.set_kpnts((39, 39, 39))
+        # self.set_kpnts((39, 39, 39))
+        self.set_kpnts((19, 19, 19)) 
         self.set_degauss('0.03D0')
         with open('qe.in', 'w') as fid:
             fid = self.qe_write_control(fid, atoms)
