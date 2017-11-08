@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-07 20:59:47
+# @Last Modified time: 2017-11-07 21:20:58
 
 
 from optparse import OptionParser
@@ -31,7 +31,7 @@ class cal_cij(gn_config.bcc,
               output_data.output_data,
               gn_qe_inputs.gn_qe_infile):
 
-    def __init__(self, inpot=md_pot_data.qe_pot.vca_W95Ta05):
+    def __init__(self, inpot=md_pot_data.qe_pot.pbe_w):
         self.unit_delta = 0.005
         self.looptimes = 8
         self.volume = None
@@ -94,15 +94,16 @@ class cal_cij(gn_config.bcc,
             del2coeffs[i] = self.fit_para(delta_list, energy_list)
         print del2coeffs
         convmat = np.mat([[3, 6, 0], [2, -2, 0], [0, 0, 4]])
-        # print np.linalg.pinv(convmat) * np.transpose(np.mat(del2coeffs))
-        c11 = (0.111111111111111 * c11_plus_c12 +
-               0.333333333333333 * c11_minus_c12)
-        c12 = (0.111111111111111 * c11_plus_c12 -
-               0.166666666666667 * c11_minus_c12)
-        c44 = 0.25 * c44
-        with open("cij.dat", 'w') as fout:
-            fout.write("C11\t%f\t\nC12\t%f\t\nC44\t%f\t\n" % (c11, c12, c44))
-            fout.close()
+        print np.linalg.pinv(convmat)
+        print np.linalg.pinv(convmat) * np.transpose(np.mat(del2coeffs))
+        # c11 = (0.111111111111111 * c11_plus_c12 +
+        #        0.333333333333333 * c11_minus_c12)
+        # c12 = (0.111111111111111 * c11_plus_c12 -
+        #        0.166666666666667 * c11_minus_c12)
+        # c44 = 0.25 * c44
+        # with open("cij.dat", 'w') as fout:
+        #     fout.write("C11\t%f\t\nC12\t%f\t\nC44\t%f\t\n" % (c11, c12, c44))
+        #     fout.close()
         return
 
     def set_volume_energy0(self):
@@ -167,7 +168,7 @@ class cal_cij(gn_config.bcc,
                     dirname = "dir-%s-n%03d" % (mtype, np.abs(j))
                 os.chdir(dirname)
                 print "i am in ", dirname
-                (energy, vol, stress) = self.qe_get_energy_stress()
+                (energy, vol, stress) = self.qe_get_energy_stress() # in eV
                 os.chdir(os.pardir)
                 self.output_delta_energy(delta,
                                          energy,
