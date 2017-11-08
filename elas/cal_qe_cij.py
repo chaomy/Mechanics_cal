@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-07 15:31:22
+# @Last Modified time: 2017-11-07 20:59:47
 
 
 from optparse import OptionParser
@@ -94,15 +94,15 @@ class cal_cij(gn_config.bcc,
             del2coeffs[i] = self.fit_para(delta_list, energy_list)
         print del2coeffs
         convmat = np.mat([[3, 6, 0], [2, -2, 0], [0, 0, 4]])
-        print np.linalg.pinv(convmat) * np.transpose(np.mat(del2coeffs))
-        # c11 = (0.111111111111111 * c11_plus_c12 +
-        #        0.333333333333333 * c11_minus_c12)
-        # c12 = (0.111111111111111 * c11_plus_c12 -
-        #        0.166666666666667 * c11_minus_c12)
-        # c44 = 0.25 * c44
-        # with open("cij.dat", 'w') as fout:
-        #     fout.write("C11\t%f\t\nC12\t%f\t\nC44\t%f\t\n" % (c11, c12, c44))
-        #     fout.close()
+        # print np.linalg.pinv(convmat) * np.transpose(np.mat(del2coeffs))
+        c11 = (0.111111111111111 * c11_plus_c12 +
+               0.333333333333333 * c11_minus_c12)
+        c12 = (0.111111111111111 * c11_plus_c12 -
+               0.166666666666667 * c11_minus_c12)
+        c44 = 0.25 * c44
+        with open("cij.dat", 'w') as fout:
+            fout.write("C11\t%f\t\nC12\t%f\t\nC44\t%f\t\n" % (c11, c12, c44))
+            fout.close()
         return
 
     def set_volume_energy0(self):
