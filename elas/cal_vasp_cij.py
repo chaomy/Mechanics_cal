@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-21 18:42:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-31 09:25:51
+# @Last Modified time: 2017-11-08 16:18:15
 
 
 import glob
@@ -74,7 +74,6 @@ class cal_cij(gn_config.bcc,
         return a
 
     def obtain_cij(self, opt='np'):
-
         self.set_volume_energy0()
         if opt is 'np':
             raw1 = np.loadtxt("data_c11.txt")

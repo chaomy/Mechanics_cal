@@ -3,11 +3,12 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-08 00:08:05
+# @Last Modified time: 2017-11-08 17:12:49
 
 
 from optparse import OptionParser
 from scipy.optimize import leastsq
+import plt_drv
 import glob
 import os
 import numpy as np
@@ -29,11 +30,12 @@ class cal_cij(gn_config.bcc,
               gn_incar.gn_incar,
               gn_pbs.gn_pbs,
               output_data.output_data,
-              gn_qe_inputs.gn_qe_infile):
+              gn_qe_inputs.gn_qe_infile,
+              plt_drv.plt_drv):
 
     def __init__(self, inpot=md_pot_data.qe_pot.pbe_w):
         self.unit_delta = 0.005
-        self.looptimes = 8
+        self.looptimes = 5 
         self.volume = None
         self.energy0 = None
         self.pot = inpot
@@ -46,6 +48,7 @@ class cal_cij(gn_config.bcc,
         gn_pbs.gn_pbs.__init__(self)
         output_data.output_data.__init__(self)
         gn_qe_inputs.gn_qe_infile.__init__(self, self.pot)
+        plt_drv.plt_drv.__init__(self)
 
         if self.pot['structure'] == 'bcc':
             gn_config.bcc.__init__(self, self.pot)
@@ -61,11 +64,13 @@ class cal_cij(gn_config.bcc,
 
         def residuals(params):
             a, c = params
-            return ydata - (a * (0.5 * xdata**2) + c)
+            return ydata - (0.5 * a * (xdata**2) + c)
         r = leastsq(residuals, [1.0, 0.0])
-        print 'r is', r
+        print r
         a, c = r[0]
-        a = a / self.volume * self.ev_angstrom3_to_GPa
+        print self.ev_angstrom3_to_GPa
+        print self.volume
+        a = a / self.volume * self.ev_angstrom3_to_GPa 
         return a
 
     def obtain_cij_old(self):
@@ -92,11 +97,10 @@ class cal_cij(gn_config.bcc,
 
         # print np.linalg.pinv(convmat) * np.transpose(np.mat(del2coeffs))
         print del2coeffs
-        c11 = (0.111111111111111 * del2coeffs[0] +
-               0.333333333333333 * del2coeffs[1])
-        c12 = (0.111111111111111 * del2coeffs[0] -
-               0.166666666666667 * del2coeffs[1])
-        c44 = 0.25 * del2coeffs[2]
+        # c11 = (0.111111111111111 * del2coeffs[0] + 0.333333333333333 * del2coeffs[1])
+        c11 = (0.33333333 * del2coeffs[0] + 0.66666667 * del2coeffs[1])
+        c12 = (0.33333333 * del2coeffs[0] - 0.33333333 * del2coeffs[1])
+        c44 = 0.5 * del2coeffs[2]
         print(c11, c12, c44)
         # with open("cij.dat", 'w') as fout:
         #     fout.write("C11\t%f\t\nC12\t%f\t\nC44\t%f\t\n" % (c11, c12, c44))
@@ -106,7 +110,7 @@ class cal_cij(gn_config.bcc,
     def set_volume_energy0(self):
         (engy, vol, stress) = self.qe_get_energy_stress(
             filename='dir-c11-p000/qe.out')
-        self.volume = vol
+        self.volume = vol * md_pot_data.unitconv.ulength["BohrtoA"]
         self.energy0 = engy
         return
 
@@ -118,7 +122,7 @@ class cal_cij(gn_config.bcc,
         self.set_thr('1.0D-6')
         self.set_ecut('40')
         # self.set_kpnts((39, 39, 39))
-        self.set_kpnts((19, 19, 19)) 
+        self.set_kpnts((19, 19, 19))
         self.set_degauss('0.03D0')
         with open('qe.in', 'w') as fid:
             fid = self.qe_write_control(fid, atoms)
@@ -154,6 +158,17 @@ class cal_cij(gn_config.bcc,
                 self.gn_qe_cij_infile(atoms)
                 os.system("cp $POTDIR/{} .".format(self.pot['file']))
                 os.chdir(os.pardir)
+        return
+
+    def cij_plt(self):
+        filelist = ['data_c11.txt', 'data_c12.txt', 'data_c44.txt']
+        for file in filelist:
+            raw = np.loadtxt(file)
+            delta_list, energy_list = raw[:, 0], raw[:, 1]
+            self.set_111plt()
+            self.ax.plot(delta_list, energy_list,
+                         label='cij', **next(self.keysiter))
+            self.fig.savefig('fig_{}.png'.format(file[:-8:-4]), **self.figsave)
         return
 
     def collect_data_cij(self):
@@ -222,7 +237,8 @@ if __name__ == "__main__":
                   'prep': drv.loop_prepare_cij,
                   'sub': drv.loop_sub_drvs,
                   'cij': drv.obtain_cij,  # obtain_cij_old
-                  'clc': drv.collect_data_cij}
+                  'clc': drv.collect_data_cij,
+                  'plt': drv.cij_plt}
 
     if options.fargs is not None:
         dispatcher[options.mtype.lower()](options.fargs)
