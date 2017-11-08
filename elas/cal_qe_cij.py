@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-07 22:53:28
+# @Last Modified time: 2017-11-07 22:53:48
 
 
 from optparse import OptionParser
@@ -100,7 +100,7 @@ class cal_cij(gn_config.bcc,
         c12 = (0.111111111111111 * del2coeffs[0] -
                0.166666666666667 * del2coeffs[1])
         c44 = 0.25 * del2coeffs[2] 
-        print (c11, c12 c44)
+        print (c11, c12, c44)
         # with open("cij.dat", 'w') as fout:
         #     fout.write("C11\t%f\t\nC12\t%f\t\nC44\t%f\t\n" % (c11, c12, c44))
         #     fout.close()
