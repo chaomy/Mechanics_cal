@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-07 22:51:01
+# @Last Modified time: 2017-11-07 22:52:39
 
 
 from optparse import OptionParser
@@ -92,14 +92,14 @@ class cal_cij(gn_config.bcc,
             delta_list, energy_list = raw[:, 0], raw[:, 1]
             del2coeffs[i] = self.fit_para(delta_list, energy_list)
 
-        convmat = np.mat([[3, 6, 0], [2, -2, 0], [0, 0, 4]])
-        print np.linalg.pinv(convmat) 
-        print np.linalg.pinv(convmat) * np.transpose(np.mat(del2coeffs))
-        # c11 = (0.111111111111111 * c11_plus_c12 +
-        #        0.333333333333333 * c11_minus_c12)
-        # c12 = (0.111111111111111 * c11_plus_c12 -
-        #        0.166666666666667 * c11_minus_c12)
-        # c44 = 0.25 * c44
+
+        # print np.linalg.pinv(convmat) * np.transpose(np.mat(del2coeffs))
+
+        c11 = (0.111111111111111 * del2coeffs[0] +
+               0.333333333333333 * del2coeffs[1])
+        c12 = (0.111111111111111 * del2coeffs[0] -
+               0.166666666666667 * del2coeffs[1])
+        c44 = 0.25 * del2coeffs[2] 
         # with open("cij.dat", 'w') as fout:
         #     fout.write("C11\t%f\t\nC12\t%f\t\nC44\t%f\t\n" % (c11, c12, c44))
         #     fout.close()
