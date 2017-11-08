@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-07 22:47:24
+# @Last Modified time: 2017-11-07 22:51:01
 
 
 from optparse import OptionParser
@@ -85,15 +85,15 @@ class cal_cij(gn_config.bcc,
 
     def obtain_cij(self, opt='np'):
         del2coeffs = np.transpose(np.zeros(3))
-        print del2coeffs
         self.set_volume_energy0()
         filelist = ['data_c11.txt', 'data_c12.txt', 'data_c44.txt']
         for i in range(3):
             raw = np.loadtxt(filelist[i])
             delta_list, energy_list = raw[:, 0], raw[:, 1]
             del2coeffs[i] = self.fit_para(delta_list, energy_list)
-        print del2coeffs
+
         convmat = np.mat([[3, 6, 0], [2, -2, 0], [0, 0, 4]])
+        print np.linalg.pinv(convmat) 
         print np.linalg.pinv(convmat) * np.transpose(np.mat(del2coeffs))
         # c11 = (0.111111111111111 * c11_plus_c12 +
         #        0.333333333333333 * c11_minus_c12)
