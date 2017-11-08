@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-07 00:32:13
+# @Last Modified time: 2017-11-08 14:25:53
 
 
 from optparse import OptionParser
@@ -39,8 +39,8 @@ vcaw = OrderedDict([('WTa05', {'ugsf1': None,    #
                                'c44': 91.8360,
                                'surf': 3.941229200}),
                     ('WRe00', {'lat': 3.17093,
-                               'ugsf1': 2.1203,
-                               'ugsf2': 2.0213,  # 110
+                               'ugsf1': 2.1203,  # 2.1147 
+                               'ugsf2': 2.0213,  # 110        # 3.1831
                                'c11': 534.2,
                                'c12': 193.8,
                                'c44': 177.1,

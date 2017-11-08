@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-07 00:31:39
+# @Last Modified time: 2017-11-08 14:26:54
 
 
 from itertools import cycle
@@ -21,11 +21,13 @@ dirtree = {'x111z110': {
     '25': 'Bcc_WRe25_gsfx111z110',
     '50': 'Bcc_WRe50_gsfx111z110',
     'ta': 'Bcc_WTa50_gsfx111z110',
-    'ta05': 'WTa0.05',
+    'ta00': 'WTa0.00',
+    'ta05': 'WTa0.05', 
     'ta10': 'WTa0.10',
     'ta15': 'WTa0.15',
     'ta20': 'WTa0.20',
-    'ta25': 'WTa0.25'
+    'ta25': 'WTa0.25',
+    'ta50': 'WTa0.50'
 }, 'x111z112': {
     '00': 'Bcc_WRe00_gsfx111z112',
     '05': 'Bcc_WRe05_gsfx111z112',
@@ -35,11 +37,13 @@ dirtree = {'x111z110': {
     '25': 'Bcc_WRe25_gsfx111z112',
     '50': 'Bcc_WRe50_gsfx111z112',
     'ta': 'Bcc_WTa50_gsfx111z112',
+    'ta00': 'WTa0.00',
     'ta05': 'WTa0.05',
     'ta10': 'WTa0.10',
     'ta15': 'WTa0.15',
     'ta20': 'WTa0.20',
-    'ta25': 'WTa0.25'}
+    'ta25': 'WTa0.25',
+    'ta50': 'WTa0.50'}
 }
 
 
@@ -55,9 +59,10 @@ class cal_qe_gsf_pos(object):
             os.chdir(os.pardir)
         return
 
-    def transdata(self, ptype='scp', tag='ta20'):
+    def transdata(self, ptype='scp', tag='ta00'):
         # disps = arange(0.46, 0.56, 0.04)
         disps = arange(0.42, 0.56, 0.04)
+        # disps = arange(0.34, 0.48, 0.04) 
         disps = append(disps, 0.0)
         for disp in disps:
             mdir = 'dir-{}-{:4.3f}'.format(self.mgsf, disp)
@@ -74,7 +79,7 @@ class cal_qe_gsf_pos(object):
     def clc_qe_gsf_engy(self, fname='gsf'):
         disps = 0.0
         disps = append(disps, arange(0.42, 0.58, 0.04))
-        # disps = append(disps, arange(0.38, 0.48, 0.04))
+        # disps = append(disps, arange(0.34, 0.48, 0.04))
         # disps = append(disps, 1.0)
         npts = len(disps)
         data = ndarray([npts, 4])
