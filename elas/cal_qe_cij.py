@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-07 23:01:00
+# @Last Modified time: 2017-11-08 00:03:36
 
 
 from optparse import OptionParser
@@ -37,8 +37,6 @@ class cal_cij(gn_config.bcc,
         self.volume = None
         self.energy0 = None
         self.pot = inpot
-        self.alat = self.pot['lattice']
-        self.elem = self.pot['element']
         self.cij_type_list = ['c11', 'c12', 'c44']
         self.cij_type = 'c11'
 
@@ -98,8 +96,8 @@ class cal_cij(gn_config.bcc,
                0.333333333333333 * del2coeffs[1])
         c12 = (0.111111111111111 * del2coeffs[0] -
                0.166666666666667 * del2coeffs[1])
-        c44 = 0.25 * del2coeffs[2] 
-        print (c11, c12, c44)
+        c44 = 0.25 * del2coeffs[2]
+        print(c11, c12, c44)
         # with open("cij.dat", 'w') as fout:
         #     fout.write("C11\t%f\t\nC12\t%f\t\nC44\t%f\t\n" % (c11, c12, c44))
         #     fout.close()
@@ -146,9 +144,12 @@ class cal_cij(gn_config.bcc,
                 self.mymkdir(dirname)
                 os.chdir(dirname)
                 self.set_pbs(dirname)
-                atoms = self.write_bcc_primitive_with_strain(delta=delta,
-                                                             in_tag=mtype,
-                                                             write=False)
+                # atoms = self.write_bcc_primitive_with_strain(delta=delta,
+                #                                              in_tag=mtype,
+                #                                              write=False)
+                atoms = self.write_bcc_with_strain(delta=delta,
+                                                   in_tag=mtype,
+                                                   write=False)
                 self.gn_qe_cij_infile(atoms)
                 os.system("cp $POTDIR/{} .".format(self.pot['file']))
                 os.chdir(os.pardir)
@@ -167,7 +168,7 @@ class cal_cij(gn_config.bcc,
                     dirname = "dir-%s-n%03d" % (mtype, np.abs(j))
                 os.chdir(dirname)
                 print "i am in ", dirname
-                (energy, vol, stress) = self.qe_get_energy_stress() # in eV
+                (energy, vol, stress) = self.qe_get_energy_stress()  # in eV
                 os.chdir(os.pardir)
                 self.output_delta_energy(delta,
                                          energy,
