@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-08 14:25:53
+# @Last Modified time: 2017-11-08 15:48:58
 
 
 from optparse import OptionParser
@@ -21,26 +21,26 @@ import cal_md_dis_emit_curtin
 import cal_md_dis_emit_plt
 
 
-vcaw = OrderedDict([('WTa05', {'ugsf1': None,    # 
-                               'ugsf2': None}),
-                    ('WTa10', {'ugsf1': None,    # 2.239 
-                               'ugsf2': None}),
-                    ('WTa15', {'ugsf1': None,    # 2.241
-                               'ugsf2': None}),  # 3.109 
-                    ('WTa20', {'ugsf1': None,    # 2.191
-                               'ugsf2': None}),  # 3.0433
-                    ('WTa25', {'ugsf1': None,
-                               'ugsf2': None}),  # 2.953 
-                    ('WTa50', {'lat': 3.2502,
+vcaw = OrderedDict([('WTa05', {'ugsf1': 2.2446,   # 
+                               'ugsf2': 2.0327}), # 3.1945 
+                    ('WTa10', {'ugsf1': 2.2584,   # 2.239 
+                               'ugsf2': 1.9952}), # 3.157
+                    ('WTa15', {'ugsf1': 2.241,    # 2.241
+                               'ugsf2': 1.9472}), # 3.109 
+                    ('WTa20', {'ugsf1': 2.191,    # 2.191
+                               'ugsf2': 1.8815}), # 3.0433
+                    ('WTa25', {'ugsf1': 2.1815,   # 
+                               'ugsf2': 1.7912}), # 2.953 
+                    ('WTa50', {'lat':   3.2502,
                                'ugsf1': 1.5988,
-                               'ugsf2': 1.2763,
+                               'ugsf2': 1.2763,   # 2.3793
                                'c11': 343.7798,
                                'c12': 187.0044,
                                'c44': 91.8360,
                                'surf': 3.941229200}),
                     ('WRe00', {'lat': 3.17093,
                                'ugsf1': 2.1203,  # 2.1147 
-                               'ugsf2': 2.0213,  # 110        # 3.1831
+                               'ugsf2': 2.0213,  # 110   # 3.1831   => 1.5747786078266461 (shift = 1.1618) 
                                'c11': 534.2,
                                'c12': 193.8,
                                'c44': 177.1,

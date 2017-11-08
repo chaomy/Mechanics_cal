@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-08 14:28:05
+# @Last Modified time: 2017-11-08 15:40:00
 
 
 import gn_lmp_infile
@@ -57,8 +57,8 @@ class cal_gsf(gn_config.bcc,
               cal_va_gsf.cal_va_gsf):
 
     def __init__(self,
-                 pot=md_pot_data.qe_pot.pbe_w, 
-                 mgsf='x111z110'):
+                 pot=md_pot_data.qe_pot.vca_W95Ta05, 
+                 mgsf='x111z112'):
         self.pot = pot
         self.mgsf = mgsf
         self.sample_gsf_num = 21
@@ -114,11 +114,7 @@ class cal_gsf(gn_config.bcc,
             self.set_main_job("""mpirun pw.x < qe.in > qe.out""")
         if opt in ['va']:
             self.set_main_job("""mpirun vasp > vasp.log""")
-        if self.pot in [md_pot_data.qe_pot.vca_W80Ta20, 
-                        md_pot_data.qe_pot.vca_W85Ta15]: 
-          self.write_pbs(od=True)
-        else:
-          self.write_pbs(od=False)
+        self.write_pbs(od=True)
         return
 
     def gn_displacement(self, atoms,

@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-07 00:02:22
+# @Last Modified time: 2017-11-08 15:26:09
 
 
 import numpy as np
@@ -25,22 +25,22 @@ class cal_qe_gsf_pre(object):
             os.chdir(os.pardir)
         return
 
-    def gn_infile_gsf_atoms(self, atoms=None, fname='qe.in'):
-        self.set_cal_type('relax')
-        self.set_ecut('43')
-        self.set_degauss('0.03D0')
-        self.set_thr('1.0D-5')
-        self.set_maxseconds(3600 * 60)
-        with open(fname, 'w') as fid:
-            fid = self.qe_write_control(fid, atoms)
-            fid = self.qe_write_system(fid, atoms)
-            fid = self.qe_write_electrons_tf(fid)
-            fid = self.qe_write_cell(fid, atoms.get_cell())
-            fid = self.qe_write_species(fid, atoms, self.pot)
-            fid = self.qe_write_pos(fid, atoms)
-            fid = self.qe_write_kpts(fid, (5, 5, 1))
-            fid.close()
-        return
+    # def gn_infile_gsf_atoms(self, atoms=None, fname='qe.in'):
+    #     self.set_cal_type('relax')
+    #     self.set_ecut('43')
+    #     self.set_degauss('0.03D0')
+    #     self.set_thr('1.0D-5')
+    #     self.set_maxseconds(3600 * 60)
+    #     with open(fname, 'w') as fid:
+    #         fid = self.qe_write_control(fid, atoms)
+    #         fid = self.qe_write_system(fid, atoms)
+    #         fid = self.qe_write_electrons_tf(fid)
+    #         fid = self.qe_write_cell(fid, atoms.get_cell())
+    #         fid = self.qe_write_species(fid, atoms, self.pot)
+    #         fid = self.qe_write_pos(fid, atoms)
+    #         fid = self.qe_write_kpts(fid, (5, 5, 1))
+    #         fid.close()
+    #     return
 
     def loop_pot_gsf(self, tag='prep'):
         vcapots = self.vcaWTa

@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-07 00:49:31
+# @Last Modified time: 2017-11-08 15:32:01
 
 
 from copy import deepcopy
@@ -52,16 +52,16 @@ class cal_qe_gsf(object):
         return
 
     def gn_qe_single_dir_gsf(self, mtype='relax'):
-        if self.mgsf in ['x111z110']:
-            atoms = self.gn_bcc110()
-        elif self.mgsf in ['x111z112']:
-            atoms = self.gn_gsf_atoms()
+        # if self.mgsf in ['x111z110']:
+        #     atoms = self.gn_bcc110()
+        # elif self.mgsf in ['x111z112']:
+        atoms = self.gn_gsf_atoms()
         atoms.wrap()
         perf_cells = deepcopy(atoms.get_cell())
         ase.io.write('perf_poscar', images=atoms, format='vasp')
 
-        # disps = np.arange(0.42, 0.58, 0.04)
-        disps = np.arange(0.34, 0.48, 0.04)
+        disps = np.arange(0.42, 0.58, 0.04)
+        # disps = np.arange(0.34, 0.48, 0.04)
         disps = np.append(disps, 0.0)
         npts = len(disps)
 
