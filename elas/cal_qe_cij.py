@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-07 21:20:58
+# @Last Modified time: 2017-11-07 22:47:24
 
 
 from optparse import OptionParser
@@ -63,8 +63,8 @@ class cal_cij(gn_config.bcc,
 
         def residuals(params):
             a, c = params
-            return (ydata - (a * (xdata**2) + c))
-        r = leastsq(residuals, [3.0, 0.0])
+            return (ydata - (a * (0.5 * xdata**2) + c))
+        r = leastsq(residuals, [1.0, 0.0])
         print 'r is', r
         a, c = r[0]
         a = a / self.volume * self.ev_angstrom3_to_GPa
@@ -94,7 +94,6 @@ class cal_cij(gn_config.bcc,
             del2coeffs[i] = self.fit_para(delta_list, energy_list)
         print del2coeffs
         convmat = np.mat([[3, 6, 0], [2, -2, 0], [0, 0, 4]])
-        print np.linalg.pinv(convmat)
         print np.linalg.pinv(convmat) * np.transpose(np.mat(del2coeffs))
         # c11 = (0.111111111111111 * c11_plus_c12 +
         #        0.333333333333333 * c11_minus_c12)
