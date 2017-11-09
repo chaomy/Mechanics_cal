@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-08 22:24:01
+# @Last Modified time: 2017-11-08 22:25:58
 
 
 import gn_lmp_infile
@@ -114,7 +114,7 @@ class cal_gsf(gn_config.bcc,
             self.set_main_job("""mpirun pw.x < qe.in > qe.out""")
         if opt in ['va']:
             self.set_main_job("""mpirun vasp > vasp.log""")
-        self.write_pbs(od=True)
+        self.write_pbs(od=False)
         return
 
     def gn_displacement(self, atoms,
