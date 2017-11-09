@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-20 01:08:07
+# @Last Modified time: 2017-11-08 22:12:03
 
 
 from optparse import OptionParser
@@ -13,7 +13,7 @@ import gsf_data
 import numpy as np
 import md_pot_data
 import ase.io
-import cal_gsf
+from gsf import cal_gsf
 import cal_qe_surface
 import cal_va_surface
 import cal_md_surface

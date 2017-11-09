@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-20 00:16:59
+# @Last Modified time: 2017-11-08 22:16:44
 
 
 from optparse import OptionParser
@@ -14,7 +14,7 @@ import numpy as np
 import md_pot_data
 import ase.io
 
-vcapots = OrderedDict([
+vcapotsRe = OrderedDict([
     ('WRe00', md_pot_data.qe_pot.pbe_w),
     ('WRe05', md_pot_data.qe_pot.vca_W95Re05),
     ('WRe10', md_pot_data.qe_pot.vca_W90Re10),
@@ -24,6 +24,13 @@ vcapots = OrderedDict([
     ('WRe50', md_pot_data.qe_pot.vca_W50Re50),
     ('WTa50', md_pot_data.qe_pot.vca_W50Ta50)])
 
+vcapots = OrderedDict([
+    ('WTa05', md_pot_data.qe_pot.vca_W95Ta05),
+    ('WTa10', md_pot_data.qe_pot.vca_W90Ta10),
+    ('WTa15', md_pot_data.qe_pot.vca_W85Ta15),
+    ('WTa20', md_pot_data.qe_pot.vca_W80Ta20),
+    ('WTa25', md_pot_data.qe_pot.vca_W75Ta25),
+    ('WTa50', md_pot_data.qe_pot.vca_W50Ta50)])
 
 class cal_qe_surface(object):
 
