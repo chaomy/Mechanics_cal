@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-08 21:10:39
+# @Last Modified time: 2017-11-08 21:24:09
 
 
 from optparse import OptionParser
@@ -211,7 +211,8 @@ class cal_cij(gn_config.bcc,
                    'WTa0.20': md_pot_data.qe_pot.vca_W80Ta20,
                    'WTa0.15': md_pot_data.qe_pot.vca_W85Ta15,
                    'WTa0.10': md_pot_data.qe_pot.vca_W90Ta10,
-                   'WTa0.05': md_pot_data.qe_pot.vca_W95Ta05}
+                   'WTa0.05': md_pot_data.qe_pot.vca_W95Ta05,
+                   'WTa0.50': md_pot_data.qe_pot.vca_W50Ta50}
         for key in potlist.keys():
             self.mymkdir(key)
             self.__init__(potlist[key])
