@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-08 17:12:49
+# @Last Modified time: 2017-11-08 20:09:18
 
 
 from optparse import OptionParser
@@ -34,7 +34,7 @@ class cal_cij(gn_config.bcc,
               plt_drv.plt_drv):
 
     def __init__(self, inpot=md_pot_data.qe_pot.pbe_w):
-        self.unit_delta = 0.005
+        self.unit_delta = 0.001
         self.looptimes = 5 
         self.volume = None
         self.energy0 = None
