@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-08 20:09:18
+# @Last Modified time: 2017-11-08 20:10:10
 
 
 from optparse import OptionParser
@@ -121,8 +121,8 @@ class cal_cij(gn_config.bcc,
     def gn_qe_cij_infile(self, atoms):
         self.set_thr('1.0D-6')
         self.set_ecut('40')
-        # self.set_kpnts((39, 39, 39))
-        self.set_kpnts((19, 19, 19))
+        self.set_kpnts((39, 39, 39))
+        # self.set_kpnts((19, 19, 19))
         self.set_degauss('0.03D0')
         with open('qe.in', 'w') as fid:
             fid = self.qe_write_control(fid, atoms)
@@ -139,7 +139,6 @@ class cal_cij(gn_config.bcc,
         for i in range(len(self.cij_type_list)):
             mtype = self.cij_type_list[i]
             self.set_cij_type(mtype)
-
             for j in range(-self.looptimes, self.looptimes):
                 delta = self.unit_delta * j
                 if j >= 0:
@@ -149,12 +148,12 @@ class cal_cij(gn_config.bcc,
                 self.mymkdir(dirname)
                 os.chdir(dirname)
                 self.set_pbs(dirname)
-                # atoms = self.write_bcc_primitive_with_strain(delta=delta,
-                #                                              in_tag=mtype,
-                #                                              write=False)
-                atoms = self.write_bcc_with_strain(delta=delta,
-                                                   in_tag=mtype,
-                                                   write=False)
+                atoms = self.write_bcc_primitive_with_strain(delta=delta,
+                                                             in_tag=mtype,
+                                                             write=False)
+                # atoms = self.write_bcc_with_strain(delta=delta,
+                #                                    in_tag=mtype,
+                #                                    write=False)
                 self.gn_qe_cij_infile(atoms)
                 os.system("cp $POTDIR/{} .".format(self.pot['file']))
                 os.chdir(os.pardir)
