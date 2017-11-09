@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-08 15:40:00
+# @Last Modified time: 2017-11-08 22:23:12
 
 
 import gn_lmp_infile
@@ -57,7 +57,7 @@ class cal_gsf(gn_config.bcc,
               cal_va_gsf.cal_va_gsf):
 
     def __init__(self,
-                 pot=md_pot_data.qe_pot.vca_W95Ta05, 
+                 pot=md_pot_data.qe_pot.vca_W90Ta10, 
                  mgsf='x111z112'):
         self.pot = pot
         self.mgsf = mgsf
