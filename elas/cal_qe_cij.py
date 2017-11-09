@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-08 20:10:10
+# @Last Modified time: 2017-11-08 21:10:27
 
 
 from optparse import OptionParser
@@ -68,8 +68,7 @@ class cal_cij(gn_config.bcc,
         r = leastsq(residuals, [1.0, 0.0])
         print r
         a, c = r[0]
-        print self.ev_angstrom3_to_GPa
-        print self.volume
+        print "vol = ", self.volume, "A^3"
         a = a / self.volume * self.ev_angstrom3_to_GPa 
         return a
 
@@ -97,10 +96,9 @@ class cal_cij(gn_config.bcc,
 
         # print np.linalg.pinv(convmat) * np.transpose(np.mat(del2coeffs))
         print del2coeffs
-        # c11 = (0.111111111111111 * del2coeffs[0] + 0.333333333333333 * del2coeffs[1])
-        c11 = (0.33333333 * del2coeffs[0] + 0.66666667 * del2coeffs[1])
-        c12 = (0.33333333 * del2coeffs[0] - 0.33333333 * del2coeffs[1])
-        c44 = 0.5 * del2coeffs[2]
+        c11 = (0.111111111111111 * del2coeffs[0] + 0.333333333333333 * del2coeffs[1])
+        c12 = (0.111111111111111 * del2coeffs[0] - 0.166666666666667 * del2coeffs[1])
+        c44 = 0.25 * del2coeffs[2]
         print(c11, c12, c44)
         # with open("cij.dat", 'w') as fout:
         #     fout.write("C11\t%f\t\nC12\t%f\t\nC44\t%f\t\n" % (c11, c12, c44))
@@ -110,7 +108,8 @@ class cal_cij(gn_config.bcc,
     def set_volume_energy0(self):
         (engy, vol, stress) = self.qe_get_energy_stress(
             filename='dir-c11-p000/qe.out')
-        self.volume = vol * md_pot_data.unitconv.ulength["BohrtoA"]
+        self.volume = vol * md_pot_data.unitconv.ulength["BohrtoA"]**3
+        print self.volume
         self.energy0 = engy
         return
 
@@ -148,12 +147,12 @@ class cal_cij(gn_config.bcc,
                 self.mymkdir(dirname)
                 os.chdir(dirname)
                 self.set_pbs(dirname)
-                atoms = self.write_bcc_primitive_with_strain(delta=delta,
-                                                             in_tag=mtype,
-                                                             write=False)
-                # atoms = self.write_bcc_with_strain(delta=delta,
-                #                                    in_tag=mtype,
-                #                                    write=False)
+                # atoms = self.write_bcc_primitive_with_strain(delta=delta,
+                #                                              in_tag=mtype,
+                #                                              write=False)
+                atoms = self.write_bcc_with_strain(delta=delta,
+                                                   in_tag=mtype,
+                                                   write=False)
                 self.gn_qe_cij_infile(atoms)
                 os.system("cp $POTDIR/{} .".format(self.pot['file']))
                 os.chdir(os.pardir)
