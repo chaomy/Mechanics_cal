@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-21 18:42:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-10 14:14:03
+# @Last Modified time: 2017-11-13 02:27:01
 
 
 from optparse import OptionParser
@@ -168,11 +168,11 @@ class cal_md_thermo(gn_config.hcp,
                 lmp_bas = self.lmp_change_box(bas)
                 self.write_lmp_config_data(atoms, 'init.txt')
                 os.system("mv init.txt  {}".format(dirname))
-                os.system("cp in.init  {}".format(dirname))
+                os.system("cp in.pv  {}".format(dirname))
 
             elif opt == 'run':
                 os.chdir(dirname)
-                os.system("lmp_mpi -i in.init")
+                os.system("lmp_mpi -i in.pv")
                 os.chdir(os.pardir)
 
             elif opt == 'clc':
@@ -182,7 +182,7 @@ class cal_md_thermo(gn_config.hcp,
                 vol[i] = data[0]
                 press[i] = data[1]
                 os.chdir(os.pardir)
-                # shutil.rmtree(dirname)
+                shutil.rmtree(dirname)    # clean  
         if opt == 'clc':
             np.savetxt("data.txt", (vol, press))
         return
@@ -210,19 +210,18 @@ class cal_md_thermo(gn_config.hcp,
         self.set_keys("upper right")
         self.set_111plt((10, 6.5))
         (vol, press) = np.loadtxt("data.txt")
-        # (dft_vol, dft_press) = np.loadtxt("../../DATA_DFT_PV.txt")
+        (dft_vol, dft_press) = np.loadtxt("/Users/chaomingyang/src/Data_shares/DATA_DFT_PV.txt")
 
         vol = vol / vol[0]
         vol = vol**3
-        # dft_vol = dft_vol / dft_vol[0]
+        dft_vol = dft_vol / dft_vol[0]
 
         self.ax.plot(vol[:npt], press[:npt],
                      label='adp',
                      **next(self.keysiter))
-
-        # self.ax.plot(dft_vol[:npt], dft_press[:npt],
-        #              label='pbe',
-        #              **next(self.keysiter))
+        self.ax.plot(dft_vol[:npt], dft_press[:npt],
+                     label='pbe',
+                     **next(self.keysiter))
         plt.xlabel('relative volume (V / V$_0$)',
                    {'fontsize': self.myfontsize})
         plt.ylabel('presssure (GPa)', {'fontsize': self.myfontsize})
@@ -230,7 +229,7 @@ class cal_md_thermo(gn_config.hcp,
         self.fig.savefig("p2v.png", **self.figsave)
         return
 
-    def p2v_wrap(self, ptype='adp'):
+    def p2v_wrap(self):
         drv.pressure_vs_vol('prep')
         drv.pressure_vs_vol('run')
         drv.pressure_vs_vol('clc')
