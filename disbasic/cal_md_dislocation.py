@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-28 14:33:11
+# @Last Modified time: 2017-11-09 16:05:31
 
 
 from optparse import OptionParser
@@ -16,7 +16,7 @@ import ase.lattice.cubic as Cubic
 import md_pot_data
 import gn_config
 import get_data
-import Intro_vasp
+from utils import Intro_vasp
 import gn_pbs
 import gn_lmp_infile
 import atomman as am

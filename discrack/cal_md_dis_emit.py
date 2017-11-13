@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-08 22:41:06
+# @Last Modified time: 2017-11-09 02:00:33
 
 
 from optparse import OptionParser
@@ -14,55 +14,55 @@ import plt_drv
 import numpy as np
 import md_pot_data
 import tool_elastic_constants
-import stroh_solve
-import cal_md_dislocation
-import cal_md_crack_ini
+from utils import stroh_solve
+from disbasic import cal_md_dislocation
+from crack import cal_md_crack_ini
 import cal_md_dis_emit_curtin
 import cal_md_dis_emit_plt
 
 
-vcaw = OrderedDict([('WTa05', {'lat': 3.16613,
-                               'ugsf1': 2.2446,    #
-                               'ugsf2': 2.0327,
-                               'c11': 554,
-                               'c12': 205,
-                               'c44': 167,
-                               'surf': None}),  # 3.1945
-                    ('WTa10', {'lat': 3.17787,
-                               'ugsf1': 2.2584,   # 2.239
-                               'ugsf2': 1.9952,
-                               'c11': 534,
-                               'c12': 202,
-                               'c44': 156,
-                               'surf': None}),  # 3.157
-                    ('WTa15', {'lat': 3.18874,
-                               'ugsf1': 2.241,    # 2.241
-                               'ugsf2': 1.9472,
-                               'c11': 500,
-                               'c12': 188,
-                               'c44': 140,
-                               'surf': None}),  # 3.109
-                    ('WTa20', {'lat': 3.19787,
-                               'ugsf1': 2.191,    # 2.191
-                               'ugsf2': 1.8815,
-                               'c11': 488,
-                               'c12': 198,
-                               'c44': 126,
-                               'surf': None}),  # 3.0433
-                    ('WTa25', {'lat': 3.207,
-                               'ugsf1': 2.1815,   #
-                               'ugsf2': 1.7912,
-                               'c11': 458,
-                               'c12': 195,
-                               'c44': 109,
-                               'surf': None}),  # 2.953
-                    ('WTa50', {'lat':   3.2502,
+vcaw = OrderedDict([('WTa50', {'lat':   3.2502,
                                'ugsf1': 1.5988,
                                'ugsf2': 1.2763,   # 2.3793
                                'c11': 343.7798,
                                'c12': 187.0044,
                                'c44': 91.8360,
                                'surf': 3.941229200}),
+                    ('WTa25', {'lat': 3.207,
+                               'ugsf1': 2.1815,   #
+                               'ugsf2': 1.7912,
+                               'c11': 458,
+                               'c12': 195,
+                               'c44': 109,
+                               'surf': 4.65010}),  # 2.953
+                    ('WTa20', {'lat': 3.19787,
+                               'ugsf1': 2.191,    # 2.191
+                               'ugsf2': 1.8815,
+                               'c11': 488,
+                               'c12': 198,
+                               'c44': 126,
+                               'surf': 4.770549}),  # 3.0433
+                    ('WTa15', {'lat': 3.18874,
+                               'ugsf1': 2.241,    # 2.241
+                               'ugsf2': 1.9472,
+                               'c11': 500,
+                               'c12': 188,
+                               'c44': 140,
+                               'surf': 4.862739}),  # 3.109
+                    ('WTa10', {'lat': 3.17787,
+                               'ugsf1': 2.2584,   # 2.239
+                               'ugsf2': 1.9952,
+                               'c11': 534,
+                               'c12': 202,
+                               'c44': 156,
+                               'surf': 4.93457}),  # 3.157
+                    ('WTa05', {'lat': 3.16613,
+                               'ugsf1': 2.2446,    #
+                               'ugsf2': 2.0327,
+                               'c11': 554,
+                               'c12': 205,
+                               'c44': 167,
+                               'surf': 4.9918543}),  # 3.1945
                     ('WRe00', {'lat': 3.17093,
                                # 2.1147 # 110   # 3.1831   =>
                                # 1.5747786078266461 (shift # = 1.1618)

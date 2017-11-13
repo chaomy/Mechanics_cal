@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-21 18:42:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-10-27 15:54:13
+# @Last Modified time: 2017-11-10 14:14:03
 
 
 from optparse import OptionParser
@@ -20,7 +20,7 @@ import gn_lmp_infile
 import gn_pbs
 import plt_drv
 import md_pot_data
-import glob
+from glob import glob
 
 
 class cal_md_thermo(gn_config.hcp,
@@ -28,35 +28,24 @@ class cal_md_thermo(gn_config.hcp,
                     gn_config.fcc,
                     get_data.get_data,
                     gn_pbs.gn_pbs,
-                    gn_lmp_infile.gn_md_infile,
-                    plt_drv.plt_drv):
+                    plt_drv.plt_drv,
+                    gn_lmp_infile.gn_md_infile):
 
     def __init__(self):
-        self.indrv = gn_lmp_infile.gn_md_infile()
-        self._pot = md_pot_data.md_pot.Nb_adp
-        self._element = self._pot['element']
-        self._pottype = self._pot['pair_style']
-        self._size = np.array([16, 16, 16])
-        self.set_lat('pot')
+        self.pot = self.load_data("./pot.dat")
+        self.size = np.array([16, 16, 16])
         self.unit_atoms = \
             ase.lattice.cubic.BodyCenteredCubic(directions=[[1, 0, 0],
                                                             [0, 1, 0],
                                                             [0, 0, 1]],
-                                                latticeconstant=self._lat,
+                                                latticeconstant=self.pot[
+                                                    "lattice"],
                                                 size=(1, 1, 1),
-                                                symbol=self._element,
+                                                symbol=self.pot["element"],
                                                 pbc=(1, 1, 1))
-        gn_config.bcc.__init__(self, self._pot)
+        gn_lmp_infile.gn_md_infile.__init__(self, self.pot)
+        gn_config.bcc.__init__(self, self.pot)
         plt_drv.plt_drv.__init__(self)
-        return
-
-    def set_lat(self, tag='cal'):
-        if tag is 'pot':
-            self._lat = self._pot['lattice']
-        elif tag is 'cal':
-            os.system("lmp_mpi -i in.lat")
-            lat = np.loadtxt("lat.txt")
-            self._lat = np.average(lat)
         return
 
     def run_thermo(self, tag='run'):
@@ -106,7 +95,7 @@ class cal_md_thermo(gn_config.hcp,
         # initial
         dirname = "dir-{:05.0f}".format(0)
         self.mymkdir(dirname)
-        self.indrv.write_md_thermo_expand('init')
+        self.write_md_thermo_expand('init')
         shutil.copy2("in.npt", dirname)
         # increase temp
         for i in range(50):
@@ -115,15 +104,15 @@ class cal_md_thermo(gn_config.hcp,
             dirname = "dir-{:05.0f}".format(tend)
             self.mymkdir(dirname)
             if i == 0:
-                self.indrv.write_md_thermo_expand(**{'tstart': tstart,
-                                                     'tend': tend,
-                                                     'pstart': 0.0,
-                                                     'pend': oneatm})
+                self.write_md_thermo_expand(**{'tstart': tstart,
+                                               'tend': tend,
+                                               'pstart': 0.0,
+                                               'pend': oneatm})
             else:
-                self.indrv.write_md_thermo_expand(**{'tstart': tstart,
-                                                     'tend': tend,
-                                                     'pstart': oneatm,
-                                                     'pend': oneatm})
+                self.write_md_thermo_expand(**{'tstart': tstart,
+                                               'tend': tend,
+                                               'pstart': oneatm,
+                                               'pend': oneatm})
             tstart = tend
             shutil.copy2("in.npt", dirname)
         return
@@ -154,7 +143,6 @@ class cal_md_thermo(gn_config.hcp,
         return
 
     def pressure_vs_vol(self, opt='prep'):
-        lat0 = self._lat
         delta = -0.01
         npts = 30
         bas = np.mat([[-0.5, 0.5, 0.5],
@@ -168,18 +156,18 @@ class cal_md_thermo(gn_config.hcp,
 
         for i in range(npts):
             rat = (1 + i * delta)**(1. / 3.)
-            alat = rat * lat0
+            alat = rat * self.pot["lattice"] 
             dirname = 'dir-%04d' % (i)
             if opt == 'prep':
                 self.mymkdir(dirname)
                 cell = alat * lmp_bas
-                atoms = ase.Atoms(self._pot['element'],
+                atoms = ase.Atoms(self.pot['element'],
                                   positions=[[0, 0, 0]],
                                   cell=cell,
                                   pbc=[1, 1, 1])
                 lmp_bas = self.lmp_change_box(bas)
-                self.write_lmp_config_data(atoms, 'bulk.txt')
-                os.system("mv bulk.txt  {}".format(dirname))
+                self.write_lmp_config_data(atoms, 'init.txt')
+                os.system("mv init.txt  {}".format(dirname))
                 os.system("cp in.init  {}".format(dirname))
 
             elif opt == 'run':
@@ -194,25 +182,18 @@ class cal_md_thermo(gn_config.hcp,
                 vol[i] = data[0]
                 press[i] = data[1]
                 os.chdir(os.pardir)
-                shutil.rmtree(dirname)
-
+                # shutil.rmtree(dirname)
         if opt == 'clc':
             np.savetxt("data.txt", (vol, press))
         return
 
     def loop_pressure_vs_vol(self):
-        dirlist = glob.glob("dir-*")
-        if not os.path.isfile("in.lat"):
-            os.system("cp ~/My_cal/Mechnical_cal/Bcc_Press_to_Vol/in.lat .")
-            os.system("cp ~/My_cal/Mechnical_cal/Bcc_Press_to_Vol/in.init .")
-
+        dirlist = glob("dir-*")
         cnt = 0
         for mdir in dirlist[:]:
             print mdir
             if ((cnt % 1) == 0):
                 if not os.path.isfile("fig-{}.png".format(mdir)):
-                    os.system("cp {}/dummy.lammps.ADP .".format(mdir))
-                    self.set_lat('cal')
                     self.pressure_vs_vol('prep')
                     self.pressure_vs_vol('run')
                     self.pressure_vs_vol('clc')
@@ -229,35 +210,27 @@ class cal_md_thermo(gn_config.hcp,
         self.set_keys("upper right")
         self.set_111plt((10, 6.5))
         (vol, press) = np.loadtxt("data.txt")
-        (dft_vol, dft_press) = np.loadtxt("../../DATA_DFT_PV.txt")
+        # (dft_vol, dft_press) = np.loadtxt("../../DATA_DFT_PV.txt")
 
         vol = vol / vol[0]
         vol = vol**3
-        dft_vol = dft_vol / dft_vol[0]
+        # dft_vol = dft_vol / dft_vol[0]
 
         self.ax.plot(vol[:npt], press[:npt],
                      label='adp',
                      **next(self.keysiter))
 
-        self.ax.plot(dft_vol[:npt], dft_press[:npt],
-                     label='pbe',
-                     **next(self.keysiter))
+        # self.ax.plot(dft_vol[:npt], dft_press[:npt],
+        #              label='pbe',
+        #              **next(self.keysiter))
         plt.xlabel('relative volume (V / V$_0$)',
                    {'fontsize': self.myfontsize})
         plt.ylabel('presssure (GPa)', {'fontsize': self.myfontsize})
         self.add_legends(self.ax)
-        self.set_tick_size(self.ax)
         self.fig.savefig("p2v.png", **self.figsave)
         return
 
-    def p2v_wrap(self, ptype='eam'):
-        pth = "~/My_cal/Mechnical_cal/Bcc_Press_to_Vol/"
-        if not os.path.isfile("in.init"):
-            os.system(
-                "cp {}in.lat_{} in.lat".format(pth, ptype))
-            os.system(
-                "cp {}in.init_{} in.init".format(pth, ptype))
-        drv.set_lat('cal')
+    def p2v_wrap(self, ptype='adp'):
         drv.pressure_vs_vol('prep')
         drv.pressure_vs_vol('run')
         drv.pressure_vs_vol('clc')

@@ -4,7 +4,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-24 23:19:54
+# @Last Modified time: 2017-11-10 02:07:56
 
 
 from optparse import OptionParser
@@ -17,17 +17,13 @@ import ase.lattice
 import md_pot_data
 import plt_drv
 import matplotlib.pyplot as plt
+import atomman as am
+import atomman.lammps as lmp
+import gn_config
+import get_data
+import gn_lmp_infile
+import gn_pbs
 
-try:
-    import atomman as am
-    import atomman.lammps as lmp
-    import gn_config
-    import get_data
-    import gn_lmp_infile
-    import gn_pbs
-
-except ImportError:
-    print("error during import")
 
 
 class cal_md_bcc_basic(gn_config.hcp,
@@ -40,10 +36,9 @@ class cal_md_bcc_basic(gn_config.hcp,
 
     def __init__(self, pot=None):
         if pot is None:
-            self.pot = md_pot_data.md_pot.Nb_my
-        else:
-            self.pot = pot
-        gn_lmp_infile.gn_md_infile.__init__(self)
+            pot = md_pot_data.md_pot.Nb_my
+        self.pot = pot
+        gn_lmp_infile.gn_md_infile.__init__(self, inpot=self.pot)
         plt_drv.plt_drv.__init__(self)
         return
 

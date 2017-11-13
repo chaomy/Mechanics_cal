@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-08 22:12:03
+# @Last Modified time: 2017-11-09 16:14:52
 
 
 from optparse import OptionParser
@@ -23,6 +23,7 @@ class cal_surface(cal_gsf.cal_gsf,
                   cal_qe_surface.cal_qe_surface,
                   cal_va_surface.cal_va_surface,
                   cal_md_surface.cal_md_surface):
+
     def __init__(self, pot=md_pot_data.va_pot.Nb_pbe,
                  msurf='x100z100'):
         self.pot = pot
@@ -70,6 +71,7 @@ if __name__ == '__main__':
                   'loopprepva': drv.loop_prep_va,
                   'plt': drv.plt_surf,
                   'trans': drv.transdata}
+
     dispatcher[options.mtype.lower()]()
     if options.fargs is not None:
         dispatcher[options.mtype.lower()](options.fargs)

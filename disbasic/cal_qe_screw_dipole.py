@@ -3,23 +3,19 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-17 17:56:53
+# @Last Modified time: 2017-11-09 20:26:54
 
 
-try:
-    import numpy as np
-    import md_pot_data
-    import ase
-    import os
-    import gn_config
-    import get_data
-    import gn_pbs
-    import gn_qe_inputs
-    import cal_md_dis_dipole
-    from optparse import OptionParser
-
-except ImportError:
-    print("error during import")
+import numpy as np
+import md_pot_data
+import ase
+import os
+import gn_config
+import get_data
+import gn_pbs
+import gn_qe_inputs
+import cal_md_dis_dipole
+from optparse import OptionParser
 
 
 class qe_dislocation(get_data.get_data,
@@ -28,7 +24,7 @@ class qe_dislocation(get_data.get_data,
                      cal_md_dis_dipole.cal_dis_dipole):
 
     def __init__(self):
-        self.pot = md_pot_data.qe_pot.exp_w
+        self.pot = md_pot_data.qe_pot.vca_W75Re25
         get_data.get_data.__init__(self)
         gn_pbs.gn_pbs.__init__(self)
         gn_config.bcc.__init__(self, self.pot)
@@ -117,19 +113,18 @@ class qe_dislocation(get_data.get_data,
 if __name__ == '__main__':
     usage = "usage:%prog [options] arg1 [options] arg2"
     parser = OptionParser(usage=usage)
-    parser.add_option("-t", "--mtype",
-                      action="store",
-                      type="string",
-                      dest="mtype", help="",
-                      default="prp_r")
+    parser.add_option("-t", "--mtype", action="store",
+                      type="string", dest="mtype")
+    parser.add_option('-p', "--param", action="store",
+                      type='string', dest="fargs")
     (options, args) = parser.parse_args()
-
     drv = qe_dislocation()
-    if options.mtype.lower() in ['dipole', 'dp']:
-        drv.gn_qe_screw_dipole_bcc()
 
-    if options.mtype.lower() in ['restart', 're']:
-        drv.cal_qe_restart()
+    dispatcher = {'dipole': drv.gn_qe_screw_dipole_bcc,
+                  'restart': drv.cal_qe_restart,
+                  're_cell': drv.cal_qe_restart_rescale_cell}
 
-    if options.mtype.lower() in ['restart_cell', 're_cell']:
-        drv.cal_qe_restart_rescale_cell()
+    if options.fargs is not None:
+        dispatcher[options.mtype.lower()](options.fargs)
+    else:
+        dispatcher[options.mtype.lower()]()

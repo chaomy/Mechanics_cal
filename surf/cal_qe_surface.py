@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-08 22:16:44
+# @Last Modified time: 2017-11-09 01:51:07
 
 
 from optparse import OptionParser
@@ -90,7 +90,7 @@ class cal_qe_surface(object):
         for key, i in zip(vcapots.keys(), range(npts)):
             dirtag = 'dir-{}'.format(key)
             self.__init__(vcapots[key], surf)
-            if i == 6:
+            if i == 5:
                 data[i, 0] = 0.5
             else:
                 data[i, 0] = 0.05 * i
@@ -121,7 +121,7 @@ class cal_qe_surface(object):
                 print mdir
                 self.mymkdir(mdir)
                 fdir = fluxdirs['QE'] + \
-                    'VC_WRe/Bcc_QE_VCA_WRe_surf_relax/{}'.format(mdir)
+                    'VC_WTa/surf/{}'.format(mdir)
                 os.system('scp {}/qe.out {}'.format(fdir, mdir, mdir))
                 os.system('scp {}/qe.in {}'.format(fdir, mdir, mdir))
 

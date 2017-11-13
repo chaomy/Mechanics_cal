@@ -3,19 +3,19 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-30 14:57:49
+# @Last Modified time: 2017-11-09 20:17:58
 
-from numpy import cos, sin
+from numpy import cos, sin, sqrt, mat
 from collections import OrderedDict
 import ase
 import ase.io
 import numpy as np
 import md_pot_data
 import tool_elastic_constants
-import stroh_solve
+from utils import stroh_solve
 import ase.lattice
 import cal_md_dislocation
-import cal_md_crack_ini
+from crack import cal_md_crack_ini
 
 matconsts = OrderedDict([('Al1', {'lat': 4.05,
                                   'ugsf': 0.167,
@@ -63,9 +63,9 @@ class cal_dis_dipole(object):
             symbol=self.pot['element'])
         atoms = self.mddis_drv.cut_half_atoms_new(atoms, "cuty")
         supercell = atoms.get_cell()
-        strain = np.mat([[1.0, 0.0, 0.0],
-                         [0.5, 1.0, 0.5],
-                         [0.0, 0.0, 1.0]])
+        strain = mat([[1.0, 0.0, 0.0],
+                      [0.5, 1.0, 0.5],
+                      [0.0, 0.0, 1.0]])
         supercell = strain * supercell
         atoms.set_cell(supercell)
         atoms.wrap(pbc=[1, 1, 1])
@@ -98,9 +98,9 @@ class cal_dis_dipole(object):
         addstrain = False
         if addstrain is True:
             print len(atoms)
-            strain = np.mat([[1.0, 0.0, 0.0],
-                             [0.5, 1.0, 0.5],
-                             [0.0, 0.0, 1.0]])
+            strain = mat([[1.0, 0.0, 0.0],
+                          [0.5, 1.0, 0.5],
+                          [0.0, 0.0, 1.0]])
             supercell = strain * supercell
             atoms.set_cell(supercell)
             atoms.wrap(pbc=[1, 1, 1])
@@ -127,25 +127,25 @@ class cal_dis_dipole(object):
         axes = np.array([[-1, -1, 2],
                          [1, 1, 1],
                          [-1, 1, 0]])
-        burgers = param['lat'] * np.sqrt(2.) / 2. * np.array([-1., 1., 0])
+        burgers = param['lat'] * sqrt(2.) / 2. * np.array([-1., 1., 0])
         stroh = stroh_solve.Stroh(c, burgers, axes=axes)
-        A = np.mat(np.zeros([3, 3]), dtype='complex')
-        A[:, 0] = np.mat(stroh.A[0]).transpose()
-        A[:, 1] = np.mat(stroh.A[2]).transpose()
-        A[:, 2] = np.mat(stroh.A[4]).transpose()
+        A = mat(np.zeros([3, 3]), dtype='complex')
+        A[:, 0] = mat(stroh.A[0]).transpose()
+        A[:, 1] = mat(stroh.A[2]).transpose()
+        A[:, 2] = mat(stroh.A[4]).transpose()
 
-        B = np.mat(np.zeros([3, 3]), dtype='complex')
-        B[:, 0] = np.mat(stroh.L[0]).transpose()
-        B[:, 1] = np.mat(stroh.L[2]).transpose()
-        B[:, 2] = np.mat(stroh.L[4]).transpose()
+        B = mat(np.zeros([3, 3]), dtype='complex')
+        B[:, 0] = mat(stroh.L[0]).transpose()
+        B[:, 1] = mat(stroh.L[2]).transpose()
+        B[:, 2] = mat(stroh.L[4]).transpose()
 
         Gamma = 0.5 * np.real(np.complex(0, 1) * A * np.linalg.inv(B))
         theta = np.deg2rad(70.0)
-        omega = np.mat([[cos(theta), sin(theta), 0.0],
-                        [-sin(theta), cos(theta), 0.0],
-                        [0.0, 0.0, 1.0]])
+        omega = mat([[cos(theta), sin(theta), 0.0],
+                     [-sin(theta), cos(theta), 0.0],
+                     [0.0, 0.0, 1.0]])
         phi = 0
-        svect = np.mat(np.array([cos(phi), 0.0, sin(phi)]))
+        svect = mat(np.array([cos(phi), 0.0, sin(phi)]))
         usf = param['ugsf']  # J/m^2
         Gamma = np.abs(np.linalg.inv(Gamma))
         # Gamma = omega * Gamma * omega
@@ -154,19 +154,19 @@ class cal_dis_dipole(object):
         print Gamma
 
         Gamma = Gamma * 1e9  # Pa
-        ke1 = np.sqrt(Gamma * usf)
+        ke1 = sqrt(Gamma * usf)
         print ke1 * 1e-6
         return
 
-        # A = np.mat(np.zeros([3, 3]), dtype='complex')
-        # A[:, 0] = np.mat(stroh.A[1]).transpose()
-        # A[:, 1] = np.mat(stroh.A[3]).transpose()
-        # A[:, 2] = np.mat(stroh.A[5]).transpose()
+        # A = mat(np.zeros([3, 3]), dtype='complex')
+        # A[:, 0] = mat(stroh.A[1]).transpose()
+        # A[:, 1] = mat(stroh.A[3]).transpose()
+        # A[:, 2] = mat(stroh.A[5]).transpose()
 
-        # B = np.mat(np.zeros([3, 3]), dtype='complex')
-        # B[:, 0] = np.mat(stroh.L[1]).transpose()
-        # B[:, 1] = np.mat(stroh.L[3]).transpose()
-        # B[:, 2] = np.mat(stroh.L[5]).transpose()
+        # B = mat(np.zeros([3, 3]), dtype='complex')
+        # B[:, 0] = mat(stroh.L[1]).transpose()
+        # B[:, 1] = mat(stroh.L[3]).transpose()
+        # B[:, 2] = mat(stroh.L[5]).transpose()
         # Gamma = np.real(np.complex(0, 1) * A * np.linalg.inv(B))
 
     def print_dis_constants(self):
@@ -235,8 +235,10 @@ class cal_dis_dipole(object):
         atoms_perf = atoms.copy()
         pos = atoms.get_positions()
 
-        unitx = np.sqrt(6) / 3. * self.pot['lattice']
-        unity = np.sqrt(2) / 2. * self.pot['lattice']
+        unitx = sqrt(6) / 3. * self.pot['lattice']
+        unity = sqrt(2) / 2. * self.pot['lattice']
+        unitz = sqrt(3) / 2. * self.pot['lattice']
+
         sx = 10.0 * sizen
         sy = 5 * sizen
         ix = 10.5 * sizen
@@ -248,20 +250,36 @@ class cal_dis_dipole(object):
         # shiftc2 = \
         # np.ones(np.shape(pos)) * np.array([c2[0, 0], c2[0, 1], 0.0])
 
-        opt = 'split'
-        if opt == 'split':
+        opt = 'pull'
+        if opt in ['split']:
             c1 = self.pot['posleft'] + \
                 np.array([0.0, 0.21 * self.pot['yunit']])
             c2 = self.pot['posrigh'] + \
                 np.array([0.0, -0.21 * self.pot['yunit']])
         else:
             c1 = [(sx) * unitx, (sy + 1. / 3.) * unity]
-            c2 = [(sx + ix) * unitx, (sy + 2. / 3.) * unity]
+            c2 = [(sx + ix) * unitx, (sy + 2. / 3.) * unity] 
+
         shiftc1 = np.ones(np.shape(pos)) * np.array([c1[0], c1[1], 0.0])
         shiftc2 = np.ones(np.shape(pos)) * np.array([c2[0], c2[1], 0.0])
 
         disp1 = stroh.displacement(pos - shiftc1)
         disp2 = stroh.displacement(pos - shiftc2)
+
+        if opt in ['pull']:
+            radius = 2.0  # find the atoms near the center
+            for ps, dp in zip(pos, disp1):
+                dis = np.linalg.norm(ps[:2] - c1)
+                if (dis < radius):
+                    print dis
+                    dp[2] += 1./6. * unitz 
+                    # add shirt  
+            for ps, dp in zip(pos, disp2):
+                dis = np.linalg.norm(ps[:2] - c2)
+                if (dis < radius):
+                    print dis 
+                    dp[2] -= 1./6. * unitz
+
 
         atoms.set_positions(pos + np.real(disp1) - np.real(disp2))
         # ase.io.write('POSCAR', atoms, format='vasp')

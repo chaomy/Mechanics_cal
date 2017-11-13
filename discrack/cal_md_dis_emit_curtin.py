@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-09 12:10:50
+# @Last Modified time: 2017-11-09 02:01:02
 
 
 import axes_check
@@ -11,7 +11,7 @@ from numpy import cos, sin, sqrt
 from collections import OrderedDict
 import numpy as np
 import tool_elastic_constants
-import stroh_solve
+from utils import stroh_solve
 
 
 matconsts = OrderedDict([('Al1', {'lat': 4.05,
