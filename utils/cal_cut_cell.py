@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-28 14:57:34
+# @Last Modified time: 2017-11-13 23:57:05
 
 import numpy as np
 
@@ -29,7 +29,7 @@ class cal_cut_cell(object):
         cell = atoms.get_cell()
         xc, yc, zc = 0.75 * cell[0, 0], 0.5 * cell[1, 1], 0.5 * cell[2, 2]
         center = np.array([xc, yc, zc])
-        rc = 25 
+        rc = 20
         fid = open('center.txt', 'w')
         fid.write("{}  {}  {}  {}".format(xc, yc, zc, rc))
         fid.close()
