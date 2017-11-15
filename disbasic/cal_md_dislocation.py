@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-09 16:05:31
+# @Last Modified time: 2017-11-13 23:45:07
 
 
 from optparse import OptionParser
@@ -34,12 +34,8 @@ class md_dislocation(gn_config.bcc,
                      cal_md_dislocation_bcc.md_dislocation_bcc,
                      cal_md_dislocation_fcc.md_dislocation_fcc):
 
-    def __init__(self, pot=None):
-        if pot is None:
-            self.pot = md_pot_data.md_pot.feyo
-            # self.pot = md_pot_data.md_pot.Nb_eam
-        else:
-            self.pot = pot
+    def __init__(self, pot=md_pot_data.md_pot.feyo):
+        self.pot = pot
         gn_pbs.gn_pbs.__init__(self)
         Intro_vasp.vasp_change_box.__init__(self, self.pot)
         gn_lmp_infile.gn_md_infile.__init__(self, self.pot)
@@ -271,7 +267,6 @@ class md_dislocation(gn_config.bcc,
     def loop_write_pbs(self):
         #  templist = [300, 600, 900, 1200, 1500, 1800];
         #  templist = [400, 500, 700, 800];
-
         templist = [1000, 1100]
         stress = '0.05'
 
@@ -279,9 +274,8 @@ class md_dislocation(gn_config.bcc,
             temp = templist[i]
             dirname = 'dir-T%d' % (temp)
 
-            if not os.path.isdir(dirname):
-                os.mkdir(dirname)
-
+            self.mymkdir(dirname)
+            
             shutil.copy("relaxed.txt", dirname)
             shutil.copy("W.set.txt", dirname)
 

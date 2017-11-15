@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-28 14:02:14
+# @Last Modified time: 2017-11-13 23:49:34
 
 
 import os
@@ -44,7 +44,6 @@ class md_dislocation_bcc(object):
 
         atoms = self.intro_single_screw_atoms(atoms)
         atoms = self.cut_z_normal_atoms(atoms)
-
         self.write_lmp_config_data_charge(atoms, 'init.screw')
         self.write_lmp_config_data(atoms, 'init.screw.atoms')
         return
@@ -73,10 +72,14 @@ class md_dislocation_bcc(object):
         e2 = [1., 1., -2]
         e3 = [0.5, 0.5, 0.5]
 
+        # first version 
         # atoms = self.set_bcc_convention(
-        #     [e1, e2, e3], (100, 60, 12))  # z periodic 12
+        #     [e1, e2, e3], (100, 60, 40))  # z periodic 12
+
+        # second version
         atoms = self.set_bcc_convention(
-            [e1, e2, e3], (100, 60, 40))  # z periodic 12
+            [e1, e2, e3], (150, 60, 40))    # z periodic 12 
+
         atoms = self.cut_y_normal_atoms(atoms)
         atoms = self.assign_ynormal_fixatoms(atoms)
 
