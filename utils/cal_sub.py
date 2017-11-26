@@ -4,7 +4,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-26 10:57:11
+# @Last Modified time: 2017-11-26 11:10:13
 
 
 import os
@@ -19,8 +19,8 @@ class subjobs(object):
         self.get_dirs()
         return
 
-    def get_dirs(self):
-        self.diriter = iter(glob.glob('dir-*'))
+    def get_dirs(self): 
+        self.diriter = iter(glob.glob('dir[-_]*')) 
         return
 
     def loop_sub_jobs(self):
