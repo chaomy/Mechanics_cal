@@ -4,7 +4,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-10-24 00:16:06
+# @Last Modified time: 2017-11-26 10:57:11
 
 
 import os
@@ -39,6 +39,11 @@ class subjobs(object):
         os.chdir(os.pardir)
         return
 
+    def mpbs(self):
+        ml = glob.glob("va*.pbs") 
+        for ee in ml: 
+            os.system("qsub {}".format(ee))
+
     def loop_shear_cnt(self):
         while True:
             try:
@@ -62,5 +67,6 @@ if __name__ == "__main__":
     (options, args) = parser.parse_args()
     drv = subjobs()
     dispatcher = {'sub': drv.loop_sub_jobs,
-                  'shearcnt': drv.loop_shear_cnt}
+                  'shearcnt': drv.loop_shear_cnt,
+                  'mpbs': drv.mpbs}
     dispatcher[options.mtype.lower()]()

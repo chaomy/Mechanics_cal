@@ -1,19 +1,11 @@
 #!/usr/bin/env python
 # encoding: utf-8
+# -*- coding: utf-8 -*-
+# @Author: chaomy
+# @Date:   2017-11-23 09:46:18
+# @Last Modified by:   chaomy
+# @Last Modified time: 2017-11-23 09:46:46
 
-###################################################################
-#
-# File Name : cal_md_vacancy.py
-#
-###################################################################
-#
-# Purpose :
-#
-# Creation Date :
-# Last Modified :
-# Created By    : Chaoming Yang
-#
-###################################################################
 
 from optparse import OptionParser
 import ase
@@ -29,12 +21,8 @@ import get_data
 import gn_lmp_infile
 import gn_pbs
 
-try:
-    import atomman as am
-    import atomman.lammps as lmp
-
-except ImportError:
-    print("error during import")
+import atomman as am
+import atomman.lammps as lmp
 
 
 class cal_md_vacancy(gn_config.hcp,

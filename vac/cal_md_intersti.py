@@ -1,19 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-###################################################################
-#
-# File Name : cal_md_intersti.py
-#
-###################################################################
-#
-# Purpose : calculate the interstitial energy
-#
-# Creation Date :
-# Last Modified :
-# Created By    : Chaoming Yang
-#
-###################################################################
 
 from optparse import OptionParser
 import ase

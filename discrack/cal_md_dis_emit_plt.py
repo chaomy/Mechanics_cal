@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-09 02:06:47
+# @Last Modified time: 2017-11-21 12:08:03
 
 from numpy import loadtxt, min, array
 from itertools import cycle
@@ -19,7 +19,7 @@ class cal_md_dis_emit_plt(object):
 
         self.set_111plt((9.2, 4.5))
         self.set_keys(loc='lower right')
-        self.ax.set_ylim(1.4, 2.8)
+        # self.ax.set_ylim(1.4, 2.8)
         # self.ax.set_xlim(-0.12, 7.45)
         data = loadtxt('vcaw_112_Ke.txt')
         xlist = array([5.5, 5.75, 5.80, 5.85, 5.90, 5.95, 
@@ -57,11 +57,11 @@ class cal_md_dis_emit_plt(object):
         # self.remove_xticks(self.ax)
         self.add_x_labels(xlabiter, self.ax)
         self.add_y_labels(ylabiter, self.ax)
-        self.fig.savefig('k1e.png', **self.figsave)
+        self.fig.savefig('Fig15_k1e.png', **self.figsave)
 
         self.closefig()
         self.set_111plt((9.2, 4.5))
-        self.ax.set_ylim(0.885, 1.285)
+        # self.ax.set_ylim(0.885, 1.285)
         # self.ax.set_xlim(-0.12, 7.45)
         self.set_keys(loc='lower left')
         data = loadtxt('vcaw_112_Ke.txt')
@@ -104,5 +104,5 @@ class cal_md_dis_emit_plt(object):
         # self.remove_xticks(self.ax)
         self.add_x_labels(xlabiter, self.ax)
         self.add_y_labels(ylabiter, self.ax)
-        self.fig.savefig('k1e2k1c.png', **self.figsave)
+        self.fig.savefig('Fig15_k1e2k1c.png', **self.figsave)
         return
