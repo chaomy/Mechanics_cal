@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-10-31 00:32:27
+# @Last Modified time: 2017-12-03 11:10:38
 
 import shutil
 import re
@@ -18,6 +18,39 @@ class md_gb_pre(object):
         for bicrystal in bicrystals:
             self.build_tiltgb_bcc(bicrystal)
         return
+
+    def read_gb_list(self):
+        with open('BuildGBlist.lst_Marinica110', 'r') as f:
+            bicrystals = []
+            raw = f.readlines()
+            for lines in raw:
+                angle = lines.split()[0]
+                angle_phi = lines.split()[1]
+                xupper = lines.split()[3] + ' ' + \
+                    lines.split()[4] + ' ' + lines.split()[5]
+                yupper = lines.split()[6] + ' ' + \
+                    lines.split()[7] + ' ' + lines.split()[8]
+                zupper = lines.split()[9] + ' ' + \
+                    lines.split()[10] + ' ' + lines.split()[11]
+
+                xlower = lines.split()[13] + ' ' + \
+                    lines.split()[14] + ' ' + lines.split()[15]
+                ylower = lines.split()[16] + ' ' + \
+                    lines.split()[17] + ' ' + lines.split()[18]
+                zlower = lines.split()[19] + ' ' + \
+                    lines.split()[20] + ' ' + lines.split()[21]
+                u_mult = lines.split()[22]
+                l_mult = lines.split()[23]
+                xsh = lines.split()[24]
+                zsh = lines.split()[25]
+                # print xlower+' '+ylower+' '+zlower
+                bicrystals.append([angle, angle_phi,
+                                   xupper, yupper, zupper,
+                                   xlower, ylower, zlower,
+                                   u_mult, l_mult, xsh, zsh])
+        f.close()
+        return bicrystals
+
 
     def build_tiltgb_bcc(self, bicrystal):
         # initialize bicrystal: angle and misorientations
@@ -84,35 +117,3 @@ class md_gb_pre(object):
                 else:
                     print filename
             return
-
-    def read_gb_list(self):
-        with open('BuildGBlist.lst_Marinica110', 'r') as f:
-            bicrystals = []
-            raw = f.readlines()
-            for lines in raw:
-                angle = lines.split()[0]
-                angle_phi = lines.split()[1]
-                xupper = lines.split()[3] + ' ' + \
-                    lines.split()[4] + ' ' + lines.split()[5]
-                yupper = lines.split()[6] + ' ' + \
-                    lines.split()[7] + ' ' + lines.split()[8]
-                zupper = lines.split()[9] + ' ' + \
-                    lines.split()[10] + ' ' + lines.split()[11]
-
-                xlower = lines.split()[13] + ' ' + \
-                    lines.split()[14] + ' ' + lines.split()[15]
-                ylower = lines.split()[16] + ' ' + \
-                    lines.split()[17] + ' ' + lines.split()[18]
-                zlower = lines.split()[19] + ' ' + \
-                    lines.split()[20] + ' ' + lines.split()[21]
-                u_mult = lines.split()[22]
-                l_mult = lines.split()[23]
-                xsh = lines.split()[24]
-                zsh = lines.split()[25]
-                # print xlower+' '+ylower+' '+zlower
-                bicrystals.append([angle, angle_phi,
-                                   xupper, yupper, zupper,
-                                   xlower, ylower, zlower,
-                                   u_mult, l_mult, xsh, zsh])
-        f.close()
-        return bicrystals

@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-02 15:37:50
+# @Last Modified time: 2017-12-03 11:13:38
 
 import numpy as np
 import os
@@ -62,33 +62,3 @@ class md_gb_indx(object):
         nmat = (matx * base.transpose()).transpose()
         return nmat
 
-    def loop_thickness(self, opt='prep'):
-        for i in range(30, 100, 10):
-            thk = (i, i + 10)
-            mdir = 'thk_{:4.3f}'.format(thk[0])
-            if opt in ['prep']:
-                self.mymkdir(mdir)
-                self.build_hcp_gb(15, thk, (0.0, 0.0, 0.0))
-                os.system('mv in.gb {}'.format(mdir))
-                self.mymkdir('{}/out'.format(mdir))
-
-            elif opt in ['run']:
-                os.chdir(mdir)
-                os.system('mpirun -n 4 lmp_mpi -i in.gb')
-                os.chdir(os.pardir)
-
-    def loop_dispx_hcp(self, opt='prep'):
-        for i in range(20):
-            dispx = 0.05 * i
-            mdir = 'dispx-{:4.3f}'.format(dispx)
-            if opt in ['prep']:
-                self.mymkdir(mdir)
-                self.build_hcp_gb(0., (30, 40), (dispx, 0.0, 0.0))
-                os.system('mv in.gb {}'.format(mdir))
-                self.mymkdir('{}/out'.format(mdir))
-
-            elif opt in ['run']:
-                os.chdir(mdir)
-                os.system('mpirun -n 4 lmp_mpi -i in.gb')
-                os.chdir(os.pardir)
-        return

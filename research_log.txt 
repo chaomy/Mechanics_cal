@@ -1,5 +1,14 @@
-1 Ry = 13.605698065894 eV
+Nov 26
 
+1. they converge to some configuration 
+2. fitting data matters ???
+3, cutoff !!!
+
+=> phi => forth neightbors 
+=> rho and meamf do third neighbors  
+=> change the code to look for different cutoff and compare it with lammps
+
+1 Ry = 13.605698065894 eV
 
 Nov 22
 1. finish it itensile !!!! 
