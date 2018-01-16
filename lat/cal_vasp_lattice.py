@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-24 10:51:25
+# @Last Modified time: 2017-12-16 20:54:36
 
 
 import numpy as np
@@ -15,18 +15,12 @@ from optparse import OptionParser
 import os
 import ase.io
 import ase
-
-
-try:
-    import gn_config
-    import get_data
-    import gn_kpoints
-    import gn_incar
-    import gn_pbs
-    import md_pot_data
-
-except ImportError:
-    print "error in importing"
+import gn_config
+import get_data
+import gn_kpoints
+import gn_incar
+import gn_pbs
+import md_pot_data
 
 
 class cal_lattice(gn_config.bcc,

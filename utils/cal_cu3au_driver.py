@@ -1,19 +1,11 @@
 #!/usr/bin/env python
 # encoding: utf-8
+# -*- coding: utf-8 -*-
+# @Author: chaomy
+# @Date:   2018-01-15 23:28:43
+# @Last Modified by:   chaomy
+# @Last Modified time: 2018-01-15 23:28:54
 
-###################################################################
-#
-# File Name : cal_cu3au_driver.py
-#
-###################################################################
-#
-# Purpose :
-#
-# Creation Date :
-# Last Modified :
-# Created By    : Chaoming Yang
-#
-###################################################################
 
 try:
     import os

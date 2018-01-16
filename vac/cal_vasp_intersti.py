@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-24 11:29:54
+# @Last Modified time: 2017-12-05 13:05:44
 
 
 import os
@@ -12,17 +12,12 @@ import numpy as np
 from md_pot_data import va_pot
 import ase
 from optparse import OptionParser
-
-try:
-    import gn_config
-    import get_data
-    import gn_incar
-    import gn_kpoints
-    import gn_pbs
-    import Intro_vasp
-
-except ImportError:
-    print("error during import")
+import gn_config
+import get_data
+import gn_incar
+import gn_kpoints
+import gn_pbs
+import Intro_vasp
 
 
 class vasp_inters(gn_config.bcc,

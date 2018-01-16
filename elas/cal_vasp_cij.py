@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-21 18:42:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-08 16:18:15
+# @Last Modified time: 2017-12-18 14:52:59
 
 
 import glob
@@ -64,7 +64,6 @@ class cal_cij(gn_config.bcc,
     def fit_para(self, delta_list, energy_list):
         xdata = delta_list
         ydata = energy_list - self.energy0
-
         def residuals(p):
             a, c = p
             return ydata - (a * (0.5 * xdata**2) + c)
