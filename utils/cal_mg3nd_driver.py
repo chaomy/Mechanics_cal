@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2018-01-15 23:30:10
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-01-16 18:06:53
+# @Last Modified time: 2018-01-16 18:12:02
 
 import os
 import glob
@@ -32,11 +32,14 @@ class cal_mg3nd_driver(gn_pbs.gn_pbs,
         for i in range(21):
             fname = "poscar.{:03d}".format(i)
             mdir = "dir_{:03d}".format(i)
-            os.system("cp INCAR {}".format(mdir))
-            os.system("cp KPOINTS {}".format(mdir))
-            os.system("cp POTCAR {}".format(mdir))
-            os.system("cp {}/{} {}/POSCAR".format(mdir, fname, mdir))
-            # self.mymkdir(mdir)
+            # os.system("cp INCAR {}".format(mdir))
+            # os.system("cp KPOINTS {}".format(mdir))
+            # os.system("cp POTCAR {}".format(mdir))
+            # os.system("cp {}/{} {}/POSCAR".format(mdir, fname, mdir))
+            # # self.mymkdir(mdir)
+            os.chdir(mdir)
+            os.system("qsub va.pbs")
+            os.chdir(os.pardir)
             # self.set_pbs("{:03d}".format(i))
             # os.system("mv {} {}".format(fname, mdir))
             # os.system("mv va.pbs {}".format(mdir))
