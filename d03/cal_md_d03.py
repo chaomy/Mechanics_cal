@@ -202,7 +202,8 @@ if __name__ == '__main__':
     dispatcher = {'build': drv.buildd03,
                   'gsf': drv.cal_stacking,
                   'clc': drv.clc_data,
-                  'plt': drv.clc_plt}
+                  'plt': drv.clc_plt,
+                  'lat': drv.clc_lat}
 
     if options.fargs is not None:
         dispatcher[options.mtype.lower()](options.fargs)
