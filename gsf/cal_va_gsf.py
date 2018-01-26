@@ -4,7 +4,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-20 00:30:00
+# @Last Modified time: 2018-01-26 11:09:24
 
 
 import os
@@ -45,14 +45,12 @@ class cal_va_gsf(object):
     def add_selective_dynamics(self, num, tag="F   F   T"):
         raw = self.mreadlines("POSCAR")
         rawNew = []
-
         for i in range(7, 7 + num):
             rawNew.append("%s  %s  %s  %s\n"
                           % (raw[i].split()[0],
                              raw[i].split()[1],
                               raw[i].split()[2],
                               tag))
-
         with open("POSCARnew", 'w') as fid:
             for i in range(6):
                 fid.write(raw[i])

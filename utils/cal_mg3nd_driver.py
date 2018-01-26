@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2018-01-15 23:30:10
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-01-16 18:12:02
+# @Last Modified time: 2018-01-16 18:12:56
 
 import os
 import glob
@@ -22,7 +22,7 @@ class cal_mg3nd_driver(gn_pbs.gn_pbs,
     def set_pbs(self, dirname, opt='va'):
         self.set_nnodes(1)
         self.set_ppn(12)
-        self.set_job_title("%s".format(dirname))
+        self.set_job_title("{}".format(dirname))
         self.set_wall_time(2)
         self.set_main_job("""mpirun vasp""")
         self.write_pbs(od=True)

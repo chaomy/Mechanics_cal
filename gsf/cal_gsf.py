@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-13 03:10:37
+# @Last Modified time: 2018-01-25 20:47:18
 
 
 import gn_lmp_infile
@@ -32,6 +32,8 @@ import ase.lattice.orthorhombic as otho
 import ase.lattice.cubic as cubic
 
 # x [sqrt(2) a ; y = a; z = sqrt(2) a]
+
+
 class othoBccp110Factory(otho.SimpleOrthorhombicFactory):
     bravais_basis = [[0.0, 0.0, 0.0],
                      [0.5, 0.5, 0.0],
@@ -57,7 +59,7 @@ class cal_gsf(gn_config.bcc,
               cal_va_gsf.cal_va_gsf):
 
     def __init__(self,
-                 pot=md_pot_data.qe_pot.vca_W75Ta25, 
+                 pot=md_pot_data.qe_pot.vca_W75Ta25,
                  mgsf='x111z110'):
         self.pot = pot
         self.mgsf = mgsf
@@ -92,7 +94,7 @@ class cal_gsf(gn_config.bcc,
                             symbol=self.pot['element'])
         print atoms
         for i in range(12):
-          atoms.pop() 
+            atoms.pop()
         ase.io.write('poscar', images=atoms, format='vasp')
         return atoms
 
