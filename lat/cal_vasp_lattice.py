@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-02-23 02:42:55
+# @Last Modified time: 2018-02-23 02:46:23
 
 
 import numpy as np
@@ -48,7 +48,6 @@ class cal_lattice(gn_config.bcc,
         InterPoints = np.linspace(lattice[0], lattice[-1], 101)
         f = interp1d(lattice, energy)
         Ynew = f(InterPoints)
-
         i = np.argmin(Ynew)
         print "min energy ", np.min(energy)
         print "num", np.argmin(energy), "lattice", InterPoints[i]
