@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-21 18:42:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-02-23 03:23:40
+# @Last Modified time: 2018-02-23 03:24:35
 
 
 import glob
@@ -201,7 +201,8 @@ if __name__ == "__main__":
 
     drv = cal_cij()
     dispatcher = {'prep': drv.loop_prepare_cij,
-                  'clc': drv.obtain_cij}
+                  'cal': drv.obtain_cij,
+                  'clc': collect_data_cij}
 
     if options.fargs is not None:
         dispatcher[options.mtype.lower()](options.fargs)
