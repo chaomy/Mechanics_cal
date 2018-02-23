@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-21 18:42:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-02-23 03:26:37
+# @Last Modified time: 2018-02-23 03:27:22
 
 
 import glob
@@ -34,7 +34,7 @@ class cal_cij(gn_config.bcc,
         gn_incar.gn_incar.__init__(self)
         output_data.output_data.__init__(self)
 
-        self.cij_unit_delta = 0.0005
+        self.unit_delta = 0.0005
         self.npts = 6
         self.volume = None
         self.energy0 = None
@@ -144,7 +144,7 @@ class cal_cij(gn_config.bcc,
         for mtype in self.cij_type_list:
             self.cij_type = mtype
             for j in range(-self.npts, self.npts):
-                delta = self.cij_unit_delta * j
+                delta = self.unit_delta * j
                 if j >= 0:
                     mdir = "dir-%s-p%03d" % (mtype, j)
                 else:
@@ -171,7 +171,7 @@ class cal_cij(gn_config.bcc,
             out_file_name = "data_%s.txt" % (mtype)
 
             for j in range(-self.npts, self.npts):
-                delta = self.cij_unit_delta * j
+                delta = self.unit_delta * j
                 if j >= 0:
                     mdir = "dir-%s-delta-%03d" % (mtype, j)
                 else:
