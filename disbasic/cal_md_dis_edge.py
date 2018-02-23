@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-08-07 20:35:25
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-17 21:08:58
+# @Last Modified time: 2018-02-20 19:28:26
 
 from optparse import OptionParser
 from numpy import array, max, min
@@ -39,7 +39,6 @@ class cal_dis_edge(gn_config.bcc,
         self.e2v = 35.2643896828  # x[111]
         self.rot = 109.471220
         # self.rot = self.b2e
-        return
 
     def rotate_cell(self, atoms, phi):
         pos = atoms.get_positions()
@@ -66,7 +65,6 @@ class cal_dis_edge(gn_config.bcc,
                 else:
                     atom.symbol = 'W'
         ase.io.write(filename='1096_symbol.aims', images=atoms, format='aims')
-        return
 
     def rotateto111(self, fname='1096_30x02y.aims'):
         # atoms = ase.io.read(fname, format='lammps-dump')
@@ -101,12 +99,10 @@ class cal_dis_edge(gn_config.bcc,
 
         ase.io.write('single_edge_30x02y.aims', images=atoms, format='aims')
         self.write_lmp_config_data(atoms)
-        return
 
     def cal_trans_ang(self):
         self.calang(array([1, 1, 0]), array([1, 1, 1]))
         self.calang(array([0, 0, 1]), array([-1, -1, 2]))
-        return
 
     def calang(self, a, b):
         x = dot(a, b) / (norm(a) * norm(b))

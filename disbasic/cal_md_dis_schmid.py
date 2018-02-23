@@ -1,19 +1,11 @@
 #!/usr/bin/env python
 # encoding: utf-8
+# -*- coding: utf-8 -*-
+# @Author: chaomy
+# @Date:   2018-02-06 14:17:35
+# @Last Modified by:   chaomy
+# @Last Modified time: 2018-02-06 14:17:56
 
-###################################################################
-#
-# File Name : cal_bcc_schmid.py
-#
-###################################################################
-#
-# Purpose : calculate schmid behavior
-#
-# Creation Date :
-# Last Modified :
-# Created By    : Chaoming Yang
-#
-###################################################################
 
 from optparse import OptionParser
 import ase
@@ -23,15 +15,9 @@ import os
 import numpy as np
 import glob
 import md_pot_data
-
-try:
-    import atomman as am
-    import atomman.lammps as lmp
-    import atomman.unitconvert as uc
-
-
-except ImportError:
-    print("error during import")
+import atomman as am
+import atomman.lammps as lmp
+import atomman.unitconvert as uc
 
 
 class cal_bcc_schmid(object):

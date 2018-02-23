@@ -4,7 +4,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-26 11:10:13
+# @Last Modified time: 2018-02-22 20:51:03
 
 
 import os
@@ -17,11 +17,9 @@ class subjobs(object):
     def __init__(self):
         self.diriter = None
         self.get_dirs()
-        return
 
-    def get_dirs(self): 
-        self.diriter = iter(glob.glob('dir[-_]*')) 
-        return
+    def get_dirs(self):
+        self.diriter = iter(glob.glob('dir[-_]*'))
 
     def loop_sub_jobs(self):
         while True:
@@ -31,17 +29,15 @@ class subjobs(object):
                 self.gonadsub(mdir)
             except StopIteration:
                 break
-        return
 
     def gonadsub(self, mdir):
         os.chdir(mdir)
         os.system("qsub va.pbs")
         os.chdir(os.pardir)
-        return
 
     def mpbs(self):
-        ml = glob.glob("va*.pbs") 
-        for ee in ml: 
+        ml = glob.glob("va*.pbs")
+        for ee in ml:
             os.system("qsub {}".format(ee))
 
     def loop_shear_cnt(self):
@@ -55,7 +51,6 @@ class subjobs(object):
                 os.chdir(os.pardir)
             except StopIteration:
                 break
-        return
 
 
 if __name__ == "__main__":

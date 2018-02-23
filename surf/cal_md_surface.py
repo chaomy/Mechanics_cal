@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-07 14:34:12
+# @Last Modified time: 2018-02-05 21:52:07
 
 
 from multiprocessing import Pool
@@ -28,7 +28,7 @@ class cal_md_surface(gn_config.bcc,
 
     def __init__(self, pot=None):
         if pot is None:
-            self.pot = md_pot_data.md_pot.Nb_eam
+            self.pot = md_pot_data.md_pot.Nb_meamc
         else:
             self.pot = pot
         get_data.get_data.__init__(self)
@@ -51,9 +51,8 @@ class cal_md_surface(gn_config.bcc,
             tag = 'x110z110'
         elif self._surface_type in ['111']:
             tag = 'x112z111'
-        self._surdir = gsf_data.gsfbase[tag]
         atoms = self.set_bcc_convention(
-            in_direction=self._surdir,
+            in_direction=gsf_data.gsfbase[tag],
             in_size=gsf_data.gsfsize[tag])
         for i in range(gsf_data.gsfpopn[tag]):
             atoms.pop()
@@ -66,9 +65,8 @@ class cal_md_surface(gn_config.bcc,
             tag = 'x110z110'
         elif self._surface_type in ['111']:
             tag = 'x112z111'
-        self._surdir = gsf_data.gsfbase[tag]
         atoms = self.set_bcc_convention(
-            in_direction=self._surdir,
+            in_direction=gsf_data.gsfbase[tag],
             in_size=gsf_data.bulksize[tag])
         return atoms
 
@@ -123,7 +121,6 @@ class cal_md_surface(gn_config.bcc,
         self.mymkdir(dir_surf)
         os.chdir(dir_surf)
         atoms = self.gn_surface_atoms()
-        os.system("cp  ../%s  ." % (self.pot['file']))
         self.write_lmp_config_data(atoms)
         os.system('cp  ../in.minimize  .')
         os.chdir(os.pardir)
@@ -134,7 +131,6 @@ class cal_md_surface(gn_config.bcc,
         self.mymkdir(dir_bulk)
         os.chdir(dir_bulk)
         atoms = self.gn_bulk_atoms()
-        os.system("cp  ../%s  ." % (self.pot['file']))
         os.system('cp  ../in.minimize  .')
         self.write_lmp_config_data(atoms)
         os.chdir(os.pardir)

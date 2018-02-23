@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-24 11:27:47
+# @Last Modified time: 2018-02-14 23:41:55
 
 
 import numpy as np
@@ -30,10 +30,8 @@ class vasp_change_box(cal_intro_iso_dis.cal_intro_iso_dis,
                       cal_cut_cell.cal_cut_cell):
 
     def __init__(self, pot=None):
-        print pot
         self.pot = pot
         self.set_intro_coeff()
-        return
 
     def set_intro_coeff(self):
         self.pi = 3.141592653589793
@@ -41,9 +39,7 @@ class vasp_change_box(cal_intro_iso_dis.cal_intro_iso_dis,
             self.burger = np.sqrt(3.) / 2. * self.pot['lattice']
             self.screw_coeff = self.burger / (2. * self.pi)
             self.Edge_coeff = self.burger / (2. * self.pi)
-            print self.screw_coeff
             self.P = 0.33
-        return
 
     def intro_edge_nuclei(self, atoms, center=None,
                           sign=1, orient=None,

@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-01-25 19:31:47
+# @Last Modified time: 2018-02-19 23:59:55
 
 
 import os
@@ -26,15 +26,13 @@ class cal_md_gsf(output_data.output_data):
         output_data.output_data.__init__(self)
         self.set_relax_type()
         self.config_file = "lmp_init.txt"
-        return
+        self.infile = "in.md_gsf"
 
     def set_relax_type(self, relaxtag='relaxed'):
         self.relaxtag = relaxtag
-        return
 
     def set_mgsf(self, mgsf):
         self.mgsf = mgsf
-        return
 
     def prepare_md_inputs(self, config_file=None,
                           in_potential=None):
@@ -46,19 +44,16 @@ class cal_md_gsf(output_data.output_data):
                              element=self.pot['element'],
                              tag='relaxed')
         os.system("cp  ../{}  .".format(self.pot['file']))
-        return
 
     def run_lmp_gsf(self, loc_dir):
         os.chdir(loc_dir)
-        os.system("lmp_mpi -in in.md_gsf")
+        os.system("lmp_mpi -in {}".format(self.infile))
         os.chdir(os.pardir)
-        return
 
     def loop_md_gsf(self):
-        dir_list = glob.glob("dir-*")
-        for mdir in dir_list:
-            self.run_lmp_gsf(mdir)
-        return
+        for i in range(0, self.sample_gsf_num):
+            dir_name = 'dir-x-%03d-%s' % (i, self.mgsf)
+            self.run_lmp_gsf(dir_name)
 
     def multi_thread_gsf(self):
         dir_list = glob.glob("dir-*")
@@ -66,34 +61,22 @@ class cal_md_gsf(output_data.output_data):
         pool = Pool(processes=num_threads)
         pool.map(unwrap_self_run_lammps,
                  zip([self] * num_threads, dir_list))
-        return
 
     def collect_gsf_energy(self):
         disp_list, energylist, area_list = [], [], []
+        data = np.ndarray([self.sample_gsf_num, 5])
         for i in range(0, self.sample_gsf_num):
             dir_name = 'dir-x-%03d-%s' % (i, self.mgsf)
             if os.path.isdir(dir_name):
                 os.chdir(dir_name)
-
-                disp_list.append(i * self.disp_delta)
-                # energylist.append(self.md_get_final_energy())
-                energylist.append(np.loadtxt('out.txt'))
                 super_cell = self.md_get_cell()
-                area_list.append(self.cal_poscar_xy_area(super_cell))
+                data[i, 0] = i
+                data[i, 1] = i * self.disp_delta
+                data[i, 2] = self.cal_poscar_xy_area(super_cell)
+                data[i, 3] = np.loadtxt('out.txt')
                 os.chdir(os.pardir)
-
-        energylist = np.array(energylist)
-        energylist = energylist / np.average(np.array(area_list))
-        print energylist
-        energylist = energylist - np.min(energylist)
-        disp_list = np.array(disp_list)
-        self.output_disp_energy(disp_list,
-                                energylist,
-                                "gsf_{}_{}.txt".format(self.pot['pair_type'],
-                                                       self.mgsf))
-        print(disp_list, energylist)
-        self.plot_md_gsf(disp_list, energylist)
-        return (disp_list, energylist)
+        data[:, 4] = (data[:, 3] - data[0, 3]) / data[:, 2]
+        np.savetxt('gsf.dat', data, fmt="%.6f")
 
     def plot_md_gsf(self, delta=None,
                     energy=None, filename='md_gsf.png'):
@@ -102,7 +85,6 @@ class cal_md_gsf(output_data.output_data):
         self.ax.plot(delta, energy,
                      label="$displacement-energy$", **self.pltkwargs)
         self.fig.savefig(filename, **self.figsave)
-        return
 
     def plot_multi_gsf_curv(self, potlist,
                             typelist, fname='gsf_compare.png'):
@@ -135,7 +117,6 @@ class cal_md_gsf(output_data.output_data):
         self.add_y_labels(ylabiter, *axlist)
         self.add_legends(*axlist)
         self.fig.savefig(fname, **self.figsave)
-        return
 
     # trans dft to md
     def trans_data_format(self):
@@ -149,7 +130,6 @@ class cal_md_gsf(output_data.output_data):
         for i in range(len(disp)):
             fid.write("{:04f} {:04f} \n".format(disp[i], energy[i]))
         fid.close()
-        return
 
     def md_single_dir_gsf(self):
         atoms = self.gn_gsf_atoms()
@@ -171,22 +151,19 @@ class cal_md_gsf(output_data.output_data):
             local_atoms.translate(disp_matrix)
 
             self.write_lmp_config_data(local_atoms)
-
-            self.prepare_md_inputs()
+            # self.prepare_md_inputs()
+            os.system("cp ../{} .".format(self.infile))
             os.system("cp lmp_init.txt ../lmp_init_{0:03d}.txt".format(i))
             os.chdir(os.pardir)
-        return
 
     def drv_cmp(self):
         potlist = ['adp', 'pbe']
         typelist = ['111_211', '111_110']
         drv.plot_multi_gsf_curv(potlist, typelist)
-        return
 
     def drv_twopath(self):
         typelist = ['111_211', '111_110']
         drv.plot_multi_type_gsf_curv(typelist)
-        return
 
     def drv_relaxed(self):
         potlist = ['adp', 'pbe']
@@ -198,7 +175,6 @@ class cal_md_gsf(output_data.output_data):
             drv.multi_thread_gsf()
             drv.collect_gsf_energy()
         drv.plot_multi_gsf_curv(potlist, typelist, 'gsf_relaxed.png')
-        return
 
     def drv_unrelaxed(self):
         potlist = ['adp', 'pbe']
@@ -211,7 +187,6 @@ class cal_md_gsf(output_data.output_data):
             drv.collect_gsf_energy()
         #  drv.plot_multi_type_gsf_curv(typelist)
         drv.plot_multi_gsf_curv(potlist, typelist, 'gsf_unrelaxed.png')
-        return
 
 
 if __name__ == '__main__':

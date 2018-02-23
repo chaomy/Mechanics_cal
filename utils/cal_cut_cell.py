@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-21 15:43:24
+# @Last Modified time: 2018-02-21 11:51:17
 
 import numpy as np
 
@@ -23,6 +23,31 @@ class cal_cut_cell(object):
                 atom.symbol = 'Mo'
             if (atom.position[gp_n] < y_below):
                 atom.symbol = 'Nb'
+        return atoms
+
+    def make_cubic(self, opt, atoms, *args):
+        if len(args) == 2:
+            lob = args[0]
+            hib = args[1]
+        elif len(args) == 1:
+            arr = args[0]
+            lob = arr[:3]
+            hib = arr[3:]
+        else:
+            cell = atoms.get_cell()
+            lob = np.array([0.5 * cell[0, 0], 0.0, 0.25 * cell[2, 2]])
+            hib = np.array([0.75 * cell[0, 0],  cell[1, 1], 0.75 * cell[2, 2]])
+
+        index = []
+        if opt in ["in"]:
+            for i in range(len(atoms)):
+                if all(((atoms[i].position - lob) * (atoms[i].position - hib)) <= 0.0):
+                    index.append(atoms[i].index)
+        else:
+            for i in range(len(atoms)):
+                if any(((atoms[i].position - lob) * (atoms[i].position - hib)) > 0.0):
+                    index.append(atoms[i].index)
+        del atoms[index]
         return atoms
 
     def make_sphere(self, atoms):
@@ -103,8 +128,10 @@ class cal_cut_cell(object):
         # x_crit =  np.sqrt(3.)/2.5 * lattice constant
         # #####################################################
         #  x_crit = np.sqrt(3.) / 2.5 * lattice_constant
-        ratio = np.sqrt(3) / 2. * 1. / 3.
-        x_crit = ratio * self.pot['lattice']
+        # ratio = np.sqrt(3) / 2. * 1. / 3.    # for bcc Fe
+        # x_crit = ratio * self.pot['lattice']
+        x_crit = np.sqrt(3) / 6 * 3.2
+
         for i in range(len(atoms)):
             atom = atoms[i]
             if (atom.position[bdir] < x_crit):

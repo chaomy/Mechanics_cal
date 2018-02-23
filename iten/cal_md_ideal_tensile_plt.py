@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-12 13:56:50
+# @Last Modified time: 2018-02-18 14:25:43
 
 
 from optparse import OptionParser
@@ -17,7 +17,6 @@ class cal_md_ideal_tensile_plt(plt_drv.plt_drv):
 
     def __init__(self):
         plt_drv.plt_drv.__init__(self)
-        return
 
     def plt_strain_vs_energy(self, infile='ishear.txt'):
         raw = np.loadtxt(infile)
@@ -27,7 +26,6 @@ class cal_md_ideal_tensile_plt(plt_drv.plt_drv):
         self.ax.plot(raw[:, 0], (raw[:, 1] - raw[0, 1]),
                      label='engy', **next(self.keysiter))
         self.fig.savefig("fig-engy.png", **self.figsave)
-        return
 
     def plt_cell(self, fname='iten.txt'):
         raw = np.loadtxt(fname)
@@ -46,7 +44,6 @@ class cal_md_ideal_tensile_plt(plt_drv.plt_drv):
         self.set_tick_size(self.ax)
         self.fig.savefig('fig-cell-{}'.format(fname.split('.')[0]),
                          **self.figsave)
-        return
 
     def plt_energy_stress(self, fname='iten.txt'):
         self.set_211plt()
@@ -55,15 +52,50 @@ class cal_md_ideal_tensile_plt(plt_drv.plt_drv):
         ylabeliter = cycle(['dE', 'Sxx', 'Syy', 'Szz'])
         self.ax1.plot(raw[:, 0], (raw[:, 1] - raw[0, 1]),
                       label='engy', **next(self.keysiter))
-        self.ax2.plot(raw[:, 0], -raw[:, 4],
+        self.ax2.plot(raw[:, 0], raw[:, 4],
                       label='sxx', **next(self.keysiter))
-        self.add_legends(*self.axlist)
-        self.add_y_labels(ylabeliter, *self.axlist)
+        self.add_legends(*self.axls)
+        self.add_y_labels(ylabeliter, *self.axls)
         self.add_x_labels(cycle([r'$\varepsilon_{xx}$']), self.ax2)
-        self.set_tick_size(*self.axlist)
+        self.set_tick_size(*self.axls)
         self.fig.savefig('fig-engy-{}'.format(fname.split('.')[0]),
                          **self.figsave)
-        return
+
+    def plt_energy_stress_two(self, fname='iten.txt'):
+        self.set_111plt()
+        raw = np.loadtxt("iten_tp.txt")
+        raw = raw[raw[:, 0].argsort()]
+        ylabeliter = cycle(['dE'])
+        self.ax.plot(raw[:, 0], (raw[:, 1] - raw[0, 1]),
+                     label='tp', **next(self.keysiter))
+        raw = np.loadtxt("iten_op.txt")
+        raw = raw[raw[:, 0].argsort()]
+        self.ax.plot(raw[:, 0], (raw[:, 1] - raw[0, 1]) / 2.,
+                     label='op', **next(self.keysiter))
+        self.add_legends(*self.axls)
+        self.add_y_labels(ylabeliter, *self.axls)
+        self.add_x_labels(cycle([r'$\varepsilon_{xx}$']), self.ax)
+        self.set_tick_size(*self.axls)
+        self.fig.savefig('fig-engy-{}'.format(fname.split('.')[0]),
+                         **self.figsave)
+
+        ylabeliter = cycle(['Sxx'])
+        self.set_111plt()
+        raw = np.loadtxt("iten_tp.txt")
+        raw = raw[raw[:, 0].argsort()]
+        self.ax.plot(raw[:, 0], raw[:, 4],
+                     label='tp', **next(self.keysiter))
+
+        raw = np.loadtxt("iten_op.txt")
+        raw = raw[raw[:, 0].argsort()]
+        self.ax.plot(raw[:, 0], raw[:, 4],
+                     label='op', **next(self.keysiter))
+        self.add_legends(*self.axls)
+        self.add_y_labels(ylabeliter, *self.axls)
+        self.add_x_labels(cycle([r'$\varepsilon_{xx}$']), self.ax)
+        self.set_tick_size(*self.axls)
+        self.fig.savefig('fig-stss-{}'.format(fname.split('.')[0]),
+                         **self.figsave)
 
     def plt_energy_stress_cmp(self):
         potlist = ['adp', 'pbe']
@@ -84,7 +116,6 @@ class cal_md_ideal_tensile_plt(plt_drv.plt_drv):
             self.ax2.legend(**self.legendarg)
         plt.xlabel('strain', {'fontsize': self.myfontsize})
         self.fig.savefig("stress_cmp.png", **self.figsave)
-        return
 
     def plt_energy_stress_cell(self,
                                fname='ishear.txt'):
@@ -104,12 +135,11 @@ class cal_md_ideal_tensile_plt(plt_drv.plt_drv):
                       label='syy', **next(self.keysiter))
         self.ax3.plot(raw[:, 0], -(szz),
                       label='szz', **next(self.keysiter))
-        self.add_legends(*self.axlist)
-        self.add_y_labels(ylabeliter, *self.axlist)
-        self.set_tick_size(*self.axlist)
+        self.add_legends(*self.axls)
+        self.add_y_labels(ylabeliter, *self.axls)
+        self.set_tick_size(*self.axls)
         self.fig.savefig('fig-engy-{}'.format(fname.split('.')[0]),
                          **self.figsave)
-        return
 
     def adjust_data_format(self, fname='iten.txt'):
         raw = np.loadtxt(fname)
@@ -117,7 +147,6 @@ class cal_md_ideal_tensile_plt(plt_drv.plt_drv):
         raw[:, 1] = raw[:, 1] / 4.
         raw[:, 4] = 0.1 * raw[:, 4]
         np.savetxt('iten.save.txt', raw)
-        return
 
     def cmp_plt(self):
         self.set_211plt()
@@ -135,12 +164,11 @@ class cal_md_ideal_tensile_plt(plt_drv.plt_drv):
                       label='op', **next(self.keysiter))
         self.ax2.plot(raw[:, 0], -raw[:, 4],
                       label='op', **next(self.keysiter))
-        self.add_legends(*self.axlist)
-        self.add_y_labels(ylabeliter, *self.axlist)
+        self.add_legends(*self.axls)
+        self.add_y_labels(ylabeliter, *self.axls)
         self.add_x_labels(cycle([r'$\varepsilon_{xx}$']), self.ax2)
-        self.set_tick_size(*self.axlist)
+        self.set_tick_size(*self.axls)
         self.fig.savefig('fig-iten-cmp.png', **self.figsave)
-        return
 
     def cmp_pot_plt(self):
         self.set_211plt()
@@ -156,12 +184,11 @@ class cal_md_ideal_tensile_plt(plt_drv.plt_drv):
                       label='md', **next(self.keysiter))
         self.ax2.plot(raw[:, 0], -raw[:, 4],
                       label='md', **next(self.keysiter))
-        self.add_legends(*self.axlist)
-        self.add_y_labels(ylabeliter, *self.axlist)
+        self.add_legends(*self.axls)
+        self.add_y_labels(ylabeliter, *self.axls)
         self.add_x_labels(cycle([r'$\varepsilon_{xx}$']), self.ax2)
-        self.set_tick_size(*self.axlist)
+        self.set_tick_size(*self.axls)
         self.fig.savefig('fig-iten-cmp.png', **self.figsave)
-        return
 
 
 if __name__ == '__main__':
@@ -173,7 +200,9 @@ if __name__ == '__main__':
                       type='float', dest="fargs")
     (options, args) = parser.parse_args()
     drv = cal_md_ideal_tensile_plt()
-    dispatcher = {'pltengy': drv.plt_energy_stress,
+    dispatcher = {'plt': drv.plt_energy_stress,
+                  'plt2': drv.plt_energy_stress_two,
+                  'cell': drv.plt_cell,
                   'adj': drv.adjust_data_format,
                   'cmp': drv.cmp_plt}
     if options.fargs is not None:

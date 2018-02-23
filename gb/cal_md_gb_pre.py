@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-12-03 11:10:38
+# @Last Modified time: 2018-02-20 22:50:43
 
 import shutil
 import re
@@ -50,7 +50,6 @@ class md_gb_pre(object):
                                    u_mult, l_mult, xsh, zsh])
         f.close()
         return bicrystals
-
 
     def build_tiltgb_bcc(self, bicrystal):
         # initialize bicrystal: angle and misorientations
@@ -116,4 +115,3 @@ class md_gb_pre(object):
                     print "Hmmmmm \n"
                 else:
                     print filename
-            return

@@ -4,12 +4,13 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-12-03 11:13:38
+# @Last Modified time: 2018-02-21 09:44:41
 
 import numpy as np
 import os
 from math import cos, sin
 from math import sqrt
+
 
 class md_gb_indx(object):
 
@@ -48,9 +49,46 @@ class md_gb_indx(object):
             # v1indx = np.array([2 * xidx, yidx, 0])
             # v2indx = np.round(v2)
         print cnt
-        return
 
-    def hcp_til_mtx(self, angdeg=15.):
+    def hcp_til_mtx_z1120(self, angdeg=15.):
+        crat = self.pot['chcp'] / self.pot['ahcp']
+        theta = np.deg2rad(angdeg)
+        base = np.mat([[sqrt(3.), 0.0, 0.0],
+                       [0.0, crat, 0.0],
+                       [0.0, 0.0, 1.0]])
+        matx = np.mat([[cos(theta), sin(theta), 0.0],
+                       [-sin(theta), cos(theta), 0.0],
+                       [0.0, 0.0, 1.0]])
+        nmat = (matx * base.transpose()).transpose()
+        # basis z || 1100
+        self.bs = """basis   0.0   0.0   0.0    &
+basis   0.5    0.0   0.5    &
+basis   ${b1}  0.5   0.0    &
+basis   ${b2}  0.5   0.5 
+
+"""
+        return nmat
+
+    def hcp_til_mtx_z1100(self, angdeg=15.):
+        crat = self.pot['chcp'] / self.pot['ahcp']
+        theta = np.deg2rad(angdeg)
+        base = np.mat([[1.0, 0.0, 0.0],
+                       [0.0, crat, 0.0],
+                       [0.0, 0.0, sqrt(3.)]])
+        matx = np.mat([[cos(theta), sin(theta), 0.0],
+                       [-sin(theta), cos(theta), 0.0],
+                       [0.0, 0.0, 1.0]])
+        nmat = (matx * base.transpose()).transpose()
+        # basis z || 1100
+        self.bs = """basis   0.0   0.0   0.0    &
+basis   0.5   0.0   0.5    &
+basis   0.0   0.5   ${b1}  &
+basis   0.5   0.5   ${b2}
+
+"""
+        return nmat
+
+    def hcp_til_mtx_z0001(self, angdeg=15.):
         crat = self.pot['chcp'] / self.pot['ahcp']
         theta = np.deg2rad(angdeg)
         base = np.mat([[1.0, 0.0, 0.0],
@@ -60,5 +98,11 @@ class md_gb_indx(object):
                        [-sin(theta), cos(theta), 0.0],
                        [0., 0., 1.]])
         nmat = (matx * base.transpose()).transpose()
-        return nmat
+        # basis z || 0001
+        self.bs = """basis   0.0   0.0   0.0    &
+basis   0.5   0.5   0.0    &
+basis   0.0   ${b1} 0.5    &
+basis   0.5   ${b2} 0.5
 
+"""
+        return nmat

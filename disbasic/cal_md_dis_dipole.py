@@ -3,10 +3,11 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-09 20:17:58
+# @Last Modified time: 2018-02-14 22:42:36
 
 from numpy import cos, sin, sqrt, mat
 from collections import OrderedDict
+import gn_config
 import ase
 import ase.io
 import numpy as np
@@ -15,6 +16,7 @@ import tool_elastic_constants
 from utils import stroh_solve
 import ase.lattice
 import cal_md_dislocation
+import atomman as am
 from crack import cal_md_crack_ini
 
 matconsts = OrderedDict([('Al1', {'lat': 4.05,
@@ -39,14 +41,12 @@ matconsts = OrderedDict([('Al1', {'lat': 4.05,
                                      'c44': 56.7})])
 
 
-class cal_dis_dipole(object):
+class cal_dis_dipole(gn_config.bcc):
 
-    def __init__(self, pot=None):
-        if pot is None:
-            pot = md_pot_data.qe_pot.vca_W75Re25
+    def __init__(self, pot=md_pot_data.md_pot.mg_kim):
         self.pot = pot
         self.mddis_drv = cal_md_dislocation.md_dislocation(self.pot)
-        return
+        gn_config.bcc.__init__(self, self.pot)
 
     def set_dipole_box(self, sizen=1):
         n = 7 * sizen
@@ -111,12 +111,10 @@ class cal_dis_dipole(object):
         for key in matconsts.keys():
             print key
             self.get_cutin_result(matconsts[key])
-        return
 
     def cal_crack(self):
         drv = cal_md_crack_ini.md_crack_ini()
         drv.cal_crack_anglecoeff()
-        return
 
     def get_cutin_result(self, param):
         c = tool_elastic_constants.elastic_constants(
@@ -170,24 +168,39 @@ class cal_dis_dipole(object):
         # Gamma = np.real(np.complex(0, 1) * A * np.linalg.inv(B))
 
     def print_dis_constants(self):
-        c = tool_elastic_constants.elastic_constants(
-            C11=self.pot['c11'],
-            C12=self.pot['c12'],
-            C44=self.pot['c44'])
-        # A
-        axes = np.array([[1, -1, 1],
-                         [2, 1, -1],
-                         [0, 1, 1]])
+        struct = "hex"
+        if struct in ["cubic"]:
+            # Cubic
+            c = tool_elastic_constants.elastic_constants(
+                C11=self.pot['c11'],
+                C12=self.pot['c12'],
+                C44=self.pot['c44'])
+            axes = np.array([[1, -1, 1],
+                             [2, 1, -1],
+                             [0, 1, 1]])
+            burgers = self.pot['lattice'] / 2 * np.array([1., 1., 1.])
+            stroh = stroh_solve.Stroh(c, burgers, axes=axes)
+            print stroh.A[0]
 
-        burgers = self.pot['lattice'] / 2 * np.array([1., 1., 1.])
+        # hexagonal
+        if struct in ["hex"]:
+            print self.pot["lattice"]
+            axes = np.array([[1, 0, 0],
+                             [0, 1, 0],
+                             [0, 0, 1]])
+
+        burgers = self.pot['lattice'] / 2 * np.array([1., 1, 0])
+        c = am.ElasticConstants()
+        c.hexagonal(C11=326.08, C33=357.50, C12=129.56, C13=119.48, C44=92.54)
         stroh = stroh_solve.Stroh(c, burgers, axes=axes)
-        #
-        print stroh.A[0]
+        print stroh.A
+        print stroh.L
+
+        # print(c)
         # print stroh.L
         # print "K tensor", stroh.K_tensor
         # print "K (biKijbj)", stroh.K_coeff, "eV/A"
         # print "pre-ln alpha = biKijbj/4pi", stroh.preln, "ev/A"
-        return
 
     def bcc_screw_dipole_triangular_atoms(self, atoms=None, fname='qe.in'):
         c = tool_elastic_constants.elastic_constants(
@@ -250,7 +263,7 @@ class cal_dis_dipole(object):
         # shiftc2 = \
         # np.ones(np.shape(pos)) * np.array([c2[0, 0], c2[0, 1], 0.0])
 
-        opt = 'pull'
+        opt = 'not pull'
         if opt in ['split']:
             c1 = self.pot['posleft'] + \
                 np.array([0.0, 0.21 * self.pot['yunit']])
@@ -258,7 +271,7 @@ class cal_dis_dipole(object):
                 np.array([0.0, -0.21 * self.pot['yunit']])
         else:
             c1 = [(sx) * unitx, (sy + 1. / 3.) * unity]
-            c2 = [(sx + ix) * unitx, (sy + 2. / 3.) * unity] 
+            c2 = [(sx + ix) * unitx, (sy + 2. / 3.) * unity]
 
         shiftc1 = np.ones(np.shape(pos)) * np.array([c1[0], c1[1], 0.0])
         shiftc2 = np.ones(np.shape(pos)) * np.array([c2[0], c2[1], 0.0])
@@ -272,16 +285,17 @@ class cal_dis_dipole(object):
                 dis = np.linalg.norm(ps[:2] - c1)
                 if (dis < radius):
                     print dis
-                    dp[2] += 1./6. * unitz 
-                    # add shirt  
+                    dp[2] += 1. / 6. * unitz
+                    # add shirt
             for ps, dp in zip(pos, disp2):
                 dis = np.linalg.norm(ps[:2] - c2)
                 if (dis < radius):
-                    print dis 
-                    dp[2] -= 1./6. * unitz
-
+                    print dis
+                    dp[2] -= 1. / 6. * unitz
 
         atoms.set_positions(pos + np.real(disp1) - np.real(disp2))
+        self.write_lmp_config_data(atoms, 'init.txt')
+        ase.io.write("perf_poscar", atoms_perf, format='vasp')
         # ase.io.write('POSCAR', atoms, format='vasp')
         return (atoms, atoms_perf)
 
@@ -290,7 +304,7 @@ if __name__ == '__main__':
     drv = cal_dis_dipole()
     # drv.bcc_screw_dipole_configs_alongz()
     # drv.bcc_screw_dipole_triangular_atoms()
-    # drv.print_dis_constants()
+    drv.print_dis_constants()
     # drv.get_cutin_result()
     # drv.loop_table()
-    drv.cal_crack()
+    # drv.cal_crack()

@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-10-01 13:34:29
+# @Last Modified time: 2018-02-18 14:14:57
 
 
 import os
@@ -27,13 +27,11 @@ class cal_bcc_ideal_tensile_op(get_data.get_data,
                                gn_config.bcc):
 
     def __init__(self):
-        # self.pot = self.load_data('../pot.dat')
-        self.pot = md_pot_data.md_pot.Nb_adp
+        self.pot = md_pot_data.md_pot.Nb_meamc
         gn_pbs.gn_pbs.__init__(self)
         plt_drv.plt_drv.__init__(self)
         get_data.get_data.__init__(self)
         gn_config.bcc.__init__(self, self.pot)
-
         self.alat = self.pot['lattice']
         self.npts = 13
         self.range = (0, 13)
@@ -45,7 +43,6 @@ class cal_bcc_ideal_tensile_op(get_data.get_data,
         self.configdrv = gn_config.bcc(self.pot)
         self.root = os.getcwd()
         self.stress = None
-        return
 
     def loop_collect_vasp(self):
         npts = 30
@@ -64,7 +61,6 @@ class cal_bcc_ideal_tensile_op(get_data.get_data,
                 cell[0, 0] - 1.0, engy, cell[1, 1] / sqrt2, cell[2, 2] / sqrt2
             data[i, 4:] = stress.transpose()
         np.savetxt("iten.txt", data)
-        return
 
     def load_input_params(self):
         if os.path.isfile('restart.txt'):
@@ -94,8 +90,7 @@ class cal_bcc_ideal_tensile_op(get_data.get_data,
             data[i][0] = delta
             data[i][1] = res.fun
             data[i][4:] = self.stress
-        np.savetxt("iten.txt", data)
-        return
+        np.savetxt("iten.txt", data, fmt='%6.5f')
 
     def runvasp(self, x, delta):
         basis = self.basis
@@ -195,7 +190,6 @@ class cal_bcc_ideal_tensile_op(get_data.get_data,
                 os.system('cp $POTDIR/{}  {}'.format(self.pot['file'],
                                                      dirname))
             self.set_pbs(dirname, raw[i][0])
-        return
 
     def set_pbs(self, dirname, delta):
         self.set_nnodes(1)
@@ -207,7 +201,6 @@ class cal_bcc_ideal_tensile_op(get_data.get_data,
                           """.format(opt))
         self.write_pbs(od=True)
         os.system("mv va.pbs %s" % (dirname))
-        return
 
     def trans(self):
         for i in range(30):
@@ -217,7 +210,6 @@ class cal_bcc_ideal_tensile_op(get_data.get_data,
                 'Nb/Tensile/OneTensileOpath100/{}'.format(mdir)
             os.system('scp {}/OUTCAR {}'.format(fdir, mdir))
             os.system('scp {}/CONTCAR {}'.format(fdir, mdir))
-        return
 
 
 if __name__ == '__main__':

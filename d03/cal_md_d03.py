@@ -18,12 +18,13 @@ import gn_pbs
 import get_data
 import ase.io
 import os
+import md_pot_data
 from numpy import sqrt
 # The D03 structure is "based on FCC", but is really simple cubic
 # with a basis.
 
 latd03 = 7.46627803307887
-area = 78.83577014166616
+area = 38.874109697935616
 
 
 class D03Factory(cubic.SimpleCubicFactory):
@@ -70,9 +71,22 @@ class D03FactoryP110A(otho.SimpleOrthorhombicFactory):
     element_basis = (0, 0, 0, 0, 0, 0,
                      0, 0, 0, 0, 0, 0,
                      1, 1, 1, 1)
+# Mg3Nd = D03FactoryP110A()
 
 
-Mg3Nd = D03FactoryP110A()
+class D03FactoryP110B(otho.SimpleOrthorhombicFactory):
+    bravais_basis = [[0.0, 0.0, 0.0],
+                     [0.5, 0.25, 0.0],
+                     [0.5, 0.75, 0.0],
+                     [0.5, 0.5, 0.5],
+                     [0.0, 0.25, 0.5],
+                     [0.0, 0.75, 0.5],
+                     [0.0, 0.5, 0.0],
+                     [0.5, 0.0, 0.5]]
+
+    element_basis = (0, 0, 0, 0, 0, 0,
+                     1, 1)
+Mg3Nd = D03FactoryP110B()
 
 
 class cal_d03(get_data.get_data,
@@ -87,7 +101,8 @@ class cal_d03(get_data.get_data,
         gnStructure.__init__(self)
         plt_drv.__init__(self)
         cal_va_gsf.cal_va_gsf.__init__(self)
-        self.disps = np.arange(0.0, 0.5, 0.05)
+        self.disps = np.arange(0.0, 0.55, 0.05)
+        self.pot = md_pot_data.va_pot.MgNd_pbe
 
     def gn_displacement(self, atoms,
                         displacement_vector):
@@ -108,27 +123,41 @@ class cal_d03(get_data.get_data,
             mdir = "dir_{:03d}".format(i)
             os.chdir(mdir)
             (energy, vol, atoms) = self.vasp_energy_stress_vol_quick()
-            data[i, 0] = atoms.get_cell()[0, 1]
+            data[i, 0] = atoms.get_cell()[0, 0]
             data[i, 1] = (energy)
             data[i, 2] = i
             os.chdir(os.pardir)
         np.savetxt('lat.dat', data)
-        return
+
+    def trans(self):
+        tm = "$FLUX:/scratch/qiliang_flux/chaomy/VA/MgNd/MgNd_Lat/"
+        for i in range(20):
+            mdir = "dir_{:03d}".format(i)
+            self.mymkdir(mdir)
+            os.system("scp {}{}/POSCAR {}".format(tm, mdir, mdir))
+            os.system("scp {}{}/OUTCAR {}".format(tm, mdir, mdir))
+            os.system("scp {}{}/CONTCAR {}".format(tm, mdir, mdir))
 
     def buildd03(self):
+        la = self.pot["lattice"]
+        # unit cell
         # atoms = Mg3Nd(latticeconstant=latd03, size=(1, 1, 1),
         #               symbol=('Mg', 'Nd'))
 
-        atoms = Mg3Nd(latticeconstant=(latd03 * sqrt(2), latd03,
-                                       latd03 * sqrt(2) / 2.),
+        # type A
+        # atoms = Mg3Nd(latticeconstant=(la * sqrt(2), la,
+        #                                la * sqrt(2) / 2.),
+        #               size=(1, 1, 18), symbol=('Mg', 'Nd'))
+
+        # type B  x: [-1, 1, 0]  y:[0, 0, 1] z: [1, 1, 0]
+        atoms = Mg3Nd(latticeconstant=(la * sqrt(2) / 2, la,
+                                       la * sqrt(2) / 2.),
                       size=(1, 1, 18), symbol=('Mg', 'Nd'))
 
         # U = np.mat([[-1, 1, 0], [0, 0, 1], [0.5, 0.5, 0]])
         # Uinv = np.linalg.inv(U)
         # pos = atoms.get_scaled_positions()
         # print np.linalg.det(U)
-        # ase.io.write("poscar.vasp", images=atoms, format="vasp")
-        # self.write_lmp_config_data(atoms)
         return atoms
 
     def clc_data(self):
@@ -143,7 +172,6 @@ class cal_d03(get_data.get_data,
             os.chdir(os.pardir)
         print raw
         np.savetxt("save.txt", raw)
-        return
 
     def clc_plt(self):
         raw = np.loadtxt("save.txt")
@@ -152,7 +180,14 @@ class cal_d03(get_data.get_data,
         self.set_keys()
         self.ax.plot(raw[:, 0], raw[:, 1], **next(self.keysiter))
         self.fig.savefig("fig_gsf.png", **self.figsave)
-        return
+
+    def set_pbs(self, mdir, opt='qe'):
+        self.set_nnodes(2)
+        self.set_ppn(12)
+        self.set_job_title("{}".format(mdir))
+        self.set_wall_time(140)
+        self.set_main_job("""mpirun vasp > vasp.log""")
+        self.write_pbs(od=False)
 
     def cal_stacking(self, opt="pre"):
         atoms = self.buildd03()
@@ -164,11 +199,10 @@ class cal_d03(get_data.get_data,
             mdir = 'dir_{}_{:4.3f}'.format(i, disp)
             self.mymkdir(mdir)
             os.chdir(mdir)
-
             if opt in ["run"]:
                 os.system("mpirun -n 4 lmp_mpi -i in.init")
             else:
-                disp_vector = [disp, disp, 0.0]
+                disp_vector = [2.0 * disp, disp, 0.0]
                 disp_matrix_direct = self.gn_displacement(
                     atoms.copy(), disp_vector)
                 disp_matrix = deepcopy(disp_matrix_direct)
@@ -181,13 +215,20 @@ class cal_d03(get_data.get_data,
                 local_atoms = atoms.copy()
                 local_atoms.translate(disp_matrix)
 
-                self.write_lmp_config_data(local_atoms)
-                os.system("cp lmp_init.txt ../lmp.{:03d}".format(i))
-                os.system("cp ../in.init .")
+                # dft calculations
+                self.set_pbs(mdir)
+                self.write_poscar_fix(local_atoms)
+                os.system("cp POSCAR ../lmp.{:03d}".format(i))
+                os.system("cp ../INCAR ../KPOINTS  ../POTCAR .")
+
+                # md calculations
+                # self.write_lmp_config_data(local_atoms)
+                # os.system("cp lmp_init.txt ../lmp.{:03d}".format(i))
+                # os.system("cp ../in.init .")
 
             os.chdir(os.pardir)
-        print("area = ", latd03 * latd03 * sqrt(2))
-        return
+        la = self.pot['lattice']
+        print("area = ",  la * la * sqrt(2) / 2.)
 
 
 if __name__ == '__main__':
@@ -203,7 +244,8 @@ if __name__ == '__main__':
                   'gsf': drv.cal_stacking,
                   'clc': drv.clc_data,
                   'plt': drv.clc_plt,
-                  'lat': drv.clc_lat}
+                  'lat': drv.clc_lat,
+                  'trans': drv.trans}
 
     if options.fargs is not None:
         dispatcher[options.mtype.lower()](options.fargs)

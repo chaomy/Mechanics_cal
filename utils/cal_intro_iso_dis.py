@@ -7,6 +7,9 @@ import math
 
 class cal_intro_iso_dis(object):
 
+    def __init__(self):
+        self.screw_coeff = self.burger / (2. * self.pi)
+
     def intro_single_screw_atoms(self, atoms,
                                  center=None,
                                  sign=None,
@@ -47,10 +50,10 @@ class cal_intro_iso_dis(object):
         ndir = 1  # glide plane normal
         # tdir = 2  # line direction
 
-        # # hcp
-        # tdir = 0
-        # bdir = 1
-        # ndir = 2
+        # hcp
+        bdir = 0 
+        ndir = 1 
+        tdir = 2 
 
         ucell = atoms.get_cell()
         atom_position = atoms.get_positions()
@@ -68,7 +71,9 @@ class cal_intro_iso_dis(object):
         print center
         xc1 = center[bdir]
         yc1 = center[ndir]
-        coeff = self.Edge_coeff
+
+        self.P = 0.33
+        coeff = self.burger / (2. * self.pi)
 
         for i in range(len(atoms)):
             dx1 = atom_position[i, bdir] - xc1
@@ -90,14 +95,17 @@ class cal_intro_iso_dis(object):
     def intro_dipole_edge_atoms(self, atoms, c1, c2):
         atom_position = atoms.get_positions()
         bdir = 0  # burger
-        ndir = 2  # glide plane normal
+        ndir = 1  # glide plane normal
         # tdir = 1  # line direction
+
         xc1 = c1[bdir]
         yc1 = c1[ndir]
         xc2 = c2[bdir]
         yc2 = c2[ndir]
 
-        coeff = self.Edge_coeff
+        self.P = 0.33
+        coeff = self.burger / (2. * self.pi)
+
         for i in range(len(atoms)):
             dx1, dx2 = atom_position[i, 0] - xc1, atom_position[i, 0] - xc2
             dy1, dy2 = atom_position[i, 1] - yc1, atom_position[i, 1] - yc2
@@ -122,9 +130,9 @@ class cal_intro_iso_dis(object):
                 uy2 *= -coeff
             else:
                 ux2 = uy2 = 0
-            if atoms[i].symbol in ['W', 'Mo']:
-                atom_position[i, 0] = atom_position[i, 0] + ux1 - ux2
-                atom_position[i, 1] = atom_position[i, 1] + uy1 - uy2
+            atom_position[i, 0] = atom_position[i, 0] + ux1 - ux2
+            atom_position[i, 1] = atom_position[i, 1] + uy1 - uy2
+
         atoms.set_positions(atom_position)
         return atoms
 

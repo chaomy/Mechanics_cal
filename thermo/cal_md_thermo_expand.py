@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-21 18:42:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-13 02:27:01
+# @Last Modified time: 2018-02-18 13:30:10
 
 
 from optparse import OptionParser
@@ -33,6 +33,7 @@ class cal_md_thermo(gn_config.hcp,
 
     def __init__(self):
         self.pot = self.load_data("./pot.dat")
+        # self.pot = md_pot_data.md_pot.Nb_meam
         self.size = np.array([16, 16, 16])
         self.unit_atoms = \
             ase.lattice.cubic.BodyCenteredCubic(directions=[[1, 0, 0],
@@ -156,7 +157,7 @@ class cal_md_thermo(gn_config.hcp,
 
         for i in range(npts):
             rat = (1 + i * delta)**(1. / 3.)
-            alat = rat * self.pot["lattice"] 
+            alat = rat * self.pot["lattice"]
             dirname = 'dir-%04d' % (i)
             if opt == 'prep':
                 self.mymkdir(dirname)
@@ -182,7 +183,7 @@ class cal_md_thermo(gn_config.hcp,
                 vol[i] = data[0]
                 press[i] = data[1]
                 os.chdir(os.pardir)
-                shutil.rmtree(dirname)    # clean  
+                shutil.rmtree(dirname)    # clean
         if opt == 'clc':
             np.savetxt("data.txt", (vol, press))
         return
@@ -210,7 +211,8 @@ class cal_md_thermo(gn_config.hcp,
         self.set_keys("upper right")
         self.set_111plt((10, 6.5))
         (vol, press) = np.loadtxt("data.txt")
-        (dft_vol, dft_press) = np.loadtxt("/Users/chaomingyang/src/Data_shares/DATA_DFT_PV.txt")
+        (dft_vol, dft_press) = np.loadtxt(
+            "/Users/chaomingyang/src/Data_shares/DATA_DFT_PV.txt")
 
         vol = vol / vol[0]
         vol = vol**3

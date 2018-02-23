@@ -4,13 +4,14 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-10-17 01:07:28
+# @Last Modified time: 2018-02-20 22:54:15
 
 import os
 from glob import glob
 
 
 class md_gb_run(object):
+
     def loop_run(self):
         dlist = glob("gb-*")
         for mdir in dlist:
@@ -22,4 +23,3 @@ class md_gb_run(object):
                 os.system("lmp_mpi -i gb4.in_final")
                 os.chdir(os.pardir)
             os.chdir(os.pardir)
-        return

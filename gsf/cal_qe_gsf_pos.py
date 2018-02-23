@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-20 18:44:02
+# @Last Modified time: 2018-01-28 22:12:14
 
 
 from itertools import cycle
@@ -22,7 +22,7 @@ dirtree = {'x111z110': {
     '50': 'Bcc_WRe50_gsfx111z110',
     'ta': 'Bcc_WTa50_gsfx111z110',
     'ta00': 'WTa0.00',
-    'ta05': 'WTa0.05_conv', 
+    'ta05': 'WTa0.05_conv',
     'ta10': 'WTa0.10_conv',
     'ta15': 'WTa0.15_conv',
     'ta20': 'WTa0.20_conv',
@@ -61,7 +61,7 @@ class cal_qe_gsf_pos(object):
 
     def transdata(self, ptype='scp', tag='ta25'):
         disps = arange(0.42, 0.50, 0.04)
-        # disps = arange(0.46, 0.52, 0.04) 
+        # disps = arange(0.46, 0.52, 0.04)
         disps = append(disps, 0.0)
         for disp in disps:
             mdir = 'dir-{}-{:4.3f}'.format(self.mgsf, disp)

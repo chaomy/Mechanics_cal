@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-01-25 16:28:55
+# @Last Modified time: 2018-02-20 22:50:21
 
 from ase import Atoms
 import ase.lattice.orthorhombic as otho
@@ -41,7 +41,6 @@ class md_gb_hcp(object):
         # pmat = self.hcp_til_mtx(30)
 
         ase.io.write("perf_hcp", images=atoms, format='vasp')
-
         ang = 30
         atoms.rotate(30, 'z', center='COU', rotate_cell=True)
 
@@ -58,4 +57,3 @@ class md_gb_hcp(object):
         ase.io.write("rot30", images=atoms, format='vasp')
         print atoms.get_cell()
         # self.write_lmp_config_data(atoms, 'lmp_init.txt')
-        return

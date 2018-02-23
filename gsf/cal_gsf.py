@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-01-25 20:47:18
+# @Last Modified time: 2018-02-20 00:08:54
 
 
 import gn_lmp_infile
@@ -27,6 +27,7 @@ import numpy as np
 from copy import deepcopy
 from math import sqrt
 from optparse import OptionParser
+from itertools import cycle
 import ase.io
 import ase.lattice.orthorhombic as otho
 import ase.lattice.cubic as cubic
@@ -59,9 +60,10 @@ class cal_gsf(gn_config.bcc,
               cal_va_gsf.cal_va_gsf):
 
     def __init__(self,
-                 pot=md_pot_data.qe_pot.vca_W75Ta25,
-                 mgsf='x111z110'):
-        self.pot = pot
+                 pot=md_pot_data.md_pot.Nb_meam,
+                 mgsf='x111z112'):
+
+        self.pot = self.load_data("pot.dat")
         self.mgsf = mgsf
         self.sample_gsf_num = 21
         self.disp_delta = 1. / (self.sample_gsf_num - 1)
@@ -72,6 +74,7 @@ class cal_gsf(gn_config.bcc,
         gn_incar.gn_incar.__init__(self)
         gn_pbs.gn_pbs.__init__(self)
         plt_drv.plt_drv.__init__(self)
+
         # config
         gn_config.bcc.__init__(self, self.pot)
         Intro_vasp.vasp_change_box.__init__(self, self.pot)
@@ -84,7 +87,6 @@ class cal_gsf(gn_config.bcc,
         cal_qe_gsf_pos.cal_qe_gsf_pos.__init__(self)
         cal_qe_gsf_pre.cal_qe_gsf_pre.__init__(self)
         cal_va_gsf.cal_va_gsf.__init__(self)
-        return
 
     def gn_bcc110(self):
         atoms = othoBccp110(latticeconstant=(self.pot['latbcc'] * sqrt(2),
@@ -117,7 +119,6 @@ class cal_gsf(gn_config.bcc,
         if opt in ['va']:
             self.set_main_job("""mpirun vasp > vasp.log""")
         self.write_pbs(od=False)
-        return
 
     def gn_displacement(self, atoms,
                         displacement_vector):
@@ -140,22 +141,42 @@ class cal_gsf(gn_config.bcc,
         return
 
     def plt_gsf(self):
-        data = np.loadtxt('gsf.dat')
-        print data
-        gsf = (data[:, 3] - np.min(data[:, 3])) / (data[:, 2])
-        coeff = 16.021766208
-        print gsf * coeff
+        dftgsfNb111z110 = [0.0, 0.0055, 0.0183, 0.0292, 0.0389, 0.0442, 0.0389,
+                           0.0292, 0.0183, 0.0055, 0.0]
+        dftgsfNb111z211 = [0.0, 0.0065, 0.0221, 0.0368, 0.0474, 0.0515, 0.0448,
+                           0.0334, 0.0214, 0.0066, 0.0000]
+        dftdisp = np.linspace(0, 1, len(dftgsfNb111z110))
+
         self.set_111plt()
-        self.ax.plot(data[:, 1], gsf, label='gsf', **next(self.keysiter))
+        coeff = 16.021766208
+
+        # for kk in ["gsf_112", "gsf_112u"]:
+        for kk in ["gsf"]:
+            data = np.loadtxt(kk + ".dat")
+            gsf = (data[:, 3] - np.min(data[:, 3])) / (data[:, 2])
+
+            self.ax.plot(data[:, 1], gsf, label=kk, **next(self.keysiter))
+
+        self.add_x_labels(cycle(["Normalized Dispament"]), *self.axls)
+        if self.mgsf in ["x111z110"]:
+            self.ax.plot(dftdisp, dftgsfNb111z110,
+                         label='dft', **next(self.keysiter))
+            self.add_y_labels(
+                cycle([r"gsf [111](110) [eV/A$^2$]"]), *self.axls)
+        elif self.mgsf in ["x111z112"]:
+            self.ax.plot(dftdisp, dftgsfNb111z211,
+                         label='dft', **next(self.keysiter))
+            self.add_y_labels(
+                cycle([r"gsf [111](211) [eV/A$^2$]"]), *self.axls)
+        self.add_legends(*self.axls)
+        self.set_tick_size(*self.axls)
         self.fig.savefig('fig_gsf.png', **self.figsave)
-        return
 
     def wrap_prep(self, opt='qe'):
         if opt in ['qe']:
             self.gn_qe_single_dir_gsf()
         if opt in ['md']:
             self.md_single_dir_gsf()
-        return
 
     def wrap_loop(self, opt='md'):
         if opt in ['md']:
@@ -169,6 +190,17 @@ class cal_gsf(gn_config.bcc,
         if opt in ['sub']:
             self.loop_sub()
 
+    def wrap_clc(self, opt='qe'):
+        if opt in ['md']:
+            self.collect_gsf_energy()
+        elif opt in ['qe']:
+            self.clc_qe_gsf_engy()
+
+    def wrap_auto(self, opt='md'):
+        if opt in ['md']:
+            self.md_single_dir_gsf()
+            self.loop_md_gsf()
+            self.collect_gsf_energy()
 
 if __name__ == '__main__':
     usage = "usage:%prog [options] arg1 [options] arg2"
@@ -179,9 +211,10 @@ if __name__ == '__main__':
                       type='string', dest="fargs")
     (options, args) = parser.parse_args()
     drv = cal_gsf()
-    dispatcher = {'prep': drv.wrap_prep,
+    dispatcher = {'auto': drv.wrap_auto,
+                  'prep': drv.wrap_prep,
                   'loop': drv.wrap_loop,
-                  'clc': drv.clc_qe_gsf_engy,
+                  'clc': drv.wrap_clc,
                   'usf': drv.cal_usf,
                   'setpbs': drv.loop_set_pbs,
                   'plt': drv.plt_gsf,

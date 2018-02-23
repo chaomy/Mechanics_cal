@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-21 15:28:29
+# @Last Modified time: 2018-02-20 20:14:11
 
 
 import os
@@ -23,7 +23,6 @@ class md_dislocation_bcc(object):
                                [0.5, -0.5, -0.5],
                                [-0.5, 0.5, -0.5],
                                [-0.5, -0.5, -0.5]])
-        return
 
     def cal_single_edge_dislocations_read(self):
         atoms = io.read('edgeinit.dump', format='lammps-dump')
@@ -35,7 +34,6 @@ class md_dislocation_bcc(object):
         atoms = self.cut_x_normal_atoms(atoms, self.pot['lattice'])
         self.write_lmp_config_data_charge(atoms, 'init.edge')
         self.write_lmp_config_data(atoms, 'init.edge.atoms')
-        return
 
     def cal_single_screw_dislocatoins_read(self):
         atoms = io.read('screwinit.dump', format='lammps-dump')
@@ -46,7 +44,6 @@ class md_dislocation_bcc(object):
         atoms = self.cut_z_normal_atoms(atoms)
         self.write_lmp_config_data_charge(atoms, 'init.screw')
         self.write_lmp_config_data(atoms, 'init.screw.atoms')
-        return
 
     def cal_single_edge_dislocations(self):
         e1 = [1., 1., 1.]
@@ -65,7 +62,6 @@ class md_dislocation_bcc(object):
         atoms = self.make_sphere(atoms)
         self.write_lmp_config_data(atoms, 'init.edge.atoms')
         self.write_lmp_config_data_charge(atoms, 'init.edge')
-        return
 
     def cal_single_screw_dislocations(self):
         e1 = [1., -1., 0]
@@ -96,7 +92,6 @@ class md_dislocation_bcc(object):
         atoms = self.make_sphere(atoms)
         self.write_lmp_config_data(atoms, 'init.screw.atoms')
         self.write_lmp_config_data_charge(atoms, 'init.screw')
-        return
 
     # calculate the nano particle  #
     def cal_non_periodic_screw_xdislocation(self):
@@ -131,4 +126,3 @@ class md_dislocation_bcc(object):
                                 "W")
         os.system("rm cfg/* ; mpirun -n 4 lmp_mpi -in in.minimize")
         # write pbs
-        return
