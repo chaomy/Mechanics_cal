@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-02-23 02:46:23
+# @Last Modified time: 2018-02-23 03:18:30
 
 
 import numpy as np
@@ -21,6 +21,7 @@ import gn_kpoints
 import gn_incar
 import gn_pbs
 import md_pot_data
+import plt_drv
 
 
 class cal_lattice(gn_config.bcc,
@@ -29,13 +30,15 @@ class cal_lattice(gn_config.bcc,
                   gn_pbs.gn_pbs,
                   get_data.get_data,
                   gn_kpoints.gn_kpoints,
-                  gn_incar.gn_incar):
+                  gn_incar.gn_incar,
+                  plt_drv.plt_drv):
 
     def __init__(self):
         self.figsize = (8, 6)
         self.npts = 20
         self.kpoints = [31, 31, 31]
         self.pot = md_pot_data.va_pot.Nb_pbe
+        plt_drv.plt_drv.__init__(self)
         gn_kpoints.gn_kpoints.__init__(self)
         get_data.get_data.__init__(self)
         gn_incar.gn_incar.__init__(self)
@@ -53,15 +56,15 @@ class cal_lattice(gn_config.bcc,
         print "num", np.argmin(energy), "lattice", InterPoints[i]
         print(np.min(Ynew))
 
-        fig = plt.figure(figsize=self.figsize)
-        ax = fig.add_subplot(111)
-        ax.plot(lattice, energy)
+        self.set_111plt()
+        self.ax.plot(lattice, energy, label="lat = {:5f}".format(
+            2 * InterPoints[i]), **next(self.keysiter))
+        self.add_legends(self.ax)
         plt.savefig("lattice.png")
-        plt.show()
 
     def set_pbs(self, mdir):
         self.set_pbs_type('va')
-        self.set_wall_time(2)
+        self.set_wall_time(10)
         self.set_job_title(mdir)
         self.set_nnodes(1)
         self.set_ppn(12)
@@ -86,7 +89,9 @@ class cal_lattice(gn_config.bcc,
     def gn_bcc(self):
         alat0 = self.pot['latbcc']
         delta = 0.001
-        rng = [-20, 20]
+        # rng = [-20, 20]
+        # rng = [20, 100]
+        rng = [-100, -20]
         gn_config.bcc.__init__(self, self.pot)
         for i in range(rng[0], rng[1]):
             self.pot["latbcc"] = alat0 + i * delta

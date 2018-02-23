@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-02-23 02:10:07
+# @Last Modified time: 2018-02-23 03:22:48
 
 
 from optparse import OptionParser
@@ -35,7 +35,7 @@ class cal_cij(gn_config.bcc,
 
     def __init__(self, inpot=md_pot_data.qe_pot.pbe_w):
         self.unit_delta = 0.001
-        self.looptimes = 5
+        self.npts = 5
         self.volume = None
         self.energy0 = None
         self.pot = inpot
@@ -140,7 +140,7 @@ class cal_cij(gn_config.bcc,
         for i in range(len(self.cij_type_list)):
             mtype = self.cij_type_list[i]
             self.set_cij_type(mtype)
-            for j in range(-self.looptimes, self.looptimes):
+            for j in range(-self.npts, self.npts):
                 delta = self.unit_delta * j
                 if j >= 0:
                     dirname = "dir-%s-p%03d" % (mtype, j)
@@ -174,7 +174,7 @@ class cal_cij(gn_config.bcc,
             mtype = self.cij_type_list[i]
             self.set_cij_type(mtype)
             out_file_name = "data_%s.txt" % (mtype)
-            for j in range(-self.looptimes, self.looptimes):
+            for j in range(-self.npts, self.npts):
                 delta = self.unit_delta * j
                 if j >= 0:
                     dirname = "dir-%s-p%03d" % (mtype, j)

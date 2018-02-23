@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-21 18:42:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-02-23 02:38:31
+# @Last Modified time: 2018-02-23 03:23:40
 
 
 import glob
@@ -34,8 +34,8 @@ class cal_cij(gn_config.bcc,
         gn_incar.gn_incar.__init__(self)
         output_data.output_data.__init__(self)
 
-        self.cij_unit_delta = 0.001
-        self.npts = 5
+        self.cij_unit_delta = 0.0005
+        self.npts = 6
         self.volume = None
         self.energy0 = None
 
@@ -59,6 +59,24 @@ class cal_cij(gn_config.bcc,
         a, c = r[0]
         a = a / self.volume * self.ev_angstrom3_to_GPa
         return a
+
+    def collect_data_cij(self):
+        for mtype in self.cij_type_list:
+            self.set_cij_type(mtype)
+            out_file_name = "data_%s.txt" % (mtype)
+            for j in range(-self.npts, self.npts):
+                delta = self.unit_delta * j
+                if j >= 0:
+                    dirname = "dir-%s-p%03d" % (mtype, j)
+                else:
+                    dirname = "dir-%s-n%03d" % (mtype, np.abs(j))
+                os.chdir(dirname)
+                print "i am in ", dirname
+                (energy, stress, vol) = self.vasp_energy_stress_vol()  # in eV
+                os.chdir(os.pardir)
+                self.output_delta_energy(delta,
+                                         energy,
+                                         file_name=out_file_name)
 
     def obtain_cij(self, opt='np'):
         self.set_volume_energy0()
@@ -140,6 +158,7 @@ class cal_cij(gn_config.bcc,
                 #                                    in_tag=mtype,
                 #                                    write=False)
                 ase.io.write("POSCAR", images=atoms, format="vasp")
+                os.system("cp va.pbs {}".format(mdir))
                 os.system("cp POTCAR {}".format(mdir))
                 os.system("cp POSCAR {}".format(mdir))
                 os.system("cp KPOINTS {}".format(mdir))
@@ -167,7 +186,6 @@ class cal_cij(gn_config.bcc,
                 if j == 0:
                     self.output_equilibrium(energy=energy,
                                             volume=volume)
-
         #  fout = open("%s_summary"%cname,"w")
             #  fout.write("%22.16f %22.16f\n"%(delta_increment*i, energy))
         #  answer = fit_para(cname,E0)
