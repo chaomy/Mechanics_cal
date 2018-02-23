@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-08 21:24:09
+# @Last Modified time: 2018-02-23 02:10:07
 
 
 from optparse import OptionParser
@@ -35,7 +35,7 @@ class cal_cij(gn_config.bcc,
 
     def __init__(self, inpot=md_pot_data.qe_pot.pbe_w):
         self.unit_delta = 0.001
-        self.looptimes = 5 
+        self.looptimes = 5
         self.volume = None
         self.energy0 = None
         self.pot = inpot
@@ -69,7 +69,7 @@ class cal_cij(gn_config.bcc,
         print r
         a, c = r[0]
         print "vol = ", self.volume, "A^3"
-        a = a / self.volume * self.ev_angstrom3_to_GPa 
+        a = a / self.volume * self.ev_angstrom3_to_GPa
         return a
 
     def obtain_cij_old(self):
@@ -96,8 +96,10 @@ class cal_cij(gn_config.bcc,
 
         # print np.linalg.pinv(convmat) * np.transpose(np.mat(del2coeffs))
         print del2coeffs
-        c11 = (0.111111111111111 * del2coeffs[0] + 0.333333333333333 * del2coeffs[1])
-        c12 = (0.111111111111111 * del2coeffs[0] - 0.166666666666667 * del2coeffs[1])
+        c11 = (0.111111111111111 *
+               del2coeffs[0] + 0.333333333333333 * del2coeffs[1])
+        c12 = (0.111111111111111 *
+               del2coeffs[0] - 0.166666666666667 * del2coeffs[1])
         c44 = 0.25 * del2coeffs[2]
         print(c11, c12, c44)
         # with open("cij.dat", 'w') as fout:
@@ -156,7 +158,6 @@ class cal_cij(gn_config.bcc,
                 self.gn_qe_cij_infile(atoms)
                 os.system("cp $POTDIR/{} .".format(self.pot['file']))
                 os.chdir(os.pardir)
-        return
 
     def cij_plt(self):
         filelist = ['data_c11.txt', 'data_c12.txt', 'data_c44.txt']
@@ -167,7 +168,6 @@ class cal_cij(gn_config.bcc,
             self.ax.plot(delta_list, energy_list,
                          label='cij', **next(self.keysiter))
             self.fig.savefig('fig_{}.png'.format(file[:-8:-4]), **self.figsave)
-        return
 
     def collect_data_cij(self):
         for i in range(len(self.cij_type_list)):
@@ -187,7 +187,6 @@ class cal_cij(gn_config.bcc,
                 self.output_delta_energy(delta,
                                          energy,
                                          file_name=out_file_name)
-        return
 
     def set_pbs(self, dirname):
         self.set_wall_time(2)
@@ -196,7 +195,6 @@ class cal_cij(gn_config.bcc,
         self.set_ppn(12)
         self.set_main_job("mpirun pw.x < qe.in > qe.out")
         self.write_pbs(od=True)
-        return
 
     def loop_sub_drvs(self):
         dir_list = glob.glob("dir-*")
@@ -204,7 +202,6 @@ class cal_cij(gn_config.bcc,
             os.chdir(dir_list[i])
             os.system("qsub va.pbs")
             os.chdir(os.pardir)
-        return
 
     def loop_pots(self):
         potlist = {'WTa0.25': md_pot_data.qe_pot.vca_W75Ta25,
@@ -219,7 +216,6 @@ class cal_cij(gn_config.bcc,
             os.chdir(key)
             self.loop_prepare_cij()
             os.chdir(os.pardir)
-        return
 
 
 if __name__ == "__main__":

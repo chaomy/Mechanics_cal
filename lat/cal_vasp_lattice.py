@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-12-16 20:54:36
+# @Last Modified time: 2018-02-23 02:42:55
 
 
 import numpy as np
@@ -35,12 +35,11 @@ class cal_lattice(gn_config.bcc,
         self.figsize = (8, 6)
         self.npts = 20
         self.kpoints = [31, 31, 31]
-        self.pot = md_pot_data.va_pot.Mg_pbe
+        self.pot = md_pot_data.va_pot.Nb_pbe
         gn_kpoints.gn_kpoints.__init__(self)
         get_data.get_data.__init__(self)
         gn_incar.gn_incar.__init__(self)
         gn_pbs.gn_pbs.__init__(self)
-        return
 
     def interpolate_lattice(self, filename):
         data = np.loadtxt(filename)
@@ -60,58 +59,48 @@ class cal_lattice(gn_config.bcc,
         ax.plot(lattice, energy)
         plt.savefig("lattice.png")
         plt.show()
-        return
 
     def set_pbs(self, mdir):
         self.set_pbs_type('va')
-        self.set_wall_time(10)
+        self.set_wall_time(2)
         self.set_job_title(mdir)
         self.set_nnodes(1)
         self.set_ppn(12)
         self.set_main_job("mpirun vasp")
-        self.write_pbs(od=None)
-        return
+        self.write_pbs(od=True)
 
     def loop_kpts(self):
         files = glob.glob('./DATA*')
         for file in files:
             cal_lattice(file)
-        return
 
     def prepare_vasp_inputs(self, mdir):
-        self.set_incar_type('dftunrelax')
-        self.write_incar()
+        # self.set_incar_type('dftunrelax')
+        # self.write_incar()
         self.set_diff_kpoints([31, 31, 31])
         self.set_intype('gamma')
         self.write_kpoints()
         self.set_pbs(mdir)
-        os.system("cp ../../POTCAR .")
-        return
+        os.system("cp ../INCAR .")
+        os.system("cp ../POTCAR .")
 
     def gn_bcc(self):
         alat0 = self.pot['latbcc']
         delta = 0.001
-        rng = [-15, 15]
-        bcc_drv = gn_config.bcc(self.pot)
-
+        rng = [-20, 20]
+        gn_config.bcc.__init__(self, self.pot)
         for i in range(rng[0], rng[1]):
-            alat = alat0 + i * delta
-
+            self.pot["latbcc"] = alat0 + i * delta
             if i >= 0:
                 mdir = "dir-p-{:03d}".format(i)
             else:
                 mdir = "dir-n-{:03d}".format(abs(i))
-
             self.mymkdir(mdir)
             os.chdir(mdir)
-
-            bcc_drv.set_lattce_constant(alat)
-            atoms = bcc_drv.set_bcc_primitive((1, 1, 1))
+            atoms = self.set_bcc_primitive((1, 1, 1))
             ase.io.write(filename="POSCAR", images=atoms, format='vasp')
-
             self.prepare_vasp_inputs(mdir)
             os.chdir(os.pardir)
-        return
 
     def gn_fcc(self):
         alat0 = 3.90
@@ -136,7 +125,6 @@ class cal_lattice(gn_config.bcc,
 
             self.prepare_vasp_inputs(mdir)
             os.chdir(os.pardir)
-        return
 
     def gn_hcp(self):
         alat0 = self.pot['ahcp']
@@ -161,11 +149,9 @@ class cal_lattice(gn_config.bcc,
             self.set_pbs(mdir)
             os.system("cp ../POTCAR .")
             os.chdir(os.pardir)
-        return
 
     def collect_data(self, tag='hcp'):
-        rng = [-8, 8]
-        rng = [-15, 15]
+        rng = [-20, 20]
         data = np.zeros([rng[1] - rng[0], 3])
         cnt = 0
         for i in range(rng[0], rng[1]):
@@ -186,7 +172,6 @@ class cal_lattice(gn_config.bcc,
             cnt += 1
             os.chdir(os.pardir)
         np.savetxt('lat.dat', data)
-        return
 
 
 if __name__ == '__main__':
@@ -204,6 +189,7 @@ if __name__ == '__main__':
                   'fcc': drv.gn_fcc,
                   'hcp': drv.gn_hcp,
                   'clc': drv.collect_data}
+
     if options.fargs is not None:
         dispatcher[options.mtype.lower()](options.fargs)
     else:

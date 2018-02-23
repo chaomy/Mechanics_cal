@@ -3,67 +3,55 @@
 # @Author: yang37
 # @Date:   2017-06-21 18:42:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-12-18 14:52:59
+# @Last Modified time: 2018-02-23 02:38:31
 
 
 import glob
 import os
+import ase.io
 import numpy as np
 import md_pot_data
 from optparse import OptionParser
 from scipy.optimize import leastsq
-
-try:
-    import gn_config
-    import get_data
-    import gn_kpoints
-    import gn_incar
-    import gn_pbs
-    import output_data
-
-except ImportError:
-    print "error during import"
+import gn_config
+import get_data
+import gn_incar
+import gn_pbs
+import output_data
 
 
 class cal_cij(gn_config.bcc,
               gn_config.fcc,
               gn_config.hcp,
               get_data.get_data,
-              gn_kpoints.gn_kpoints,
               gn_incar.gn_incar,
               gn_pbs.gn_pbs,
               output_data.output_data):
 
     def __init__(self):
-        self.pot = md_pot_data.dft_data.Nb_pbe
-        gn_kpoints.gn_kpoints.__init__(self)
+        self.pot = md_pot_data.va_pot.Nb_pbe
         get_data.get_data.__init__(self)
         gn_incar.gn_incar.__init__(self)
         output_data.output_data.__init__(self)
 
-        self.cij_unit_delta = 0.005
-        self.cij_loop_times = 10
+        self.cij_unit_delta = 0.001
+        self.npts = 5
         self.volume = None
         self.energy0 = None
 
-        self.alat = self.pot['lattice']
-        self.elem = self.pot['element']
         self.cij_type_list = ['c11', 'c12', 'c44']
-        self.cij_type = 'c11'
-        self.kpts = (30, 30, 30)
-        self.struct = self.pot['structure']
 
-        if self.struct == 'bcc':
-            gn_config.bcc.__init__(self)
-        elif self.struct == 'fcc':
-            gn_config.fcc.__init__(self)
-        elif self.struct == 'hcp':
-            gn_config.hcp.__init__(self)
-        return
+        if self.pot["structure"] == 'bcc':
+            gn_config.bcc.__init__(self, self.pot)
+        elif self.pot["structure"] == 'fcc':
+            gn_config.fcc.__init__(self, self.pot)
+        elif self.pot["structure"] == 'hcp':
+            gn_config.hcp.__init__(self, self.pot)
 
     def fit_para(self, delta_list, energy_list):
         xdata = delta_list
         ydata = energy_list - self.energy0
+
         def residuals(p):
             a, c = p
             return ydata - (a * (0.5 * xdata**2) + c)
@@ -99,7 +87,6 @@ class cal_cij(gn_config.bcc,
         with open("cij.dat", 'w') as fout:
             fout.write("C11\t%f\t\nC12\t%f\t\nC44\t%f\t\n" % (c11, c12, c44))
             fout.close()
-        return
 
     def obtain_cij_old(self):
         self.volume = 18.30
@@ -125,96 +112,53 @@ class cal_cij(gn_config.bcc,
         c12 = (0.111111111111111 * c11_plus_c12 -
                0.166666666666667 * c11_minus_c12)
         c44 = 0.25 * c44
-
         print c11, c12, c44
-        return
 
     def set_volume_energy0(self):
         raw = np.loadtxt("equilibrium.txt")
         self.volume = np.average(raw[:, 0])
         self.energy0 = np.average(raw[:, 1])
-        return
 
     def set_cij_type(self, cij_type):
         self.cij_type = cij_type
-        return
-
-    def write_cij_poscar(self, delta):
-        self.set_lattce_constant(self.alat)
-        self.write_bcc_primitive_with_strain(delta,
-                                             self.cij_type,
-                                             (1, 1, 1))
-        return
 
     def loop_prepare_cij(self):
-        for i in range(len(self.cij_type_list)):
-            current_type = self.cij_type_list[i]
-            self.set_cij_type(current_type)
-
-            for j in range(-self.cij_loop_times, self.cij_loop_times):
+        for mtype in self.cij_type_list:
+            self.cij_type = mtype
+            for j in range(-self.npts, self.npts):
                 delta = self.cij_unit_delta * j
                 if j >= 0:
-                    dir_name = "dir-%s-delta-%03d" % (current_type, j)
+                    mdir = "dir-%s-p%03d" % (mtype, j)
                 else:
-                    dir_name = "dir-%s-delta-n%03d" % (current_type, np.abs(j))
-                if not os.path.isdir(dir_name):
-                    os.mkdir(dir_name)
-                os.chdir(dir_name)
+                    mdir = "dir-%s-n%03d" % (mtype, np.abs(j))
 
-                self.write_cij_poscar(delta)
-                self.prepare_vasp_inputs(dir_name)
-                os.chdir(self.root_dir)
-        return
-
-    ###################################################################
-    # continue the calculation due to the limit of walltime
-    ###################################################################
-    def cal_cij_continue(self, tag='modify'):
-        dirlist = glob.glob("dir-c*-delta-*")
-        for i in range(len(dirlist)):
-            mydir = dirlist[i]
-            os.chdir(mydir)
-            os.system("cp CONTCAR POSCAR")
-
-            if tag is 'cnt':
-                # rewrite the va.pbs #
-                self.set_pbs_type('va')
-                self.set_wall_time(50)
-                self.set_job_title(mydir[6:])
-                self.set_nnodes(1)
-                self.set_ppn(12)
-                self.set_main_job("mpirun vasp")
-                self.write_pbs(od=None)
-
-                # sub the job
-                os.system("qsub va.pbs")
-
-            elif tag is 'modify':
-                #  os.system("rm OUTCAR_cpy")
-                #  os.system("head -n 500 OUTCAR >> OUTCAR_cpy")
-                #  os.system("tail -n 1000 OUTCAR >> OUTCAR_cpy")
-                #  os.system("rm OUTCAR")
-                os.system("mv OUTCAR_cpy OUTCAR")
-            os.chdir(self.root_dir)
-        return
+                self.mymkdir(mdir)
+                atoms = self.write_bcc_primitive_with_strain(delta=delta,
+                                                             in_tag=mtype,
+                                                             write=False)
+                # atoms = self.write_bcc_with_strain(delta=delta,
+                #                                    in_tag=mtype,
+                #                                    write=False)
+                ase.io.write("POSCAR", images=atoms, format="vasp")
+                os.system("cp POTCAR {}".format(mdir))
+                os.system("cp POSCAR {}".format(mdir))
+                os.system("cp KPOINTS {}".format(mdir))
+                os.system("cp INCAR {}".format(mdir))
 
     def ouput_data_cij(self):
-        if os.path.isfile("cij.dat"):
-            os.system("mv cij.dat cij.dat")
-
         for i in range(len(self.cij_type_list)):
-            current_type = self.cij_type_list[i]
-            self.set_cij_type(current_type)
-            out_file_name = "data_%s.txt" % (current_type)
+            mtype = self.cij_type_list[i]
+            self.set_cij_type(mtype)
+            out_file_name = "data_%s.txt" % (mtype)
 
-            for j in range(-self.cij_loop_times, self.cij_loop_times):
+            for j in range(-self.npts, self.npts):
                 delta = self.cij_unit_delta * j
                 if j >= 0:
-                    dir_name = "dir-%s-delta-%03d" % (current_type, j)
+                    mdir = "dir-%s-delta-%03d" % (mtype, j)
                 else:
-                    dir_name = "dir-%s-delta-n%03d" % (current_type, np.abs(j))
-                os.chdir(dir_name)
-                print "i am in ", dir_name
+                    mdir = "dir-%s-delta-n%03d" % (mtype, np.abs(j))
+                os.chdir(mdir)
+                print "i am in ", mdir
                 (energy, volume) = self.vasp_energy_stress_vol_quick()
                 os.chdir(self.root_dir)
 
@@ -227,69 +171,24 @@ class cal_cij(gn_config.bcc,
         #  fout = open("%s_summary"%cname,"w")
             #  fout.write("%22.16f %22.16f\n"%(delta_increment*i, energy))
         #  answer = fit_para(cname,E0)
-        return
-
-    def prepare_vasp_inputs(self, dir_name):
-        self.set_incar_type('dft')
-        self.set_accuracy(1e-4)
-        self.write_incar()
-
-        self.set_diff_kpoints([31, 31, 31])
-        self.set_intype('gamma')
-        self.write_kpoints()
-
-        self.set_pbs_type('va')
-        self.set_wall_time(30)
-        self.set_job_title(dir_name[6:])
-        self.set_nnodes(1)
-        self.set_ppn(12)
-        self.set_main_job("mpirun vasp")
-        self.write_pbs(od=None)
-
-        os.system("cp ../../POTCAR .")
-        return
-
-    def loop_sub_jobs(self):
-        dir_list = glob.glob("dir-*")
-        for i in range(len(dir_list)):
-            os.chdir(dir_list[i])
-            os.system("qsub va.pbs")
-            os.chdir(self.root_dir)
-        return
-
-
-usage = "usage:%prog [options] arg1 [options] arg2"
-parser = OptionParser(usage=usage)
-parser.add_option("-t",
-                  "--mtype",
-                  action="store",
-                  type="string",
-                  dest="mtype",
-                  help="",
-                  default="prp_r")
-(options, args) = parser.parse_args()
 
 if __name__ == "__main__":
+    usage = "usage:%prog [options] arg1 [options] arg2"
+    parser = OptionParser(usage=usage)
+    parser.add_option('-t', "--mtype", action="store",
+                      type="string", dest="mtype")
+    parser.add_option('-p', "--param", action="store",
+                      type='string', dest="fargs")
+    (options, args) = parser.parse_args()
 
-    Job = cal_cij(in_struct='bcc',
-                  lattice_constant=3.322404,
-                  in_element='Nb',
-                  in_kpoints=[31, 31, 31])
+    drv = cal_cij()
+    dispatcher = {'prep': drv.loop_prepare_cij,
+                  'clc': drv.obtain_cij}
 
-    if options.mtype.lower() == 'prep':
-        Job.loop_prepare_cij()
-
-    if options.mtype.lower() == 'sub':
-        Job.loop_sub_jobs()
-
-    if options.mtype.lower() == 'clc':
-        Job.obtain_cij()
-
-    if options.mtype.lower() == 'cnt':
-        Job.cal_cij_continue()
-
-    if options.mtype.lower() == 'data':
-        Job.ouput_data_cij()
+    if options.fargs is not None:
+        dispatcher[options.mtype.lower()](options.fargs)
+    else:
+        dispatcher[options.mtype.lower()]()
 
     #  A.set_volume_energy0()
     #  A.obtain_cij_old()
