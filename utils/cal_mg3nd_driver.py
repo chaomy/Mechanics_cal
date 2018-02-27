@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2018-01-15 23:30:10
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-01-16 18:12:56
+# @Last Modified time: 2018-02-26 09:49:25
 
 import os
 import glob
@@ -26,7 +26,6 @@ class cal_mg3nd_driver(gn_pbs.gn_pbs,
         self.set_wall_time(2)
         self.set_main_job("""mpirun vasp""")
         self.write_pbs(od=True)
-        return
 
     def cal_lat(self):
         for i in range(21):
@@ -43,7 +42,6 @@ class cal_mg3nd_driver(gn_pbs.gn_pbs,
             # self.set_pbs("{:03d}".format(i))
             # os.system("mv {} {}".format(fname, mdir))
             # os.system("mv va.pbs {}".format(mdir))
-        return
 
 
 if __name__ == '__main__':

@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-02-23 03:22:48
+# @Last Modified time: 2018-02-23 14:12:40
 
 
 from optparse import OptionParser
@@ -56,7 +56,6 @@ class cal_cij(gn_config.bcc,
             gn_config.fcc.__init__(self, self.pot)
         elif self.pot['structure'] == 'hcp':
             gn_config.hcp.__init__(self, self.pot)
-        return
 
     def fit_para(self, delta_list, energy_list):
         xdata = delta_list
@@ -83,7 +82,6 @@ class cal_cij(gn_config.bcc,
             del2coeffs[i] = self.fit_para(delta_list, energy_list)
         # convmat = np.mat([[3, 6, 0], [2, -2, 0], [0, 0, 4]])
         # print 2 * np.linalg.pinv(convmat) * np.transpose(np.mat(del2coeffs))
-        return
 
     def obtain_cij(self, opt='np'):
         del2coeffs = np.transpose(np.zeros(3))
@@ -105,7 +103,6 @@ class cal_cij(gn_config.bcc,
         # with open("cij.dat", 'w') as fout:
         #     fout.write("C11\t%f\t\nC12\t%f\t\nC44\t%f\t\n" % (c11, c12, c44))
         #     fout.close()
-        return
 
     def set_volume_energy0(self):
         (engy, vol, stress) = self.qe_get_energy_stress(
@@ -113,11 +110,9 @@ class cal_cij(gn_config.bcc,
         self.volume = vol * md_pot_data.unitconv.ulength["BohrtoA"]**3
         print self.volume
         self.energy0 = engy
-        return
 
     def set_cij_type(self, cij_type):
         self.cij_type = cij_type
-        return
 
     def gn_qe_cij_infile(self, atoms):
         self.set_thr('1.0D-6')
@@ -134,7 +129,6 @@ class cal_cij(gn_config.bcc,
             fid = self.qe_write_pos(fid, atoms)
             fid = self.qe_write_kpts(fid)
             fid.close()
-        return
 
     def loop_prepare_cij(self):
         for i in range(len(self.cij_type_list)):

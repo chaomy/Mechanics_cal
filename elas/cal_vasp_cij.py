@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-21 18:42:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-02-23 03:27:22
+# @Last Modified time: 2018-02-27 00:47:09
 
 
 import glob
@@ -13,6 +13,7 @@ import numpy as np
 import md_pot_data
 from optparse import OptionParser
 from scipy.optimize import leastsq
+from utils import cal_add_strain
 import gn_config
 import get_data
 import gn_incar
@@ -26,20 +27,22 @@ class cal_cij(gn_config.bcc,
               get_data.get_data,
               gn_incar.gn_incar,
               gn_pbs.gn_pbs,
-              output_data.output_data):
+              output_data.output_data,
+              cal_add_strain.cal_add_strain):
 
     def __init__(self):
         self.pot = md_pot_data.va_pot.Nb_pbe
         get_data.get_data.__init__(self)
         gn_incar.gn_incar.__init__(self)
         output_data.output_data.__init__(self)
+        cal_add_strain.cal_add_strain.__init__(self)
 
-        self.unit_delta = 0.0005
-        self.npts = 6
+        self.unit_delta = 0.001
+        self.npts = 50
         self.volume = None
         self.energy0 = None
 
-        self.cij_type_list = ['c11', 'c12', 'c44']
+        self.cij_type_list = ['c12', 'c44']
 
         if self.pot["structure"] == 'bcc':
             gn_config.bcc.__init__(self, self.pot)
@@ -108,7 +111,8 @@ class cal_cij(gn_config.bcc,
 
     def obtain_cij_old(self):
         self.volume = 18.30
-        self.energy0 = -10.09407662
+        # self.energy0 = -10.09407662
+        self.energy0 = -10.09207329
 
         data = np.loadtxt("c11_summary_35.00")
         delta_list = np.array(data[:, 0])
@@ -133,12 +137,32 @@ class cal_cij(gn_config.bcc,
         print c11, c12, c44
 
     def set_volume_energy0(self):
-        raw = np.loadtxt("equilibrium.txt")
-        self.volume = np.average(raw[:, 0])
-        self.energy0 = np.average(raw[:, 1])
+        self.volume = self.pot["lattice"] ** 3 / 2.
+        self.energy0 = -10.09207329
 
     def set_cij_type(self, cij_type):
         self.cij_type = cij_type
+
+    def loop_prepare_cij_otho(self):
+        for kk in ['D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'D8', 'D9']:
+            for j in range(-self.npts, self.npts):
+                delta = self.unit_delta * j
+                if j >= 0:
+                    mdir = "dir-%s-p%03d" % (kk, j)
+                else:
+                    mdir = "dir-%s-n%03d" % (kk, -j)
+
+                self.mymkdir(mdir)
+
+                atoms = self.set_bcc_primitive((1, 1, 1))
+                atoms = self.strain_for_otho(delta, atoms, kk)
+                ase.io.write("POSCAR", images=atoms, format="vasp")
+
+                os.system("cp va.pbs {}".format(mdir))
+                os.system("cp POTCAR {}".format(mdir))
+                os.system("cp POSCAR {}".format(mdir))
+                os.system("cp KPOINTS {}".format(mdir))
+                os.system("cp INCAR {}".format(mdir))
 
     def loop_prepare_cij(self):
         for mtype in self.cij_type_list:
@@ -183,9 +207,6 @@ class cal_cij(gn_config.bcc,
 
                 self.output_delta_energy(delta, energy,
                                          file_name=out_file_name)
-                if j == 0:
-                    self.output_equilibrium(energy=energy,
-                                            volume=volume)
         #  fout = open("%s_summary"%cname,"w")
             #  fout.write("%22.16f %22.16f\n"%(delta_increment*i, energy))
         #  answer = fit_para(cname,E0)
@@ -202,7 +223,8 @@ if __name__ == "__main__":
     drv = cal_cij()
     dispatcher = {'prep': drv.loop_prepare_cij,
                   'cal': drv.obtain_cij,
-                  'clc': drv.collect_data_cij}
+                  'clc': drv.collect_data_cij,
+                  'otho': drv.loop_prepare_cij_otho}
 
     if options.fargs is not None:
         dispatcher[options.mtype.lower()](options.fargs)

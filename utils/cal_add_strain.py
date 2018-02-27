@@ -4,13 +4,17 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-20 23:19:31
+# @Last Modified time: 2018-02-23 15:47:24
 
 
 import numpy as np
+import cal_add_strain_otho
 
 
-class cal_add_strain(object):
+class cal_add_strain(cal_add_strain_otho.strain_otho):
+
+    def __init__(self):
+        cal_add_strain_otho.strain_otho.__init__(self)
 
     def volume_conserving_ortho_strain(self, delta):
         atom_number, supercell_base, comment, atom_position =\
@@ -42,7 +46,6 @@ class cal_add_strain(object):
                            atom_position[1, i],
                            atom_position[2, i]))
             fid.close()
-        return
 
     def add_volumeric_strain(self, atoms, delta):
         cell = np.mat(atoms.get_cell())

@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-02-23 03:18:30
+# @Last Modified time: 2018-02-27 10:06:42
 
 
 import numpy as np
@@ -107,26 +107,20 @@ class cal_lattice(gn_config.bcc,
             os.chdir(os.pardir)
 
     def gn_fcc(self):
-        alat0 = 3.90
+        alat0 = self.pot["latfcc"]
         delta = 0.005
-        #  rng = [-20, 20]
-        rng = [20, 50]
-        fcc_drv = gn_config.fcc(self.pot)
-
+        rng = [-50, 50]
+        gn_config.fcc.__init__(self, self.pot)
         for i in range(rng[0], rng[1]):
             alat = alat0 + i * delta
             if i >= 0:
                 mdir = "dir-p-{:03d}".format(i)
             else:
                 mdir = "dir-n-{:03d}".format(abs(i))
-
             self.mymkdir(mdir)
             os.chdir(mdir)
-
-            fcc_drv.set_lattce_constant(alat)
-            atoms = fcc_drv.set_fcc_primitive((1, 1, 1))
+            atoms = self.set_fcc_primitive((1, 1, 1))
             ase.io.write(filename="POSCAR", images=atoms, format='vasp')
-
             self.prepare_vasp_inputs(mdir)
             os.chdir(os.pardir)
 
@@ -155,7 +149,7 @@ class cal_lattice(gn_config.bcc,
             os.chdir(os.pardir)
 
     def collect_data(self, tag='hcp'):
-        rng = [-20, 20]
+        rng = [-50, 50]
         data = np.zeros([rng[1] - rng[0], 3])
         cnt = 0
         for i in range(rng[0], rng[1]):
