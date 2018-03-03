@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-03 02:25:45
+# @Last Modified time: 2018-03-03 02:45:10
 
 
 from scipy.optimize import minimize
@@ -16,7 +16,7 @@ class cal_bcc_ideal_shear_run(object):
     def qe_relax(self):
         (delta, x0) = self.load_input_params()
         data = np.zeros(7)
-        res = minimize(self.runqe, x0, delta, tol=5.e-4, method='Nelder-Mead')
+        res = minimize(self.runqe, x0, delta, tol=5e-4, method='Nelder-Mead')
         print res
         data[0] = delta
         data[1] = res.fun
@@ -27,7 +27,7 @@ class cal_bcc_ideal_shear_run(object):
         self.cnt = 0
         (delta, x0) = self.load_input_params()
         data = np.zeros(7)
-        res = minimize(self.runvasp, x0, delta, tol=5e-4, method='Nelder-Mead')
+        res = minimize(self.runvasp, x0, delta, tol=1e-3, method='Nelder-Mead')
         print res
         data[0] = delta
         data[1] = res.fun
@@ -90,9 +90,9 @@ class cal_bcc_ideal_shear_run(object):
         new_strain = basis.transpose() * strain * basis
         self.gn_primitive_lmps(new_strain, 'vasp')
         os.system("mpirun vasp > vasp.log")
-        os.system("mv OUTCAR outcar-{:03d}".format(self.cnt))
-        self.cnt += 1
         print "cnt = ", self.cnt
         (engy, stress, vol) = self.vasp_energy_stress_vol()
         self.recordstrain(delta, x, engy)
+        os.system("mv OUTCAR outcar-{:03d}".format(self.cnt))
+        self.cnt += 1
         return engy

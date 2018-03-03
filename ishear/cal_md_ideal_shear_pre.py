@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-03 01:57:42
+# @Last Modified time: 2018-03-03 02:28:46
 
 
 import os
@@ -92,8 +92,8 @@ class cal_bcc_ideal_shear_pre(object):
         self.set_ppn(12)
         self.set_job_title("%s" % (dirname))
         self.set_wall_time(50)
-        self.set_main_job("""../cal_md_ideal_shear.py  -t  i{}""".format(opt))
-        self.write_pbs(od=False)
+        self.set_main_job("""cal_md_ideal_shear.py  -t iva""".format(opt))
+        self.write_pbs(od=True)
 
     def loop_prep_vasp(self):
         npts = self.npts
@@ -102,9 +102,9 @@ class cal_bcc_ideal_shear_pre(object):
             dirname = "dir-{:03d}".format(i)
             self.mymkdir(dirname)
             os.system("echo {} > strain.txt".format(delta))
-            self.copy_inputs(dirname, 'KPOINTS',
-                             'INCAR', 'POTCAR', 'strain.txt')
             self.set_pbs(dirname, delta)
+            self.copy_inputs(dirname, 'KPOINTS', 'INCAR',
+                             'POTCAR', 'strain.txt', 'va.pbs')
 
     def loop_prep_restart(self, opt='qe'):
         raw = np.mat(np.loadtxt("ishear.txt"))
