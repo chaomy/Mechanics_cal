@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-04 20:53:50
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-03 02:11:50
+# @Last Modified time: 2018-03-03 02:23:12
 
 
 from md_pot_data import unitconv
@@ -50,7 +50,7 @@ class cal_bcc_ideal_shear_pos(object):
             data = np.loadtxt("strain.txt")
             delta = data
             x0 = np.array([1., 1., 1., 0.0, 0.0])
-        np.savetxt('init.save', data)
+        # np.savetxt('init.save', data)
         return (delta, x0)
 
     def transdata(self, ptype='format'):
