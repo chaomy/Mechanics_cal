@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-03 02:14:05
+# @Last Modified time: 2018-03-03 02:24:56
 
 
 from scipy.optimize import minimize
@@ -90,7 +90,7 @@ class cal_bcc_ideal_shear_run(object):
         new_strain = basis.transpose() * strain * basis
         self.gn_primitive_lmps(new_strain, 'vasp')
         os.system("mpirun vasp > vasp.log")
-        os.system("mv OUTCAR {outcar-{:03d}}".format(self.cnt))
+        os.system("mv OUTCAR outcar-{:03d}".format(self.cnt))
         self.cnt += 1
         (engy, stress, vol) = self.vasp_energy_stress_vol()
         self.recordstrain(delta, x, engy)
