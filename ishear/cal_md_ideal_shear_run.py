@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-03 02:45:10
+# @Last Modified time: 2018-03-03 02:51:37
 
 
 from scipy.optimize import minimize
@@ -50,7 +50,7 @@ class cal_bcc_ideal_shear_run(object):
         np.savetxt("ishear.txt", data)
 
     def recordstrain(self, delta, x, fval):
-        fid = open("s{:4.3f}.txt".format(delta), "a")
+        fid = open("strain.txt", "a")
         fid.write('{} {} {} {} {} {}\n'.format(x[0], x[1], x[2],
                                                x[3], x[4], fval))
         fid.close()
