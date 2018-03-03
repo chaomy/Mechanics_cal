@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-21 18:42:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-02-27 00:47:09
+# @Last Modified time: 2018-02-28 21:25:23
 
 
 import glob
@@ -37,7 +37,7 @@ class cal_cij(gn_config.bcc,
         output_data.output_data.__init__(self)
         cal_add_strain.cal_add_strain.__init__(self)
 
-        self.unit_delta = 0.001
+        self.unit_delta = 0.002
         self.npts = 50
         self.volume = None
         self.energy0 = None
@@ -167,7 +167,9 @@ class cal_cij(gn_config.bcc,
     def loop_prepare_cij(self):
         for mtype in self.cij_type_list:
             self.cij_type = mtype
-            for j in range(-self.npts, self.npts):
+            # for j in range(-self.npts, self.npts):
+            for j in range(-80, -50):
+                # for j in range(50, 80):
                 delta = self.unit_delta * j
                 if j >= 0:
                     mdir = "dir-%s-p%03d" % (mtype, j)

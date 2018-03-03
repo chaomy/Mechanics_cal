@@ -4,9 +4,11 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-02-27 10:06:42
+# @Last Modified time: 2018-03-02 23:07:28
 
 
+import ase.lattice.hexagonal as Hexagonal
+import ase.io
 import numpy as np
 import glob
 from scipy.interpolate import interp1d
@@ -46,20 +48,26 @@ class cal_lattice(gn_config.bcc,
 
     def interpolate_lattice(self, filename):
         data = np.loadtxt(filename)
+        print data[:, 1]
+
         lattice = np.abs(data[:, 0])
         energy = data[:, 1]
+
         InterPoints = np.linspace(lattice[0], lattice[-1], 101)
         f = interp1d(lattice, energy)
         Ynew = f(InterPoints)
         i = np.argmin(Ynew)
+
         print "min energy ", np.min(energy)
         print "num", np.argmin(energy), "lattice", InterPoints[i]
+
         print(np.min(Ynew))
 
         self.set_111plt()
         self.ax.plot(lattice, energy, label="lat = {:5f}".format(
             2 * InterPoints[i]), **next(self.keysiter))
         self.add_legends(self.ax)
+
         plt.savefig("lattice.png")
 
     def set_pbs(self, mdir):
@@ -77,21 +85,22 @@ class cal_lattice(gn_config.bcc,
             cal_lattice(file)
 
     def prepare_vasp_inputs(self, mdir):
-        # self.set_incar_type('dftunrelax')
         # self.write_incar()
-        self.set_diff_kpoints([31, 31, 31])
-        self.set_intype('gamma')
-        self.write_kpoints()
+        # self.set_diff_kpoints([31, 31, 31])
+        # self.set_intype('gamma')
+        # self.write_kpoints()
         self.set_pbs(mdir)
-        os.system("cp ../INCAR .")
-        os.system("cp ../POTCAR .")
+        os.system("mv va.pbs {}".format(mdir))
+        os.system("cp KPOINTS {}".format(mdir))
+        os.system("cp INCAR {}".format(mdir))
+        os.system("cp POTCAR {}".format(mdir))
 
     def gn_bcc(self):
         alat0 = self.pot['latbcc']
         delta = 0.001
         # rng = [-20, 20]
         # rng = [20, 100]
-        rng = [-100, -20]
+        rng = [-400, -100]
         gn_config.bcc.__init__(self, self.pot)
         for i in range(rng[0], rng[1]):
             self.pot["latbcc"] = alat0 + i * delta
@@ -100,11 +109,10 @@ class cal_lattice(gn_config.bcc,
             else:
                 mdir = "dir-n-{:03d}".format(abs(i))
             self.mymkdir(mdir)
-            os.chdir(mdir)
             atoms = self.set_bcc_primitive((1, 1, 1))
             ase.io.write(filename="POSCAR", images=atoms, format='vasp')
+            os.system("mv POSCAR {}".format(mdir))
             self.prepare_vasp_inputs(mdir)
-            os.chdir(os.pardir)
 
     def gn_fcc(self):
         alat0 = self.pot["latfcc"]
@@ -112,17 +120,41 @@ class cal_lattice(gn_config.bcc,
         rng = [-50, 50]
         gn_config.fcc.__init__(self, self.pot)
         for i in range(rng[0], rng[1]):
-            alat = alat0 + i * delta
+            self.pot["latfcc"] = alat0 + i * delta
             if i >= 0:
                 mdir = "dir-p-{:03d}".format(i)
             else:
                 mdir = "dir-n-{:03d}".format(abs(i))
             self.mymkdir(mdir)
-            os.chdir(mdir)
             atoms = self.set_fcc_primitive((1, 1, 1))
             ase.io.write(filename="POSCAR", images=atoms, format='vasp')
+            os.system("mv POSCAR {}".format(mdir))
             self.prepare_vasp_inputs(mdir)
-            os.chdir(os.pardir)
+
+    def gn_hcp_mesh(self):
+        da = 0.01
+        dc = 0.02
+        shift = -da * 25
+        shift = -dc * 8
+
+        for i in range(50):
+            for j in range(16):
+                mdir = "dir-{:03d}-{:03d}".format(i, j)
+
+                aa = self.pot["ahcp"] + shift + da * i
+                cc = self.pot["chcp"] + shift + dc * j
+
+                atoms = Hexagonal.HexagonalClosedPacked(
+                    latticeconstant={'a': aa,
+                                     'c': cc},
+                    size=(1, 1, 1),
+                    symbol=self.pot["element"],
+                    pbc=(1, 1, 1))
+
+                self.mymkdir(mdir)
+                ase.io.write(filename="POSCAR", images=atoms, format='vasp')
+                os.system("mv POSCAR {}".format(mdir))
+                self.prepare_vasp_inputs(mdir)
 
     def gn_hcp(self):
         alat0 = self.pot['ahcp']
@@ -186,6 +218,7 @@ if __name__ == '__main__':
                   'bcc': drv.gn_bcc,
                   'fcc': drv.gn_fcc,
                   'hcp': drv.gn_hcp,
+                  'hcp2': drv.gn_hcp_mesh,
                   'clc': drv.collect_data}
 
     if options.fargs is not None:

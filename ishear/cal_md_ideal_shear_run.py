@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-28 22:29:43
+# @Last Modified time: 2018-03-03 02:14:05
 
 
 from scipy.optimize import minimize
@@ -22,9 +22,9 @@ class cal_bcc_ideal_shear_run(object):
         data[1] = res.fun
         data[2:] = res.x
         np.savetxt("ishear.txt", data)
-        return
 
     def vasp_relax(self):
+        self.cnt = 0
         (delta, x0) = self.load_input_params()
         data = np.zeros(7)
         res = minimize(self.runvasp, x0, delta, tol=5e-4, method='Nelder-Mead')
@@ -33,7 +33,6 @@ class cal_bcc_ideal_shear_run(object):
         data[1] = res.fun
         data[2:] = res.x
         np.savetxt("ishear.txt", data)
-        return
 
     def loop_shear_lmp(self):
         x0 = np.array([1.2, 1.1, 0.9, 0., 0.])
@@ -49,14 +48,12 @@ class cal_bcc_ideal_shear_run(object):
             data[i][1] = res.fun
             data[i][2:] = res.x
         np.savetxt("ishear.txt", data)
-        return
 
     def recordstrain(self, delta, x, fval):
         fid = open("s{:4.3f}.txt".format(delta), "a")
         fid.write('{} {} {} {} {} {}\n'.format(x[0], x[1], x[2],
                                                x[3], x[4], fval))
         fid.close()
-        return
 
     def runlmp(self, x, delta):
         basis = self.basis
@@ -93,6 +90,8 @@ class cal_bcc_ideal_shear_run(object):
         new_strain = basis.transpose() * strain * basis
         self.gn_primitive_lmps(new_strain, 'vasp')
         os.system("mpirun vasp > vasp.log")
+        os.system("mv OUTCAR {outcar-{:03d}}".format(self.cnt))
+        self.cnt += 1
         (engy, stress, vol) = self.vasp_energy_stress_vol()
         self.recordstrain(delta, x, engy)
         return engy

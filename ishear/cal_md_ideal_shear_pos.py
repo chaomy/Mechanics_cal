@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-04 20:53:50
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-29 21:16:18
+# @Last Modified time: 2018-03-03 02:11:50
 
 
 from md_pot_data import unitconv
@@ -70,7 +70,6 @@ class cal_bcc_ideal_shear_pos(object):
                 ase.io.write(filename='poscar', images=atoms, format='vasp')
                 os.system('mv poscar ../poscar_{:03}'.format(i))
                 os.chdir(os.pardir)
-        return
 
     def plt_check(self):
         file = glob.glob('s0.*.txt')[0]
@@ -79,7 +78,6 @@ class cal_bcc_ideal_shear_pos(object):
         xx = np.linspace(0, 1, len(data))
         self.ax.plot(xx, data[:, -1])
         self.fig.savefig('fig-engy.png')
-        return
 
     def trans_coords_to_cartisian(self, stress):
         basis = self.basis
@@ -117,7 +115,6 @@ class cal_bcc_ideal_shear_pos(object):
                 np.savetxt('ishear.txt', data)
             elif mtype in ['out']:
                 np.savetxt('stress.txt', data)
-        return
 
     def va_loop_stress(self):
         npts = self.npts
@@ -132,7 +129,6 @@ class cal_bcc_ideal_shear_pos(object):
             data[i, 7:] = self.get_va_stress()
             os.chdir(self.root)
         np.savetxt("stress.txt", data)
-        return
 
     def load_sfile_txt(self):
         flist = glob.glob("s0.*.txt")
@@ -184,7 +180,6 @@ class cal_bcc_ideal_shear_pos(object):
                 print "coeff", convunit / vol[i]
                 data[i, -1] = splder1(raw[i, 0]) * convunit / vol[i]
         np.savetxt("stress.txt", data)
-        return
 
     ##########################################################
     # used for lammps
@@ -218,7 +213,6 @@ class cal_bcc_ideal_shear_pos(object):
                 data[i, -1] = splder1(raw[i, 0]) * convunit / vol[i]
         print data
         np.savetxt("stress.txt", data)
-        return
 
     def prep_restart_from_log(self):
         flist = glob.glob("s0.*.txt")
@@ -247,7 +241,6 @@ class cal_bcc_ideal_shear_pos(object):
                 os.chdir(os.pardir)
                 data[i, :] = raw
         np.savetxt('ishear.txt', data)
-        return
 
     def get_va_stress(self):
         basis = self.basis
@@ -276,7 +269,6 @@ class cal_bcc_ideal_shear_pos(object):
         stress = np.mat(stress)
         stress = basis * stress * basis.transpose()
         print stress
-        return
 
     # for unfinished runs (temporary)
     def get_engy(self, file):
@@ -352,4 +344,3 @@ class cal_bcc_ideal_shear_pos(object):
                 print data[i, -1]
             print data
             np.savetxt("stress.txt", data)
-        return

@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-28 22:12:11
+# @Last Modified time: 2018-03-03 01:57:42
 
 
 import os
@@ -20,7 +20,6 @@ class cal_bcc_ideal_shear_pre(object):
         self.set_degauss('0.03D0')
         self.set_ecut('45')
         self.set_kpnts((33, 33, 33))
-        return
 
     def gn_primitive_lmps(self,
                           strain=np.mat(np.identity(3)),
@@ -58,7 +57,6 @@ class cal_bcc_ideal_shear_pre(object):
                               cell=cell,
                               pbc=[1, 1, 1])
             self.write_lmp_config_data(atoms, 'init.txt')
-        return
 
     def gn_shear_twin_path(self):
         e1 = 0.5 * np.array([-1, 1, 1])
@@ -81,7 +79,6 @@ class cal_bcc_ideal_shear_pre(object):
                               cell=cell, pbc=[1, 1, 1])
             ase.io.write("POSCAR_{:03d}".format(i),
                          images=atoms, format='vasp')
-        return
 
     def loop_set_pbs(self):
         dirlist = glob('dir-*')
@@ -89,7 +86,6 @@ class cal_bcc_ideal_shear_pre(object):
             os.chdir(mdir)
             self.set_pbs(mdir)
             os.chdir(os.pardir)
-        return
 
     def set_pbs(self, dirname, opt='qe'):
         self.set_nnodes(1)
@@ -98,7 +94,6 @@ class cal_bcc_ideal_shear_pre(object):
         self.set_wall_time(50)
         self.set_main_job("""../cal_md_ideal_shear.py  -t  i{}""".format(opt))
         self.write_pbs(od=False)
-        return
 
     def loop_prep_vasp(self):
         npts = self.npts
@@ -110,7 +105,6 @@ class cal_bcc_ideal_shear_pre(object):
             self.copy_inputs(dirname, 'KPOINTS',
                              'INCAR', 'POTCAR', 'strain.txt')
             self.set_pbs(dirname, delta)
-        return
 
     def loop_prep_restart(self, opt='qe'):
         raw = np.mat(np.loadtxt("ishear.txt"))
@@ -127,4 +121,3 @@ class cal_bcc_ideal_shear_pre(object):
                                                      dirname))
             self.set_pbs(dirname, 'qe')
             os.system('mv va.pbs {}'.format(dirname))
-        return
