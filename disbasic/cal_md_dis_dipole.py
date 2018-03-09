@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-02-14 22:42:36
+# @Last Modified time: 2018-03-04 20:02:31
 
 from numpy import cos, sin, sqrt, mat
 from collections import OrderedDict
@@ -154,7 +154,6 @@ class cal_dis_dipole(gn_config.bcc):
         Gamma = Gamma * 1e9  # Pa
         ke1 = sqrt(Gamma * usf)
         print ke1 * 1e-6
-        return
 
         # A = mat(np.zeros([3, 3]), dtype='complex')
         # A[:, 0] = mat(stroh.A[1]).transpose()
@@ -229,7 +228,6 @@ class cal_dis_dipole(gn_config.bcc):
 
         atoms.set_positions(pos + np.real(disp1) - np.real(disp2))
         ase.io.write('tri_dis_poscar.vasp', atoms, format='vasp')
-        return
 
     def bcc_screw_dipole_configs_alongz(self, sizen=1):
         c = tool_elastic_constants.elastic_constants(

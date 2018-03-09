@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-02-18 14:14:57
+# @Last Modified time: 2018-03-03 16:16:25
 
 
 import os
@@ -27,7 +27,8 @@ class cal_bcc_ideal_tensile_op(get_data.get_data,
                                gn_config.bcc):
 
     def __init__(self):
-        self.pot = md_pot_data.md_pot.Nb_meamc
+        # self.pot = md_pot_data.md_pot.Nb_meamc
+        self.pot = self.load_data('pot.dat')
         gn_pbs.gn_pbs.__init__(self)
         plt_drv.plt_drv.__init__(self)
         get_data.get_data.__init__(self)

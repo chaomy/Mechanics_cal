@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-08 15:32:01
+# @Last Modified time: 2018-03-06 02:38:57
 
 
 from copy import deepcopy
@@ -31,7 +31,6 @@ class cal_qe_gsf(object):
             'WRe20': md_pot_data.qe_pot.vca_W80Re20,
             'WRe25': md_pot_data.qe_pot.vca_W75Re25,
             'WRe50': md_pot_data.qe_pot.vca_W50Re50}
-        return
 
     def setup_qe_scf(self):
         self.set_cal_type('scf')
@@ -40,7 +39,6 @@ class cal_qe_gsf(object):
         self.set_thr('1.0D-6')
         self.set_kpnts(gsf_data.gsfkpts[self.mgsf])
         self.set_maxseconds(3600 * 24)
-        return
 
     def setup_qe_relax(self):
         self.set_cal_type('relax')
@@ -49,7 +47,6 @@ class cal_qe_gsf(object):
         self.set_thr('1.0D-6')
         self.set_kpnts(gsf_data.gsfkpts[self.mgsf])
         self.set_maxseconds(3600 * 100)
-        return
 
     def gn_qe_single_dir_gsf(self, mtype='relax'):
         # if self.mgsf in ['x111z110']:
@@ -97,7 +94,6 @@ class cal_qe_gsf(object):
             self.write_lmp_config_data(local_atoms)
             os.system("mv poscar ../poscar.{:03d}".format(i))
             os.chdir(os.pardir)
-        return
 
     def check_gsf(self):
         for key in gsf_data.gsfsize:
@@ -111,4 +107,3 @@ class cal_qe_gsf(object):
 
             print(key, len(atomss) - len(atomsb),
                   gsf_data.gsfpopn[key])
-        return

@@ -4,123 +4,68 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-01-26 11:09:24
+# @Last Modified time: 2018-03-06 03:11:33
 
 
 import os
 import glob
-import copy
 import shutil
 import numpy as np
 import matplotlib.pylab as plt
+import ase
 from optparse import OptionParser
+from copy import deepcopy
 import gsf_data
 
 
 class cal_va_gsf(object):
 
-    def add_alloy(self, num):
-        with open("POSCAR", 'r') as fid:
-            raw = fid.readlines()
-            Cut = 36
-            print raw[5:]
-            print raw[8:8 + Cut]
-        with open("POSCARnew", 'w') as fid:
-            for i in range(5):
-                fid.write(raw[i])
-            fid.write("Cu  Au \n")
-            fid.write("%d  %d \n" % (num - 1, 1))
-            fid.write("Selective Dynamics\n")
-            fid.write("Cartesian\n")
-            for i in range(Cut):
-                fid.write(raw[8 + i])
-            for j in range(num - Cut - 1):
-                fid.write(raw[9 + Cut + j])
-            fid.write(raw[8 + Cut])
-            fid.close()
-        shutil.copy("POSCARnew", "POSCAR.vasp")
-        shutil.copy("POSCARnew", "POSCAR")
-        return
-
-    def add_selective_dynamics(self, num, tag="F   F   T"):
-        raw = self.mreadlines("POSCAR")
-        rawNew = []
-        for i in range(7, 7 + num):
-            rawNew.append("%s  %s  %s  %s\n"
-                          % (raw[i].split()[0],
-                             raw[i].split()[1],
-                              raw[i].split()[2],
-                              tag))
-        with open("POSCARnew", 'w') as fid:
-            for i in range(6):
-                fid.write(raw[i])
-            fid.write("Selective Dynamics\n")
-            fid.write("Cartesian\n")
-            for i in range(num):
-                fid.write(rawNew[i])
-            fid.close()
-        shutil.move("POSCAR",    "POSCAR_no_SD")
-        shutil.move("POSCARnew", "POSCAR")
-        return
-
     def prepare_vasp_inputs(self, mdir):
-        self.set_incar_type('dft2')
-        self.set_nsw(0)
-        self.write_incar()
-
-        self.set_diff_kpoints(gsf_data.gsfkpts[self.mgsf])
-        self.set_intype('gamma')
-        self.write_kpoints()
-
         self.set_pbs_type('va')
-        self.set_wall_time(40)
-        self.set_job_title(mdir[7:])
-        self.set_nnodes(2)
+        self.set_wall_time(30)
+        self.set_job_title(mdir[:3])
+        self.set_nnodes(1)
         self.set_main_job("mpirun vasp")
-        self.write_pbs()
+        self.write_pbs(od=True)
+        os.system("mv va.pbs {}".format(mdir))
+        os.system("cp INCAR {}".format(mdir))
+        os.system("cp POTCAR {}".format(mdir))
+        os.system("cp KPOINTS {}".format(mdir))
+        os.system("cp POSCAR {}".format(mdir))
 
-        os.system("cp ../../POTCAR .")
-        return
+    def gn_va_single_dir_gsf(self, mtype='relax'):
+        # if self.mgsf in ['x111z110']:
+        #     atoms = self.gn_bcc110()
+        # elif self.mgsf in ['x111z112']:
 
-    def change_pbs(self):
-        dirlist = glob.glob("dir-*")
-        for dirname in dirlist:
-            os.chdir(dirname)
-
-            self.set_pbs_type('va')
-            self.set_accuracy(1e-5)
-            self.set_wall_time(80)
-            self.set_job_title(dirname[7:])
-            self.set_nnodes(2)
-            self.set_main_job("mpirun vasp")
-            self.write_pbs()
-
-            os.chdir(os.pardir)
-        return
-
-    def va_gsf_given_dis(self, given_disp):
         atoms = self.gn_gsf_atoms()
-        perf_cells = copy.deepcopy(atoms.get_cell())
-        mdir = 'dir-x-%.3f-%s' % (given_disp, self.mgsf)
+        atoms.wrap()
+        perf_cells = deepcopy(atoms.get_cell())
+        ase.io.write('perf_poscar', images=atoms, format='vasp')
 
-        self.mymkdir(mdir)
-        disp_vector = [given_disp, 0, 0]
-        disp_matrix_direct = self.gn_displacement(atoms.copy(),
-                                                  disp_vector)
-        print disp_matrix_direct
+        disps = np.linspace(0, 1.0, 21)
+        disps = np.append(disps, 0.0)
+        npts = len(disps)
 
-        disp_matrix = copy.deepcopy(disp_matrix_direct)
+        for i, disp in zip(range(npts), disps):
+            dirname = 'dir-{}-{:4.3f}'.format(self.mgsf, disp)
+            self.mymkdir(dirname)
 
-        cell_length_x = perf_cells[0, 0]
-        disp_matrix[:, 0] = disp_matrix_direct[:, 0] * cell_length_x
+            if self.mgsf in ['x111z110']:
+                disp_vector = [disp, disp, 0]
+            else:
+                disp_vector = [disp, 0.0, 0.0]
 
-        local_atoms = atoms.copy()
-        local_atoms.translate(disp_matrix)
-        # add small perturbation #
-        local_atoms = self.add_perturbation(local_atoms, 1.0)
-        self.write_poscar(local_atoms)
-        os.chdir(os.pardir)
-        return
+            disp_matrix_direct = self.gn_displacement(
+                atoms.copy(), disp_vector)
+            disp_matrix = deepcopy(disp_matrix_direct)
+            disp_matrix[:, 0] = disp_matrix_direct[:, 0] * perf_cells[0, 0]
+
+            local_atoms = atoms.copy()
+            local_atoms.translate(disp_matrix)
+            ase.io.write('POSCAR', images=local_atoms, format='vasp')
+            self.prepare_vasp_inputs(dirname)
+            os.system("cp POSCAR poscar.{:03d}".format(i))
 
     def vasp_single_dir_gsf(self):
         atoms = self.gn_gsf_atoms()
@@ -129,8 +74,7 @@ class cal_va_gsf(object):
         delta = 1. / (npts - 1)
         for i in range(0, npts):
             mdir = 'dir-x-%03d-%s' % (i, self.mgsf)
-            if not os.path.isdir(mdir):
-                os.mkdir(mdir)
+            self.mymkdir(mdir)
             os.chdir(mdir)
 
             disp_vector = [i * delta, 0, 0]
@@ -152,7 +96,6 @@ class cal_va_gsf(object):
             os.system("cp POSCAR.vasp ../POSCAR%03d.vasp" % (i))
 
             os.chdir(os.pardir)
-        return
 
     def collect_vasp_gsf_energy(self):  # to be done
         disp_list, energy_list, area_list = [], [], []
@@ -176,17 +119,15 @@ class cal_va_gsf(object):
             for i in range(len(disp_list)):
                 fid.write("%d  %f  %f  %f \n" %
                           (i, disp_list[i],  area_list[i], energy_list[i]))
-        return
 
     def loop_vasp_gsf_surface(self):
         for j in range(0, 1):
             for i in range(0, 11):
                 mdir = 'dir-x-%03d-y-%03d' % (i, j)
-                os.mkdir(mdir)
+                self.mymkdir(mdir)
                 shutil.copy('POTCAR', mdir)
 
                 os.chdir(mdir)
-
                 disp_vector = [i * 0.05, j * 0, 0]
                 print disp_vector
                 disp_matrix_direct = self.gn_displacement(atoms.copy(),
@@ -209,7 +150,6 @@ class cal_va_gsf(object):
 
                 os.system("cp POSCAR POSCAR-{0:03d}.vasp".format(i))
                 os.chdir(os.pardir)
-        return
 
     def plot_gsf_data(self, tag="full"):
         data = np.loadtxt("DATA")
@@ -265,37 +205,30 @@ class cal_va_gsf(object):
 
         fig.savefig("gsf.png",
                     bbox_inches='tight', pad_inches=0.01)
-        return
 
 
 if __name__ == '__main__':
     usage = "usage:%prog [options] arg1 [options] arg2"
     parser = OptionParser(usage=usage)
-    parser.add_option("-t",
-                      "--mtype",
-                      action="store",
-                      type="string",
-                      dest="mtype")
+    parser.add_option('-t', "--mtype", action="store",
+                      type="string", dest="mtype")
+    parser.add_option('-p', "--param", action="store",
+                      type='string', dest="fargs")
     (options, args) = parser.parse_args()
+
     # lattice W    3.1711
     #         Nb   3.3224040
     gsf111_211 = {'type': '111_211', 'kpoints': [23, 21, 1]}
     gsf111_110 = {'type': '111_110', 'kpoints': [23, 11, 1]}
+
     ingsf = gsf111_211
-    Job = cal_gsf()
+    Job = cal_va_gsf()
     # cal total lists of given shift direction #
     if options.mtype.lower() == "single":
         Job.vasp_single_dir_gsf()
-
-    # cal given strain at given direction #
-    if options.mtype.lower() == "given":
-        Job.va_gsf_given_dis(0.25)
 
     if options.mtype == "clc":
         Job.collect_vasp_gsf_energy()
 
     if options.mtype == "plt":
         Job.plot_gsf_data()
-
-    if options.mtype == "pbs":
-        Job.change_pbs()

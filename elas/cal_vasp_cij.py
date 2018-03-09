@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-21 18:42:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-02-28 21:25:23
+# @Last Modified time: 2018-03-03 15:40:52
 
 
 import glob
@@ -37,11 +37,11 @@ class cal_cij(gn_config.bcc,
         output_data.output_data.__init__(self)
         cal_add_strain.cal_add_strain.__init__(self)
 
-        self.unit_delta = 0.002
+        # self.unit_delta = 0.002 near equilibrim
+        self.unit_delta = 0.003 
         self.npts = 50
         self.volume = None
         self.energy0 = None
-
         self.cij_type_list = ['c12', 'c44']
 
         if self.pot["structure"] == 'bcc':
@@ -145,7 +145,8 @@ class cal_cij(gn_config.bcc,
 
     def loop_prepare_cij_otho(self):
         for kk in ['D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'D8', 'D9']:
-            for j in range(-self.npts, self.npts):
+            # for j in range(-self.npts, self.npts):
+            for j in range(-100, -50) + range(50, 100):
                 delta = self.unit_delta * j
                 if j >= 0:
                     mdir = "dir-%s-p%03d" % (kk, j)

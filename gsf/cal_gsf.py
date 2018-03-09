@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-02-20 00:08:54
+# @Last Modified time: 2018-03-08 23:27:06
 
 
 import gn_lmp_infile
@@ -59,11 +59,11 @@ class cal_gsf(gn_config.bcc,
               cal_md_gsf.cal_md_gsf,
               cal_va_gsf.cal_va_gsf):
 
-    def __init__(self,
-                 pot=md_pot_data.md_pot.Nb_meam,
+    def __init__(self, pot=md_pot_data.va_pot.Nb_pbe,
                  mgsf='x111z112'):
 
-        self.pot = self.load_data("pot.dat")
+        self.pot = pot
+        # self.pot = self.load_data("pot.dat")
         self.mgsf = mgsf
         self.sample_gsf_num = 21
         self.disp_delta = 1. / (self.sample_gsf_num - 1)
@@ -94,7 +94,6 @@ class cal_gsf(gn_config.bcc,
                                              self.pot['latbcc'] * sqrt(2)),
                             size=(1, 1, 15),
                             symbol=self.pot['element'])
-        print atoms
         for i in range(12):
             atoms.pop()
         ase.io.write('poscar', images=atoms, format='vasp')
@@ -138,7 +137,6 @@ class cal_gsf(gn_config.bcc,
         gsf = (data[:, 3] - data[-1, 3]) / (2 * data[:, 2])
         usf = np.max(gsf)
         print("usf = {} eV/A^2".format(usf))
-        return
 
     def plt_gsf(self):
         dftgsfNb111z110 = [0.0, 0.0055, 0.0183, 0.0292, 0.0389, 0.0442, 0.0389,
@@ -177,6 +175,8 @@ class cal_gsf(gn_config.bcc,
             self.gn_qe_single_dir_gsf()
         if opt in ['md']:
             self.md_single_dir_gsf()
+        if opt in ['va']:
+            self.gn_va_single_dir_gsf()
 
     def wrap_loop(self, opt='md'):
         if opt in ['md']:

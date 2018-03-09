@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-02-18 14:25:43
+# @Last Modified time: 2018-03-07 14:00:13
 
 
 from optparse import OptionParser
@@ -17,6 +17,17 @@ class cal_md_ideal_tensile_plt(plt_drv.plt_drv):
 
     def __init__(self):
         plt_drv.plt_drv.__init__(self)
+
+    def plt_mesh(self):
+        data = np.loadtxt("save.txt")
+        xx = data[:, 0].reshape(20, 20)
+        yy = data[:, 1].reshape(20, 20)
+        zz = data[:, 2].reshape(20, 20)
+        print xx
+        self.set_111plt()
+        cs = self.ax.contour(xx, yy, zz)
+        self.ax.clabel(cs, inline=0.02, lw=5, fontsize=6)
+        self.fig.savefig("fig_mesh.png")
 
     def plt_strain_vs_energy(self, infile='ishear.txt'):
         raw = np.loadtxt(infile)
@@ -130,7 +141,7 @@ class cal_md_ideal_tensile_plt(plt_drv.plt_drv):
                       label='sxx', **next(self.keysiter))
         syy = np.max([raw[:, 5], raw[:, 6]], axis=0)
         szz = np.min([raw[:, 5], raw[:, 6]], axis=0)
-        #
+
         self.ax3.plot(raw[:, 0], -(syy),
                       label='syy', **next(self.keysiter))
         self.ax3.plot(raw[:, 0], -(szz),
@@ -170,19 +181,19 @@ class cal_md_ideal_tensile_plt(plt_drv.plt_drv):
         self.set_tick_size(*self.axls)
         self.fig.savefig('fig-iten-cmp.png', **self.figsave)
 
-    def cmp_pot_plt(self):
+    def cmp_pot_plt(self, tg='tp'):
         self.set_211plt()
-        raw = np.loadtxt('iten.va.tp.txt')
+        raw = np.loadtxt('iten.va.{}.txt'.format(tg))
         ylabeliter = cycle(['dE', 'Sxx', 'Syy', 'Szz'])
         self.ax1.plot(raw[:, 0], raw[:, 1] - raw[0, 1],
                       label='va', **next(self.keysiter))
-        self.ax2.plot(raw[:, 0], -raw[:, 4],
+        self.ax2.plot(raw[:, 0], raw[:, 4],
                       label='va', **next(self.keysiter))
 
-        raw = np.loadtxt('iten.md.tp.txt')
+        raw = np.loadtxt('iten.md.{}.txt'.format(tg))
         self.ax1.plot(raw[:, 0], raw[:, 1] - raw[0, 1],
                       label='md', **next(self.keysiter))
-        self.ax2.plot(raw[:, 0], -raw[:, 4],
+        self.ax2.plot(raw[:, 0], raw[:, 4],
                       label='md', **next(self.keysiter))
         self.add_legends(*self.axls)
         self.add_y_labels(ylabeliter, *self.axls)
@@ -204,7 +215,8 @@ if __name__ == '__main__':
                   'plt2': drv.plt_energy_stress_two,
                   'cell': drv.plt_cell,
                   'adj': drv.adjust_data_format,
-                  'cmp': drv.cmp_plt}
+                  'cmp': drv.cmp_pot_plt,
+                  'mesh': drv.plt_mesh}
     if options.fargs is not None:
         dispatcher[options.mtype.lower()](options.fargs)
     else:

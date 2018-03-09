@@ -4,13 +4,14 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-22 22:06:44
+# @Last Modified time: 2018-03-04 21:37:12
 
 
 import cal_md_ideal_shear_pre
 import cal_md_ideal_shear_run
 import cal_md_ideal_shear_pos
 import cal_md_ideal_shear_plt
+import cal_md_ideal_shear_mesh
 import os
 import numpy as np
 import gn_config
@@ -28,7 +29,8 @@ class cal_bcc_ideal_shear(get_data.get_data,
                           cal_md_ideal_shear_pre.cal_bcc_ideal_shear_pre,
                           cal_md_ideal_shear_run.cal_bcc_ideal_shear_run,
                           cal_md_ideal_shear_pos.cal_bcc_ideal_shear_pos,
-                          cal_md_ideal_shear_plt.cal_bcc_ideal_shear_plt):
+                          cal_md_ideal_shear_plt.cal_bcc_ideal_shear_plt,
+                          cal_md_ideal_shear_mesh.cal_bcc_ideal_shear_mesh):
 
     def __init__(self, inpot, shtype='110'):
         self.pot = inpot
@@ -42,6 +44,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
         cal_md_ideal_shear_run.cal_bcc_ideal_shear_run.__init__(self)
         cal_md_ideal_shear_pos.cal_bcc_ideal_shear_pos.__init__(self)
         cal_md_ideal_shear_plt.cal_bcc_ideal_shear_plt.__init__(self)
+        cal_md_ideal_shear_mesh.cal_bcc_ideal_shear_mesh.__init__(self)
         self.alat = self.pot['lattice']
         self.npts = 20
         self.delta = 0.02
@@ -71,4 +74,3 @@ class cal_bcc_ideal_shear(get_data.get_data,
         self.basis = np.mat([e1, e2, e3])
         self.setup_qe_params()
         self.root = os.getcwd()
-        return

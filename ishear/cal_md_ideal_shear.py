@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-28 21:35:10
+# @Last Modified time: 2018-03-04 21:55:16
 
 
 from optparse import OptionParser
@@ -22,8 +22,9 @@ if __name__ == '__main__':
                       type='string', dest="fargs")
 
     (options, args) = parser.parse_args()
-    # drv = init.cal_bcc_ideal_shear(md_pot_data.md_pot.Nb_eam, '211')
-    drv = init.cal_bcc_ideal_shear(md_pot_data.md_pot.Nb_adp, '110')
+    # drv = init.cal_bcc_ideal_shear(md_pot_data.va_pot.Nb_pbe, '211')
+    drv = init.cal_bcc_ideal_shear(md_pot_data.va_pot.Nb_pbe, '110')
+
     dispatcher = {'qeone': drv.get_qe_stress,
                   'restart': drv.loop_prep_restart,
                   'twin': drv.gn_shear_twin_path,
@@ -45,7 +46,8 @@ if __name__ == '__main__':
                   'pltcmp': drv.plt_cmp,
                   'pltchk': drv.plt_check,
                   'trans': drv.transdata,
-                  'setpbs': drv.loop_set_pbs}
+                  'setpbs': drv.loop_set_pbs,
+                  'mesh': drv.mesh}
 
     if options.fargs is not None:
         dispatcher[options.mtype.lower()](options.fargs)

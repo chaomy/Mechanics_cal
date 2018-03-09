@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-02 23:07:28
+# @Last Modified time: 2018-03-05 02:33:15
 
 
 import ase.lattice.hexagonal as Hexagonal
@@ -100,7 +100,8 @@ class cal_lattice(gn_config.bcc,
         delta = 0.001
         # rng = [-20, 20]
         # rng = [20, 100]
-        rng = [-400, -100]
+        rng = [-500, -400]
+        # rng = [400, 500]
         gn_config.bcc.__init__(self, self.pot)
         for i in range(rng[0], rng[1]):
             self.pot["latbcc"] = alat0 + i * delta
@@ -134,10 +135,10 @@ class cal_lattice(gn_config.bcc,
     def gn_hcp_mesh(self):
         da = 0.01
         dc = 0.02
-        shift = -da * 25
+        shift = -da * (20 + 45)
         shift = -dc * 8
 
-        for i in range(50):
+        for i in range(20):
             for j in range(16):
                 mdir = "dir-{:03d}-{:03d}".format(i, j)
 
@@ -145,8 +146,7 @@ class cal_lattice(gn_config.bcc,
                 cc = self.pot["chcp"] + shift + dc * j
 
                 atoms = Hexagonal.HexagonalClosedPacked(
-                    latticeconstant={'a': aa,
-                                     'c': cc},
+                    latticeconstant={'a': aa, 'c': cc},
                     size=(1, 1, 1),
                     symbol=self.pot["element"],
                     pbc=(1, 1, 1))

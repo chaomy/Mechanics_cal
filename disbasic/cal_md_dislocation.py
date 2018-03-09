@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-02-21 03:39:35
+# @Last Modified time: 2018-03-04 20:33:35
 
 
 from optparse import OptionParser
@@ -38,13 +38,14 @@ class md_dislocation(gn_config.bcc,
                      cal_md_prec.md_prec,
                      cal_md_gb_hcp_dis.gb_hcp_dis):
 
-    def __init__(self, pot=md_pot_data.md_pot.mg_Poco):
+    def __init__(self, pot=md_pot_data.va_pot.Nb_pbe):
         self.pot = pot
         gn_pbs.gn_pbs.__init__(self)
         Intro_vasp.vasp_change_box.__init__(self, self.pot)
         gn_lmp_infile.gn_md_infile.__init__(self, self.pot)
         cal_md_prec.md_prec.__init__(self)
         cal_md_gb_hcp_dis.gb_hcp_dis.__init__(self)
+
         if self.pot['structure'] in 'bcc':
             gn_config.bcc.__init__(self, self.pot)
             cal_md_dislocation_bcc.md_dislocation_bcc.__init__(self)
@@ -107,42 +108,40 @@ class md_dislocation(gn_config.bcc,
         m = 11 * sizen
         t = 3
 
-        atoms = Cubic.BodyCenteredCubic(directions=[e1, e2, e3],
+        atoms = Cubic.BodyCenteredCubic(directions=[[e1[0], e1[1], e1[2]],
+                                                    [e2[0], e2[1], e2[2]],
+                                                    [e3[0], e3[1], e3[2]]],
                                         latticeconstant=self.pot['lattice'],
                                         size=(n, m, t),
-                                        symbol='W',
+                                        symbol=self.pot["element"],
                                         pbc=(1, 1, 1))
 
         # perfect positions
         p = self.pot['lattice'] * self.bccneigh
 
-        atoms = self.intro_dipole_screw_atoms(atoms,
-                                              self.pot['lattice'])
+        # atoms = self.intro_dipole_screw_atoms(atoms, self.pot['lattice'])
+        atoms = self.intro_single_screw_atoms(atoms)
 
-        ase.io.write("lmp_dis.cfg",
-                     atoms,
-                     "cfg")
+        ase.io.write("lmp_dis.cfg", atoms, "cfg")
+
         # system
         system, elements = am.convert.ase_Atoms.load(atoms)
 
         r = (3**0.5 / 2. + 1) / 2.
         system.nlist(self.pot['lattice'] * r)
-
         nye_rlt = am.defect.nye_tensor(system, p, axes=unit_cell)
 
-        for key, value in nye_rlt.iteritems():
-            print key, value
-            system.atoms_prop(key=key, value=value)
+        print np.max(nye_rlt['strain'][:])
+        # for key, value in nye_rlt.iteritems():
+        #     print key, value
+        #     system.atoms_prop(key=key, value=value)
 
-        print atoms.get_positions()
-
-        int_sum = np.empty(3)
-        for i in range(3):
-            int_sum[i] = am.plot.interpolate_contour(system,
-                                                     'Nye_tensor',
-                                                     index=[1, i],
-                                                     cmap='bwr')[0]
-        print('burgers vector estimate = ', int_sum)
+        # int_sum = np.empty(3)
+        # for i in range(3):
+        #     int_sum[i] = am.plot.interpolate_contour(system, 'Nye_tensor',
+        #                                              index=[1, i],
+        #                                              cmap='bwr')[0]
+        # print('burgers vector estimate = ', int_sum)
 
         ############################################################
         # since lammmps can only use  xy xz yz

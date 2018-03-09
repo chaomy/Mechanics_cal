@@ -1,19 +1,10 @@
 #!/usr/bin/env python
 # encoding: utf-8
-
-###################################################################
-#
-# File Name :
-#
-###################################################################
-#
-# Purpose :
-#
-# Creation Date :
-# Last Modified :
-# Created By    : Chaoming Yang
-#
-###################################################################
+# -*- coding: utf-8 -*-
+# @Author: chaomy
+# @Date:   2018-03-07 13:09:29
+# @Last Modified by:   chaomy
+# @Last Modified time: 2018-03-07 13:10:20
 
 import numpy as np
 import ase
@@ -23,13 +14,8 @@ import ase.lattice
 import gn_config
 from optparse import OptionParser
 import md_pot_data
-
-try:
-    import atomman as am
-    import atomman.lammps as lmp
-
-except ImportError:
-    print("error during import")
+import atomman as am
+import atomman.lammps as lmp
 
 
 class lmp_phonon(object):
@@ -40,7 +26,6 @@ class lmp_phonon(object):
         self._lat = self._pot['latbcc']
         self._pottype = self._pot['pair_style']
         self._potfile = self._pot['file']
-        return
 
     def lmp_change_box(self, in_cell):
         unit_x = np.linalg.norm(in_cell[0, :])
@@ -80,7 +65,6 @@ class lmp_phonon(object):
                          [0.0,  0.974257, 0.0],
                          [0.0, 0.0, 0.973610]])
         self.gn_primitive_lmps(strain)
-        return
 
     def gn_primitive_lmps(self,
                           strain=np.mat([[1., 0., 0.],
@@ -128,7 +112,6 @@ class lmp_phonon(object):
                 fout.write("%d  1  %12.7f %12.7f %12.7f\n"
                            % (i + 1, pos[i, 0], pos[i, 1], pos[i, 2]))
         fout.close()
-        return
 
 #  Phonopy use the supercell base vector as basis
 #  the basis vector we use is
@@ -183,13 +166,11 @@ class lmp_phonon(object):
             print "self.append_band(bands, %s, %s)" \
                 % (stringlist[i],
                    stringlist[i + 1])
-        return
 
     def convert_pos_lmp_data_norm(self, filename="POSCAR-001"):
         ase_atoms = ase.io.read(filename, format='vasp')
         system, elements = am.convert.ase_Atoms.load(ase_atoms)
         lmp.atom_data.dump(system, "lmp_init.txt")
-        return
 
     def convert_pos_lmp_data(self, filename="POSCAR-001"):
         ase_atoms = ase.io.read(filename, format='vasp')
@@ -200,7 +181,6 @@ class lmp_phonon(object):
         # write lmp file
         drv_gnconfig = gn_config.gnStructure(self._pot)
         drv_gnconfig.write_lmp_config_data(ase_atoms)
-        return
 
 
 if __name__ == '__main__':

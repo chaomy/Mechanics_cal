@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-07-08 06:56:00
+# @Last Modified time: 2018-03-07 13:11:44
 
 
 import os
@@ -52,7 +52,6 @@ class cal_bcc_ideal_tensile(get_data.get_data,
                                [0.5, 0.5, -0.5]])
         self.root = os.getcwd()
         self.stress = np.zeros(6)
-        return
 
     def runvasp_tp(self, x, delta):
         basis = self.basis
@@ -124,10 +123,7 @@ class cal_bcc_ideal_tensile(get_data.get_data,
             va_bas = bas * strain
             # poscar input type
             cell = alat * va_bas
-            atoms = ase.Atoms('Nb',
-                              positions=[[0, 0, 0]],
-                              cell=cell,
-                              pbc=[1, 1, 1])
+            atoms = ase.Atoms('Nb', positions=[[0, 0, 0]], cell=cell, pbc=[1, 1, 1])
             ase.io.write("POSCAR", images=atoms, format='vasp')
 
         if tag == 'lmp':
@@ -140,7 +136,6 @@ class cal_bcc_ideal_tensile(get_data.get_data,
                               cell=cell,
                               pbc=[1, 1, 1])
             self.write_lmp_config_data(atoms, 'init.txt')
-        return
 
     def load_input_params(self):
         if os.path.isfile('restart.txt'):
@@ -179,7 +174,6 @@ class cal_bcc_ideal_tensile(get_data.get_data,
             data[i][1] = res.fun
             data[i][4:] = self.stress
         np.savetxt("iten.txt", data)
-        return
 
     def vasp_relax(self, opt='op'):
         (delta, x0) = self.load_input_params()
@@ -201,7 +195,6 @@ class cal_bcc_ideal_tensile(get_data.get_data,
         data[-6:] = self.stress
         print res
         np.savetxt("iten.txt", data)
-        return
 
     def set_pbs(self, dirname, delta, opt='tp'):
         self.set_nnodes(1)
@@ -213,7 +206,6 @@ class cal_bcc_ideal_tensile(get_data.get_data,
                           """.format(opt))
         self.write_pbs(od=True)
         os.system("mv va.pbs %s" % (dirname))
-        return
 
     def recordstrain(self, delta, x, fval):
         fid = open("s{:4.3f}.txt".format(delta), "a")
@@ -221,7 +213,6 @@ class cal_bcc_ideal_tensile(get_data.get_data,
         formatstr += '\n'
         fid.write(formatstr.format(fval, x[0], x[1], *self.stress))
         fid.close()
-        return
 
     def loop_prep_restart(self, opt1='va', opt2='tp'):
         raw = np.mat(np.loadtxt("iten.txt"))
@@ -237,7 +228,6 @@ class cal_bcc_ideal_tensile(get_data.get_data,
                 os.system('cp $POTDIR/{}  {}'.format(self.pot['file'],
                                                      dirname))
             self.set_pbs(dirname, raw[i][0], opt2)
-        return
 
     def loop_collect(self, opt='va'):
         dirlist = glob.glob("dir-*")
@@ -250,7 +240,6 @@ class cal_bcc_ideal_tensile(get_data.get_data,
             if os.path.isfile('{}/iten.txt'.format(dirname)):
                 data[i, :] = np.loadtxt('{}/iten.txt'.format(dirname))
         np.savetxt("iten.txt", data)
-        return
 
 
 if __name__ == '__main__':

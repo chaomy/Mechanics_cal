@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-29 21:20:15
+# @Last Modified time: 2018-03-04 21:35:04
 
 
 from itertools import cycle
@@ -18,7 +18,6 @@ class cal_bcc_ideal_shear_plt(object):
 
     def __init__(self):
         plt_drv.plt_drv.__init__(self)
-        return
 
     def plt_vc(self):
         self.set_111plt()
@@ -34,7 +33,6 @@ class cal_bcc_ideal_shear_plt(object):
                      label='sh', **next(self.keysiter))
         self.add_legends(self.ax)
         self.fig.savefig('fig-stress.0.50.png')
-        return
 
     def plt_energy(self, infile='ishear.txt'):
         raw = np.loadtxt(infile)
@@ -44,7 +42,6 @@ class cal_bcc_ideal_shear_plt(object):
         self.ax.plot(raw[:, 0], (raw[:, 1] - raw[0, 1]),
                      label='engy', **next(self.keysiter))
         self.fig.savefig("fig-engy.png", **self.figsave)
-        return
 
     def plt_energy_stress_lmp(self, fname='stress.txt'):
         til = os.getcwd().split('/')[-1].split('_')[-2:]
@@ -63,7 +60,6 @@ class cal_bcc_ideal_shear_plt(object):
         self.add_x_labels(cycle([r'$\epsilon$']), self.ax2)
         self.ax1.set_title('{} {}'.format(*til), fontsize=self.myfontsize)
         self.fig.savefig("fig-ishear.png", **self.figsave)
-        return
 
     def plt_energy_stress(self, ptype='211', fname='stress.txt'):
         til = os.getcwd().split('/')[-1].split('_')[-2:]
@@ -96,7 +92,6 @@ class cal_bcc_ideal_shear_plt(object):
         self.add_x_labels(cycle([r'$\epsilon$']), self.ax2)
         self.ax1.set_title('{} {}'.format(*til), fontsize=self.myfontsize)
         self.fig.savefig("fig-ishear.png", **self.figsave)
-        return
 
     def plt_cmp(self):
         pln = '211'
@@ -119,4 +114,3 @@ class cal_bcc_ideal_shear_plt(object):
         self.add_x_labels(cycle([r'$\epsilon$']), self.ax2)
         # self.ax1.set_title(til, fontsize=self.myfontsize)
         self.fig.savefig("fig-cmp-{}.png".format(pln), **self.figsave)
-        return

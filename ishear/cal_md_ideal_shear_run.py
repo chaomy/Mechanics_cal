@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-03 02:52:47
+# @Last Modified time: 2018-03-04 21:15:19
 
 
 from scipy.optimize import minimize
@@ -61,7 +61,6 @@ class cal_bcc_ideal_shear_run(object):
         strain = np.mat([[x[0], 0.0, 0.0],
                          [-delta, x[1], 0.0],
                          [x[3], x[4], x[2]]])
-
         new_strain = basis.transpose() * strain * basis
         self.gn_primitive_lmps(new_strain, 'lmp')
         os.system("lmp_mpi -i in.init -screen  no")
