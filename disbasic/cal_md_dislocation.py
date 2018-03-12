@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-04 20:33:35
+# @Last Modified time: 2018-03-09 03:05:49
 
 
 from optparse import OptionParser
@@ -27,8 +27,7 @@ import cal_md_dislocation_bcc
 import cal_md_dislocation_fcc
 
 
-class md_dislocation(gn_config.bcc,
-                     gn_config.fcc, gn_config.hcp,
+class md_dislocation(gn_config.bcc, gn_config.fcc, gn_config.hcp,
                      get_data.get_data, gn_pbs.gn_pbs,
                      Intro_vasp.vasp_change_box,
                      gn_lmp_infile.gn_md_infile,
@@ -38,26 +37,22 @@ class md_dislocation(gn_config.bcc,
                      cal_md_prec.md_prec,
                      cal_md_gb_hcp_dis.gb_hcp_dis):
 
-    def __init__(self, pot=md_pot_data.va_pot.Nb_pbe):
+    def __init__(self, pot=md_pot_data.md_pot.mg_kim):
         self.pot = pot
         gn_pbs.gn_pbs.__init__(self)
         Intro_vasp.vasp_change_box.__init__(self, self.pot)
         gn_lmp_infile.gn_md_infile.__init__(self, self.pot)
         cal_md_prec.md_prec.__init__(self)
         cal_md_gb_hcp_dis.gb_hcp_dis.__init__(self)
-
         if self.pot['structure'] in 'bcc':
             gn_config.bcc.__init__(self, self.pot)
             cal_md_dislocation_bcc.md_dislocation_bcc.__init__(self)
-
         elif self.pot['structure'] in 'fcc':
             gn_config.fcc.__init__(self, self.pot)
             cal_md_dislocation_fcc.md_dislocation_fcc.__init__(self)
-
         elif self.pot['structure'] in 'hcp':
             gn_config.hcp.__init__(self, self.pot)
             cal_md_dislocation_hcp.md_dislocation_hcp.__init__(self)
-
         self.set_config_file_format('lmp')
 
     def intro_kink_pair(self):
@@ -79,15 +74,10 @@ class md_dislocation(gn_config.bcc,
         atoms = self.intro_kink_screw_dislocations(
             atoms, (xc1, yc1), (xc1 + H, yc1), h, 1. / 4.)
 
-        ase.io.write("lmp_init.cfg",
-                     atoms,
-                     "cfg")
-
+        ase.io.write("lmp_init.cfg", atoms, "cfg")
         fname = "init.data"
         self.write_lmp_config_data(atoms, fname)
-        self.gn_md_minimize_cfg("init.data",
-                                "./w_eam4.fs",
-                                "W")
+        self.gn_md_minimize_cfg("init.data", "./w_eam4.fs", "W")
 
     def cal_nye(self):
         torient = 'z'

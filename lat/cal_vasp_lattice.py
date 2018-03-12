@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-05 02:33:15
+# @Last Modified time: 2018-03-12 17:17:15
 
 
 import ase.lattice.hexagonal as Hexagonal
@@ -90,6 +90,7 @@ class cal_lattice(gn_config.bcc,
         # self.set_intype('gamma')
         # self.write_kpoints()
         self.set_pbs(mdir)
+        os.system("mv POSCAR {}".format(mdir))
         os.system("mv va.pbs {}".format(mdir))
         os.system("cp KPOINTS {}".format(mdir))
         os.system("cp INCAR {}".format(mdir))
@@ -112,7 +113,6 @@ class cal_lattice(gn_config.bcc,
             self.mymkdir(mdir)
             atoms = self.set_bcc_primitive((1, 1, 1))
             ase.io.write(filename="POSCAR", images=atoms, format='vasp')
-            os.system("mv POSCAR {}".format(mdir))
             self.prepare_vasp_inputs(mdir)
 
     def gn_fcc(self):
@@ -129,7 +129,6 @@ class cal_lattice(gn_config.bcc,
             self.mymkdir(mdir)
             atoms = self.set_fcc_primitive((1, 1, 1))
             ase.io.write(filename="POSCAR", images=atoms, format='vasp')
-            os.system("mv POSCAR {}".format(mdir))
             self.prepare_vasp_inputs(mdir)
 
     def gn_hcp_mesh(self):
@@ -137,28 +136,23 @@ class cal_lattice(gn_config.bcc,
         dc = 0.02
         shift = -da * (20 + 45)
         shift = -dc * 8
-
         for i in range(20):
             for j in range(16):
                 mdir = "dir-{:03d}-{:03d}".format(i, j)
 
                 aa = self.pot["ahcp"] + shift + da * i
                 cc = self.pot["chcp"] + shift + dc * j
-
                 atoms = Hexagonal.HexagonalClosedPacked(
                     latticeconstant={'a': aa, 'c': cc},
                     size=(1, 1, 1),
                     symbol=self.pot["element"],
                     pbc=(1, 1, 1))
-
                 self.mymkdir(mdir)
                 ase.io.write(filename="POSCAR", images=atoms, format='vasp')
-                os.system("mv POSCAR {}".format(mdir))
                 self.prepare_vasp_inputs(mdir)
 
     def gn_hcp(self):
         alat0 = self.pot['ahcp']
-        hcp_drv = gn_config.hcp(self.pot)
         for i in range(-15, 15):
             delta = 0.01
             alat = alat0 + i * delta
@@ -166,19 +160,12 @@ class cal_lattice(gn_config.bcc,
                 mdir = "dir-p-{:03d}".format(i)
             else:
                 mdir = "dir-n-{:03d}".format(abs(i))
+            atoms = Hexagonal.HexagonalClosedPacked(
+                latticeconstant={'a': alat, 'c': self.pot["chcp"]},
+                size=(1, 1, 1), symbol=self.pot["element"], pbc=(1, 1, 1))
             self.mymkdir(mdir)
-            os.chdir(mdir)
-            hcp_drv.write_hcp_poscar(alat)
-
-            self.set_incar_type("isif4")
-            self.write_incar()
-
-            self.set_diff_kpoints([36, 36, 19])
-            self.set_intype('gamma')
-            self.write_kpoints()
-            self.set_pbs(mdir)
-            os.system("cp ../POTCAR .")
-            os.chdir(os.pardir)
+            ase.io.write(filename="POSCAR", images=atoms, format='vasp')
+            self.prepare_vasp_inputs()
 
     def collect_data(self, tag='hcp'):
         rng = [-50, 50]

@@ -4,7 +4,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-07 15:13:34
+# @Last Modified time: 2018-03-12 13:56:03
 
 
 from optparse import OptionParser
@@ -24,7 +24,6 @@ class cal_md_cij(get_data.get_data,
         self.pot = pot
         gn_lmp_infile.gn_md_infile.__init__(self, self.pot)
         gn_config.bcc.__init__(self, self.pot)
-        return
 
     def gn_temp_atoms(self):
         lattice_direction = [[1, 0, 0],

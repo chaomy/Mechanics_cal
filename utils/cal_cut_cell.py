@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-02-21 11:51:17
+# @Last Modified time: 2018-03-09 02:44:35
 
 import numpy as np
 
@@ -16,13 +16,18 @@ class cal_cut_cell(object):
         dh = 28.
         y_above = cell[gp_n, gp_n] - dh
         y_below = dh
+        nup = 0
+        ndn = 0
         for i in range(len(atoms)):
             atom = atoms[i]
             # atom.symbol = 'W'
             if (atom.position[gp_n] > y_above):
                 atom.symbol = 'Mo'
+                nup += 1
             if (atom.position[gp_n] < y_below):
                 atom.symbol = 'Nb'
+                ndn += 1
+        print("up = ", nup, "dn = ", ndn)
         return atoms
 
     def make_cubic(self, opt, atoms, *args):
@@ -75,10 +80,8 @@ class cal_cut_cell(object):
         dh = 20.
         y_above = cell[gp_n, gp_n] - dh
         y_below = dh
-
         # y_above = 7. / 8. * cell[gp_n, gp_n]  # edge
         # y_below = 1. / 8. * cell[gp_n, gp_n]  # edge
-
         index = []
         for i in range(len(atoms)):
             atom = atoms[i]

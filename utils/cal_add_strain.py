@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-02-23 15:47:24
+# @Last Modified time: 2018-03-12 16:05:28
 
 
 import numpy as np
@@ -55,7 +55,6 @@ class cal_add_strain(cal_add_strain_otho.strain_otho):
                          [0, 0, 1 + delta]], "float")
         cell = strain * cell
         positions = positions * strain
-
         atoms.set_positions(positions)
         atoms.set_cell(cell)
         return atoms
