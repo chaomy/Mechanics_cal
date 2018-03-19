@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-19 17:38:15
+# @Last Modified time: 2018-03-19 17:42:57
 
 
 import os
@@ -97,8 +97,8 @@ class lmps_neb_tools(get_data.get_data, gn_config.bcc):
         os.system("cp in.new in.neb_dislocation")
 
     def create_final_screw(self):
-        os.system("lmp_mpi -i in.init_dipole")
-        os.system("lmp_mpi -i in.final_dipole")
+        # os.system("lmp_mpi -i in.init_dipole")
+        # os.system("lmp_mpi -i in.final_dipole")
         fileList = glob.glob("./Final_custom/dump.custom.*")
         mydir = os.getcwd().split('/')[-1]
         os.system("cp  %s  ." % (fileList[-1]))
