@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-07 13:56:03
+# @Last Modified time: 2018-03-18 10:18:28
 
 
 import os
@@ -27,12 +27,9 @@ class cal_bcc_ideal_tensile_tp(get_data.get_data,
                                gn_pbs.gn_pbs,
                                gn_config.bcc):
 
-    def __init__(self, pot=None):
-        if pot is None:
-            # self.pot = md_pot_data.va_pot.Nb_pbe
-            self.pot = self.load_data('pot.dat')
-        else:
-            self.pot = pot
+    def __init__(self, pot=md_pot_data.va_pot.Nb_pbe):
+        self.pot = pot
+        self.pot = self.load_data('../BASICS/pot.dat')
         gn_pbs.gn_pbs.__init__(self)
         get_data.get_data.__init__(self)
         gn_config.bcc.__init__(self, self.pot)
@@ -64,6 +61,7 @@ class cal_bcc_ideal_tensile_tp(get_data.get_data,
             data[i][2:2 + 2] = res.x
             data[i][-6:] = self.stress
         np.savetxt("iten.txt", data, fmt='%6.5f')
+        np.savetxt("iten.md.tp.txt", data, fmt='%6.5f')
 
     def mesh(self):
         cn = 0
@@ -118,7 +116,6 @@ class cal_bcc_ideal_tensile_tp(get_data.get_data,
         raw = np.loadtxt("out.txt")
         engy = raw[0]
         self.stress = raw[1:]
-        self.recordstrain(delta, [x[0], x[0]], engy)
         return engy
 
     def gn_convention_lmps(self,
@@ -188,8 +185,7 @@ class cal_bcc_ideal_tensile_tp(get_data.get_data,
                                  'restart.txt')
             elif opt in ['qe']:
                 os.system("mv restart.txt {}".format(mdir))
-                os.system('cp $POTDIR/{}  {}'.format(self.pot['file'],
-                                                     mdir))
+                os.system('cp $POTDIR/{}  {}'.format(self.pot['file'], mdir))
             self.set_pbs(mdir, raw[i][0])
 
     def recordstrain(self, delta, x, fval):

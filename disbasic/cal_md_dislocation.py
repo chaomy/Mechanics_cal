@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-09 03:05:49
+# @Last Modified time: 2018-03-19 16:24:36
 
 
 from optparse import OptionParser
@@ -234,55 +234,6 @@ class md_dislocation(gn_config.bcc, gn_config.fcc, gn_config.hcp,
         self.write_lmp_config_data(atoms, "relaxed.txt")
         return atoms
 
-    def add_vol_expan(self, atoms):
-        cell = atoms.get_cell()
-        atoms.set_cell(1.0035 * cell, scale_atoms=True)
-        return atoms
-
-    def cal_non_periodic_screw(self):
-        e1 = np.array([1., 1., -2.])
-        e2 = np.array([-1., 1., 0.])
-        e3 = np.array([1., 1., 1.])
-        atoms = self.set_bcc_convention(
-            [e1, e2, e3], (80, 50, 40))  # z periodic 12
-        atoms = self.intro_single_screw_atoms(atoms)
-        self.write_lmp_config_data(atoms)
-
-        #  if not os.path.isdir("restart"):
-        #  os.mkdir("restart")
-        #  os.mkdir("cfg")
-
-    # calculate the dislocation velocity under shear by LMP #
-    def loop_write_pbs(self):
-        #  templist = [300, 600, 900, 1200, 1500, 1800];
-        #  templist = [400, 500, 700, 800];
-        templist = [1000, 1100]
-        stress = '0.05'
-
-        for i in range(len(templist)):
-            temp = templist[i]
-            dirname = 'dir-T%d' % (temp)
-
-            self.mymkdir(dirname)
-
-            shutil.copy("relaxed.txt", dirname)
-            shutil.copy("W.set.txt", dirname)
-
-            os.chdir(dirname)
-
-            self.mymkdir('restart')
-            self.mymkdir('force_cfg')
-
-            self.set_nnodes(1)
-            self.set_wall_time(90)
-            self.set_job_title("W-%s-T%d" % (stress, temp))
-            self.set_main_job(
-                "mpirun lmp_linux -in in.md_addforce  > screen.log ")
-            self.write_pbs()
-            self.gn_md_add_force(temp, stress)
-            os.chdir(os.pardir)
-
-
 if __name__ == "__main__":
     usage = "usage:%prog [options] arg1 [options] arg2"
     parser = OptionParser(usage=usage)
@@ -301,7 +252,6 @@ if __name__ == "__main__":
                   'nye': drv.cal_nye,
                   'cuau': drv.cal_cu3Au_dis,
                   'ani': drv.intro_ani_edge_fcc,
-                  'looppbs': drv.loop_write_pbs,
                   'static': drv.static_add_stress,
                   'prep': drv.prep_relaxed_dislocation,
                   'gnedge': drv.cal_single_edge_dislocations_read,
@@ -309,7 +259,7 @@ if __name__ == "__main__":
                   'hcp': drv.buildhcp,
                   'thermo': drv.cal_thermo,
                   'prec': drv.make_prec,
-                  'expan': drv.add_vol_expan,
+                  'onlyprec': drv.make_only_prec,
                   'gb': drv.make_gb}
 
     if options.fargs is not None:

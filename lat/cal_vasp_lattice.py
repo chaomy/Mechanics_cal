@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-12 17:17:15
+# @Last Modified time: 2018-03-12 22:04:04
 
 
 import ase.lattice.hexagonal as Hexagonal
@@ -85,10 +85,6 @@ class cal_lattice(gn_config.bcc,
             cal_lattice(file)
 
     def prepare_vasp_inputs(self, mdir):
-        # self.write_incar()
-        # self.set_diff_kpoints([31, 31, 31])
-        # self.set_intype('gamma')
-        # self.write_kpoints()
         self.set_pbs(mdir)
         os.system("mv POSCAR {}".format(mdir))
         os.system("mv va.pbs {}".format(mdir))
@@ -165,7 +161,7 @@ class cal_lattice(gn_config.bcc,
                 size=(1, 1, 1), symbol=self.pot["element"], pbc=(1, 1, 1))
             self.mymkdir(mdir)
             ase.io.write(filename="POSCAR", images=atoms, format='vasp')
-            self.prepare_vasp_inputs()
+            self.prepare_vasp_inputs(mdir)
 
     def collect_data(self, tag='hcp'):
         rng = [-50, 50]

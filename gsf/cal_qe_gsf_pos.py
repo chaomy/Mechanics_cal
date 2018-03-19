@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-01-28 22:12:14
+# @Last Modified time: 2018-03-13 17:56:06
 
 
 from itertools import cycle
@@ -127,7 +127,6 @@ class cal_qe_gsf_pos(object):
         self.set_tick_size(*axlist)
         self.fig.savefig('gsf_{}.png'.format(self.mgsf), **self.figsave)
         savetxt('tol_{}.txt'.format(self.mgsf), toldat)
-        return
 
     def plt_tol(self):
         dat1 = loadtxt('tol_x111z110.txt')[:6]

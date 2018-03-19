@@ -4,10 +4,11 @@
 # @Author: chaomy
 # @Date:   2018-02-06 14:17:35
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-02-06 14:17:56
+# @Last Modified time: 2018-03-18 22:11:32
 
 
 from optparse import OptionParser
+import get_data
 import ase
 import ase.io
 import copy
@@ -20,32 +21,26 @@ import atomman.lammps as lmp
 import atomman.unitconvert as uc
 
 
-class cal_bcc_schmid(object):
+class cal_bcc_schmid(get_data.get_data):
 
-    def __init__(self, pot=None):
-        if pot is None:
-            self.pot = md_pot_data.md_pot.Nb_eam
-        else:
-            self.pot = pot
-        self.root = os.getcwd()
+    def __init__(self, pot=md_pot_data.md_pot.Nb_eam):
+        get_data.get_data.__init__(self)
+        self.pot = self.load_data("../BASICS/pot.dat")
         self._range = (0, 25)
         #  self._delta = 0.02
         self._delta = 0.002   # totla is  5  percent
         #  self._delta = 0.0025   # totla is  5  percent
-        return
 
-    ##########################################################
     # calculate elastic constant of screw dislocation
-    ##########################################################
     def cal_screw_const(self, tag='intro'):
         axes = np.array([[1, 1, -2],
                          [-1, 1, 0],
                          [1, 1, 1]])
 
         alat = uc.set_in_units(self.pot['lattice'], 'angstrom')
-        C11 = uc.set_in_units(self.pot['C11'], 'GPa')
-        C12 = uc.set_in_units(self.pot['C12'], 'GPa')
-        C44 = uc.set_in_units(self.pot['C44'], 'GPa')
+        C11 = uc.set_in_units(self.pot['c11'], 'GPa')
+        C12 = uc.set_in_units(self.pot['c12'], 'GPa')
+        C44 = uc.set_in_units(self.pot['c44'], 'GPa')
 
         c = am.ElasticConstants(C11=C11, C12=C12, C44=C44)
         burgers = alat / 2 * np.array([1., 1., 1.])
@@ -54,20 +49,19 @@ class cal_bcc_schmid(object):
         print "K tensor", stroh.K_tensor
         print "K (biKijbj)", stroh.K_coeff, "eV/A"
         print "pre-ln alpha = biKijbj/4pi", stroh.preln, "ev/A"
-        return
 
-    def make_screw_plate(self,
-                         size=[180, 260, 3],
-                         rad=[580, 600],
-                         move=[0., 0., 0.],
-                         tag='[211]',
-                         filename="lmp_init.txt",
-                         opt=None):
+    #     drv.make_screw_plate(size=[80, 120, 2], rad=[200, 230],
+    #                          move=[0., 0., 0.], tag='[211]',
+    #                          filename="lmp_init.txt")
+
+    def make_screw_plate(self, size=[40, 60, 2], rad=[100, 115],
+                         move=[0., 0., 0.], tag='[211]', filename="lmp_init.txt", opt=None):
 
         alat = uc.set_in_units(self.pot['lattice'], 'angstrom')
-        C11 = uc.set_in_units(self.pot['C11'], 'GPa')
-        C12 = uc.set_in_units(self.pot['C12'], 'GPa')
-        C44 = uc.set_in_units(self.pot['C44'], 'GPa')
+        C11 = uc.set_in_units(self.pot['c11'], 'GPa')
+        C12 = uc.set_in_units(self.pot['c12'], 'GPa')
+        C44 = uc.set_in_units(self.pot['c44'], 'GPa')
+
         if tag == '[110]':
             axes = np.array([[-1, 0, 1],
                              [1, -2, 1],
@@ -91,9 +85,7 @@ class cal_bcc_schmid(object):
             shfty = -1. / 3. * alat * np.sqrt(2) / 2.
 
         sizez = size[2]
-        c = am.ElasticConstants(C11=C11,
-                                C12=C12,
-                                C44=C44)
+        c = am.ElasticConstants(C11=C11, C12=C12, C44=C44)
         burgers = 0.5 * alat * np.array([1., 1., 1.])
 
         # initializing a new Stroh object using the data
@@ -101,9 +93,8 @@ class cal_bcc_schmid(object):
 
         # monopole system
         box = am.Box(a=alat, b=alat, c=alat)
-        atoms = am.Atoms(natoms=2, prop={'atype': 2,
-                                         'pos': [[0.0, 0.0, 0.0],
-                                                 [0.5, 0.5, 0.5]]})
+        atoms = am.Atoms(natoms=2, prop={'atype': 2, 'pos': [[0.0, 0.0, 0.0],
+                                                             [0.5, 0.5, 0.5]]})
 
         ucell = am.System(atoms=atoms, box=box, scale=True)
         system = am.rotate_cubic(ucell, axes)
@@ -137,7 +128,6 @@ class cal_bcc_schmid(object):
 
             if r > radiusout2:
                 delindex.append(atom.index)
-
             if r < radius2:
                 atom.symbol = 'W'
 
@@ -145,7 +135,7 @@ class cal_bcc_schmid(object):
         (system, elements) = am.convert.ase_Atoms.load(ase_atoms)
 
         ############################################################
-        # use neb this is to generate init configuration
+        # use neb, it's to generate init configuration
         ############################################################
         if opt == 'neb':
             system_init = copy.deepcopy(system)
@@ -163,14 +153,9 @@ class cal_bcc_schmid(object):
             system_init.atoms_prop(key='pos',
                                    value=system_init.atoms_prop(key='pos') + disp)
 
-            shift = np.array([0.50000000000,
-                              0.500000000000,
-                              0.00000000000000])
-
-            new_pos = system_init.atoms_prop(key='pos',
-                                             scale=True) + shift
-            system_init.atoms_prop(key='pos',
-                                   value=new_pos, scale=True)
+            shift = np.array([0.50000, 0.50000, 0.00000])
+            new_pos = system_init.atoms_prop(key='pos', scale=True) + shift
+            system_init.atoms_prop(key='pos', value=new_pos, scale=True)
 
             # for lammps read structure
             lmp.atom_data.dump(system_init, "init.txt")
@@ -179,11 +164,8 @@ class cal_bcc_schmid(object):
         ase.io.write("lmp_perf.cfg", images=ase_atoms, format='cfg')
         lmp.atom_data.dump(system, "lmp_perf.txt")
 
-        shift = np.array([-0.50000000000,
-                          -0.500000000000,
-                          0.00000000000000])
-        new_pos = system.atoms_prop(key='pos',
-                                    scale=True) + shift
+        shift = np.array([-0.50000, -0.500, 0.0000])
+        new_pos = system.atoms_prop(key='pos', scale=True) + shift
         system.atoms_prop(key='pos',
                           value=new_pos,
                           scale=True)
@@ -192,22 +174,17 @@ class cal_bcc_schmid(object):
         system.atoms_prop(key='pos', value=new_pos)
 
         disp = stroh.displacement(system.atoms_prop(key='pos'))
-        system.atoms_prop(key='pos',
-                          value=system.atoms_prop(key='pos') + disp)
+        system.atoms_prop(key='pos', value=system.atoms_prop(key='pos') + disp)
 
         new_pos = system.atoms_prop(key='pos') - move
         system.atoms_prop(key='pos', value=new_pos)
 
-        shift = np.array([0.50000000000,
-                          0.500000000000,
-                          0.00000000000000])
-        new_pos = system.atoms_prop(key='pos',
-                                    scale=True) + shift
+        shift = np.array([0.500000, 0.500000, 0.000000])
+        new_pos = system.atoms_prop(key='pos', scale=True) + shift
         system.atoms_prop(key='pos', value=new_pos, scale=True)
 
         # for lammps read structure
         lmp.atom_data.dump(system, filename)
-        return
 
     #############################################################
     # change orient such that dislocation line is along x
@@ -300,7 +277,6 @@ class cal_bcc_schmid(object):
             os.system("mv lmp_tmp.cfg {}/lmp_perf.cfg".format(dirname))
             os.system("mv lmp_tmp.txt {}/lmp_init.txt".format(dirname))
             os.system("cp in.minimize {}".format(dirname))
-        return
 
     def mvdir(self):
         self._range = (0, 30)
@@ -310,7 +286,6 @@ class cal_bcc_schmid(object):
             dirname = 'dir-%.4f' % (delta)
             newname = 'dir-%.4f' % (delta)
             os.system("mv %s  %s " % (dirname, newname))
-        return
 
     def mvdump(self):
         for i in range(0, 20):
@@ -323,7 +298,6 @@ class cal_bcc_schmid(object):
             #  cfgname = "dis_z_%.4f" % (delta)
             #  ase.io.write(cfgname, images=ase_atoms,
             #  format='cfg')
-        return
 
     def draw_ddmap(self):
         #  for i in range(self._range[0], self._range[1]):
@@ -370,13 +344,6 @@ class cal_bcc_schmid(object):
             print cfgname
             ase.io.write(cfgname, images=ase_atoms,
                          format='cfg')
-        return
-
-    def adjust(self):
-        dirlist = glob.glob("dir-*")
-        for dirname in dirlist:
-            os.system("cp in.minimize  {}".format(dirname))
-        return
 
     def run_lmp(self, tag='lmp'):
         #  for i in range(self._range[0], self._range[1]):
@@ -392,8 +359,7 @@ class cal_bcc_schmid(object):
                 filelist = glob.glob("bcc.*")
                 print filelist[-1]
                 os.system("cp  %s ../bcc.%03d" % (filelist[-1], i))
-            os.chdir(self.root)
-        return
+            os.chdir(os.pardir)
 
     def static_shear(self):
         # add shear based on relaxed configurations
@@ -425,60 +391,40 @@ class cal_bcc_schmid(object):
             os.chdir(dirname)
             os.system("lmp_mpi -i in.minimize")
             os.system("rm in.minimize")
-            os.chdir(self.root)
+            os.chdir(os.pardir)
             lastdir = dirname
-        return
+
+    def wrap_auto(self):
+        self.make_screw_plate()
+        self.prep_mrss()
+        self.run_lmp('lmp')
 
 
 if __name__ == '__main__':
     usage = "usage:%prog [options] arg1 [options] arg2"
     parser = OptionParser(usage=usage)
-    parser.add_option("-t", "--mtype",
-                      action="store",
-                      type="string",
-                      dest="mtype",
-                      default="prp_r")
+    parser.add_option("-t", "--mtype", action="store",
+                      type="string", dest="mtype")
+    parser.add_option('-p', "--param", action="store",
+                      type='string', dest="fargs")
+
     (options, args) = parser.parse_args()
     drv = cal_bcc_schmid()
 
-    if options.mtype == 'plate':
-        drv.make_screw_plate(size=[80, 120, 2],
-                             rad=[200, 230],
-                             move=[0., 0., 0.],
-                             tag='[211]',
-                             filename="lmp_init.txt")
+    dispatcher = {'plate': drv.make_screw_plate,
+                  'change': drv.change_orient,
+                  'mrss': drv.prep_mrss,
+                  'run': drv.run_lmp,
+                  'ddmap': drv.draw_ddmap,
+                  'static': drv.static_shear,
+                  'const': drv.cal_screw_const}
 
-    elif options.mtype == 'change':
-        drv.change_orient()
+    if options.fargs is not None:
+        dispatcher[options.mtype.lower()](options.fargs)
+    else:
+        dispatcher[options.mtype.lower()]()
 
-    elif options.mtype == 'mrss':
-        drv.prep_mrss()
-
-    elif options.mtype == 'run':
-        drv.run_lmp('lmp')
-
-    elif options.mtype == 'ddmap':
-        drv.draw_ddmap()
-
-    elif options.mtype == 'show':
-        drv.run_lmp('show')
-
-    elif options.mtype.lower() == 'auto':
-        drv.make_screw_plate()
-        drv.prep_mrss()
-        drv.run_lmp('lmp')
-
-    elif options.mtype == 'mvdump':
-        drv.mvdump()
-
-    elif options.mtype == 'mvdir':
-        drv.mvdir()
-
-    elif options.mtype == 'adj':
-        drv.adjust()
-
-    elif options.mtype == 'static':
-        drv.static_shear()
-
-    elif options.mtype == 'const':
-        drv.cal_screw_const()
+    # if options.mtype == 'plate':
+    #     drv.make_screw_plate(size=[80, 120, 2], rad=[200, 230],
+    #                          move=[0., 0., 0.], tag='[211]',
+    #                          filename="lmp_init.txt")

@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-02-19 23:59:55
+# @Last Modified time: 2018-03-17 07:47:12
 
 
 import os
@@ -41,8 +41,7 @@ class cal_md_gsf(output_data.output_data):
         self.gn_gsf_minimize(config_file=self.config_file,
                              potential_type=self.pot['pair_style'],
                              potential_file=self.pot['file'],
-                             element=self.pot['element'],
-                             tag='relaxed')
+                             element=self.pot['element'], tag='relaxed')
         os.system("cp  ../{}  .".format(self.pot['file']))
 
     def run_lmp_gsf(self, loc_dir):
@@ -76,18 +75,16 @@ class cal_md_gsf(output_data.output_data):
                 data[i, 3] = np.loadtxt('out.txt')
                 os.chdir(os.pardir)
         data[:, 4] = (data[:, 3] - data[0, 3]) / data[:, 2]
-        np.savetxt('gsf.dat', data, fmt="%.6f")
+        np.savetxt('gsf.{}.dat'.format(self.mgsf), data, fmt="%.6f")
 
-    def plot_md_gsf(self, delta=None,
-                    energy=None, filename='md_gsf.png'):
+    def plot_md_gsf(self, delta=None, energy=None, filename='md_gsf.png'):
         self.set_keys()
         self.set_111plt((8, 4))
         self.ax.plot(delta, energy,
                      label="$displacement-energy$", **self.pltkwargs)
         self.fig.savefig(filename, **self.figsave)
 
-    def plot_multi_gsf_curv(self, potlist,
-                            typelist, fname='gsf_compare.png'):
+    def plot_multi_gsf_curv(self, potlist, typelist, fname='gsf_compare.png'):
         self.set_keys()
         self.set_211plt()
         axlist = [self.ax1, self.ax2]
@@ -140,8 +137,8 @@ class cal_md_gsf(output_data.output_data):
             os.chdir(dir_name)
 
             disp_vector = [i * self.disp_delta, 0, 0]
-            disp_matrix_direct = self.gn_displacement(atoms.copy(),
-                                                      disp_vector)
+            disp_matrix_direct = self.gn_displacement(
+                atoms.copy(), disp_vector)
             disp_matrix = copy.deepcopy(disp_matrix_direct)
 
             cell_length_x = perf_cells[0, 0]
@@ -151,9 +148,8 @@ class cal_md_gsf(output_data.output_data):
             local_atoms.translate(disp_matrix)
 
             self.write_lmp_config_data(local_atoms)
-            # self.prepare_md_inputs()
             os.system("cp ../{} .".format(self.infile))
-            os.system("cp lmp_init.txt ../lmp_init_{0:03d}.txt".format(i))
+            # os.system("cp lmp_init.txt ../lmp_init_{0:03d}.txt".format(i))
             os.chdir(os.pardir)
 
     def drv_cmp(self):
@@ -185,7 +181,6 @@ class cal_md_gsf(output_data.output_data):
             drv.md_single_dir_gsf()
             drv.multi_thread_gsf()
             drv.collect_gsf_energy()
-        #  drv.plot_multi_type_gsf_curv(typelist)
         drv.plot_multi_gsf_curv(potlist, typelist, 'gsf_unrelaxed.png')
 
 

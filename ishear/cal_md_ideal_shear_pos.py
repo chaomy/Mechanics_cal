@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-04 20:53:50
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-03 02:23:12
+# @Last Modified time: 2018-03-18 07:45:22
 
 
 from md_pot_data import unitconv
@@ -269,78 +269,3 @@ class cal_bcc_ideal_shear_pos(object):
         stress = np.mat(stress)
         stress = basis * stress * basis.transpose()
         print stress
-
-    # for unfinished runs (temporary)
-    def get_engy(self, file):
-        fid = open(file, 'r')
-        raw = fid.readlines()
-        fid.close()
-        for line in raw[:-1]:
-            if len(line.split()) == 1:
-                dat = line.split()[0]
-        if dat[0] == '[':
-            dat = dat.split('\'')[1]
-        return dat
-
-    # for unfinished runs
-    def read_ofiles(self, opt='makeup'):
-        flist = glob.glob('dir-*')
-        data = np.ndarray([2, len(flist)])
-        if opt == 'clcengy':
-            for i in range(len(flist)):
-                file = flist[i]
-                cnt = int(file[4:7])
-                fid = open(file, 'r')
-                raw = fid.readlines()
-                fid.close()
-                for line in raw[:-1]:
-                    if len(line.split()) == 1:
-                        dat = line.split()[0]
-                if dat[0] == '[':
-                    dat = dat.split('\'')[1]
-                data[0, i] = 0.02 * cnt
-                data[1, i] = dat
-            print data
-            np.savetxt('ishear.txt', data)
-
-        elif opt == 'clccell':
-            data = np.ndarray([3, len(flist)])
-            for i in range(len(flist)):
-                mdir = flist[i]
-                cell = self.qe_get_cell('{}/qe.in'.format(mdir))
-                data[2, i] = np.linalg.det(cell)
-                os.chdir(mdir)
-                data[0, i] = np.loadtxt('restart.txt')[0]
-                data[1, i] = self.get_engy(glob.glob('dir-*')[0])
-                os.chdir(os.pardir)
-            np.savetxt('vol.txt', data)
-
-        elif opt == 'clctmp':
-            data = np.ndarray([len(flist), 3])
-            for i in range(len(flist)):
-                mdir = flist[i]
-                print mdir
-                cell = self.qe_get_cell('{}/qe.in'.format(mdir))
-                sfile = glob.glob('{}/s*'.format(mdir))[0]
-                data[i, 0] = np.loadtxt('{}/restart.txt'.format(mdir))[0]
-                data[i, 1] = np.loadtxt('{}'.format(sfile))[-1][5]
-                data[i, 2] = np.linalg.det(cell)
-            np.savetxt("itmp.txt", data)
-
-        elif opt == 'convert':
-            raw = np.loadtxt('itmp.txt')
-            raw = raw[raw[:, 0].argsort()]
-            (nrow, ncol) = np.shape(raw)
-            data = np.ndarray([nrow, ncol + 1])
-            data[:, :-1] = raw
-            data[:, 1] = data[:, 1] * unitconv.uengy['rytoeV']
-            convunit = unitconv.ustress['evA3toGpa']
-            spl = InterpolatedUnivariateSpline(data[:, 0], data[:, 1])
-            spl.set_smoothing_factor(1.3)
-            splder1 = spl.derivative()
-            for i in range(len(data[:, 0])):
-                # append the stress to the last column
-                data[i, -1] = splder1(data[i, 0]) * convunit / data[i, 2]
-                print data[i, -1]
-            print data
-            np.savetxt("stress.txt", data)

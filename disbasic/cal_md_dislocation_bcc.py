@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-02-20 20:14:11
+# @Last Modified time: 2018-03-13 23:58:41
 
 
 import os
@@ -110,19 +110,10 @@ class md_dislocation_bcc(object):
 
         self.write_lmp_config_data(atoms)
 
-        if not os.path.isdir("restart"):
-            os.mkdir("restart")
-            os.mkdir("cfg")
-
-        #  self.gn_md_nano_tensile(
-            #  potential_file = "Nb.eam.alloy.webarchive",
-            #  element = "Nb",
-            #  temperature = "20",
-            #  deform_direction = "xz",
-            #  deform_rate = "5e-7")
+        self.mymkdir("restart")
+        self.mymkdir("cfg")
 
         self.gn_md_minimize_cfg("lmp_init.txt",
                                 "W.set.txt",    # "Nb.eam.alloy.webarchive",
                                 "W")
         os.system("rm cfg/* ; mpirun -n 4 lmp_mpi -in in.minimize")
-        # write pbs

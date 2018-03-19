@@ -16,7 +16,6 @@ import ase.lattice.orthorhombic as otho
 import numpy as np
 import gn_pbs
 import get_data
-import ase.io
 import os
 import md_pot_data
 from numpy import sqrt
@@ -129,15 +128,6 @@ class cal_d03(get_data.get_data,
             data[i, 2] = i
             os.chdir(os.pardir)
         np.savetxt('lat.dat', data)
-
-    def trans(self):
-        tm = "$FLUX:/scratch/qiliang_flux/chaomy/VA/MgNd/MgNd_Lat/"
-        for i in range(20):
-            mdir = "dir_{:03d}".format(i)
-            self.mymkdir(mdir)
-            os.system("scp {}{}/POSCAR {}".format(tm, mdir, mdir))
-            os.system("scp {}{}/OUTCAR {}".format(tm, mdir, mdir))
-            os.system("scp {}{}/CONTCAR {}".format(tm, mdir, mdir))
 
     def buildd03(self):
         la = self.pot["lattice"]

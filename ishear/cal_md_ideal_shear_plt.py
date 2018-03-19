@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-04 21:35:04
+# @Last Modified time: 2018-03-18 07:48:14
 
 
 from itertools import cycle
@@ -58,7 +58,6 @@ class cal_bcc_ideal_shear_plt(object):
         self.set_tick_size(*axlist)
         self.add_y_labels(ylabeliter, *axlist)
         self.add_x_labels(cycle([r'$\epsilon$']), self.ax2)
-        self.ax1.set_title('{} {}'.format(*til), fontsize=self.myfontsize)
         self.fig.savefig("fig-ishear.png", **self.figsave)
 
     def plt_energy_stress(self, ptype='211', fname='stress.txt'):

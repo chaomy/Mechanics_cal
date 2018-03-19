@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-03 02:28:46
+# @Last Modified time: 2018-03-18 07:41:31
 
 
 import os
@@ -22,9 +22,7 @@ class cal_bcc_ideal_shear_pre(object):
         self.set_kpnts((33, 33, 33))
 
     def gn_primitive_lmps(self,
-                          strain=np.mat(np.identity(3)),
-                          tag='lmp'):
-
+                          strain=np.mat(np.identity(3)), tag='lmp'):
         alat = self.alat
         bas = np.mat([[-0.5, 0.5, 0.5],
                       [0.5, -0.5, 0.5],

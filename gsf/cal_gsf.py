@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-08 23:27:06
+# @Last Modified time: 2018-03-18 10:11:03
 
 
 import gn_lmp_infile
@@ -31,6 +31,7 @@ from itertools import cycle
 import ase.io
 import ase.lattice.orthorhombic as otho
 import ase.lattice.cubic as cubic
+import os
 
 # x [sqrt(2) a ; y = a; z = sqrt(2) a]
 
@@ -59,22 +60,17 @@ class cal_gsf(gn_config.bcc,
               cal_md_gsf.cal_md_gsf,
               cal_va_gsf.cal_va_gsf):
 
-    def __init__(self, pot=md_pot_data.va_pot.Nb_pbe,
-                 mgsf='x111z112'):
-
-        self.pot = pot
-        # self.pot = self.load_data("pot.dat")
+    def __init__(self, pot=md_pot_data.va_pot.Nb_pbe, mgsf='x111z112'):
+        self.pot = self.load_data("../BASICS/pot.dat")
         self.mgsf = mgsf
         self.sample_gsf_num = 21
         self.disp_delta = 1. / (self.sample_gsf_num - 1)
-
         cal_sub.subjobs.__init__(self)
         gn_kpoints.gn_kpoints.__init__(self)
         get_data.get_data.__init__(self)
         gn_incar.gn_incar.__init__(self)
         gn_pbs.gn_pbs.__init__(self)
         plt_drv.plt_drv.__init__(self)
-
         # config
         gn_config.bcc.__init__(self, self.pot)
         Intro_vasp.vasp_change_box.__init__(self, self.pot)
@@ -107,6 +103,51 @@ class cal_gsf(gn_config.bcc,
         for i in range(gsf_data.gsfpopn[mgsf]):
             atoms.pop()
         return atoms
+
+    def gn_gsf_one_layer(self, opt="211"):
+        if opt in ["211"]:  # 211 plane
+            atoms = self.set_bcc_convention(
+                in_direction=gsf_data.gsfbase['x111z112'],
+                in_size=(1, 1, 1))
+        if opt in ["110"]:  # 110 plane
+            atoms = othoBccp110(latticeconstant=(self.pot['latbcc'] * sqrt(2),
+                                                 self.pot['latbcc'],
+                                                 self.pot['latbcc'] * sqrt(2)),
+                                size=(1, 1, 1), symbol=self.pot['element'])
+        if opt in ["100"]:  # 100 plane
+            atoms = self.set_bcc_convention()
+
+        if opt in ["111"]:  # 111 plane
+            atoms = othoBccp110(latticeconstant=(self.pot['latbcc'] * sqrt(2),
+                                                 self.pot['latbcc'],
+                                                 self.pot['latbcc'] * sqrt(2)),
+                                size=(1, 1, 1), symbol=self.pot['element'])
+        npi = 20
+        npj = 15
+        cn = 0
+        cell = atoms.get_cell()
+        for i in range(npi):
+            for j in range(npj):
+                mdir = 'dir_{:03}'.format(cn)
+                self.mymkdir(mdir)
+                trans_atoms = atoms.copy()
+                dx = cell[0, 0] * i / npi
+                dy = cell[1, 1] * j / npj
+                # disp_matrix = np.mat([[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0],
+                #                       [dx, dy, 0.0], [dx, dy, 0.0], [dx, dy, 0.0]])
+                # disp_matrix = np.mat([[0.0, 0.0, 0.0], [0.0, 0.0, 0.0],
+                #                       [dx, dy, 0.0], [dx, dy, 0.0]])
+                disp_matrix = np.mat([[0.0, 0.0, 0.0], [dx, dy, 0.0]])
+                trans_atoms.translate(disp_matrix)
+
+                ase.io.write("POSCAR", images=trans_atoms, format="vasp")
+                os.system("cp POSCAR pos{:03}".format(cn))
+                os.system("mv POSCAR {}".format(mdir))
+                os.system("cp va.pbs {}".format(mdir))
+                os.system("cp KPOINTS {}".format(mdir))
+                os.system("cp INCAR {}".format(mdir))
+                os.system("cp POTCAR {}".format(mdir))
+                cn += 1
 
     def set_pbs(self, dirname, opt='qe'):
         self.set_nnodes(2)
@@ -149,11 +190,10 @@ class cal_gsf(gn_config.bcc,
         coeff = 16.021766208
 
         # for kk in ["gsf_112", "gsf_112u"]:
-        for kk in ["gsf"]:
-            data = np.loadtxt(kk + ".dat")
-            gsf = (data[:, 3] - np.min(data[:, 3])) / (data[:, 2])
-
-            self.ax.plot(data[:, 1], gsf, label=kk, **next(self.keysiter))
+        kk = 'gsf.{}'.format(self.mgsf)
+        data = np.loadtxt(kk + ".dat")
+        gsf = (data[:, 3] - np.min(data[:, 3])) / (data[:, 2])
+        self.ax.plot(data[:, 1], gsf, label=kk, **next(self.keysiter))
 
         self.add_x_labels(cycle(["Normalized Dispament"]), *self.axls)
         if self.mgsf in ["x111z110"]:
@@ -168,7 +208,7 @@ class cal_gsf(gn_config.bcc,
                 cycle([r"gsf [111](211) [eV/A$^2$]"]), *self.axls)
         self.add_legends(*self.axls)
         self.set_tick_size(*self.axls)
-        self.fig.savefig('fig_gsf.png', **self.figsave)
+        self.fig.savefig('fig_gsf.{}.png'.format(self.mgsf), **self.figsave)
 
     def wrap_prep(self, opt='qe'):
         if opt in ['qe']:
@@ -198,9 +238,16 @@ class cal_gsf(gn_config.bcc,
 
     def wrap_auto(self, opt='md'):
         if opt in ['md']:
-            self.md_single_dir_gsf()
-            self.loop_md_gsf()
-            self.collect_gsf_energy()
+            for gsf in ['x111z112', 'x111z110']:
+                self.mgsf = gsf
+                self.md_single_dir_gsf()
+                self.loop_md_gsf()
+                self.collect_gsf_energy()
+                self.plt_gsf()
+                self.clean_gsf()
+
+    def clean_gsf(self):
+        os.system("rm -rf dir-x-*")
 
 if __name__ == '__main__':
     usage = "usage:%prog [options] arg1 [options] arg2"
@@ -216,12 +263,11 @@ if __name__ == '__main__':
                   'loop': drv.wrap_loop,
                   'clc': drv.wrap_clc,
                   'usf': drv.cal_usf,
-                  'setpbs': drv.loop_set_pbs,
                   'plt': drv.plt_gsf,
                   'plttol': drv.plt_tol,
                   'trans': drv.transdata,
-                  'movedir': drv.move_dirs,
-                  'bcc110': drv.gn_bcc110}
+                  'bcc110': drv.gn_bcc110,
+                  'one': drv.gn_gsf_one_layer}
 
     if options.fargs is not None:
         dispatcher[options.mtype.lower()](options.fargs)

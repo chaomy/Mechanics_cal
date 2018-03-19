@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-21 18:42:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-02-18 13:30:10
+# @Last Modified time: 2018-03-18 09:47:17
 
 
 from optparse import OptionParser
@@ -32,8 +32,8 @@ class cal_md_thermo(gn_config.hcp,
                     gn_lmp_infile.gn_md_infile):
 
     def __init__(self):
-        self.pot = self.load_data("./pot.dat")
-        # self.pot = md_pot_data.md_pot.Nb_meam
+        self.pot = self.load_data("../BASICS/pot.dat")
+        # self.pot = md_pot_data.va_pot.Nb_pbe
         self.size = np.array([16, 16, 16])
         self.unit_atoms = \
             ase.lattice.cubic.BodyCenteredCubic(directions=[[1, 0, 0],
@@ -47,7 +47,6 @@ class cal_md_thermo(gn_config.hcp,
         gn_lmp_infile.gn_md_infile.__init__(self, self.pot)
         gn_config.bcc.__init__(self, self.pot)
         plt_drv.plt_drv.__init__(self)
-        return
 
     def run_thermo(self, tag='run'):
         if tag == 'run':
@@ -68,7 +67,6 @@ class cal_md_thermo(gn_config.hcp,
             print temp_lx
         temp_lx = np.array(temp_lx)
         np.savetxt("temp_lx.txt", temp_lx)
-        return
 
     def draw_temp_vol(self):
         self.set_figs()
@@ -83,7 +81,6 @@ class cal_md_thermo(gn_config.hcp,
                 raw = self.mreadlines("{}/log.lammps".format(dirname))
                 for j in range(lastline, lastline + datan):
                     print raw[-j]
-        return
 
     def given_temp_prep(self):
         unitatoms = self.unit_atoms.copy()
@@ -116,7 +113,6 @@ class cal_md_thermo(gn_config.hcp,
                                                'pend': oneatm})
             tstart = tend
             shutil.copy2("in.npt", dirname)
-        return
 
     def get_temp_lat(self, filename="log.lammps"):
         raw = self.mreadlines(filename)
@@ -141,7 +137,6 @@ class cal_md_thermo(gn_config.hcp,
     def theormo_expand_plt(self):
         temp_lx = np.loadtxt("temp_lx.txt")
         print temp_lx
-        return
 
     def pressure_vs_vol(self, opt='prep'):
         delta = -0.01
@@ -186,7 +181,6 @@ class cal_md_thermo(gn_config.hcp,
                 shutil.rmtree(dirname)    # clean
         if opt == 'clc':
             np.savetxt("data.txt", (vol, press))
-        return
 
     def loop_pressure_vs_vol(self):
         dirlist = glob("dir-*")
@@ -203,7 +197,6 @@ class cal_md_thermo(gn_config.hcp,
                     os.system("mv data.txt  {}".format(mdir))
                     os.system("cp p2v.png fig-{}.png".format(mdir))
             cnt += 1
-        return
 
     def vasp_energy_stress_vol_plt(self,
                                    inlabel='p-v',
@@ -229,14 +222,19 @@ class cal_md_thermo(gn_config.hcp,
         plt.ylabel('presssure (GPa)', {'fontsize': self.myfontsize})
         self.add_legends(self.ax)
         self.fig.savefig("p2v.png", **self.figsave)
-        return
 
     def p2v_wrap(self):
         drv.pressure_vs_vol('prep')
         drv.pressure_vs_vol('run')
         drv.pressure_vs_vol('clc')
         drv.vasp_energy_stress_vol_plt(25)
-        return
+
+    def add_vol_expan(self):
+        atoms = ase.io.read("dump", format='lammps-dump')
+        cell = atoms.get_cell()
+        atoms.set_cell(1.0035 * cell, scale_atoms=True)
+        self.write_lmp_config_data(atoms, "thermo.txt")
+        return atoms
 
 
 if __name__ == '__main__':
@@ -256,7 +254,9 @@ if __name__ == '__main__':
                   'loopp2v': drv.loop_pressure_vs_vol,
                   'p2vplt': drv.vasp_energy_stress_vol_plt,
                   'plt': drv.draw_temp_vol,
-                  'themoplt': drv.theormo_expand_plt}
+                  'themoplt': drv.theormo_expand_plt,
+                  'add': drv.add_vol_expan}
+
     if options.fargs is not None:
         dispatcher[options.mtype.lower()](options.fargs)
     else:

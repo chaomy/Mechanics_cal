@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-02-05 21:52:07
+# @Last Modified time: 2018-03-18 09:45:55
 
 
 from multiprocessing import Pool
@@ -38,11 +38,9 @@ class cal_md_surface(gn_config.bcc,
         gn_config.bcc.__init__(self, self.pot)
         self.set_config_file_format("lmp")
         self.config_file = "lmp_init.txt"
-        return
 
     def set_surface_type(self, surface_type):
         self._surface_type = surface_type
-        return
 
     def gn_surface_atoms(self):
         if self._surface_type in ['100']:
@@ -84,7 +82,6 @@ class cal_md_surface(gn_config.bcc,
             dir_list.append('dir-bulk-%s' % (loop_list[i]))
         for mdir in dir_list:
             self.run_lmp_minimize(mdir)
-        return
 
     def multi_thread_surface(self):
         dir_list = []
@@ -96,7 +93,6 @@ class cal_md_surface(gn_config.bcc,
         pool = Pool(processes=num_threads)
         pool.map(unwrap_self_run_lammps,
                  zip([self] * num_threads, dir_list))
-        return
 
     def loop_cal_surface_data(self):
         loop_list = ['100', '110', '111']
@@ -114,27 +110,20 @@ class cal_md_surface(gn_config.bcc,
             self.set_surface_type(loc_type)
             self.prepare_md_surface()
             self.prepare_md_bulk()
-        return
 
     def prepare_md_surface(self):
         dir_surf = 'dir-surf-%s' % (self._surface_type)
         self.mymkdir(dir_surf)
-        os.chdir(dir_surf)
-        atoms = self.gn_surface_atoms()
-        self.write_lmp_config_data(atoms)
-        os.system('cp  ../in.minimize  .')
-        os.chdir(os.pardir)
-        return
+        self.write_lmp_config_data(self.gn_surface_atoms())
+        os.system("cp lmp_init.txt {}".format(dir_surf))
+        os.system('cp in.minimize  {}'.format(dir_surf))
 
     def prepare_md_bulk(self):
         dir_bulk = 'dir-bulk-%s' % (self._surface_type)
         self.mymkdir(dir_bulk)
-        os.chdir(dir_bulk)
-        atoms = self.gn_bulk_atoms()
-        os.system('cp  ../in.minimize  .')
-        self.write_lmp_config_data(atoms)
-        os.chdir(os.pardir)
-        return
+        self.write_lmp_config_data(self.gn_bulk_atoms())
+        os.system("cp lmp_init.txt {}".format(dir_bulk))
+        os.system('cp in.minimize  {}'.format(dir_bulk))
 
     def cal_surface_energy(self):
         dir_bulk = 'dir-bulk-%s' % (self._surface_type)
@@ -163,7 +152,6 @@ class cal_md_surface(gn_config.bcc,
         self.loop_prepare_surface()
         self.multi_thread_surface()
         print self.loop_cal_surface_data()
-        return
 
 
 if __name__ == '__main__':

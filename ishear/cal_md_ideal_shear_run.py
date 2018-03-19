@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-04 21:15:19
+# @Last Modified time: 2018-03-18 07:13:28
 
 
 from scipy.optimize import minimize
@@ -16,11 +16,9 @@ class cal_bcc_ideal_shear_run(object):
     def qe_relax(self):
         (delta, x0) = self.load_input_params()
         data = np.zeros(7)
-        res = minimize(self.runqe, x0, delta, tol=5e-4, method='Nelder-Mead')
+        res = minimize(self.runqe, x0, delta, tol=1e-3, method='Nelder-Mead')
         print res
-        data[0] = delta
-        data[1] = res.fun
-        data[2:] = res.x
+        data[0], data[1], data[2:] = delta, res.fun, res.x
         np.savetxt("ishear.txt", data)
 
     def vasp_relax(self):
@@ -29,9 +27,7 @@ class cal_bcc_ideal_shear_run(object):
         data = np.zeros(7)
         res = minimize(self.runvasp, x0, delta, tol=1e-3, method='Nelder-Mead')
         print res
-        data[0] = delta
-        data[1] = res.fun
-        data[2:] = res.x
+        data[0], data[1], data[2:] = delta, res.fun, res.x
         np.savetxt("ishear.txt", data)
 
     def loop_shear_lmp(self):
@@ -41,12 +37,10 @@ class cal_bcc_ideal_shear_run(object):
         for i in range(npts):
             delta = self.delta * i
             res = minimize(self.runlmp, x0, delta,
-                           tol=1e-4, method='Nelder-Mead')
+                           tol=1e-3, method='Nelder-Mead')
             x0 = res.x
             print res
-            data[i][0] = (delta)
-            data[i][1] = res.fun
-            data[i][2:] = res.x
+            data[i][0], data[i][1], data[i][2:] = (delta), res.fun, res.x
         np.savetxt("ishear.txt", data)
 
     def recordstrain(self, delta, x, fval):

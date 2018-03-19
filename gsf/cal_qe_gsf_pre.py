@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-08 15:26:09
+# @Last Modified time: 2018-03-13 02:42:29
 
 
 import numpy as np
@@ -17,13 +17,13 @@ from glob import glob
 
 
 class cal_qe_gsf_pre(object):
+
     def loop_set_pbs(self):
         dirlist = glob('dir-*')
         for mdir in dirlist:
             os.chdir(mdir)
             self.set_pbs(mdir)
             os.chdir(os.pardir)
-        return
 
     # def gn_infile_gsf_atoms(self, atoms=None, fname='qe.in'):
     #     self.set_cal_type('relax')
@@ -44,7 +44,7 @@ class cal_qe_gsf_pre(object):
 
     def loop_pot_gsf(self, tag='prep'):
         vcapots = self.vcaWTa
-        gsf = 'x111z110' 
+        gsf = 'x111z110'
         for key in vcapots.keys():
             mdir = key
             self.mymkdir(mdir)
@@ -52,7 +52,6 @@ class cal_qe_gsf_pre(object):
             self.__init__(vcapots[key], gsf)
             self.gn_qe_single_dir_gsf()
             os.chdir(os.pardir)
-        return
 
     def loop_sub(self):
         vcapots = self.vcapots
@@ -65,7 +64,6 @@ class cal_qe_gsf_pre(object):
                     # os.system('cal_qe_gsf.py -t setpbs')
                     os.system('cal_sub.py -t sub')
                     os.chdir(os.pardir)
-        return
 
     def move_dirs(self):
         vcapots = self.vcapots
@@ -84,4 +82,3 @@ class cal_qe_gsf_pre(object):
                     dirname = 'dir-{}-{:4.3f}'.format(gsf, disp)
                     os.system('mv {} ../{}'.format(dirname, mdir1))
                 os.chdir(os.pardir)
-        return

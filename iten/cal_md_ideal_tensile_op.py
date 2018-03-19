@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-03 16:16:25
+# @Last Modified time: 2018-03-18 10:42:19
 
 
 import os
@@ -26,9 +26,9 @@ class cal_bcc_ideal_tensile_op(get_data.get_data,
                                plt_drv.plt_drv,
                                gn_config.bcc):
 
-    def __init__(self):
         # self.pot = md_pot_data.md_pot.Nb_meamc
-        self.pot = self.load_data('pot.dat')
+    def __init__(self):
+        self.pot = self.load_data('../BASICS/pot.dat')
         gn_pbs.gn_pbs.__init__(self)
         plt_drv.plt_drv.__init__(self)
         get_data.get_data.__init__(self)
@@ -84,7 +84,7 @@ class cal_bcc_ideal_tensile_op(get_data.get_data,
         for i in range(npts):
             delta = self.delta * (self.range[0] + i)
             res = minimize(self.runlmp, x0, delta, method='Nelder-Mead',
-                           options={'fatol': 5e-4, 'disp': True})
+                           options={'fatol': 1e-3, 'disp': True})
             data[i][2], data[i][3] = res.x[0], res.x[1]
             x0 = res.x
             print res
@@ -92,6 +92,7 @@ class cal_bcc_ideal_tensile_op(get_data.get_data,
             data[i][1] = res.fun
             data[i][4:] = self.stress
         np.savetxt("iten.txt", data, fmt='%6.5f')
+        np.savetxt("iten.md.op.txt", data, fmt='%6.5f')
 
     def runvasp(self, x, delta):
         basis = self.basis

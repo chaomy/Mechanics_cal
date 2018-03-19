@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2018-03-07 13:09:29
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-07 13:10:20
+# @Last Modified time: 2018-03-17 08:56:13
 
 import numpy as np
 import ase
@@ -16,16 +16,15 @@ from optparse import OptionParser
 import md_pot_data
 import atomman as am
 import atomman.lammps as lmp
+import get_data
+import glob
 
 
-class lmp_phonon(object):
+class lmp_phonon(get_data.get_data):
 
     def __init__(self):
-        self._pot = md_pot_data.md_pot.Nb_adp
-        self._element = self._pot['element']
-        self._lat = self._pot['latbcc']
-        self._pottype = self._pot['pair_style']
-        self._potfile = self._pot['file']
+        get_data.get_data.__init__(self)
+        self.pot = self.load_data("../pot.dat")
 
     def lmp_change_box(self, in_cell):
         unit_x = np.linalg.norm(in_cell[0, :])
@@ -66,27 +65,22 @@ class lmp_phonon(object):
                          [0.0, 0.0, 0.973610]])
         self.gn_primitive_lmps(strain)
 
-    def gn_primitive_lmps(self,
-                          strain=np.mat([[1., 0., 0.],
-                                         [0., 1., 0.],
-                                         [0., 0., 1.]])):
-        alat = self._lat
+    def gn_primitive_lmps(self, strain=np.mat([[1., 0., 0.],
+                                               [0., 1., 0.],
+                                               [0., 0., 1.]])):
+        alat = self.pot['lattice']
         cell = np.mat([[-0.5, 0.5, 0.5],
                        [0.5, -0.5, 0.5],
                        [0.5, 0.5, -0.5]])
         # [[-0.53       0.53       0.53     ]
         # [ 0.4921285 -0.4921285  0.4921285]
         # [ 0.4918525  0.4918525 -0.4918525]]
-
         cell = strain * cell
         print cell
         cell = alat * self.lmp_change_box(cell)
 
-        atoms = ase.Atoms('Nb',
-                          positions=[[0, 0, 0]],
-                          cell=cell,
-                          pbc=[1, 1, 1])
-
+        atoms = ase.Atoms(
+            'Nb', positions=[[0, 0, 0]], cell=cell, pbc=[1, 1, 1])
         ase.io.write("POSCAR", images=atoms, format='vasp')
 
         pos = np.array([[0, 0, 0]])
@@ -138,7 +132,6 @@ class lmp_phonon(object):
         strain = np.mat([[1.10, 0., 0.],
                          [0.0,  0.974257, 0.0],
                          [0.0, 0.0, 0.973610]])
-
         strain = np.mat(np.identity(3))
 
         unitcell = strain * unitcell
@@ -167,42 +160,45 @@ class lmp_phonon(object):
                 % (stringlist[i],
                    stringlist[i + 1])
 
-    def convert_pos_lmp_data_norm(self, filename="POSCAR-001"):
+    def convert_pos_to_lmp_data_norm(self, filename="POSCAR-001"):
         ase_atoms = ase.io.read(filename, format='vasp')
         system, elements = am.convert.ase_Atoms.load(ase_atoms)
         lmp.atom_data.dump(system, "lmp_init.txt")
 
-    def convert_pos_lmp_data(self, filename="POSCAR-001"):
+    def convert_pos_to_lmp_data(self, filename="POSCAR-001"):
         ase_atoms = ase.io.read(filename, format='vasp')
         cell = ase_atoms.get_cell()
         print np.linalg.norm(cell)
         print ase_atoms.get_positions()
-
-        # write lmp file
-        drv_gnconfig = gn_config.gnStructure(self._pot)
+        drv_gnconfig = gn_config.gnStructure(self.pot)
         drv_gnconfig.write_lmp_config_data(ase_atoms)
+
+    def cal_phonon_auto(self):
+        self.gn_primitive_lmps()
+        os.system("phonopy --dim=\"5 5 5\" -d")
+        os.system("lmp_mpi -i in.phonon")
+        files = glob.glob("bcc.0.dump")
+        os.system("phonopy -f {} --lammps".format(files[0]))
+        os.system("MutiPhonon_oneAtom.py")
 
 
 if __name__ == '__main__':
     usage = "usage:%prog [options] arg1 [options] arg2"
     parser = OptionParser(usage=usage)
-    parser.add_option("-t", "--mtype", action="store", type="string", dest="mtype", help="",
-                      default="curv")
-    parser.add_option("-f", "--mfile", action="store", type="string", dest="mfile",
-                      default="./dummy.config.pair")
+    parser.add_option("-t", "--mtype", action="store",
+                      type="string", dest="mtype")
+    parser.add_option('-p', "--param", action="store",
+                      type='string', dest="fargs")
 
     (options, args) = parser.parse_args()
-    OriDir = os.getcwd()
     drv = lmp_phonon()
+    dispatcher = {'cnv': drv.convert_pos_to_lmp_data,
+                  'prim': drv.gn_primitive_lmps,
+                  'strain': drv.gn_primitive_lmps_with_strain,
+                  'kpt': drv.convert_kpath_upon_base_vector,
+                  'auto': drv.cal_phonon_auto}
 
-    if options.mtype.lower() == 'lmp':
-        drv.convert_pos_lmp_data()
-
-    if options.mtype.lower() == 'prim':
-        drv.gn_primitive_lmps()
-
-    if options.mtype.lower() == 'strain':
-        drv.gn_primitive_lmps_with_strain()
-
-    if options.mtype.lower() == 'kpt':
-        drv.convert_kpath_upon_base_vector()
+    if options.fargs is not None:
+        dispatcher[options.mtype.lower()](options.fargs)
+    else:
+        dispatcher[options.mtype.lower()]()

@@ -1,19 +1,11 @@
 #!/usr/bin/env python
 # encoding: utf-8
+# -*- coding: utf-8 -*-
+# @Author: chaomy
+# @Date:   2018-03-13 23:59:29
+# @Last Modified by:   chaomy
+# @Last Modified time: 2018-03-19 16:23:00
 
-###################################################################
-#
-# File Name : cal_bcc_kink.py
-#
-###################################################################
-#
-# Purpose :
-#
-# Creation Date : Mon Apr 24 01:27:15 2017
-# Last Modified :
-# Created By    : Chaoming Yang
-#
-###################################################################
 
 import atomman as am
 import atomman.lammps as lmp
@@ -42,16 +34,12 @@ class bcc_kink(gn_config.bcc,
         gn_pbs.gn_pbs.__init__(self)
         self.pot = md_pot_data.md_pot.Nb_eam
         self._alat = self.pot['lattice']  # Nb
-        Intro_vasp.vasp_change_box.__init__(self,
-                                            self._alat)
+        Intro_vasp.vasp_change_box.__init__(self, self._alat)
         gn_lmp_infile.gn_md_infile.__init__(self)
         self.shmid_drv = cal_md_dis_schmid.cal_bcc_schmid(self.pot)
-        return
 
         ############################################################
-        # cluster method  (large supercell)
-        # make a plate
-        # run some MD
+        # cluster method  (large supercell) # make a plate # run some MD
         ############################################################
     def construct_init_final(self):
         alat = self._alat
@@ -61,27 +49,14 @@ class bcc_kink(gn_config.bcc,
                                         move=move1,
                                         tag='[211]',
                                         filename="init.txt")
-
         move2 = [0, 0, 0]
         self.shmid_drv.make_screw_plate(size=[60, 84, 20],
                                         rad=[152, 160],
                                         move=move2,
                                         tag='[211]',
                                         filename="final.txt")
-        return
 
-        ############################################################
-        # cluster method  (large supercell)
-        # make a plate
-        # run some MD
-        ############################################################
-    def cal_md_peierls_barrier(self):
-
-        return
-
-        ############################################################
         # dipole method
-        ############################################################
     def cal_kink_pair_neb_pre(self):
         dirname = "kink_0.004"
         self.mymkdir(dirname)
@@ -91,14 +66,12 @@ class bcc_kink(gn_config.bcc,
         e2 = 1. / 2. * np.array([-1., 1.,  0])
         e3 = np.array([0.5,  0.5,  0.5])
 
-        self.set_lattce_constant(self._alat)
-        self.set_element(self.pot['element'])
-
         Lx = 30  # Default 30
         Ly = 15  # Default 30
         Lz = 100
 
-        xc1 = (0.0 + (-2.56656)) / 2. + 1.5 * Lx * np.sqrt(6.) / 3. * self._alat
+        xc1 = (0.0 + (-2.56656)) / 2. + 1.5 * \
+            Lx * np.sqrt(6.) / 3. * self._alat
         yc1 = (0.0 + (2.22271)) / 2. + 15 * np.sqrt(2.) * self._alat
         H = np.sqrt(2. / 3.0) * self._alat
 
@@ -145,12 +118,15 @@ class bcc_kink(gn_config.bcc,
         elif (neb_tag == "final"):
             #  generate initial #
             atoms = self.set_bcc_convention([e1, e2, e3], (Lx, Ly, Lz))
-            atoms = self.intro_kink_screw_dislocations(atoms, (xc1, yc1), (xc1 + H, yc1), 0)
+            atoms = self.intro_kink_screw_dislocations(
+                atoms, (xc1, yc1), (xc1 + H, yc1), 0)
             fname = "init.data"
             self.write_lmp_config_data(atoms, file_name=fname)
 
-            # generate final #  atoms = self.set_bcc_convention([e1, e2, e3], (30, 30, 100));
-            atoms = self.intro_kink_screw_dislocations(atoms, (xc1 + H, yc1), (xc1 + 2 * H, yc1), 0)
+            # generate final #  atoms = self.set_bcc_convention([e1, e2, e3],
+            # (30, 30, 100));
+            atoms = self.intro_kink_screw_dislocations(
+                atoms, (xc1 + H, yc1), (xc1 + 2 * H, yc1), 0)
             fname = "final.data"
             coordn = "final.screw"
             self.write_lmp_config_data(atoms, file_name=fname)
@@ -162,13 +138,6 @@ class bcc_kink(gn_config.bcc,
                 atoms, (xc1, yc1), (xc1 + H, yc1), h, 1. / 4.)
             fname = "init.data"
             self.write_lmp_config_data(atoms, file_name=fname)
-        return
-
-    def each_neb_prerun(self):
-        filelist = glob.glob("init_*.data")
-        for mfile in filelist:
-            print mfile
-        return
 
         ############################################################
         # prepare for neb calculation of kink pair (disocation dipole)
@@ -179,9 +148,6 @@ class bcc_kink(gn_config.bcc,
             e1 = 1. / 3. * np.array([1., 1., -2.])
             e2 = np.array([0.5, 0.5, 0.5])
             e3 = 1. / 2. * np.array([1, -1, 0])
-
-        self.set_lattce_constant(self._alat)
-        self.set_element(self.pot['element'])
 
         times = 4
         n = 7 * times
@@ -410,7 +376,6 @@ class bcc_kink(gn_config.bcc,
 
         #  elif tag == 'perf':
             #  self.write_lmp_config_data(atoms, 'lmp_init.txt')
-        return
 
     def cal_kink_energy(self):
         atoms = ase.io.read('./relax.cfg',
@@ -428,7 +393,8 @@ class bcc_kink(gn_config.bcc,
 
         count = 0
         for i in range(len(atom_position)):
-            if (atom_position[i, 2] > crit1):  # and (atom_position[i, 2] < crit2):
+            # and (atom_position[i, 2] < crit2):
+            if (atom_position[i, 2] > crit1):
                 atom_position[i, 0] += disp
                 count += 1
 
@@ -437,38 +403,26 @@ class bcc_kink(gn_config.bcc,
 
         atoms.set_positions(atom_position)
         self.write_lmp_config_data(atoms)
-        return
-
-    def adjust(self):
-        atoms = ase.io.read("md.4000.dump", format='lammps-dump')
-        system, elements = am.convert.ase_Atoms.load(atoms)
-        lmp.atom_data.dump(system, "lmp_init.txt")
-        return
 
 
 if __name__ == "__main__":
     usage = "usage:%prog [options] arg1 [options] arg2"
     parser = OptionParser(usage=usage)
     parser.add_option("-t", "--mtype", action="store",
-                      type="string", dest="mtype", help="",
-                      default="prp_r")
-
+                      type="string", dest="mtype")
+    parser.add_option('-p', "--param", action="store",
+                      type='string', dest="fargs")
     (options, args) = parser.parse_args()
     drv = bcc_kink()
 
-    if options.mtype == 'build':
-        drv.construct_init_final()
+    dispatcher = {'build': drv.construct_init_final,
+                  'dipole': drv.cal_kink_pair_neb_pre,
+                  'dipoleneb': cal_kink_pair_neb_dipole}
+    if options.fargs is not None:
+        dispatcher[options.mtype.lower()](options.fargs)
+    else:
+        dispatcher[options.mtype.lower()]()
 
-    if options.mtype == 'dipole':
-        drv.cal_kink_pair_neb_pre()
-
-    if options.mtype == 'adj':
-        drv.adjust()
-
-    if options.mtype == "dipole_neb":
-        #  drv.cal_kink_pair_neb_dipole('initial')
-        #  drv.cal_kink_pair_neb_dipole('final')
-        drv.cal_kink_pair_neb_dipole('each_interp')
-
-    if options.mtype == "prerun":
-        drv.each_neb_prerun()
+    #  drv.cal_kink_pair_neb_dipole('initial')
+    #  drv.cal_kink_pair_neb_dipole('final')
+    # drv.cal_kink_pair_neb_dipole('each_interp')

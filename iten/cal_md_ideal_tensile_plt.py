@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-07 14:00:13
+# @Last Modified time: 2018-03-17 09:54:24
 
 
 from optparse import OptionParser
@@ -199,7 +199,7 @@ class cal_md_ideal_tensile_plt(plt_drv.plt_drv):
         self.add_y_labels(ylabeliter, *self.axls)
         self.add_x_labels(cycle([r'$\varepsilon_{xx}$']), self.ax2)
         self.set_tick_size(*self.axls)
-        self.fig.savefig('fig-iten-cmp.png', **self.figsave)
+        self.fig.savefig('fig-iten-cmp-{}.png'.format(tg), **self.figsave)
 
 
 if __name__ == '__main__':
@@ -208,7 +208,7 @@ if __name__ == '__main__':
     parser.add_option('-t', "--mtype", action="store",
                       type="string", dest="mtype")
     parser.add_option('-p', "--param", action="store",
-                      type='float', dest="fargs")
+                      type='string', dest="fargs")
     (options, args) = parser.parse_args()
     drv = cal_md_ideal_tensile_plt()
     dispatcher = {'plt': drv.plt_energy_stress,
@@ -217,6 +217,7 @@ if __name__ == '__main__':
                   'adj': drv.adjust_data_format,
                   'cmp': drv.cmp_pot_plt,
                   'mesh': drv.plt_mesh}
+
     if options.fargs is not None:
         dispatcher[options.mtype.lower()](options.fargs)
     else:

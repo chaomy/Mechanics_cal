@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-04 21:55:16
+# @Last Modified time: 2018-03-18 07:46:21
 
 
 from optparse import OptionParser
@@ -12,12 +12,10 @@ import cal_md_ideal_shear_ini as init
 
 
 if __name__ == '__main__':
-
     usage = "usage:%prog [options] arg1 [options] arg2"
     parser = OptionParser(usage=usage)
     parser.add_option('-t', "--mtype", action="store",
                       type="string", dest="mtype")
-
     parser.add_option('-p', "--param", action="store",
                       type='string', dest="fargs")
 
@@ -38,7 +36,6 @@ if __name__ == '__main__':
                   'ilmp': drv.loop_shear_lmp,
                   'iqe': drv.qe_relax,
                   'gnprim': drv.gn_primitive_lmps,
-                  'clctmp': drv.read_ofiles,
                   'pltengy': drv.plt_energy,
                   'pltstress': drv.plt_energy_stress,
                   'pltlmp': drv.plt_energy_stress_lmp,
