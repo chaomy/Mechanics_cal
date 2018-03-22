@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-21 18:42:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-18 09:47:17
+# @Last Modified time: 2018-03-20 13:56:51
 
 
 from optparse import OptionParser
@@ -23,9 +23,7 @@ import md_pot_data
 from glob import glob
 
 
-class cal_md_thermo(gn_config.hcp,
-                    gn_config.bcc,
-                    gn_config.fcc,
+class cal_md_thermo(gn_config.gnStructure,
                     get_data.get_data,
                     gn_pbs.gn_pbs,
                     plt_drv.plt_drv,
@@ -35,17 +33,8 @@ class cal_md_thermo(gn_config.hcp,
         self.pot = self.load_data("../BASICS/pot.dat")
         # self.pot = md_pot_data.va_pot.Nb_pbe
         self.size = np.array([16, 16, 16])
-        self.unit_atoms = \
-            ase.lattice.cubic.BodyCenteredCubic(directions=[[1, 0, 0],
-                                                            [0, 1, 0],
-                                                            [0, 0, 1]],
-                                                latticeconstant=self.pot[
-                                                    "lattice"],
-                                                size=(1, 1, 1),
-                                                symbol=self.pot["element"],
-                                                pbc=(1, 1, 1))
         gn_lmp_infile.gn_md_infile.__init__(self, self.pot)
-        gn_config.bcc.__init__(self, self.pot)
+        gn_config.gnStructure.__init__(self, self.pot)
         plt_drv.plt_drv.__init__(self)
 
     def run_thermo(self, tag='run'):
@@ -64,7 +53,7 @@ class cal_md_thermo(gn_config.hcp,
                 os.chdir(dirname)
                 temp_lx.append(self.get_temp_lat())
                 os.chdir(os.pardir)
-            print temp_lx
+            print(temp_lx)
         temp_lx = np.array(temp_lx)
         np.savetxt("temp_lx.txt", temp_lx)
 
@@ -75,16 +64,15 @@ class cal_md_thermo(gn_config.hcp,
         for i in range(1, 51):
             tend = 50 * i
             dirname = "dir-{:05.0f}".format(tend)
-            print dirname
-            print tend
+            print(dirname)
+            print(tend)
             if os.path.isfile("{}/log.lammps".format(dirname)):
                 raw = self.mreadlines("{}/log.lammps".format(dirname))
                 for j in range(lastline, lastline + datan):
-                    print raw[-j]
+                    print(raw[-j])
 
     def given_temp_prep(self):
-        unitatoms = self.unit_atoms.copy()
-        atoms = unitatoms.repeat(([15, 15, 15]))
+        atoms = self.set_bcc_convention().repeat(([15, 15, 15]))
         self.write_lmp_config_data(atoms, "init.txt")
         oneatm = 1.01325
         tstart = 0.1
@@ -131,12 +119,12 @@ class cal_md_thermo(gn_config.hcp,
                         break
         temp /= cnt
         lx /= cnt
-        print temp, lx
+        print(temp, lx)
         return (temp, lx)
 
     def theormo_expand_plt(self):
         temp_lx = np.loadtxt("temp_lx.txt")
-        print temp_lx
+        print(temp_lx)
 
     def pressure_vs_vol(self, opt='prep'):
         delta = -0.01
@@ -174,7 +162,7 @@ class cal_md_thermo(gn_config.hcp,
             elif opt == 'clc':
                 os.chdir(dirname)
                 data = np.loadtxt("out.txt")
-                print data
+                print(data)
                 vol[i] = data[0]
                 press[i] = data[1]
                 os.chdir(os.pardir)
@@ -186,7 +174,7 @@ class cal_md_thermo(gn_config.hcp,
         dirlist = glob("dir-*")
         cnt = 0
         for mdir in dirlist[:]:
-            print mdir
+            print(mdir)
             if ((cnt % 1) == 0):
                 if not os.path.isfile("fig-{}.png".format(mdir)):
                     self.pressure_vs_vol('prep')

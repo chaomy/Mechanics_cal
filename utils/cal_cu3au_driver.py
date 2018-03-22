@@ -14,7 +14,7 @@ try:
     import ase.lattice.cubic as Cubic
     from optparse import OptionParser
     import shutil
-    import Intro_vasp
+    from . import Intro_vasp
     import gn_lmp_infile
     import gn_pbs
     import gn_config
@@ -114,12 +114,12 @@ class cal_cu3au_driver(Intro_vasp.vasp_change_box,
                        pos[2] > zzone[0] and \
                        pos[0] < xzone[1] and \
                        pos[0] > xzone[0]:
-                        print atom.symbol
+                        print(atom.symbol)
                         #  if atom.symbol == 'He':
                         #  index_list.append(atom.index)
                         #  atom.position += shiftAu
 
-            print index_list
+            print(index_list)
             del atoms[index_list]
             center = [0.5 * (xzone[0] + xzone[1]), yzone[1], 0.0]
 
@@ -144,7 +144,7 @@ class cal_cu3au_driver(Intro_vasp.vasp_change_box,
                     index_list.append(atom.index)
 
                 if index_list is not []:
-                    print "delete %s atoms" % (len(index_list))
+                    print("delete %s atoms" % (len(index_list)))
                     del atoms[index_list]
 
             ### output ###

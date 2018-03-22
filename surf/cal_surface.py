@@ -14,9 +14,9 @@ import numpy as np
 import md_pot_data
 import ase.io
 from gsf import cal_gsf
-import cal_qe_surface
-import cal_va_surface
-import cal_md_surface
+from . import cal_qe_surface
+from . import cal_va_surface
+from . import cal_md_surface
 
 
 class cal_surface(cal_gsf.cal_gsf,
@@ -35,7 +35,7 @@ class cal_surface(cal_gsf.cal_gsf,
     def loop_prep_va(self):
         surlist = ['x100z100', 'x110z110', 'x112z111']
         for self.mgsf in surlist:
-            print self.mgsf
+            print(self.mgsf)
             self.prep_va_surface()
         return
 

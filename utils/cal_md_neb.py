@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-19 17:42:57
+# @Last Modified time: 2018-03-19 17:49:18
 
 
 import os
@@ -52,7 +52,7 @@ class lmps_neb_tools(get_data.get_data, gn_config.bcc):
         dir_list = glob.glob("z*")
         for i in range(len(dir_list)):
             mdir = dir_list[i]
-            print mdir
+            print(mdir)
             os.chdir(mdir)
             # os.system("sh clean.sh")
             os.system("lmp_linux -in in.init  > log.init  &")
@@ -64,7 +64,7 @@ class lmps_neb_tools(get_data.get_data, gn_config.bcc):
         dir_list = glob.glob("z*")
         for i in range(len(dir_list)):
             mdir = dir_list[i]
-            print mdir
+            print(mdir)
             os.chdir(mdir)
             self.change_in_Neb()
             self.create_final_screw()
@@ -75,7 +75,7 @@ class lmps_neb_tools(get_data.get_data, gn_config.bcc):
             raw = fid.readlines()
             fid.close()
 
-        print raw[55]
+        print(raw[55])
         raw[55] = '                    [%5.4f, 1,0],\n' % (delta)
         with open("./gnStructure.py", 'w') as fid:
             for i in range(len(raw)):
@@ -84,12 +84,12 @@ class lmps_neb_tools(get_data.get_data, gn_config.bcc):
 
     def change_in_Neb(self):
         fileList = glob.glob("./Init_Restart/*")
-        print fileList[-1]
+        print(fileList[-1])
         mfile = fileList[-1]
 
         with open("./in.neb_dislocation", 'r') as fid:
             raw = fid.readlines()
-        print raw[14]
+        print(raw[14])
         raw[14] = "read_restart  %s\n" % (mfile)
         with open("in.new", 'w') as fid:
             fid.writelines(raw)
@@ -104,8 +104,8 @@ class lmps_neb_tools(get_data.get_data, gn_config.bcc):
         os.system("cp  %s  ." % (fileList[-1]))
         with open(fileList[-1], 'r') as fid:
             raw = fid.readlines()
-        print raw[3]
-        print raw[9]
+        print(raw[3])
+        print(raw[9])
         with open("final.coord", 'w') as fid:
             fid.write(raw[3])
             fid.writelines(raw[9:])
@@ -121,15 +121,15 @@ class lmps_neb_tools(get_data.get_data, gn_config.bcc):
             os.system("mv ./log.lammps.%d  log.lammps.0%d" % (i, i))
 
     def read_lmp_log_file(self, figname='neb.png'):
-        mydir = os.getcwd().split('/')[-1]
-        sshdir = "$FLUX:/home/chaomy/{}".format(mydir)
+        # mydir = os.getcwd().split('/')[-1]
+        # sshdir = "$FLUX:/home/chaomy/{}".format(mydir)
         # os.system("scp {}/log.lammps.* .".format(sshdir))
         file_list = glob.glob("log.lammps.*")
         nlogs = len(file_list)
         neb_energy = []
         for i in range(nlogs):
             mfile = "log.lammps.%d" % (i)
-            print mfile
+            print(mfile)
             neb_energy.append(self.md_get_final_energy(mfile))
         neb_energy = np.array(neb_energy)
         neb_energy -= np.min(neb_energy)
@@ -151,13 +151,13 @@ class lmps_neb_tools(get_data.get_data, gn_config.bcc):
         count = 0
 
         for file in log_files:
-            print file
+            print(file)
             with open(file, 'r') as fid:
                 raw = fid.read()
                 fid.close()
 
             neb_energy.append(float(re_energy.findall(raw)[-1][-1]))
-            print "%d %f\n" % (count, neb_energy[count])
+            print("%d %f\n" % (count, neb_energy[count]))
             count += 1
 
         neb_energy = np.array(neb_energy)
@@ -167,7 +167,7 @@ class lmps_neb_tools(get_data.get_data, gn_config.bcc):
         #  neb_energy = 1000 * neb_energy * 0.5  #  meV / burger
         #  neb_energy = np.delete(neb_energy, np.argmin(neb_energy));
 
-        print "after delete", len(neb_energy)
+        print("after delete", len(neb_energy))
         neb_energy = neb_energy - np.min(neb_energy)
         return neb_energy
 
@@ -212,7 +212,7 @@ class lmps_neb_tools(get_data.get_data, gn_config.bcc):
                 os.system("tail -n %d %s  > dump.%d" % (numlines, file, i + 1))
         else:
             atoms = ase.io.read("./dump.1", format="lammps-dump")
-            print atoms
+            print(atoms)
             self.write_lmp_config_data(atoms, "dump.init.data")
 
 
@@ -220,20 +220,19 @@ if __name__ == '__main__':
     usage = "usage:%prog [options] arg1 [options] arg2"
     parser = OptionParser(usage=usage)
     parser.add_option("-t", "--mtype", action="store",
-                      type="string", dest="mtype", help="",
-                      default="prp_r")
+                      type="string", dest="mtype")
+    parser.add_option('-p', "--param", action="store",
+                      type='string', dest="fargs")
+
     (options, args) = parser.parse_args()
 
     drv = lmps_neb_tools()
+    dispatcher = {'plt': drv.read_lmp_log_file,
+                  'screen': drv.read_screen,
+                  'rst': drv.restart_neb,
+                  'adj': drv.create_final_screw}
 
-    if options.mtype.lower() == "plot":
-        drv.read_lmp_log_file()
-
-    elif options.mtype == 'screen':
-        drv.read_screen()
-
-    elif options.mtype == "restart":
-        drv.restart_neb()
-
-    elif options.mtype.lower() == 'adj':
-        drv.create_final_screw()
+    if options.fargs is not None:
+        dispatcher[options.mtype.lower()](options.fargs)
+    else:
+        dispatcher[options.mtype.lower()]()

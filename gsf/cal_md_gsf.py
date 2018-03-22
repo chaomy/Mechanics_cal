@@ -59,7 +59,7 @@ class cal_md_gsf(output_data.output_data):
         num_threads = len(dir_list)
         pool = Pool(processes=num_threads)
         pool.map(unwrap_self_run_lammps,
-                 zip([self] * num_threads, dir_list))
+                 list(zip([self] * num_threads, dir_list)))
 
     def collect_gsf_energy(self):
         disp_list, energylist, area_list = [], [], []

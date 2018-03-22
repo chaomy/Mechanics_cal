@@ -31,7 +31,7 @@ try:
     import Intro_vasp
 
 except ImportError:
-    print "error during import"
+    print("error during import")
 
 
 class cal_vasp_thermo(gn_config.bcc,
@@ -101,7 +101,7 @@ class cal_vasp_thermo(gn_config.bcc,
                 os.chdir(dirname)
                 (engy, stress, vol) = self.vasp_energy_stress_vol()
                 stresslist.append(0.1 * stress[0])  # Gpa
-                print stress
+                print(stress)
                 vollist.append(vol)
                 os.chdir(self._root)
 

@@ -171,8 +171,8 @@ class md_crack(lmp_change_configs.lmp_change_configs):
         for i in range(6):
             for j in range(6):
                 s66new[i, j] = s99new[i, j]
-            print s99new
-            print s66new
+            print(s99new)
+            print(s66new)
         return s66new
 
     def cal_sij(self):
@@ -183,7 +183,7 @@ class md_crack(lmp_change_configs.lmp_change_configs):
         sij[0, 1], sij[0, 2], sij[1, 2], sij[1, 0], sij[
             2, 0], sij[2, 1] = s12, s12, s12, s12, s12, s12
         sij[3, 3], sij[4, 4], sij[5, 5] = s44, s44, s44
-        print sij
+        print(sij)
         # use for coordination trnasformation
         # sij = self.change_sij(L,sij)
         return sij
@@ -213,9 +213,9 @@ class md_crack(lmp_change_configs.lmp_change_configs):
         b16 = (sij[0, 5] * sij[2, 2] - sij[0, 2] * sij[2, 5]) / sij[2, 2]
         b26 = (sij[1, 5] * sij[2, 2] - sij[1, 2] * sij[2, 5]) / sij[2, 2]
         Eq = np.poly1d([b11, -2 * b16, 2 * b12 + b66, -2 * b26, b22])
-        print Eq
+        print(Eq)
         u1, u3, u2, u4 = Eq.r
-        print u1, u2, u3, u4
+        print(u1, u2, u3, u4)
         p1 = b11 * u1**2 - b16 * u1 + b12
         p2 = b11 * u2**2 - b16 * u2 + b12
         q1 = b12 * u1 - b26 + b22 / u1

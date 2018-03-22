@@ -15,7 +15,7 @@ import md_pot_data
 import tool_elastic_constants
 from utils import stroh_solve
 import ase.lattice
-import cal_md_dislocation
+from . import cal_md_dislocation
 import atomman as am
 from crack import cal_md_crack_ini
 
@@ -52,7 +52,7 @@ class cal_dis_dipole(gn_config.bcc):
         n = 7 * sizen
         m = 11 * sizen
         t = 1 * sizen
-        print self.pot
+        print(self.pot)
         alat = self.pot['lattice']
         atoms = ase.lattice.cubic.BodyCenteredCubic(
             directions=[[1., 1., -2.],
@@ -97,7 +97,7 @@ class cal_dis_dipole(gn_config.bcc):
         supercell = atoms.get_cell()
         addstrain = False
         if addstrain is True:
-            print len(atoms)
+            print(len(atoms))
             strain = mat([[1.0, 0.0, 0.0],
                           [0.5, 1.0, 0.5],
                           [0.0, 0.0, 1.0]])
@@ -108,8 +108,8 @@ class cal_dis_dipole(gn_config.bcc):
         return atoms
 
     def loop_table(self):
-        for key in matconsts.keys():
-            print key
+        for key in list(matconsts.keys()):
+            print(key)
             self.get_cutin_result(matconsts[key])
 
     def cal_crack(self):
@@ -149,11 +149,11 @@ class cal_dis_dipole(gn_config.bcc):
         # Gamma = omega * Gamma * omega
 
         Gamma = (svect * Gamma * svect.transpose())[0, 0]  # in GPa
-        print Gamma
+        print(Gamma)
 
         Gamma = Gamma * 1e9  # Pa
         ke1 = sqrt(Gamma * usf)
-        print ke1 * 1e-6
+        print(ke1 * 1e-6)
 
         # A = mat(np.zeros([3, 3]), dtype='complex')
         # A[:, 0] = mat(stroh.A[1]).transpose()
@@ -179,11 +179,11 @@ class cal_dis_dipole(gn_config.bcc):
                              [0, 1, 1]])
             burgers = self.pot['lattice'] / 2 * np.array([1., 1., 1.])
             stroh = stroh_solve.Stroh(c, burgers, axes=axes)
-            print stroh.A[0]
+            print(stroh.A[0])
 
         # hexagonal
         if struct in ["hex"]:
-            print self.pot["lattice"]
+            print(self.pot["lattice"])
             axes = np.array([[1, 0, 0],
                              [0, 1, 0],
                              [0, 0, 1]])
@@ -192,8 +192,8 @@ class cal_dis_dipole(gn_config.bcc):
         c = am.ElasticConstants()
         c.hexagonal(C11=326.08, C33=357.50, C12=129.56, C13=119.48, C44=92.54)
         stroh = stroh_solve.Stroh(c, burgers, axes=axes)
-        print stroh.A
-        print stroh.L
+        print(stroh.A)
+        print(stroh.L)
 
         # print(c)
         # print stroh.L
@@ -218,7 +218,7 @@ class cal_dis_dipole(gn_config.bcc):
 
         c1 = [0.51 * cell[0, 0], 1. / 3. * cell[1, 1]]
         c2 = [2 * cell[1, 0], 2. / 3. * cell[1, 1]]
-        print cell, c1, c2
+        print(cell, c1, c2)
 
         shiftc1 = np.ones(np.shape(pos)) * np.array([c1[0], c1[1], 0.0])
         shiftc2 = np.ones(np.shape(pos)) * np.array([c2[0], c2[1], 0.0])
@@ -282,13 +282,13 @@ class cal_dis_dipole(gn_config.bcc):
             for ps, dp in zip(pos, disp1):
                 dis = np.linalg.norm(ps[:2] - c1)
                 if (dis < radius):
-                    print dis
+                    print(dis)
                     dp[2] += 1. / 6. * unitz
                     # add shirt
             for ps, dp in zip(pos, disp2):
                 dis = np.linalg.norm(ps[:2] - c2)
                 if (dis < radius):
-                    print dis
+                    print(dis)
                     dp[2] -= 1. / 6. * unitz
 
         atoms.set_positions(pos + np.real(disp1) - np.real(disp2))

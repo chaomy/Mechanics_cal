@@ -45,10 +45,10 @@ class md_gb_indx(object):
                                 rot['z'] = vn
                                 rot['theta'] = np.rad2deg(theta)
                                 cnt += 1
-                                print rot
+                                print(rot)
             # v1indx = np.array([2 * xidx, yidx, 0])
             # v2indx = np.round(v2)
-        print cnt
+        print(cnt)
 
     def hcp_til_mtx_z1120(self, angdeg=15.):
         crat = self.pot['chcp'] / self.pot['ahcp']

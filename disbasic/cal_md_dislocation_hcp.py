@@ -80,7 +80,7 @@ class md_dislocation_hcp(object):
 
         cx = 0.5 * sz[0] * self.pot["ahcp"]
         cy = 0.5 * sz[1] * self.pot["ahcp"] * sqrt(3)
-        print cx, cy
+        print(cx, cy)
         shift = np.ones(pos.shape) * np.array([cx, cy, 0.0])
 
         disp = stroh.displacement(pos - shift)

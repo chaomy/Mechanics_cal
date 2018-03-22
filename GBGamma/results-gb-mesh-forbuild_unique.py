@@ -55,17 +55,17 @@ for dir in subdirlist:
     lbox_list = []
     filename = dir + '/log.lammps'
     try:
-        print dir
+        print(dir)
         o = open(filename, 'r').readlines()
     except IOError:
-        print "No file \n"
+        print("No file \n")
     else:
         try:
             starts = [n for n, l in enumerate(o) if l.startswith(outtempl)]
             if len(starts) > 0:
                 aindex = starts[0]  # +1
         except IOError:
-            print "Error"
+            print("Error")
         else:
             # relaxed energy
             if len(starts) > 0:
@@ -123,7 +123,7 @@ d = {'angle': anglelist,
      'gbdir': gbdirlist
      }
 
-print d['gbdir']
+print(d['gbdir'])
 
 alldataframe = pd.DataFrame(d)
 
@@ -211,8 +211,8 @@ for i in range(len(gbenergy_best)):
         + gbenergy_best['orientlow'].tolist()[i].split()[16] + ' ' \
         + gbenergy_best['orientlow'].tolist()[i].split()[17]
 
-    xuplen = fitness(map(int, u_x.split()))
-    xlowlen = fitness(map(int, l_x.split()))
+    xuplen = fitness(list(map(int, u_x.split())))
+    xlowlen = fitness(list(map(int, l_x.split())))
     x = Fraction(Decimal(xuplen / xlowlen)
                  ).limit_denominator(max_denominator=40)
     l_mult = x.numerator

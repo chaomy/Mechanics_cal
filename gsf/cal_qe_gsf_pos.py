@@ -72,7 +72,7 @@ class cal_qe_gsf_pos(object):
                         dirtree[self.mgsf][tag])
                 os.system('scp {}/{}/qe.out {}'.format(fdir, mdir, mdir))
                 os.system('scp {}/{}/qe.in {}'.format(fdir, mdir, mdir))
-                print fdir
+                print(fdir)
         return
 
     def clc_qe_gsf_engy(self, fname='gsf'):
@@ -82,13 +82,13 @@ class cal_qe_gsf_pos(object):
         # disps = append(disps, 1.0)
         npts = len(disps)
         data = ndarray([npts, 4])
-        for i, disp in zip(range(npts), disps):
+        for i, disp in zip(list(range(npts)), disps):
             if disp == 1:
                 dirname = 'dir-{}-{:4.3f}'.format(self.mgsf, 0.0)
             else:
                 dirname = 'dir-{}-{:4.3f}'.format(self.mgsf, disp)
             os.chdir(dirname)
-            print dirname
+            print(dirname)
             # print(self.qe_get_cell())
             data[i, 0] = i
             data[i, 1] = disp
@@ -109,7 +109,7 @@ class cal_qe_gsf_pos(object):
         axlist = [self.ax]
         reratio = [0.0, 0.05, 0.10, 0.15, 0.20, 0.25, 0.50]
         for mkey, labtag, re, i in zip(mlist, lablist,
-                                       reratio, range(len(reratio)))[:6]:
+                                       reratio, list(range(len(reratio))))[:6]:
             mdir = dirtree[self.mgsf][mkey]
             mfile = 'dat.{}.txt'.format(mdir)
             data = loadtxt(mfile)
@@ -134,8 +134,8 @@ class cal_qe_gsf_pos(object):
         self.set_111plt()
         axlist = [self.ax]
         coeff = 16.021766208
-        print coeff * dat1[:, 1]
-        print coeff * dat2[:, 1]
+        print(coeff * dat1[:, 1])
+        print(coeff * dat2[:, 1])
         self.ax.plot(dat1[:, 0], dat1[:, 1],
                      label='USFE [111](110)', **next(self.keysiter))
         self.ax.plot(dat2[:, 0], dat2[:, 1],
@@ -151,8 +151,8 @@ class cal_qe_gsf_pos(object):
 
         # plot ductility parameters
         surfE03 = loadtxt('surfE03.txt')
-        print 'SurfE'
-        print surfE03 * coeff
+        print('SurfE')
+        print(surfE03 * coeff)
         self.set_111plt()
         self.ax.plot(dat1[:, 0], surfE03 / dat1[:, 1],
                      label='D [111](110)', **next(self.keysiter))

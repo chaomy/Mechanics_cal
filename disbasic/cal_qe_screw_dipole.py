@@ -14,7 +14,7 @@ import gn_config
 import get_data
 import gn_pbs
 import gn_qe_inputs
-import cal_md_dis_dipole
+from . import cal_md_dis_dipole
 from optparse import OptionParser
 
 

@@ -45,7 +45,7 @@ class cal_qe_gsf_pre(object):
     def loop_pot_gsf(self, tag='prep'):
         vcapots = self.vcaWTa
         gsf = 'x111z110'
-        for key in vcapots.keys():
+        for key in list(vcapots.keys()):
             mdir = key
             self.mymkdir(mdir)
             os.chdir(mdir)
@@ -56,7 +56,7 @@ class cal_qe_gsf_pre(object):
     def loop_sub(self):
         vcapots = self.vcapots
         gsfs = ['x111z112', 'x111z110']
-        for key in vcapots.keys():
+        for key in list(vcapots.keys()):
             for gsf in gsfs:
                 mdir = 'Bcc_{}_gsf{}'.format(key, gsf)
                 if os.path.isdir(mdir):
@@ -68,7 +68,7 @@ class cal_qe_gsf_pre(object):
     def move_dirs(self):
         vcapots = self.vcapots
         gsfs = ['x111z112', 'x111z110']
-        for key in vcapots.keys():
+        for key in list(vcapots.keys()):
             for gsf in gsfs:
                 mdir = 'Bcc_{}_gsf{}'.format(key, gsf)
                 mdir1 = 'Bcc_{}_gsf{}_1'.format(key, gsf)

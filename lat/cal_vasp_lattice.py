@@ -48,7 +48,7 @@ class cal_lattice(gn_config.bcc,
 
     def interpolate_lattice(self, filename):
         data = np.loadtxt(filename)
-        print data[:, 1]
+        print(data[:, 1])
 
         lattice = np.abs(data[:, 0])
         energy = data[:, 1]
@@ -58,10 +58,10 @@ class cal_lattice(gn_config.bcc,
         Ynew = f(InterPoints)
         i = np.argmin(Ynew)
 
-        print "min energy ", np.min(energy)
-        print "num", np.argmin(energy), "lattice", InterPoints[i]
+        print("min energy ", np.min(energy))
+        print("num", np.argmin(energy), "lattice", InterPoints[i])
 
-        print(np.min(Ynew))
+        print((np.min(Ynew)))
 
         self.set_111plt()
         self.ax.plot(lattice, energy, label="lat = {:5f}".format(

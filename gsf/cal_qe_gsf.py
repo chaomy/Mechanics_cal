@@ -67,7 +67,7 @@ class cal_qe_gsf(object):
         elif mtype in ['relax']:
             self.setup_qe_relax()
 
-        for i, disp in zip(range(npts), disps):
+        for i, disp in zip(list(range(npts)), disps):
             dirname = 'dir-{}-{:4.3f}'.format(self.mgsf, disp)
             self.mymkdir(dirname)
             os.chdir(dirname)
@@ -79,7 +79,7 @@ class cal_qe_gsf(object):
                 atoms.copy(), disp_vector)
             disp_matrix = deepcopy(disp_matrix_direct)
             disp_matrix[:, 0] = disp_matrix_direct[:, 0] * perf_cells[0, 0]
-            print disp_matrix
+            print(disp_matrix)
             local_atoms = atoms.copy()
             local_atoms.translate(disp_matrix)
 
@@ -105,5 +105,5 @@ class cal_qe_gsf(object):
                 in_direction=gsf_data.gsfbase[key],
                 in_size=gsf_data.bulksize[key])
 
-            print(key, len(atomss) - len(atomsb),
-                  gsf_data.gsfpopn[key])
+            print((key, len(atomss) - len(atomsb),
+                  gsf_data.gsfpopn[key]))

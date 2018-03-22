@@ -63,7 +63,7 @@ class cal_qe_surface(object):
     def cal_qe_surface(self, dirtag='dir'):
         configs = ['bulk', 'surf']
         data = np.zeros(len(configs))
-        for i, config in zip(range(len(configs)), configs):
+        for i, config in zip(list(range(len(configs))), configs):
             mdir = '{}-{}-{}'.format(
                 dirtag, self.mgsf, config)
             os.chdir(mdir)
@@ -87,7 +87,7 @@ class cal_qe_surface(object):
         npts = len(vcapots)
         data = np.ndarray([npts, 5])
         ev2j = 1.60218
-        for key, i in zip(vcapots.keys(), range(npts)):
+        for key, i in zip(list(vcapots.keys()), list(range(npts))):
             dirtag = 'dir-{}'.format(key)
             self.__init__(vcapots[key], surf)
             if i == 5:
@@ -114,11 +114,11 @@ class cal_qe_surface(object):
         npts = len(vcapots)
         configs = ['surf', 'bulk']
         for config in configs:
-            for key, i in zip(vcapots.keys(), range(npts)):
+            for key, i in zip(list(vcapots.keys()), list(range(npts))):
                 dirtag = 'dir-{}'.format(key)
                 mdir = '{}-{}-{}'.format(
                     dirtag, self.mgsf, config)
-                print mdir
+                print(mdir)
                 self.mymkdir(mdir)
                 fdir = fluxdirs['QE'] + \
                     'VC_WTa/surf/{}'.format(mdir)

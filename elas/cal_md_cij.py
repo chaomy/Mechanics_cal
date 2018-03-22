@@ -76,7 +76,7 @@ if __name__ == '__main__':
 
     (options, args) = parser.parse_args()
     drv = cal_md_cij()
-    print drv.cal_elastic_constant()
+    print(drv.cal_elastic_constant())
 
     #  Job.cal_md_shear_modulus()
     #       miu 43.463638  #300K

@@ -25,7 +25,7 @@ class subjobs(object):
         while True:
             try:
                 mdir = next(self.diriter)
-                print mdir
+                print(mdir)
                 self.gonadsub(mdir)
             except StopIteration:
                 break
@@ -46,7 +46,7 @@ class subjobs(object):
                 mdir = next(self.diriter)
                 os.chdir(mdir)
                 if not os.path.isfile('ishear.txt'):
-                    print mdir
+                    print(mdir)
                     os.system('qsub va.pbs')
                 os.chdir(os.pardir)
             except StopIteration:

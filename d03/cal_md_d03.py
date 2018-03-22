@@ -155,13 +155,13 @@ class cal_d03(get_data.get_data,
         disps = self.disps
         npts = len(disps)
         raw = np.ndarray([npts, 2])
-        for i, disp in zip(range(npts), disps):
+        for i, disp in zip(list(range(npts)), disps):
             mdir = 'dir_{}_{:4.3f}'.format(i, disp)
             os.chdir(mdir)
             raw[i, 0] = disp
             raw[i, 1] = np.loadtxt("out.txt")
             os.chdir(os.pardir)
-        print raw
+        print(raw)
         np.savetxt("save.txt", raw)
 
     def clc_plt(self):
@@ -186,7 +186,7 @@ class cal_d03(get_data.get_data,
         self.write_lmp_config_data(atoms)
         disps = self.disps
         npts = len(disps)
-        for i, disp in zip(range(npts), disps):
+        for i, disp in zip(list(range(npts)), disps):
             mdir = 'dir_{}_{:4.3f}'.format(i, disp)
             self.mymkdir(mdir)
             os.chdir(mdir)
@@ -219,7 +219,7 @@ class cal_d03(get_data.get_data,
 
             os.chdir(os.pardir)
         la = self.pot['lattice']
-        print("area = ",  la * la * sqrt(2) / 2.)
+        print(("area = ",  la * la * sqrt(2) / 2.))
 
 
 if __name__ == '__main__':

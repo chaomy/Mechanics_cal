@@ -36,7 +36,7 @@ class md_gb_hcp(object):
                         size=(4, 4, 2),
                         symbol=self.pot['element'])
 
-        print atoms.get_cell()
+        print(atoms.get_cell())
 
         # pmat = self.hcp_til_mtx(30)
 
@@ -55,5 +55,5 @@ class md_gb_hcp(object):
 
         # atoms.wrap()
         ase.io.write("rot30", images=atoms, format='vasp')
-        print atoms.get_cell()
+        print(atoms.get_cell())
         # self.write_lmp_config_data(atoms, 'lmp_init.txt')

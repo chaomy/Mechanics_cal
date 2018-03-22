@@ -99,14 +99,14 @@ class cal_dis_emit(object):
         return
 
     def loop_curtin(self):
-        for key in matconsts.keys():
+        for key in list(matconsts.keys()):
             self.get_cutin_result_mat_k1e(matconsts[key])
         return
 
     def loop_table(self):
         data = np.ndarray([6, 4])
-        for key, i in zip(vcaw.keys(), range(6)):
-            print key
+        for key, i in zip(list(vcaw.keys()), list(range(6))):
+            print(key)
             data[i, 0] = 0.05 * i
             data[i, 1:] = self.get_bcc_w_result(vcaw[key])
         np.savetxt('vcaw_112_Ke.txt', data)
@@ -181,7 +181,7 @@ class cal_dis_emit(object):
         k2e = np.sqrt(G00 * usf) * 1e-6
         coeff, tmp = self.cal_crack(param)
         k1e = k2e / coeff
-        print k1e, k2e, k1c, tmp
+        print(k1e, k2e, k1c, tmp)
         return (k1e, k2e, k1c)
 
     def get_cutin_result(self, param):
@@ -234,8 +234,8 @@ class cal_dis_emit(object):
         coeff, tmp = self.cal_crack(param)
 
         k1e = k2e / coeff
-        print 'Gamma', Gamma00, Gamma11
-        print 'k1e, k2e', k1e, k2e
+        print('Gamma', Gamma00, Gamma11)
+        print('k1e, k2e', k1e, k2e)
         return
 
     def get_cutin_result_mat_k1e(self, param):
@@ -281,11 +281,11 @@ class cal_dis_emit(object):
         # phi = 0
         # svect = np.mat(np.array([cos(phi), 0.0, sin(phi)]))
         Gamma = np.linalg.inv(Gamma)
-        print Gamma
+        print(Gamma)
 
         Gamma00 = Gamma[0, 0]  # in GPa
         Gamma11 = Gamma[1, 1]
-        print 'Gamma', Gamma00, Gamma11   # GPa
+        print('Gamma', Gamma00, Gamma11)   # GPa
         Gamma00 *= 1e9
         Gamma11 *= 1e9
 
@@ -302,7 +302,7 @@ class cal_dis_emit(object):
 
         # print Gamma
         k2e = np.sqrt(Gamma00 * param['ugsf']) * 1e-6   # Mpa
-        print 'k2e', k2e
+        print('k2e', k2e)
         return
 
 #       np.rad2deg(np.arccos(np.dot(v1, v2)/( np.linalg.norm(v1) * np.linalg.norm(v2) )))

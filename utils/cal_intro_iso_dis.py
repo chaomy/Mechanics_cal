@@ -68,7 +68,7 @@ class cal_intro_iso_dis(object):
             ndir = orient[1]
             # tdir = orient[2]
 
-        print center
+        print(center)
         xc1 = center[bdir]
         yc1 = center[ndir]
 
@@ -220,8 +220,8 @@ class cal_intro_iso_dis(object):
             xc2 = (1 - s) * beasy_core[0] + s * bsplit[0]
             yc2 = (1 - s) * beasy_core[1] + s * bsplit[1]
 
-        print "xc1 = %g, yc1 = %g \n" % (xc1, yc1)
-        print "xc2 = %g, yc2 = %g \n" % (xc2, yc2)
+        print("xc1 = %g, yc1 = %g \n" % (xc1, yc1))
+        print("xc2 = %g, yc2 = %g \n" % (xc2, yc2))
 
         xc1 += move_x
         xc2 += move_x

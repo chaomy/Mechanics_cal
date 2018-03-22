@@ -31,7 +31,7 @@ try:
     import dd_map
 
 except ImportError:
-    print "error during import"
+    print("error during import")
 
 
 class vasp_dislocation(gn_config.bcc,
@@ -95,7 +95,7 @@ class vasp_dislocation(gn_config.bcc,
                          [0.0, 0.0, 1.0]])
 
         supercell = strain * supercell
-        print "new supercell is", supercell
+        print("new supercell is", supercell)
 
         atoms.set_cell(supercell)
         atoms.wrap(pbc=[1, 1, 1])
@@ -129,7 +129,7 @@ class vasp_dislocation(gn_config.bcc,
         self.set_element('W')
 
         atoms = self.set_bcc_convention([v1, v2, v3], (r, 1, 1))
-        print atoms.get_cell()
+        print(atoms.get_cell())
         atoms_perf = atoms.copy()
         atoms_perf = self.cut_half_atoms(atoms_perf)
 
@@ -191,7 +191,7 @@ class vasp_dislocation(gn_config.bcc,
             with open(file_name, 'r') as fid:
                 raw = fid.readlines()
                 fid.close()
-                print raw[5]
+                print(raw[5])
             raw[0] = "W   Ta\n"
             raw[5] = "W   Ta\n"
 
@@ -256,8 +256,8 @@ class vasp_dislocation(gn_config.bcc,
             (engy[cnt], vol[cnt]) = self.vasp_energy_stress_vol_quick()
             cnt += 1
             os.chdir(self.root_dir)
-        print engy
-        print vol
+        print(engy)
+        print(vol)
         return
 
 

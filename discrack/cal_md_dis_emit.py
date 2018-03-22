@@ -17,8 +17,8 @@ import tool_elastic_constants
 from utils import stroh_solve
 from disbasic import cal_md_dislocation
 from crack import cal_md_crack_ini
-import cal_md_dis_emit_curtin
-import cal_md_dis_emit_plt
+from . import cal_md_dis_emit_curtin
+from . import cal_md_dis_emit_plt
 
 
 
@@ -267,16 +267,16 @@ class cal_dis_emit(cal_md_dis_emit_curtin.cal_dis_emit_curtin,
         return
 
     def loop_table(self):
-        npts = len(vcaw.keys())
+        npts = len(list(vcaw.keys()))
         data = np.ndarray([npts, 4])
-        for key, i in zip(vcaw.keys(), range(npts)):
-            print key
+        for key, i in zip(list(vcaw.keys()), list(range(npts))):
+            print(key)
             data[i, 0] = i
             data[i, 1:] = self.get_bcc_w_result110(vcaw[key])
         np.savetxt('vcaw_110_Ke.txt', data)
 
-        for key, i in zip(vcaw.keys(), range(npts)):
-            print key
+        for key, i in zip(list(vcaw.keys()), list(range(npts))):
+            print(key)
             data[i, 0] = i
             data[i, 1:] = self.get_bcc_w_result211(vcaw[key])
         np.savetxt('vcaw_112_Ke.txt', data)
@@ -326,7 +326,7 @@ class cal_dis_emit(cal_md_dis_emit_curtin.cal_dis_emit_curtin,
         Linv = np.real(np.complex(0, 1) * A * np.linalg.inv(B))
         Gamma = 0.5 * Linv
         surf = param['surf']
-        print Gamma[1, 1]
+        print(Gamma[1, 1])
         k1c = sqrt(2 * surf / abs(Gamma[1, 1] * 1e3))
 
         theta = np.deg2rad(54.735610317245346)
@@ -355,7 +355,7 @@ class cal_dis_emit(cal_md_dis_emit_curtin.cal_dis_emit_curtin,
         G00 = Gamma[0, 0]
         k1e = np.sqrt(G00 * usf) * 1e-6
         k1e = k1e / coeff
-        print k1e, k1c, Kg, k1e / k1c
+        print(k1e, k1c, Kg, k1e / k1c)
         return (k1e, k1c, k1e / k1c)
 
     def get_bcc_w_result110(self, param):
@@ -387,7 +387,7 @@ class cal_dis_emit(cal_md_dis_emit_curtin.cal_dis_emit_curtin,
 
         # k1c
         surf = param['surf']
-        print Gamma[1, 1]
+        print(Gamma[1, 1])
         k1c = sqrt(2 * surf / abs(Gamma[1, 1] * 1e3))
 
         theta = np.deg2rad(90.0)
@@ -420,7 +420,7 @@ class cal_dis_emit(cal_md_dis_emit_curtin.cal_dis_emit_curtin,
         G00 = Gamma
         k1e = np.sqrt(G00 * usf) * 1e-6 / svect[0, 0]
         k1e = k1e / coeff
-        print k1e, k1c, Kg, k1e / k1c
+        print(k1e, k1c, Kg, k1e / k1c)
         return (k1e, k1c, k1e / k1c)
 
 

@@ -22,7 +22,7 @@ try:
     import Intro_vasp
 
 except ImportError:
-    print "error during import"
+    print("error during import")
 
 
 class cal_gsf(gn_config.bcc,
@@ -151,7 +151,7 @@ class cal_gsf(gn_config.bcc,
 
         cut = 0.5 * np.max(positions[:, 2])
         for i in range(atom_num):
-            print positions[i, 2]
+            print(positions[i, 2])
             if positions[i, 2] < cut:
                 displacement[i] = [0, 0, 0]
             else:
@@ -170,7 +170,7 @@ class cal_gsf(gn_config.bcc,
         disp_vector = [given_disp, 0, 0]
         disp_matrix_direct = self.gn_displacement(atoms.copy(),
                                                   disp_vector)
-        print disp_matrix_direct
+        print(disp_matrix_direct)
 
         disp_matrix = copy.deepcopy(disp_matrix_direct)
 
@@ -224,7 +224,7 @@ class cal_gsf(gn_config.bcc,
             dir_name = 'dir-x-%03d-%s' \
                 % (i, self._gsf_surface_type)
 
-            print "dir is", dir_name
+            print("dir is", dir_name)
             disp_list.append(i * self.disp_delta)
 
             if os.path.isdir(dir_name):
@@ -259,8 +259,8 @@ class cal_gsf(gn_config.bcc,
         energy = energy / area[0]
         energy = energy - np.min(energy)
 
-        print "disp, energy", disp, energy
-        print "unstable stacking fault {}: {}".format(self._gsf_surface_type, max(energy))
+        print("disp, energy", disp, energy)
+        print("unstable stacking fault {}: {}".format(self._gsf_surface_type, max(energy)))
 
         if tag.lower() == "half":
             npts = len(energy)

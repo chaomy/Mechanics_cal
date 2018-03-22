@@ -32,9 +32,9 @@ class dd_tensile(gn_dd_ctrl.gn_dd_ctrl,
     def dd_mob_prepare(self):
         (tau, templist, edge_moblist, screw_moblist) = self.cal_dis_mob()
 
-        print templist
-        print edge_moblist
-        print screw_moblist
+        print(templist)
+        print(edge_moblist)
+        print(screw_moblist)
         fm_table = "W_miu160_niu2p79"
         config = "glide.data"
 

@@ -37,7 +37,7 @@ class cal_bcc_ideal_shear_plt(object):
     def plt_energy(self, infile='ishear.txt'):
         raw = np.loadtxt(infile)
         raw = raw[raw[:, 0].argsort()]
-        print raw
+        print(raw)
         self.set_111plt()
         self.ax.plot(raw[:, 0], (raw[:, 1] - raw[0, 1]),
                      label='engy', **next(self.keysiter))
@@ -67,7 +67,7 @@ class cal_bcc_ideal_shear_plt(object):
         self.set_keys()
         self.set_211plt()
         axlist = [self.ax1, self.ax2]
-        print raw[:, 0]
+        print(raw[:, 0])
         index = np.where(raw[:, 1] < -100.0)
         raw[:, 1][index] = raw[:, 1][index] / unitconv.uengy['rytoeV']
         self.ax1.plot(raw[:, 0], (raw[:, 1] - raw[0, 1]),
@@ -81,7 +81,7 @@ class cal_bcc_ideal_shear_plt(object):
 
         # call interp
         ply = polyfit(raw[:, 0], yy, 2)
-        print polyval(ply, [0.08])
+        print(polyval(ply, [0.08]))
 
         self.ax2.plot(raw[:, 0], yy,
                       label='stress', **next(self.keysiter))

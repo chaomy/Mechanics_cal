@@ -89,8 +89,8 @@ class cal_MgNd_driver(Intro_vasp.vasp_change_box,
             if tag == 'grab':
                 gbengylist.append(self.grab_data())
             os.chdir(self.root)
-        print deltalist
-        print gbengylist
+        print(deltalist)
+        print(gbengylist)
 
         fig = plt.figure()
         ax = fig.add_subplot(111)

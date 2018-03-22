@@ -184,10 +184,10 @@ class md_loop_tensile(md_tensile):
                     self.strainmtx[2, 2] += strain[2]
 
                 with open('monitor.txt', 'a') as fid:
-                    print >> fid, "delta ", delta
-                    print >> fid, "Run times", count
-                    print >> fid, "stress_original", self.stress_original
-                    print >> fid, "stressPrime ", stressPrime
+                    print("delta ", delta, file=fid)
+                    print("Run times", count, file=fid)
+                    print("stress_original", self.stress_original, file=fid)
+                    print("stressPrime ", stressPrime, file=fid)
                     fid.close()
                 count += 1
 

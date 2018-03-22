@@ -47,7 +47,7 @@ class cal_va_gsf(object):
         disps = np.append(disps, 0.0)
         npts = len(disps)
 
-        for i, disp in zip(range(npts), disps):
+        for i, disp in zip(list(range(npts)), disps):
             dirname = 'dir-{}-{:4.3f}'.format(self.mgsf, disp)
             self.mymkdir(dirname)
 
@@ -103,7 +103,7 @@ class cal_va_gsf(object):
             mdir = 'dir-x-%03d-%s' \
                 % (i, self.mgsf)
 
-            print "dir is", mdir
+            print("dir is", mdir)
             disp_list.append(i * self.disp_delta)
 
             if os.path.isdir(mdir):
@@ -129,7 +129,7 @@ class cal_va_gsf(object):
 
                 os.chdir(mdir)
                 disp_vector = [i * 0.05, j * 0, 0]
-                print disp_vector
+                print(disp_vector)
                 disp_matrix_direct = self.gn_displacement(atoms.copy(),
                                                           disp_vector)
                 disp_matrix = copy.deepcopy(disp_matrix_direct)
@@ -139,8 +139,8 @@ class cal_va_gsf(object):
                 disp_matrix[:, 0] = disp_matrix_direct[:, 0] * x1
                 disp_matrix[:, 1] = disp_matrix_direct[:, 1] * x2
 
-                print "disp_matrix is", disp_matrix
-                print "Length is", len(disp_matrix)
+                print("disp_matrix is", disp_matrix)
+                print("Length is", len(disp_matrix))
 
                 Localatoms = self._atoms.copy()
                 Localatoms.translate(disp_matrix)
@@ -169,8 +169,8 @@ class cal_va_gsf(object):
         energy = energy / area[0]
         energy = energy - np.min(energy)
 
-        print "disp, energy", disp, energy
-        print "unstable stacking fault {}: {}".format(self.mgsf, max(energy))
+        print("disp, energy", disp, energy)
+        print("unstable stacking fault {}: {}".format(self.mgsf, max(energy)))
 
         if tag.lower() == "half":
             # get the data of half then use symmetry to plt full  #

@@ -90,7 +90,7 @@ class cal_bcc_ideal_tensile(get_data.get_data,
             delta = 0.01 * i
             if opt == 'engy':
                 dirname = 'dir-{:4.3f}'.format(delta)
-                print dirname
+                print(dirname)
                 os.chdir(dirname)
                 engy, stress, vol = self.vasp_energy_stress_vol()
                 (data[i, 0], data[i, 1], data[i, 2:8], data[i, -1]) = \

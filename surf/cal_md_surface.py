@@ -1,10 +1,9 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# @Author: chaomy
-# @Date:   2017-06-25 14:28:58
-# @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-18 09:45:55
-
+#!/ usr / bin / env python
+#- * - coding : utf - 8 - * -
+#@Author : chaomy
+#@Date : 2017 - 06 - 25 14 : 28 : 58
+#@Last Modified by : chaomy
+#@Last Modified time : 2018 - 03 - 20 13 : 34 : 11
 
 from multiprocessing import Pool
 from optparse import OptionParser
@@ -14,65 +13,42 @@ import get_data
 import gsf_data
 import gn_lmp_infile
 import md_pot_data
-import output_data
 
 
 def unwrap_self_run_lammps(arg, **kwarg):
     return cal_md_surface.run_lmp_minimize(*arg, **kwarg)
 
+mp = {'100': 'x100z100',
+      '110': 'x110z110',
+      '111': 'x112z111'}
 
-class cal_md_surface(gn_config.bcc,
+
+class cal_md_surface(gn_config.gnStructure,
                      get_data.get_data,
-                     gn_lmp_infile.gn_md_infile,
-                     output_data.output_data):
+                     gn_lmp_infile.gn_md_infile):
 
-    def __init__(self, pot=None):
-        if pot is None:
-            self.pot = md_pot_data.md_pot.Nb_meamc
-        else:
-            self.pot = pot
+    def __init__(self, pot=md_pot_data.md_pot.Nb_meam):
+        self.pot = pot
         get_data.get_data.__init__(self)
         gn_lmp_infile.gn_md_infile.__init__(self, self.pot)
-        output_data.output_data.__init__(self)
-        self._surface_type = '100'
-        gn_config.bcc.__init__(self, self.pot)
-        self.set_config_file_format("lmp")
-        self.config_file = "lmp_init.txt"
+        gn_config.gnStructure.__init__(self, self.pot)
 
-    def set_surface_type(self, surface_type):
-        self._surface_type = surface_type
-
-    def gn_surface_atoms(self):
-        if self._surface_type in ['100']:
-            tag = 'x100z100'
-        elif self._surface_type in ['110']:
-            tag = 'x110z110'
-        elif self._surface_type in ['111']:
-            tag = 'x112z111'
+    def gn_surface_atoms(self, tg):
         atoms = self.set_bcc_convention(
-            in_direction=gsf_data.gsfbase[tag],
-            in_size=gsf_data.gsfsize[tag])
-        for i in range(gsf_data.gsfpopn[tag]):
+            gsf_data.gsfbase[mp[tg]], gsf_data.gsfsize[mp[tg]])
+        for i in range(gsf_data.gsfpopn[mp[tg]]):
             atoms.pop()
         return atoms
 
-    def gn_bulk_atoms(self):
-        if self._surface_type in ['100']:
-            tag = 'x100z100'
-        elif self._surface_type in ['110']:
-            tag = 'x110z110'
-        elif self._surface_type in ['111']:
-            tag = 'x112z111'
+    def gn_bulk_atoms(self, tg):
         atoms = self.set_bcc_convention(
-            in_direction=gsf_data.gsfbase[tag],
-            in_size=gsf_data.bulksize[tag])
+            gsf_data.gsfbase[mp[tg]], gsf_data.bulksize[mp[tg]])
         return atoms
 
     def run_lmp_minimize(self, loc_dir):
         os.chdir(loc_dir)
         os.system("lmp_mpi -in in.minimize")
         os.chdir(os.pardir)
-        return
 
     def loop_run_surface(self):
         dir_list = []
@@ -92,66 +68,53 @@ class cal_md_surface(gn_config.bcc,
         num_threads = len(dir_list)
         pool = Pool(processes=num_threads)
         pool.map(unwrap_self_run_lammps,
-                 zip([self] * num_threads, dir_list))
+                 list(zip([self] * num_threads, dir_list)))
 
     def loop_cal_surface_data(self):
-        loop_list = ['100', '110', '111']
         surface_energy_list = []
-        for i in range(len(loop_list)):
-            loc_type = loop_list[i]
-            self.set_surface_type(loc_type)
-            surface_energy_list.append(self.cal_surface_energy())
+        for ee in ['100', '110', '111']:
+            surface_energy_list.append(self.cal_surface_energy(ee))
         return surface_energy_list
 
     def loop_prepare_surface(self):
-        loop_list = ['100', '110', '111']
-        for i in range(len(loop_list)):
-            loc_type = loop_list[i]
-            self.set_surface_type(loc_type)
-            self.prepare_md_surface()
-            self.prepare_md_bulk()
+        for ee in ['100', '110', '111']:
+            self.prepare_md_surface(ee)
+            self.prepare_md_bulk(ee)
 
-    def prepare_md_surface(self):
-        dir_surf = 'dir-surf-%s' % (self._surface_type)
-        self.mymkdir(dir_surf)
-        self.write_lmp_config_data(self.gn_surface_atoms())
-        os.system("cp lmp_init.txt {}".format(dir_surf))
-        os.system('cp in.minimize  {}'.format(dir_surf))
+    def prepare_md_surface(self, tg):
+        mdir = 'dir-surf-{}'.format(tg)
+        self.mymkdir(mdir)
+        self.write_lmp_config_data(self.gn_surface_atoms(tg))
+        os.system("cp lmp_init.txt in.minimize {}".format(mdir))
 
-    def prepare_md_bulk(self):
-        dir_bulk = 'dir-bulk-%s' % (self._surface_type)
-        self.mymkdir(dir_bulk)
-        self.write_lmp_config_data(self.gn_bulk_atoms())
-        os.system("cp lmp_init.txt {}".format(dir_bulk))
-        os.system('cp in.minimize  {}'.format(dir_bulk))
+    def prepare_md_bulk(self, tg):
+        mdir = 'dir-bulk-{}'.format(tg)
+        self.mymkdir(mdir)
+        self.write_lmp_config_data(self.gn_bulk_atoms(tg))
+        os.system("cp lmp_init.txt in.minimize {}".format(mdir))
 
-    def cal_surface_energy(self):
-        dir_bulk = 'dir-bulk-%s' % (self._surface_type)
-        dir_surf = 'dir-surf-%s' % (self._surface_type)
-
-        os.chdir(dir_bulk)
+    def cal_surface_energy(self, tg):
+        os.chdir('dir-bulk-{}'.format(tg))
         energy_b = self.md_get_final_energy()
         super_cell = self.md_get_cell()
         xy_area = self.cal_poscar_xy_area(super_cell)
         os.chdir(os.pardir)
 
-        os.chdir(dir_surf)
+        os.chdir('dir-surf-{}'.format(tg))
         energy_s = self.md_get_final_energy()
         os.chdir(os.pardir)
 
         surface_e = 0.5 * (energy_s - energy_b) / xy_area
         with open("surface_energy.dat", 'a') as fid:
-            fid.write("surface energy %s %6.4f ev/A \n"
-                      % (self._surface_type, surface_e))
-            fid.write("surface energy %s %6.4f J/m \n"
-                      % (self._surface_type,
-                         surface_e * self.ev_angstrom2_to_j_m2))
+            fid.write("surface energy %s %6.4f ev/A \n" % (tg, surface_e))
+            fid.write("surface energy %s %6.4f J/m \n" % (tg,
+                                                          surface_e * self.ev_angstrom2_to_j_m2))
         return (surface_e * self.ev_angstrom2_to_j_m2)
 
     def wrap_run(self):
         self.loop_prepare_surface()
         self.multi_thread_surface()
-        print self.loop_cal_surface_data()
+        print(self.loop_cal_surface_data())
 
 
 if __name__ == '__main__':

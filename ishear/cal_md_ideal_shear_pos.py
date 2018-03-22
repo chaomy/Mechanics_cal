@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-04 20:53:50
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-18 07:45:22
+# @Last Modified time: 2018-03-20 14:41:33
 
 
 from md_pot_data import unitconv
@@ -44,8 +44,8 @@ class cal_bcc_ideal_shear_pos(object):
                                0.993181305132341009e+00,
                                1.079656535712334997e-04,
                                3.744713183531088452e-04])
-            print delta
-            print x0
+            print(delta)
+            print(x0)
         else:
             data = np.loadtxt("strain.txt")
             delta = data
@@ -63,7 +63,7 @@ class cal_bcc_ideal_shear_pos(object):
                 os.system('scp {}/{}/qe.out {}'.format(fdir, mdir, mdir))
                 os.system('scp {}/{}/qe.in {}'.format(fdir, mdir, mdir))
                 os.system('scp {}/{}/*.txt {}'.format(fdir, mdir, mdir))
-                print fdir
+                print(fdir)
             elif ptype in ['format']:
                 os.chdir(mdir)
                 atoms = ase.io.read('qe.out', format='espresso-out')
@@ -99,7 +99,7 @@ class cal_bcc_ideal_shear_pos(object):
         if opt == 'clc':
             for i in range(npts):
                 dirname = "dir-{:03d}".format(i)
-                print dirname
+                print(dirname)
                 if os.path.isdir(dirname):
                     os.chdir(dirname)
                     raw = self.load_ishear_txt()
@@ -124,7 +124,7 @@ class cal_bcc_ideal_shear_pos(object):
             os.chdir(dirname)
             raw = self.load_ishear_txt()
             self.get_va_stress()
-            print "raw is", raw
+            print("raw is", raw)
             data[i, :7] = raw
             data[i, 7:] = self.get_va_stress()
             os.chdir(self.root)
@@ -135,9 +135,9 @@ class cal_bcc_ideal_shear_pos(object):
         if len(flist) >= 1:
             data = np.loadtxt(flist[0])
         indx = np.argmin(data[:, -1])
-        print 'min engy index', indx
+        print('min engy index', indx)
         tmp = data[indx]
-        print tmp
+        print(tmp)
         data_init = np.zeros(len(tmp) + 1)
         data_init[1] = tmp[-1]
         data_init[2:] = tmp[:-1]
@@ -151,16 +151,14 @@ class cal_bcc_ideal_shear_pos(object):
             raw = self.prep_restart_from_log()
             return raw
 
-    ##########################################################
     # used for transform all
-    ##########################################################
     def convert_stress_vasp(self):
         raw = np.loadtxt("ishear.txt")
         data = np.zeros((len(raw), len(raw[0]) + 1))
         data[:, :-1] = raw
         convunit = unitconv.ustress['evA3toGpa']
         vol = np.zeros(len(raw))
-        vperf = 0.5 * self.alat**3
+        vperf = 0.5 * self.pot['lattice']**3
         strmat = np.zeros([3, 3])
         for i in range(len(raw)):
             strmat[0, 0], strmat[1, 1], strmat[2, 2] = \
@@ -177,13 +175,11 @@ class cal_bcc_ideal_shear_pos(object):
             splder1 = spl.derivative()
             for i in range(len(raw)):
                 # append the stress to the last column
-                print "coeff", convunit / vol[i]
+                print("coeff", convunit / vol[i])
                 data[i, -1] = splder1(raw[i, 0]) * convunit / vol[i]
         np.savetxt("stress.txt", data)
 
-    ##########################################################
     # used for lammps
-    ##########################################################
     def convert_stress(self, mtype='qe'):
         raw = np.loadtxt("ishear.txt")
         data = np.zeros((len(raw), len(raw[0]) + 1))
@@ -192,7 +188,7 @@ class cal_bcc_ideal_shear_pos(object):
             data[:, 1] /= unitconv.uengy['rytoeV']
         convunit = unitconv.ustress['evA3toGpa']
         vol = np.zeros(len(raw))
-        vperf = 0.5 * self.alat**3
+        vperf = 0.5 * self.pot['lattice']**3
         strmat = np.zeros([3, 3])
         for i in range(len(raw)):
             strmat[0, 0], strmat[1, 1], strmat[2, 2] = \
@@ -209,9 +205,9 @@ class cal_bcc_ideal_shear_pos(object):
             splder1 = spl.derivative()
             for i in range(len(raw)):
                 # append the stress to the last column
-                print "coeff", convunit / vol[i]
+                print("coeff", convunit / vol[i])
                 data[i, -1] = splder1(raw[i, 0]) * convunit / vol[i]
-        print data
+        print(data)
         np.savetxt("stress.txt", data)
 
     def prep_restart_from_log(self):
@@ -221,7 +217,7 @@ class cal_bcc_ideal_shear_pos(object):
             data_init = np.loadtxt('restart.txt')
             data_init[1] = data[-1][-1]
             data_init[2:] = data[-1][:-1]
-            print data_init
+            print(data_init)
         else:
             data_init = np.loadtxt('restart.txt')
         np.savetxt('restart.txt', data_init)
@@ -236,7 +232,7 @@ class cal_bcc_ideal_shear_pos(object):
             dirname = "dir-{:03d}".format(i)
             if os.path.isdir(dirname):
                 os.chdir(dirname)
-                print dirname
+                print(dirname)
                 raw = self.prep_restart_from_log()
                 os.chdir(os.pardir)
                 data[i, :] = raw
@@ -268,4 +264,4 @@ class cal_bcc_ideal_shear_pos(object):
         basis = self.basis
         stress = np.mat(stress)
         stress = basis * stress * basis.transpose()
-        print stress
+        print(stress)

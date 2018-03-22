@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-18 10:42:19
+# @Last Modified time: 2018-03-20 14:13:18
 
 
 import os
@@ -20,39 +20,34 @@ from md_pot_data import fluxdirs
 from scipy.optimize import minimize
 from optparse import OptionParser
 
+sqrt2 = 2**(0.5)
+
 
 class cal_bcc_ideal_tensile_op(get_data.get_data,
                                gn_pbs.gn_pbs,
-                               plt_drv.plt_drv,
-                               gn_config.bcc):
+                               gn_config.gnStructure,
+                               plt_drv.plt_drv):
 
-        # self.pot = md_pot_data.md_pot.Nb_meamc
     def __init__(self):
         self.pot = self.load_data('../BASICS/pot.dat')
         gn_pbs.gn_pbs.__init__(self)
         plt_drv.plt_drv.__init__(self)
         get_data.get_data.__init__(self)
-        gn_config.bcc.__init__(self, self.pot)
+        gn_config.gnStructure.__init__(self, self.pot)
         self.alat = self.pot['lattice']
         self.npts = 13
         self.range = (0, 13)
         self.delta = 0.02
-        e1 = [1., 0., 0.]
-        e2 = [0., 1., 0.]
-        e3 = [0., 0., 1.]
-        self.basis = np.mat([e1, e2, e3])
-        self.configdrv = gn_config.bcc(self.pot)
-        self.root = os.getcwd()
+        self.basis = np.mat(np.identity(3))
         self.stress = None
 
     def loop_collect_vasp(self):
         npts = 30
         data = np.ndarray([npts, 10])
         lat = 3.322404
-        sqrt2 = 2**(0.5)
         for i in range(npts):
             mdir = "dir-{:4.3f}".format(0.01 * i)
-            print mdir
+            print(mdir)
             os.chdir(mdir)
             (engy, stress, vol) = self.vasp_energy_stress_vol()
             atoms = ase.io.read('CONTCAR', format='vasp')
@@ -68,7 +63,7 @@ class cal_bcc_ideal_tensile_op(get_data.get_data,
             data = np.loadtxt("restart.txt")
             delta = data[0]
             x0 = data[2:4]
-            print delta
+            print(delta)
         else:
             data = np.loadtxt("strain.txt")
             delta = data
@@ -87,7 +82,7 @@ class cal_bcc_ideal_tensile_op(get_data.get_data,
                            options={'fatol': 1e-3, 'disp': True})
             data[i][2], data[i][3] = res.x[0], res.x[1]
             x0 = res.x
-            print res
+            print(res)
             data[i][0] = delta
             data[i][1] = res.fun
             data[i][4:] = self.stress
@@ -103,7 +98,7 @@ class cal_bcc_ideal_tensile_op(get_data.get_data,
         self.gn_op_convention_lmp(new_strain, 'vasp')
         os.system("mpirun vasp > vasp.log")
         (engy, stress, vol) = self.vasp_energy_stress_vol()
-        print engy
+        print(engy)
         return engy
 
     def runlmp(self, x, delta):
@@ -126,6 +121,7 @@ class cal_bcc_ideal_tensile_op(get_data.get_data,
                              [0., 0., np.sqrt(2)]]))
         va_bas = bas * strain
         cell = alat * va_bas
+
         atoms = ase.lattice.cubic.FaceCenteredCubic(directions=[[1., 0., 0.],
                                                                 [0., 1., 0.],
                                                                 [0., 0., 1.]],
@@ -141,7 +137,6 @@ class cal_bcc_ideal_tensile_op(get_data.get_data,
             ase.io.write("POSCAR", images=atoms, format='vasp')
         if tag == 'lmp':
             self.write_lmp_config_data(atoms, 'init.txt')
-        return
 
     def gn_convention_lmps(self,
                            strain=np.mat(np.identity(3)),
@@ -174,7 +169,7 @@ class cal_bcc_ideal_tensile_op(get_data.get_data,
         data[0] = delta
         data[1] = res.fun
         data[-6:] = self.stress
-        print res
+        print(res)
         np.savetxt("iten.txt", data)
         return
 

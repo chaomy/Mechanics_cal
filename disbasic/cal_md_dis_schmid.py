@@ -4,11 +4,10 @@
 # @Author: chaomy
 # @Date:   2018-02-06 14:17:35
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-18 22:11:32
+# @Last Modified time: 2018-03-20 11:24:45
 
 
 from optparse import OptionParser
-import get_data
 import ase
 import ase.io
 import copy
@@ -21,15 +20,11 @@ import atomman.lammps as lmp
 import atomman.unitconvert as uc
 
 
-class cal_bcc_schmid(get_data.get_data):
+class cal_bcc_schmid(object):
 
-    def __init__(self, pot=md_pot_data.md_pot.Nb_eam):
-        get_data.get_data.__init__(self)
-        self.pot = self.load_data("../BASICS/pot.dat")
+    def __init__(self):
         self._range = (0, 25)
-        #  self._delta = 0.02
-        self._delta = 0.002   # totla is  5  percent
-        #  self._delta = 0.0025   # totla is  5  percent
+        self._delta = 0.002   # total is  5  percent
 
     # calculate elastic constant of screw dislocation
     def cal_screw_const(self, tag='intro'):
@@ -46,9 +41,9 @@ class cal_bcc_schmid(get_data.get_data):
         burgers = alat / 2 * np.array([1., 1., 1.])
 
         stroh = am.defect.Stroh(c, burgers, axes=axes)
-        print "K tensor", stroh.K_tensor
-        print "K (biKijbj)", stroh.K_coeff, "eV/A"
-        print "pre-ln alpha = biKijbj/4pi", stroh.preln, "ev/A"
+        print("K tensor", stroh.K_tensor)
+        print("K (biKijbj)", stroh.K_coeff, "eV/A")
+        print("pre-ln alpha = biKijbj/4pi", stroh.preln, "ev/A")
 
     #     drv.make_screw_plate(size=[80, 120, 2], rad=[200, 230],
     #                          move=[0., 0., 0.], tag='[211]',
@@ -134,10 +129,8 @@ class cal_bcc_schmid(get_data.get_data):
         del ase_atoms[delindex]
         (system, elements) = am.convert.ase_Atoms.load(ase_atoms)
 
-        ############################################################
         # use neb, it's to generate init configuration
-        ############################################################
-        if opt == 'neb':
+        if opt in ['neb']:
             system_init = copy.deepcopy(system)
 
             shift = np.array([-0.50000000000,
@@ -186,9 +179,7 @@ class cal_bcc_schmid(get_data.get_data):
         # for lammps read structure
         lmp.atom_data.dump(system, filename)
 
-    #############################################################
     # change orient such that dislocation line is along x
-    #############################################################
     def change_orient(self, ase_atoms=None, outfile="new_dis.cfg"):
         if ase_atoms is None:
             files = glob.glob("out/*")
@@ -197,7 +188,7 @@ class cal_bcc_schmid(get_data.get_data):
         # we add the shear on the relaxed structure #
         cell = ase_atoms.get_cell()
         pos = ase_atoms.get_positions()
-        print pos[:, 0]
+        print(pos[:, 0])
 
         #  ase.io.write("old_dis.cfg", images=ase_atoms,
         #  format='cfg')
@@ -292,7 +283,7 @@ class cal_bcc_schmid(get_data.get_data):
             delta = 2 * self._delta * i
             dirname = 'dir-%.4f' % (delta)
             filelist = glob.glob("%s/bcc.*.dump" % (dirname))
-            print filelist[-1]
+            print(filelist[-1])
             os.system("cp %s dump_%03d" % (filelist[-1], i))
             #  ase_atoms = ase.io.read(filelist[-1], format='lammps-dump')
             #  cfgname = "dis_z_%.4f" % (delta)
@@ -319,10 +310,10 @@ class cal_bcc_schmid(get_data.get_data):
             invstrain = np.linalg.inv(strain)
 
             cell = ase_atoms.get_cell()
-            print "before add strain", cell
+            print("before add strain", cell)
 
             cell = invstrain * cell
-            print "after add strain ", cell
+            print("after add strain ", cell)
 
             pos = np.mat(ase_atoms.get_positions())
             pos = pos * invstrain
@@ -341,7 +332,7 @@ class cal_bcc_schmid(get_data.get_data):
             ase_atoms.set_positions(newpos)
 
             cfgname = "dis_z_%.4f" % (delta)
-            print cfgname
+            print(cfgname)
             ase.io.write(cfgname, images=ase_atoms,
                          format='cfg')
 
@@ -357,7 +348,7 @@ class cal_bcc_schmid(get_data.get_data):
 
             elif tag == 'show':
                 filelist = glob.glob("bcc.*")
-                print filelist[-1]
+                print(filelist[-1])
                 os.system("cp  %s ../bcc.%03d" % (filelist[-1], i))
             os.chdir(os.pardir)
 
@@ -369,11 +360,10 @@ class cal_bcc_schmid(get_data.get_data):
         for i in range(0, 10):
             # add espsilon xz direction  (z direction shear along x)
             dirname = 'dir-%.4f' % (i * delta)
-            if not os.path.isdir(dirname):
-                os.mkdir(dirname)
+            self.mymkdir(dirname)
 
             files = glob.glob("%s/bcc.*" % (lastdir))
-            print files
+            print(files)
             dis_atoms = ase.io.read(files[-1], format='lammps-dump')
             dis_atoms.wrap(pbc=[1, 1, 1])
 
@@ -400,29 +390,29 @@ class cal_bcc_schmid(get_data.get_data):
         self.run_lmp('lmp')
 
 
-if __name__ == '__main__':
-    usage = "usage:%prog [options] arg1 [options] arg2"
-    parser = OptionParser(usage=usage)
-    parser.add_option("-t", "--mtype", action="store",
-                      type="string", dest="mtype")
-    parser.add_option('-p', "--param", action="store",
-                      type='string', dest="fargs")
+# if __name__ == '__main__':
+#     usage = "usage:%prog [options] arg1 [options] arg2"
+#     parser = OptionParser(usage=usage)
+#     parser.add_option("-t", "--mtype", action="store",
+#                       type="string", dest="mtype")
+#     parser.add_option('-p', "--param", action="store",
+#                       type='string', dest="fargs")
 
-    (options, args) = parser.parse_args()
-    drv = cal_bcc_schmid()
+#     (options, args) = parser.parse_args()
+#     drv = cal_bcc_schmid()
 
-    dispatcher = {'plate': drv.make_screw_plate,
-                  'change': drv.change_orient,
-                  'mrss': drv.prep_mrss,
-                  'run': drv.run_lmp,
-                  'ddmap': drv.draw_ddmap,
-                  'static': drv.static_shear,
-                  'const': drv.cal_screw_const}
+#     dispatcher = {'plate': drv.make_screw_plate,
+#                   'change': drv.change_orient,
+#                   'mrss': drv.prep_mrss,
+#                   'run': drv.run_lmp,
+#                   'ddmap': drv.draw_ddmap,
+#                   'static': drv.static_shear,
+#                   'const': drv.cal_screw_const}
 
-    if options.fargs is not None:
-        dispatcher[options.mtype.lower()](options.fargs)
-    else:
-        dispatcher[options.mtype.lower()]()
+#     if options.fargs is not None:
+#         dispatcher[options.mtype.lower()](options.fargs)
+#     else:
+#         dispatcher[options.mtype.lower()]()
 
     # if options.mtype == 'plate':
     #     drv.make_screw_plate(size=[80, 120, 2], rad=[200, 230],

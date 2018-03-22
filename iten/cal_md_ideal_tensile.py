@@ -58,10 +58,10 @@ class cal_bcc_ideal_tensile(get_data.get_data,
     def read_stress(self):
         (engy, stress, vol) = self.vasp_energy_stress_vol()
         stress = stress * 0.1
-        print "engy {}".format(engy)
-        print "{}, {}, {}, {}, {}, {}".format(
+        print("engy {}".format(engy))
+        print("{}, {}, {}, {}, {}, {}".format(
             stress[0][0], stress[1][0], stress[2][0],
-            stress[3][0], stress[4][0], stress[5][0])
+            stress[3][0], stress[4][0], stress[5][0]))
         return
 
     def lmp_relax(self):
@@ -70,8 +70,8 @@ class cal_bcc_ideal_tensile(get_data.get_data,
         res = minimize(self.runlmp, x0, delta,
                        method='Nelder-Mead',
                        options={'xtol': 1e-3, 'disp': True})
-        print res.fun
-        print res.x
+        print(res.fun)
+        print(res.x)
         return
 
     def loop_collect_vasp(self):
@@ -80,7 +80,7 @@ class cal_bcc_ideal_tensile(get_data.get_data,
         data = np.ndarray([npts, 10])
         for i in range(npts):
             dirname = dirlist[i]
-            print dirname
+            print(dirname)
             os.chdir(dirname)
             atoms = ase.io.read('CONTCAR', format='vasp')
             (engy, stress, vol) = self.vasp_energy_stress_vol()
@@ -102,7 +102,7 @@ class cal_bcc_ideal_tensile(get_data.get_data,
             res = minimize(self.runlmp, x0, delta,
                            method='Nelder-Mead', options={'disp': True})
             x0 = res.x
-            print res
+            print(res)
             data[i][0] = (delta)
             data[i][1] = res.fun
             data[i][2:] = res.x
@@ -118,7 +118,7 @@ class cal_bcc_ideal_tensile(get_data.get_data,
         self.gn_primitive_lmps(new_strain, 'vasp')
         os.system("mpirun vasp > vasp.log")
         (engy, stress, vol) = self.vasp_energy_stress_vol()
-        print engy
+        print(engy)
         return engy
 
     def runlmp(self, x, delta):
@@ -131,7 +131,7 @@ class cal_bcc_ideal_tensile(get_data.get_data,
         os.system("lmp_mpi -i in.init -screen  no")
         raw = np.loadtxt("out.txt")
         engy = raw[0]
-        print engy
+        print(engy)
         return engy
 
     def gn_primitive_lmps(self,
@@ -188,8 +188,8 @@ class cal_bcc_ideal_tensile(get_data.get_data,
         if given is True:
             delta = data[0]
             x0 = data[-2:]
-            print delta
-            print x0
+            print(delta)
+            print(x0)
         else:
             delta = data
             x0 = np.array([1., 1.])
@@ -197,7 +197,7 @@ class cal_bcc_ideal_tensile(get_data.get_data,
         res = minimize(self.runvasp, x0, delta,
                        method='Nelder-Mead',
                        options={'fatol': 5e-4, 'disp': True})
-        print res
+        print(res)
         data[0] = delta
         data[1] = res.fun
         data[2:] = res.x
@@ -263,9 +263,9 @@ class cal_bcc_ideal_tensile(get_data.get_data,
             splder1 = spl.derivative()
             for i in range(len(raw)):
                 # append the stress to the last column
-                print "vol", vol[i]
+                print("vol", vol[i])
                 data[i, -1] = splder1(raw[i, 0]) * convunit / vol[i]
-        print data
+        print(data)
         np.savetxt("istress.txt", data)
         return
 

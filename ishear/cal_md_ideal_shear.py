@@ -8,7 +8,7 @@
 
 from optparse import OptionParser
 import md_pot_data
-import cal_md_ideal_shear_ini as init
+from . import cal_md_ideal_shear_ini as init
 
 
 if __name__ == '__main__':

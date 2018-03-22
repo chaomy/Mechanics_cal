@@ -112,7 +112,7 @@ class vasp_itensile(gn_config.bcc,
                                                              stress[0], stress[
                                                                  1], stress[2],
                                                              stress[3], stress[4], stress[5])
-            print outstr
+            print(outstr)
 
             os.chdir(self.root_dir)
 
@@ -272,7 +272,7 @@ class vasp_itensile(gn_config.bcc,
 
             os.chdir(dirnameT)
             (energy, stress, base) = self.read_Strain_stress()
-            print base
+            print(base)
 
             strn_listT[j] = base[1, 1]
             engy_listT[j] = energy

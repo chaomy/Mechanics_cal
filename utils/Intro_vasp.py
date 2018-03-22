@@ -10,11 +10,11 @@
 import numpy as np
 import math
 from ase import Atoms
-import cal_add_strain
-import cal_cut_cell
-import cal_intro_iso_dis
-import cal_intro_iso_dis_image
-import cal_intro_ani_dis
+from . import cal_add_strain
+from . import cal_cut_cell
+from . import cal_intro_iso_dis
+from . import cal_intro_iso_dis_image
+from . import cal_intro_ani_dis
 
 
 class cubic_cij:
@@ -129,8 +129,8 @@ class vasp_change_box(cal_intro_iso_dis.cal_intro_iso_dis,
             volcut = ((lowx * cell[1, 1] + lowy *
                        (cell[0, 0] - 2 * lowx)) * 2 * cell[2, 2])
 
-            print("vol[%f] - volcut[%f] = %f " % (vol, volcut, vol - volcut))
-            print("area is [%f]" % (areaxy))  # 29094.182232  A^2
+            print(("vol[%f] - volcut[%f] = %f " % (vol, volcut, vol - volcut)))
+            print(("area is [%f]" % (areaxy)))  # 29094.182232  A^2
 
             index_list = []
         cut = None  # only cut y direction ####
@@ -275,8 +275,8 @@ class vasp_change_box(cal_intro_iso_dis.cal_intro_iso_dis,
             xc2 = center[1][0]
             yc2 = center[1][1]
 
-        print("center 1 (%g  %g)\n" % (xc1, yc1))
-        print("center 2 (%g  %g)\n" % (xc2, yc2))
+        print(("center 1 (%g  %g)\n" % (xc1, yc1)))
+        print(("center 2 (%g  %g)\n" % (xc2, yc2)))
 
         for i in range(len(atom_position)):
             dx1, dx2 = atom_position[i, lxid] - \
@@ -335,7 +335,7 @@ class vasp_change_box(cal_intro_iso_dis.cal_intro_iso_dis,
                     map_list[0].append(i)
                     map_list[1].append(k)
 
-        print len(map_list[1])
+        print(len(map_list[1]))
         return map_list
 
     def add_perturbation(self, atoms, disp):
@@ -362,17 +362,17 @@ class vasp_change_box(cal_intro_iso_dis.cal_intro_iso_dis,
                     map_list[0].append(i)
                     map_list[1].append(k)
 
-        print len(map_list[1])
+        print(len(map_list[1]))
         return map_list
 
     def sort_atoms(self, atoms, map_list):
         new_atoms = Atoms()
-        print map_list[0]
-        print map_list[1]
+        print(map_list[0])
+        print(map_list[1])
 
         for i in map_list[1]:
             #  print i
-            print atoms[i].position
+            print(atoms[i].position)
             new_atoms.append(atoms[i])
         new_atoms.set_cell(atoms.get_cell())
         return new_atoms

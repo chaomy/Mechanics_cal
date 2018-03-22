@@ -52,7 +52,7 @@ class vasp_inters(gn_config.bcc,
             atoms_new = self.atoms.copy()
             for atom in self.atoms:
                 if atom.position[1] > 1.0:
-                    print atom.index
+                    print(atom.index)
                     del atoms_new[atom.index]
             self.atoms_simple = atoms_new
         return
@@ -214,7 +214,7 @@ class vasp_inters(gn_config.bcc,
                 atoms = atoms_copy
                 break
             elif cnt > 20:
-                print "no write"
+                print("no write")
                 break
             else:
                 cnt += 1
@@ -259,7 +259,7 @@ class vasp_inters(gn_config.bcc,
         # add perturbation
         ###################################################################
         cnt = 0
-        print atoms.get_positions()
+        print(atoms.get_positions())
         add_perturbation = True
         if add_perturbation is True:
             while True:
@@ -268,7 +268,7 @@ class vasp_inters(gn_config.bcc,
                     atoms = atoms_copy
                     break
                 elif cnt > 20:
-                    print "no write"
+                    print("no write")
                     break
                 else:
                     cnt += 1
@@ -283,9 +283,9 @@ class vasp_inters(gn_config.bcc,
             os.chdir(dirname)
 
             (energy, vol, atomnum) = self.vasp_energy_stress_vol_quick()
-            print dirname
-            print(energy / atomnum)
-            print
+            print(dirname)
+            print((energy / atomnum))
+            print()
             os.chdir(os.pardir)
         return
 
@@ -339,12 +339,12 @@ class vasp_inters(gn_config.bcc,
                     dis = np.linalg.norm(atom1.position - atom2.position +
                                          image)
                     if (dis > 0 and dis < 2.0):
-                        print dis
+                        print(dis)
                         return False
                     dis = np.linalg.norm(atom1.position - atom2.position -
                                          image)
                     if (dis > 0 and dis < 2.0):
-                        print dis
+                        print(dis)
                         return False
         return True
 
@@ -357,7 +357,7 @@ class vasp_inters(gn_config.bcc,
         for atom in atoms:
             if ((pos - atom.position) == ([0, 0, 0])).all():
                 index = atom.index
-                print "del {}  atom".format(index)
+                print("del {}  atom".format(index))
         del atoms[index]
 
         ase.io.write("POSCAR_vac", images=atoms, format='vasp')

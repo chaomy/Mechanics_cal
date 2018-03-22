@@ -73,8 +73,8 @@ class md_gb_pre(object):
             zupper.split()[1])**2 + float(zupper.split()[2])**2)
 
         # Lz used to be 2
-        print Lx
-        print Lz
+        print(Lx)
+        print(Lz)
         stepx = 0.05
         max_x = int(Lx / stepx)
         stepz = 0.05
@@ -112,6 +112,6 @@ class md_gb_pre(object):
                     w.close()
                     o.close()
                 except OSError:
-                    print "Hmmmmm \n"
+                    print("Hmmmmm \n")
                 else:
-                    print filename
+                    print(filename)

@@ -9,7 +9,7 @@
 
 import atomman as am
 import atomman.lammps as lmp
-import cal_md_dis_schmid
+from . import cal_md_dis_schmid
 import get_data
 import gn_config
 import Intro_vasp
@@ -195,11 +195,11 @@ class bcc_kink(gn_config.bcc,
         elif center_opt == 'cal':
             unit_a = H
             unit_b = np.sqrt(2.) / 2. * self._alat
-            print unit_a, unit_b
+            print(unit_a, unit_b)
             yc1 = yc2 = (m / 2 + 0.5) * unit_b
             xc1 = (10 * times + 0.5) * unit_a
             xc2 = (10 * times + 0.5 + 1.5 * n) * unit_a
-            print xc1, yc1, xc2,  yc2
+            print(xc1, yc1, xc2,  yc2)
 
         if tag == 'initial':
             atoms = self.intro_kink_screw_dislocations(atoms,
@@ -386,7 +386,7 @@ class bcc_kink(gn_config.bcc,
 
         disp = 0.5 * np.sqrt(6.) / 3. * self._alat
 
-        print supercell_base[2, 2]
+        print(supercell_base[2, 2])
 
         #  crit1 = 20 * np.sqrt(3.) / 2. * 3.1648492
         crit1 = 40 * np.sqrt(3.) / 2. * 3.1648492
@@ -398,8 +398,8 @@ class bcc_kink(gn_config.bcc,
                 atom_position[i, 0] += disp
                 count += 1
 
-        print count
-        print count / len(atom_position)
+        print(count)
+        print(count / len(atom_position))
 
         atoms.set_positions(atom_position)
         self.write_lmp_config_data(atoms)

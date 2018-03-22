@@ -65,9 +65,9 @@ class cal_cij(gn_config.bcc,
             a, c = params
             return ydata - (0.5 * a * (xdata**2) + c)
         r = leastsq(residuals, [1.0, 0.0])
-        print r
+        print(r)
         a, c = r[0]
-        print "vol = ", self.volume, "A^3"
+        print("vol = ", self.volume, "A^3")
         a = a / self.volume * self.ev_angstrom3_to_GPa
         return a
 
@@ -75,7 +75,7 @@ class cal_cij(gn_config.bcc,
         self.volume = 3.071**3
         del2coeffs = np.transpose(np.zeros(3))
         fileList = ['c11_summary', 'c12_summary', 'c44_summary']
-        for file, i in zip(fileList, range(3)):
+        for file, i in zip(fileList, list(range(3))):
             raw = np.loadtxt(file)
             self.energy0 = raw[0, 1] * 13.605698066
             delta_list, energy_list = raw[:, 0], raw[:, 1] * 13.605698066
@@ -93,13 +93,13 @@ class cal_cij(gn_config.bcc,
             del2coeffs[i] = self.fit_para(delta_list, energy_list)
 
         # print np.linalg.pinv(convmat) * np.transpose(np.mat(del2coeffs))
-        print del2coeffs
+        print(del2coeffs)
         c11 = (0.111111111111111 *
                del2coeffs[0] + 0.333333333333333 * del2coeffs[1])
         c12 = (0.111111111111111 *
                del2coeffs[0] - 0.166666666666667 * del2coeffs[1])
         c44 = 0.25 * del2coeffs[2]
-        print(c11, c12, c44)
+        print((c11, c12, c44))
         # with open("cij.dat", 'w') as fout:
         #     fout.write("C11\t%f\t\nC12\t%f\t\nC44\t%f\t\n" % (c11, c12, c44))
         #     fout.close()
@@ -108,7 +108,7 @@ class cal_cij(gn_config.bcc,
         (engy, vol, stress) = self.qe_get_energy_stress(
             filename='dir-c11-p000/qe.out')
         self.volume = vol * md_pot_data.unitconv.ulength["BohrtoA"]**3
-        print self.volume
+        print(self.volume)
         self.energy0 = engy
 
     def set_cij_type(self, cij_type):
@@ -175,7 +175,7 @@ class cal_cij(gn_config.bcc,
                 else:
                     dirname = "dir-%s-n%03d" % (mtype, np.abs(j))
                 os.chdir(dirname)
-                print "i am in ", dirname
+                print("i am in ", dirname)
                 (energy, vol, stress) = self.qe_get_energy_stress()  # in eV
                 os.chdir(os.pardir)
                 self.output_delta_energy(delta,
@@ -204,7 +204,7 @@ class cal_cij(gn_config.bcc,
                    'WTa0.10': md_pot_data.qe_pot.vca_W90Ta10,
                    'WTa0.05': md_pot_data.qe_pot.vca_W95Ta05,
                    'WTa0.50': md_pot_data.qe_pot.vca_W50Ta50}
-        for key in potlist.keys():
+        for key in list(potlist.keys()):
             self.mymkdir(key)
             self.__init__(potlist[key])
             os.chdir(key)

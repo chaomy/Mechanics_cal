@@ -43,7 +43,7 @@ matconsts = OrderedDict([('Al1', {'lat': 4.05,
 class cal_dis_emit_curtin(object):
 
     def loop_curtin(self):
-        for key in matconsts.keys()[:]:
+        for key in list(matconsts.keys())[:]:
             # self.get_cutin_result_mat_k2e(matconsts[key])
             self.get_cutin_result_mat_k1e(matconsts[key])
         return
@@ -99,12 +99,12 @@ class cal_dis_emit_curtin(object):
             c = c.transform(axes)
 
         (coeff, Kg) = self.cal_crack(param, c)
-        print(cos(0.5 * theta))**2 * sin(0.5 * theta)
-        print coeff
+        print((cos(0.5 * theta))**2 * sin(0.5 * theta))
+        print(coeff)
 
         k1e = sqrt(Gamma00 * param['ugsf']) * 1e-6   # Mpa
-        print 'k2e', k1e
-        print 'k2e', k1e / coeff
+        print('k2e', k1e)
+        print('k2e', k1e / coeff)
         # / Fmat2[1], k2e / cos(theta)
         return
 

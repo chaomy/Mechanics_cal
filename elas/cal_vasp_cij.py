@@ -74,7 +74,7 @@ class cal_cij(gn_config.bcc,
                 else:
                     dirname = "dir-%s-n%03d" % (mtype, np.abs(j))
                 os.chdir(dirname)
-                print "i am in ", dirname
+                print("i am in ", dirname)
                 (energy, stress, vol) = self.vasp_energy_stress_vol()  # in eV
                 os.chdir(os.pardir)
                 self.output_delta_energy(delta,
@@ -134,7 +134,7 @@ class cal_cij(gn_config.bcc,
         c12 = (0.111111111111111 * c11_plus_c12 -
                0.166666666666667 * c11_minus_c12)
         c44 = 0.25 * c44
-        print c11, c12, c44
+        print(c11, c12, c44)
 
     def set_volume_energy0(self):
         self.volume = self.pot["lattice"] ** 3 / 2.
@@ -146,7 +146,7 @@ class cal_cij(gn_config.bcc,
     def loop_prepare_cij_otho(self):
         for kk in ['D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'D8', 'D9']:
             # for j in range(-self.npts, self.npts):
-            for j in range(-100, -50) + range(50, 100):
+            for j in list(range(-100, -50)) + list(range(50, 100)):
                 delta = self.unit_delta * j
                 if j >= 0:
                     mdir = "dir-%s-p%03d" % (kk, j)
@@ -204,7 +204,7 @@ class cal_cij(gn_config.bcc,
                 else:
                     mdir = "dir-%s-delta-n%03d" % (mtype, np.abs(j))
                 os.chdir(mdir)
-                print "i am in ", mdir
+                print("i am in ", mdir)
                 (energy, volume) = self.vasp_energy_stress_vol_quick()
                 os.chdir(self.root_dir)
 

@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2018-03-07 13:09:29
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-17 08:56:13
+# @Last Modified time: 2018-03-22 17:27:57
 
 import numpy as np
 import ase
@@ -24,7 +24,7 @@ class lmp_phonon(get_data.get_data):
 
     def __init__(self):
         get_data.get_data.__init__(self)
-        self.pot = self.load_data("../pot.dat")
+        self.pot = self.load_data("../BASICS/pot.dat")
 
     def lmp_change_box(self, in_cell):
         unit_x = np.linalg.norm(in_cell[0, :])
@@ -76,7 +76,7 @@ class lmp_phonon(get_data.get_data):
         # [ 0.4921285 -0.4921285  0.4921285]
         # [ 0.4918525  0.4918525 -0.4918525]]
         cell = strain * cell
-        print cell
+        print(cell)
         cell = alat * self.lmp_change_box(cell)
 
         atoms = ase.Atoms(
@@ -154,11 +154,11 @@ class lmp_phonon(get_data.get_data):
                               (transformedkpath[i, 0],
                                transformedkpath[i, 1],
                                transformedkpath[i, 2]))
-        print stringlist
+        print(stringlist)
         for i in range(len(stringlist) - 1):
-            print "self.append_band(bands, %s, %s)" \
+            print("self.append_band(bands, %s, %s)" \
                 % (stringlist[i],
-                   stringlist[i + 1])
+                   stringlist[i + 1]))
 
     def convert_pos_to_lmp_data_norm(self, filename="POSCAR-001"):
         ase_atoms = ase.io.read(filename, format='vasp')
@@ -168,14 +168,15 @@ class lmp_phonon(get_data.get_data):
     def convert_pos_to_lmp_data(self, filename="POSCAR-001"):
         ase_atoms = ase.io.read(filename, format='vasp')
         cell = ase_atoms.get_cell()
-        print np.linalg.norm(cell)
-        print ase_atoms.get_positions()
+        print(np.linalg.norm(cell))
+        print(ase_atoms.get_positions())
         drv_gnconfig = gn_config.gnStructure(self.pot)
         drv_gnconfig.write_lmp_config_data(ase_atoms)
 
     def cal_phonon_auto(self):
         self.gn_primitive_lmps()
         os.system("phonopy --dim=\"5 5 5\" -d")
+        self.convert_pos_to_lmp_data() 
         os.system("lmp_mpi -i in.phonon")
         files = glob.glob("bcc.0.dump")
         os.system("phonopy -f {} --lammps".format(files[0]))

@@ -89,7 +89,7 @@ class cal_md_intersti(gn_config.hcp,
         #  write and run #
         engyinter = self.write_and_run(dirname, atoms)
         engyincre = engyinter - eperatom * (atoms.get_number_of_atoms())
-        print "energy increment :", engyincre
+        print("energy increment :", engyincre)
         return engyincre
 
     def cal_dumbbell_110(self, atoms):
@@ -111,7 +111,7 @@ class cal_md_intersti(gn_config.hcp,
 
         engyinter = self.write_and_run(dirname, atoms)
         engyincre = engyinter - eperatom * (atoms.get_number_of_atoms())
-        print "110 dumbel interstitial: ", engyincre
+        print("110 dumbel interstitial: ", engyincre)
         return engyincre
 
     def cal_dumbbell_111(self, atoms):
@@ -133,7 +133,7 @@ class cal_md_intersti(gn_config.hcp,
 
         engyinter = self.write_and_run(dirname, atoms)
         engyincre = engyinter - eperatom * (atoms.get_number_of_atoms())
-        print "111 dumbel interstitial: ", engyincre
+        print("111 dumbel interstitial: ", engyincre)
         return engyincre
 
     def cal_crowdion(self, atoms):
@@ -149,7 +149,7 @@ class cal_md_intersti(gn_config.hcp,
 
         engyinter = self.write_and_run(dirname, atoms)
         engyincre = engyinter - eperatom * (atoms.get_number_of_atoms())
-        print "energy crowdion: ", engyincre
+        print("energy crowdion: ", engyincre)
         return engyincre
 
     def cal_octahedral(self, atoms):
@@ -165,7 +165,7 @@ class cal_md_intersti(gn_config.hcp,
 
         engyinter = self.write_and_run(dirname, atoms)
         engyincre = engyinter - eperatom * (atoms.get_number_of_atoms())
-        print "energy octahedral: ", engyincre
+        print("energy octahedral: ", engyincre)
         return engyincre
 
     def cal_tetrahedral(self, atoms):
@@ -179,7 +179,7 @@ class cal_md_intersti(gn_config.hcp,
 
         engyinter = self.write_and_run(dirname, atoms)
         engyincre = engyinter - eperatom * (atoms.get_number_of_atoms())
-        print "energy octahedral: ", engyincre
+        print("energy octahedral: ", engyincre)
         return engyincre
 
     def prep_interstitials(self):
@@ -193,7 +193,7 @@ class cal_md_intersti(gn_config.hcp,
         for atom in atoms:
             if ((pos - atom.position) == ([0, 0, 0])).all():
                 index = atom.index
-                print "del {}  atom".format(index)
+                print("del {}  atom".format(index))
         del atoms[index]
 
         atomsper = self._unitatoms.copy().repeat((sizen, sizen, sizen))
@@ -205,9 +205,9 @@ class cal_md_intersti(gn_config.hcp,
         ecrowdion = self.cal_crowdion(atomsper.copy())
         eoctahedral = self.cal_octahedral(atomsper.copy())
         etetrahedral = self.cal_tetrahedral(atomsper.copy())
-        print "100 110 111", edumbb100, edumbb110, edumbb111
-        print "ecrowdion octahedral etetrahedral", \
-            ecrowdion, eoctahedral, etetrahedral
+        print("100 110 111", edumbb100, edumbb110, edumbb111)
+        print("ecrowdion octahedral etetrahedral", \
+            ecrowdion, eoctahedral, etetrahedral)
         return
 
     def loop_collect_r(self):  # total is 14 ####

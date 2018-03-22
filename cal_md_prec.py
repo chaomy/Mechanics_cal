@@ -63,7 +63,7 @@ class md_precipitate(gn_config.bcc,
                                         symbol='Mg',
                                         pbc=(1, 1, 1))
 
-        print atoms.get_cell()
+        print(atoms.get_cell())
         ase.io.write(filename="init.cfg",
                      images=atoms,
                      format='cfg')

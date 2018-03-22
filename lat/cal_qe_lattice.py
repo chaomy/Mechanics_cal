@@ -136,7 +136,7 @@ class cal_lattice(gn_config.bcc,
         ecutlist = np.zeros(npts)
         engylist = np.zeros(npts)
         for i in range(npts):
-            print dirlist[i]
+            print(dirlist[i])
             os.chdir(dirlist[i])
             ecutlist[i] = int(dirlist[i][-2:])
             (engylist[i], vol, stress) = self.qe_get_energy_stress()
@@ -161,7 +161,7 @@ class cal_lattice(gn_config.bcc,
                 data[cnt, 1] = (energy)
             cnt += 1
             os.chdir(self.root)
-        print data
+        print(data)
         np.savetxt('lat.txt', data)
         return
 
@@ -184,7 +184,7 @@ class cal_lattice(gn_config.bcc,
         for i in range(7):
             degauss = degauss0 + 0.005 * i
             mdir = 'degauss{:4.3f}'.format(degauss)
-            print mdir
+            print(mdir)
             os.chdir(mdir)
             self.clc_data(tag='kpts')
             os.system("cp kpts.txt ../kpts_{:4.3f}.txt".format(degauss))
@@ -198,7 +198,7 @@ class cal_lattice(gn_config.bcc,
         for mfile in filelist:
             data = np.loadtxt(mfile)
             tag = mfile[5:-4]
-            print tag
+            print(tag)
             data[1] = data[1][np.argsort(data[0])]
             self.ax.plot(np.sort(data[0]), data[1], label=tag)
             self.ax.legend()
@@ -208,7 +208,7 @@ class cal_lattice(gn_config.bcc,
     def loop_run(self):
         dirlist = glob.glob("dir-*")
         for mdir in dirlist:
-            print mdir
+            print(mdir)
             os.chdir(mdir)
             os.system("mpirun pw.x < qe.in > qe.out")
             os.chdir(self.root)
@@ -235,9 +235,9 @@ class cal_lattice(gn_config.bcc,
             data = np.loadtxt('lat.txt')
             data[:, 0] = np.abs(data[:, 0])  # in case
         interps = np.linspace(data[0, 0], data[-1, 0], 201)
-        print interps
+        print(interps)
         spl = InterpolatedUnivariateSpline(data[:, 0], data[:, 1])
-        print "min lat", interps[np.argmin(spl(interps))]
+        print("min lat", interps[np.argmin(spl(interps))])
         return data
 
     def set_my_pbs(self, mdir, od=True):
@@ -260,7 +260,7 @@ mpirun pw.x < qe.in > qe.out
                    'WTa0.15': md_pot_data.qe_pot.vca_W85Ta15,
                    'WTa0.10': md_pot_data.qe_pot.vca_W90Ta10,
                    'WTa0.05': md_pot_data.qe_pot.vca_W95Ta05}
-        for key in potlist.keys():
+        for key in list(potlist.keys()):
             self.mymkdir(key)
             self.__init__(potlist[key])
             os.chdir(key)

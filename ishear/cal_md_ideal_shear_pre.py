@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-18 07:41:31
+# @Last Modified time: 2018-03-20 14:36:08
 
 
 import os
@@ -23,7 +23,7 @@ class cal_bcc_ideal_shear_pre(object):
 
     def gn_primitive_lmps(self,
                           strain=np.mat(np.identity(3)), tag='lmp'):
-        alat = self.alat
+        alat = self.pot['lattice']
         bas = np.mat([[-0.5, 0.5, 0.5],
                       [0.5, -0.5, 0.5],
                       [0.5, 0.5, -0.5]])
@@ -71,7 +71,7 @@ class cal_bcc_ideal_shear_pre(object):
             a2 = e2 + oneo6 * xtos * et
             a3 = e3
             cell = np.mat([a1, a2, a3])
-            print cell
+            print(cell)
             atoms = ase.Atoms('Nb',
                               positions=[[0, 0, 0]],
                               cell=cell, pbc=[1, 1, 1])

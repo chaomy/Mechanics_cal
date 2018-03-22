@@ -48,7 +48,7 @@ class cal_ideal_tensile(object):
                 self._AtomMass2 * Percentage
 
         if os.path.isdir("output"):
-            print "mkdir output"
+            print("mkdir output")
         else:
             os.mkdir("output")
 
@@ -108,11 +108,11 @@ class cal_ideal_tensile(object):
         Element = self._Element1
         real_dn = r'-?(\d+\.\d*)'
         Element = '%s\s+' % (Element)
-        print Element
+        print(Element)
         Object = Element + real_dn + \
             '\s+' + real_dn + '\s+' + real_dn + \
             '\s+' + real_dn + '\s+' + real_dn + '\s+' + real_dn
-        print Object
+        print(Object)
         fid = open("cij_sij.txt", 'r')
         for line in fid:
             match = re.search(Object, line)
@@ -144,7 +144,7 @@ class cal_ideal_tensile(object):
         with open(self._qeoutfile) as fid:
             Raw = fid.read()
             fid.close()
-            print Raw
+            print(Raw)
 #            for line in Raw :
 #                match = re.search(r"!\s*total energy\s*=\s*(-?\d*\.\d*)",line)
 #                if match :
@@ -164,7 +164,7 @@ class cal_ideal_tensile(object):
             for j in range(3):
                 StressMatrix[i, j] = 0.1 * \
                     float(Stress[-1][i * 6 + j + 4])  # Gpa
-        print StressMatrix
+        print(StressMatrix)
         Stress6by1 = np.zeros([6, 1], "float")
         Stress6by1[0, 0] = StressMatrix[0, 0]
         Stress6by1[1, 0] = StressMatrix[1, 1]
@@ -186,12 +186,12 @@ class cal_ideal_tensile(object):
         with open(self._outfile, 'a') as ff:
             ff.write("delta %6.4f\t Sxx %10.8f\n"
                      % (delta, Stress_original[0]))
-            print >> ff, "Stress original"
-            print >> ff, Stress_original
-            print >> ff, "calculated Stress"
-            print >> ff, Stress
-            print >> ff, "Energy is"
-            print >> ff, Energy
+            print("Stress original", file=ff)
+            print(Stress_original, file=ff)
+            print("calculated Stress", file=ff)
+            print(Stress, file=ff)
+            print("Energy is", file=ff)
+            print(Energy, file=ff)
             ff.close()
         if os.path.isfile(self._outfile):
             shutil.rmtree("./results")
@@ -213,8 +213,8 @@ class cal_ideal_tensile(object):
                               [0, 0, 1]], "float")
         Transformed_strain = np.mat(original_strain)
         Transposed_Base = Transformed_strain * Base_vector
-        print np.mat(Transposed_Base)
-        print self._Lattice_constant
+        print(np.mat(Transposed_Base))
+        print(self._Lattice_constant)
 
         Transposed_Base = Transposed_Base * self._Lattice_constant
         AtomicPositions = np.mat([[0.0, 0.0, 0.0],
@@ -353,18 +353,18 @@ K_POINTS automatic
             while True:
                 if self._tag == 'Tpath':
                     if os.path.isfile(self._infile):
-                        print "restart calculation"
+                        print("restart calculation")
                     else:
                         Transformed_strain = self.gnInfile_T(delta,
                                                              Correct_strain)
                 elif self._tag == 'Opath':
                     if os.path.isfile(self._infile):
-                        print "restart calculation"
+                        print("restart calculation")
                     else:
                         Transformed_strain = self.gnInfile_O(delta,
                                                              Correct_strain)
                 else:
-                    print "please specify Opath or Tpath"
+                    print("please specify Opath or Tpath")
 
                 os.system("%s" % (self._executable))
                 # back up infile
@@ -392,10 +392,10 @@ K_POINTS automatic
                     Correct_strain = self.updateStrain(Strain,
                                                        Correct_strain)
                     with open(self._watchfile, 'a') as fout:
-                        print >> fout, "loop time",  count
-                        print >> fout, "StressPrime", StressPrime
-                        print >> fout, "original Stress", Stress_original
-                        print >> fout, "Correct_strain", Correct_strain
+                        print("loop time",  count, file=fout)
+                        print("StressPrime", StressPrime, file=fout)
+                        print("original Stress", Stress_original, file=fout)
+                        print("Correct_strain", Correct_strain, file=fout)
                         count += 1
                         fout.close()
         return
@@ -410,7 +410,7 @@ K_POINTS automatic
             delta = i * 0.02
             Dir = "Dir-%4.3f" % (delta)
             originInfile = "WRe.in.%4.3f" % (delta)
-            print originInfile
+            print(originInfile)
 
             os.mkdir(Dir)
             if os.path.isfile(originInfile):
@@ -423,20 +423,20 @@ K_POINTS automatic
             while True:
                 if self._tag == 'Tpath':
                     if os.path.isfile(originInfile):
-                        print "restart calculation"
+                        print("restart calculation")
                         shutil.move(originInfile, self._infile)
                     else:
                         Transformed_strain = self.gnInfile_T(delta,
                                                              Correct_strain)
                 elif self._tag == 'Opath':
                     if os.path.isfile(originInfile):
-                        print "restart calculation"
+                        print("restart calculation")
                         shutil.move(originInfile, self._infile)
                     else:
                         Transformed_strain = self.gnInfile_O(delta,
                                                              Correct_strain)
                 else:
-                    print "please specify Opath or Tpath"
+                    print("please specify Opath or Tpath")
 
                 os.system("%s" % (self._executable))
                 # back up infile
@@ -464,10 +464,10 @@ K_POINTS automatic
                     Correct_strain = self.updateStrain(Strain,
                                                        Correct_strain)
                     with open(self._watchfile, 'a') as fout:
-                        print >> fout, "loop time",  count
-                        print >> fout, "StressPrime", StressPrime
-                        print >> fout, "original Stress", Stress_original
-                        print >> fout, "Correct_strain", Correct_strain
+                        print("loop time",  count, file=fout)
+                        print("StressPrime", StressPrime, file=fout)
+                        print("original Stress", Stress_original, file=fout)
+                        print("Correct_strain", Correct_strain, file=fout)
                         count += 1
                         fout.close()
             os.chdir(RootDir)

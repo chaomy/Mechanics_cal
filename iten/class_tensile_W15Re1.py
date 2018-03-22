@@ -46,9 +46,9 @@ class VAtension(object):
         import re
         real_dn = r'-?(\d+\.\d*)'
         Element = '%s\s+'%(Element)
-        print Element
+        print(Element)
         Object = Element + real_dn + '\s+'+real_dn+'\s+'+real_dn+'\s+'+real_dn+'\s+'+real_dn+'\s+'+real_dn
-        print Object
+        print(Object)
         fid = open("./cij_sij.txt",'r')
         for line in fid:
             match = re.search(Object,line)
@@ -101,12 +101,12 @@ class VAtension(object):
     def output(self,Stress_original,delta,Correct_strain,Stress):
         with open("DATA",'a') as ff:
             ff.write("delta %6.4f\t Sxx %10.8f\n"%(delta,Stress_original[0]))
-            print >> ff, "Correct_strain"
-            print >> ff, Correct_strain
-            print >> ff, "Stress original"
-            print >> ff, Stress_original
-            print >> ff, "calculated Stress"
-            print >> ff, Stress
+            print("Correct_strain", file=ff)
+            print(Correct_strain, file=ff)
+            print("Stress original", file=ff)
+            print(Stress_original, file=ff)
+            print("calculated Stress", file=ff)
+            print(Stress, file=ff)
             os.system("cp POSCAR POSCAR%4.3f"%(delta))
             ff.close()
         return
@@ -122,8 +122,8 @@ class VAtension(object):
         Base_vector[1,1], Base_vector[2,2] = Base_vector[1,1] * np.sqrt(2), Base_vector[2,2] * np.sqrt(2)
         Transformed_strain = original_strain
         Transposed_Base =  Transformed_strain * Base_vector
-        print "Transformed Strain ", original_strain
-        print "transformed Base" , Transposed_Base
+        print("Transformed Strain ", original_strain)
+        print("transformed Base" , Transposed_Base)
         with open("poscar",mode='w') as fout:
             fout.write("bcc\n")
             fout.write("%f\n"%(lattice_constant))
@@ -210,12 +210,12 @@ class loop_calculate(object):
                         Strain = M.Sij * Stress * 0.07
                         Correct_strain = M.updateStrain(Strain,Correct_strain)
                         with open("moniter.txt",'a') as fout:
-                            print >> fout, "M.Sij", M.Sij
-                            print >> fout, "loop time",  count
-                            print >> fout, "StressPrime", StressPrime
-                            print >> fout, "original Stress", Stress_original
-                            print >> fout, "Correct_strain", Correct_strain
-                            print >> fout, "transformed Strain", Transformed_strain
+                            print("M.Sij", M.Sij, file=fout)
+                            print("loop time",  count, file=fout)
+                            print("StressPrime", StressPrime, file=fout)
+                            print("original Stress", Stress_original, file=fout)
+                            print("Correct_strain", Correct_strain, file=fout)
+                            print("transformed Strain", Transformed_strain, file=fout)
                             count += 1
                             fout.close()
         return

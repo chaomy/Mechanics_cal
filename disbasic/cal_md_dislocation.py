@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-19 16:24:36
+# @Last Modified time: 2018-03-20 11:27:18
 
 
 from optparse import OptionParser
@@ -22,38 +22,38 @@ from gb import cal_md_gb_hcp_dis
 import gn_pbs
 import gn_lmp_infile
 import atomman as am
-import cal_md_dislocation_hcp
-import cal_md_dislocation_bcc
-import cal_md_dislocation_fcc
+from . import cal_md_dislocation_hcp
+from . import cal_md_dislocation_bcc
+from . import cal_md_dislocation_fcc
+from . import cal_md_peierls_barrier
+from . import cal_md_dis_schmid
 
 
-class md_dislocation(gn_config.bcc, gn_config.fcc, gn_config.hcp,
+class md_dislocation(gn_config.gnStructure,
                      get_data.get_data, gn_pbs.gn_pbs,
                      Intro_vasp.vasp_change_box,
                      gn_lmp_infile.gn_md_infile,
+                     cal_md_peierls_barrier.cal_barrier,
                      cal_md_dislocation_hcp.md_dislocation_hcp,
                      cal_md_dislocation_bcc.md_dislocation_bcc,
                      cal_md_dislocation_fcc.md_dislocation_fcc,
                      cal_md_prec.md_prec,
-                     cal_md_gb_hcp_dis.gb_hcp_dis):
+                     cal_md_gb_hcp_dis.gb_hcp_dis,
+                     cal_md_dis_schmid.cal_bcc_schmid):
 
     def __init__(self, pot=md_pot_data.md_pot.mg_kim):
-        self.pot = pot
+        self.pot = self.load_data('../BASICS/pot.dat')
+        gn_config.gnStructure.__init__(self, self.pot)
         gn_pbs.gn_pbs.__init__(self)
         Intro_vasp.vasp_change_box.__init__(self, self.pot)
         gn_lmp_infile.gn_md_infile.__init__(self, self.pot)
         cal_md_prec.md_prec.__init__(self)
         cal_md_gb_hcp_dis.gb_hcp_dis.__init__(self)
-        if self.pot['structure'] in 'bcc':
-            gn_config.bcc.__init__(self, self.pot)
-            cal_md_dislocation_bcc.md_dislocation_bcc.__init__(self)
-        elif self.pot['structure'] in 'fcc':
-            gn_config.fcc.__init__(self, self.pot)
-            cal_md_dislocation_fcc.md_dislocation_fcc.__init__(self)
-        elif self.pot['structure'] in 'hcp':
-            gn_config.hcp.__init__(self, self.pot)
-            cal_md_dislocation_hcp.md_dislocation_hcp.__init__(self)
-        self.set_config_file_format('lmp')
+        cal_md_peierls_barrier.cal_barrier.__init__(self)
+        cal_md_dis_schmid.cal_bcc_schmid.__init__(self)
+        cal_md_dislocation_bcc.md_dislocation_bcc.__init__(self)
+        cal_md_dislocation_fcc.md_dislocation_fcc.__init__(self)
+        cal_md_dislocation_hcp.md_dislocation_hcp.__init__(self)
 
     def intro_kink_pair(self):
         e1 = 1. / 3. * np.array([1., 1., -2.])
@@ -98,13 +98,9 @@ class md_dislocation(gn_config.bcc, gn_config.fcc, gn_config.hcp,
         m = 11 * sizen
         t = 3
 
-        atoms = Cubic.BodyCenteredCubic(directions=[[e1[0], e1[1], e1[2]],
+        atoms = self.set_bcc_convention(directions=[[e1[0], e1[1], e1[2]],
                                                     [e2[0], e2[1], e2[2]],
-                                                    [e3[0], e3[1], e3[2]]],
-                                        latticeconstant=self.pot['lattice'],
-                                        size=(n, m, t),
-                                        symbol=self.pot["element"],
-                                        pbc=(1, 1, 1))
+                                                    [e3[0], e3[1], e3[2]]], size=(n, m, t))
 
         # perfect positions
         p = self.pot['lattice'] * self.bccneigh
@@ -121,7 +117,7 @@ class md_dislocation(gn_config.bcc, gn_config.fcc, gn_config.hcp,
         system.nlist(self.pot['lattice'] * r)
         nye_rlt = am.defect.nye_tensor(system, p, axes=unit_cell)
 
-        print np.max(nye_rlt['strain'][:])
+        print(np.max(nye_rlt['strain'][:]))
         # for key, value in nye_rlt.iteritems():
         #     print key, value
         #     system.atoms_prop(key=key, value=value)
@@ -149,12 +145,10 @@ class md_dislocation(gn_config.bcc, gn_config.fcc, gn_config.hcp,
         n = 7 * sizen
         m = 11 * sizen
         t = 1
-        atoms = Cubic.BodyCenteredCubic(directions=[[e1[0], e1[1], e1[2]],
+        atoms = self.set_bcc_convention(directions=[[e1[0], e1[1], e1[2]],
                                                     [e2[0], e2[1], e2[2]],
-                                                    [e3[0], e3[1], e3[2]]],
-                                        latticeconstant=self.pot['lattice'],
-                                        size=(n, t, m),
-                                        symbol=self.pot["element"])
+                                                    [e3[0], e3[1], e3[2]]], size=(n, t, m))
+
         atoms = self.cut_half_atoms_new(atoms, "cutz")
         supercell = atoms.get_cell()
         strain = np.mat([[1.0, 0.0, 0.0],
@@ -185,7 +179,7 @@ class md_dislocation(gn_config.bcc, gn_config.fcc, gn_config.hcp,
         v2 = 0.5 * n * e1 + m * e2 + (0.5 - 1. / (6 * m)) * e3
         v3 = e3
 
-        print v1, v2, v3
+        print(v1, v2, v3)
 
         v1 = np.round(v1, decimals=0)
         v2 = np.round(v2, decimals=0)
@@ -193,7 +187,7 @@ class md_dislocation(gn_config.bcc, gn_config.fcc, gn_config.hcp,
 
         self.set_lattce_constant(self.pot['lattice'])
         self.set_element('Nb')
-        print v1, v2, v3
+        print(v1, v2, v3)
 
         atoms = Cubic.BodyCenteredCubic(directions=[v1, v2, v3],
                                         latticeconstant=3.0,
@@ -260,7 +254,8 @@ if __name__ == "__main__":
                   'thermo': drv.cal_thermo,
                   'prec': drv.make_prec,
                   'onlyprec': drv.make_only_prec,
-                  'gb': drv.make_gb}
+                  'gb': drv.make_gb,
+                  'dipole': drv.dipole_peierls_barrier}
 
     if options.fargs is not None:
         dispatcher[options.mtype.lower()](options.fargs)

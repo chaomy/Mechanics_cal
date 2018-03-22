@@ -82,7 +82,7 @@ class cal_md_lattice(gn_config.bcc,
         da2 = np.loadtxt("ENG.log")
 
         idx = da2[:, 0].argsort()
-        print da2[:, 1][idx]
+        print(da2[:, 1][idx])
 
         self.set_111plt()
         self.ax.plot(dat[:, 0], dat[:, 3] - min(dat[:, 3]))

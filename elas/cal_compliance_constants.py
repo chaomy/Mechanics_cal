@@ -25,10 +25,10 @@ class cal_para(object):
             Possion_ratio.append(float(Raw[9 * i + 6]))
             Shear_Modulus.append(float(Raw[9 * i + 7]))
             A.append(float(Raw[9 * i + 8]))
-        print Element_name,
-        print C11
-        print C44
-        print C12  # Youngs_Modulus, Shear_Modulus, Possion_ratio, A
+        print(Element_name, end=' ')
+        print(C11)
+        print(C44)
+        print(C12)  # Youngs_Modulus, Shear_Modulus, Possion_ratio, A
         c11 = arange(len(Element_name), dtype="float")
         c12 = arange(len(Element_name), dtype="float")
         c44 = arange(len(Element_name), dtype="float")
@@ -49,11 +49,11 @@ class cal_para(object):
                 2, 1] = c12[i], c12[i], c12[i], c12[i], c12[i], c12[i]
             M[3, 3], M[4, 4], M[5, 5] = c44[i], c44[i], c44[i]
             N = inv(M)
-            print N
+            print(N)
             s11[i] = N[0, 0]  # divide(1,float(Youngs_Modulus[i]))
             s12[i] = N[0, 1]  # divide((-Possion_ratio[i]),Youngs_Modulus[i])
             s44[i] = N[4, 4]  # divide(1.,float(Shear_Modulus[i]))
-            print s11[i], s12[i], s44[i]
+            print(s11[i], s12[i], s44[i])
         fout = open("cij_sij.txt", 'w')
         fout.write(
             "Element  \t c11   \t  c12  \t  c44  \t  s11  \t  s12  \t  s44 \n")
@@ -71,11 +71,11 @@ class cal_para(object):
         M[1, 2], M[2, 0], M[2, 1] = c12, c12, c12
         M[3, 3], M[4, 4], M[5, 5] = c44, c44, c44
         N = inv(M)
-        print N
+        print(N)
         s11 = N[0, 0]  # divide(1,float(Youngs_Modulus[i]))
         s12 = N[0, 1]  # divide((-Possion_ratio[i]),Youngs_Modulus[i])
         s44 = N[4, 4]  # divide(1.,float(Shear_Modulus[i]))
-        print s11, s12, s44
+        print(s11, s12, s44)
         return s11, s12, s44
 
 

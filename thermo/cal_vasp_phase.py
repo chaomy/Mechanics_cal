@@ -140,7 +140,7 @@ class vasp_inters(gn_config.bcc,
                         b.append(diff)
                         a.append((diff > crit_dix))
 
-            print np.min(np.array(b))
+            print(np.min(np.array(b)))
             if (all(np.array(a)) is True):
                 break
 
@@ -195,7 +195,7 @@ class vasp_inters(gn_config.bcc,
             pcub.append(-1 * pcub[i])
 
         atoms = ase.Atoms(cell=supercell, pbc=[1, 1, 1])
-        print atoms.get_cell()
+        print(atoms.get_cell())
 
         atom_num = 210
         m_pi = np.pi
@@ -261,7 +261,7 @@ class vasp_inters(gn_config.bcc,
                     ####  break the while loop ####
 
             atoms.append(ase.Atom(symbol="Nb", position=pos_new))
-            print len(atoms)
+            print(len(atoms))
         self.write_poscar(atoms)
         self.prepare_dislocation_vasp_infiles(dirname)
         return

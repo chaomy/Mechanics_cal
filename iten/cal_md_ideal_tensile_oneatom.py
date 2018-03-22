@@ -63,7 +63,7 @@ class cal_bcc_ideal_tensile(get_data.get_data,
         os.system("mpirun vasp > vasp.log")
         (engy, stress, vol) = self.vasp_energy_stress_vol()
         self.stress = stress.flatten()
-        print engy, self.stress, vol
+        print(engy, self.stress, vol)
         self.recordstrain(delta, [x[0], x[0]], engy)
         return engy
 
@@ -90,7 +90,7 @@ class cal_bcc_ideal_tensile(get_data.get_data,
         self.gn_primitive_lmps(new_strain, 'vasp')
         os.system("mpirun vasp > vasp.log")
         (engy, stress, vol) = self.vasp_energy_stress_vol()
-        print engy, stress, vol
+        print(engy, stress, vol)
         self.stress = stress.flatten()
         self.recordstrain(delta, x, engy)
         return engy
@@ -142,7 +142,7 @@ class cal_bcc_ideal_tensile(get_data.get_data,
             data = np.loadtxt("restart.txt")
             delta = data[0]
             x0 = data[2:4]
-            print delta
+            print(delta)
         else:
             data = np.loadtxt("strain.txt")
             delta = data
@@ -169,7 +169,7 @@ class cal_bcc_ideal_tensile(get_data.get_data,
                                options={'disp': True})
                 data[i][2], data[i][3] = res.x, res.x
             x0 = res.x
-            print res
+            print(res)
             data[i][0] = delta
             data[i][1] = res.fun
             data[i][4:] = self.stress
@@ -193,7 +193,7 @@ class cal_bcc_ideal_tensile(get_data.get_data,
         data[0] = delta
         data[1] = res.fun
         data[-6:] = self.stress
-        print res
+        print(res)
         np.savetxt("iten.txt", data)
 
     def set_pbs(self, dirname, delta, opt='tp'):
@@ -236,7 +236,7 @@ class cal_bcc_ideal_tensile(get_data.get_data,
         # delta, engy, x, stress
         for i in range(npts):
             dirname = dirlist[i]
-            print dirname
+            print(dirname)
             if os.path.isfile('{}/iten.txt'.format(dirname)):
                 data[i, :] = np.loadtxt('{}/iten.txt'.format(dirname))
         np.savetxt("iten.txt", data)

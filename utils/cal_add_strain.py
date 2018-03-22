@@ -8,7 +8,7 @@
 
 
 import numpy as np
-import cal_add_strain_otho
+from . import cal_add_strain_otho
 
 
 class cal_add_strain(cal_add_strain_otho.strain_otho):

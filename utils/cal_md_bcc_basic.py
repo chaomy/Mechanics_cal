@@ -4,7 +4,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-10 02:07:56
+# @Last Modified time: 2018-03-20 12:52:22
 
 
 from optparse import OptionParser
@@ -25,7 +25,6 @@ import gn_lmp_infile
 import gn_pbs
 
 
-
 class cal_md_bcc_basic(gn_config.hcp,
                        gn_config.bcc,
                        gn_config.fcc,
@@ -34,13 +33,10 @@ class cal_md_bcc_basic(gn_config.hcp,
                        gn_lmp_infile.gn_md_infile,
                        plt_drv.plt_drv):
 
-    def __init__(self, pot=None):
-        if pot is None:
-            pot = md_pot_data.md_pot.Nb_my
+    def __init__(self, pot=md_pot_data.md_pot.Nb_meam):
         self.pot = pot
         gn_lmp_infile.gn_md_infile.__init__(self, inpot=self.pot)
         plt_drv.plt_drv.__init__(self)
-        return
 
     def loop_shear(self):
         for dim in range(20, 100, 10):
@@ -75,7 +71,6 @@ class cal_md_bcc_basic(gn_config.hcp,
                 os.system("mpirun -n 4 lmp_mpi -i in.minimize")
                 os.system("mv  bcc.dump  %s/dump_%03d" % (dirname, i))
             os.system("mv out.dat  out.dat.%03d" % (dim))
-        return
 
     def cal_lattice(self, potname='pot.dat'):
         pot = md_pot_data.md_pot.Nb_adp
@@ -89,14 +84,13 @@ class cal_md_bcc_basic(gn_config.hcp,
         data = np.loadtxt("out.txt")
         pot['ahcp'], pot['chcp'], pot['ehcp'] = data[0], data[1], data[2]
 
-        print 'fcc', pot['efcc'] - pot['ebcc']
-        print 'hcp', pot['ehcp'] - pot['ebcc']
-        print 'latbcc', pot['latbcc']
-        print 'latfcc', pot['latfcc']
+        print('fcc', pot['efcc'] - pot['ebcc'])
+        print('hcp', pot['ehcp'] - pot['ebcc'])
+        print('latbcc', pot['latbcc'])
+        print('latfcc', pot['latfcc'])
         pot['lattice'] = pot['latbcc']
         self.pot = pot
         self.dump_data(potname, pot)
-        return
 
     def loop_rcut_engy(self):
         npts = 16
@@ -104,15 +98,14 @@ class cal_md_bcc_basic(gn_config.hcp,
         for i in range(npts):
             rcut = 5.1500 + 0.01 * i
             dirname = 'dir-%5.4f' % (rcut)
-            print dirname
+            print(dirname)
             os.system("cp engy1000/{}/dummy.lamm*  .".format(dirname))
             potname = 'pot_%5.4f_lat' % (rcut)
             self.cal_lattice(potname)
             data[i, 0] = rcut
             data[i, 1] = self.pot['efcc'] - self.pot['ebcc']
-        print data
+        print(data)
         np.savetxt('rcut_ebcc2fcc.txt', data)
-        return
 
     def plt_rcut_energy(self):
         data = np.loadtxt('rcut_ebcc2fcc.txt')
@@ -127,14 +120,6 @@ class cal_md_bcc_basic(gn_config.hcp,
         self.ax.set_ylabel('fcc - bcc (meV / atom)',
                            {'fontsize': self.myfontsize})
         self.fig.savefig('rcut_ebcc2fcc.png', **self.figsave)
-        return
-
-    def cal_delta_energy(self):
-        pot = md_pot_data.md_pot.Nb_adp
-        print pot['efcc'] - pot['ebcc']
-        print pot['ehcp'] - pot['ebcc']
-        return
-
 
 if __name__ == '__main__':
     usage = "usage:%prog [options] arg1 [options] arg2"
@@ -151,9 +136,6 @@ if __name__ == '__main__':
 
     if options.mtype.lower() == 'shear':
         drv.loop_shear()
-
-    if options.mtype.lower() == 'phasetrans':
-        drv.cal_delta_energy()
 
     if options.mtype.lower() == 'looprcut':
         drv.loop_rcut_engy()

@@ -6,7 +6,7 @@
 # @Last Modified time: 2017-08-30 14:47:28
 
 from optparse import OptionParser
-import cal_md_crack_ini
+from . import cal_md_crack_ini
 
 
 if __name__ == "__main__":

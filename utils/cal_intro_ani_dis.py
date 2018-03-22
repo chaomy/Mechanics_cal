@@ -66,7 +66,7 @@ class cal_intro_ani_dis(object):
 
         disp = stroh.displacement(pos_test)
 
-        print "displacement =", uc.get_in_units(disp, 'angstrom'), 'angstrom'
+        print("displacement =", uc.get_in_units(disp, 'angstrom'), 'angstrom')
 
         # monopole system
         box = am.Box(a=alat, b=alat, c=alat)

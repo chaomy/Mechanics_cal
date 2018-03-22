@@ -27,7 +27,7 @@ class cal_cut_cell(object):
             if (atom.position[gp_n] < y_below):
                 atom.symbol = 'Nb'
                 ndn += 1
-        print("up = ", nup, "dn = ", ndn)
+        print(("up = ", nup, "dn = ", ndn))
         return atoms
 
     def make_cubic(self, opt, atoms, *args):
@@ -93,11 +93,11 @@ class cal_cut_cell(object):
     def cut_z_normal_top_atoms(self, atoms):
         cell = atoms.get_cell()
         # cut along y
-        print cell
+        print(cell)
         y_above = 7. / 8. * cell[2, 2]  # edge
         y_below = 1. / 8. * cell[2, 2]  # edge
 
-        print y_above, y_below
+        print(y_above, y_below)
 
         index_list = []
 
@@ -120,7 +120,7 @@ class cal_cut_cell(object):
                 index_list.append(atom.index)
 
         if index_list is not []:
-            print "delete %s atoms" % (len(index_list))
+            print("delete %s atoms" % (len(index_list)))
             # del atoms[index_list]
         return atoms
 
@@ -140,7 +140,7 @@ class cal_cut_cell(object):
             if (atom.position[bdir] < x_crit):
                 index_list.append(atom.index)
         if index_list is not []:
-            print "delete %s atoms" % (len(index_list))
+            print("delete %s atoms" % (len(index_list)))
             del atoms[index_list]
         return atoms
 
@@ -166,7 +166,7 @@ class cal_cut_cell(object):
 
         index_list = []
         # delele half atoms
-        print yy_max
+        print(yy_max)
         inv_cell_t = np.linalg.inv(cell.transpose())
 
         for i in range(len(atoms)):
@@ -176,14 +176,14 @@ class cal_cut_cell(object):
             if b >= y_max:
                 index_list.append(atom.index)
 
-        print len(index_list)
+        print(len(index_list))
         del atoms[index_list]
 
         # change the supercell
         cell[cutIndx, :] = cell[cutIndx, :] * 0.5
 
         atoms.set_cell(cell)
-        print len(atoms.get_positions())
+        print(len(atoms.get_positions()))
         return atoms
 
     def cut_half_atoms(self, atoms):
@@ -191,14 +191,14 @@ class cal_cut_cell(object):
         positions = atoms.get_positions()
         scale_positions = atoms.get_scaled_positions()
 
-        print np.max(scale_positions[:, 0])
+        print(np.max(scale_positions[:, 0]))
         yy_max = 0.5 * np.max(positions[:, 1])
         y_max = 0.5 * np.max(scale_positions[:, 1])
 
         index_list = []
 
         # delele half atoms
-        print yy_max
+        print(yy_max)
         inv_cell_t = np.linalg.inv(cell.transpose())
 
         for i in range(len(atoms)):
@@ -208,12 +208,12 @@ class cal_cut_cell(object):
             if b > y_max:
                 index_list.append(atom.index)
 
-        print len(index_list)
+        print(len(index_list))
 
         del atoms[index_list]
 
         # change the supercell
         cell[1, :] = cell[1, :] * 0.4999
         atoms.set_cell(cell)
-        print len(atoms.get_positions())
+        print(len(atoms.get_positions()))
         return atoms

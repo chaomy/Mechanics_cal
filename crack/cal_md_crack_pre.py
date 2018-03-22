@@ -66,7 +66,7 @@ class md_crack_pre(object):
                      u2 * q1 * smsqrt(cos(theta) - u1 * sin(theta)))
                 ux = coeff * ux.real
                 uy = -coeff * uy.real
-            print ux, uy
+            print(ux, uy)
             x[i] += ux
             y[i] += uy
         return (x, y)
@@ -130,13 +130,13 @@ class md_crack_pre(object):
         size = comm.Get_size()
         if rank == 0:
             local_n = np.array([natoms / size])
-            print "in rank 0  x and y size", len(x), len(y)
+            print("in rank 0  x and y size", len(x), len(y))
         else:
             local_n = np.array([0])
             x, y = None, None
 
         comm.Bcast(local_n, root=0)
-        print "local_n of %d is " % (rank), local_n
+        print("local_n of %d is " % (rank), local_n)
         if rank == 0:
             if (len(x) % size == 0):
                 check = True
@@ -146,17 +146,17 @@ class md_crack_pre(object):
                 xrem, yrem = x[body:], y[body:]
                 x, y = x[0:body], y[0:body]
                 xrem, yrem = np.array(xrem), np.array(yrem)
-            print "Now in rank 0  x  and y size", len(x), len(y)
+            print("Now in rank 0  x  and y size", len(x), len(y))
         else:
-            print "I am rank %d" % (rank)
+            print("I am rank %d" % (rank))
         xc, yc = 0, 0
         x_local = np.zeros(local_n)
         y_local = np.zeros(local_n)
 
         if rank == 0:
-            print rank, len(x_local), len(y_local), len(x), len(y)
+            print(rank, len(x_local), len(y_local), len(x), len(y))
         if rank != 0:
-            print rank, len(x_local), len(y_local), x, y
+            print(rank, len(x_local), len(y_local), x, y)
 
         comm.Scatter(x, x_local, root=0)
         comm.Scatter(y, y_local, root=0)

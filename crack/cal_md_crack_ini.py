@@ -8,9 +8,9 @@
 
 
 import md_pot_data
-import cal_md_crack_uti
-import cal_md_crack_pre
-import cal_md_crack_run
+from . import cal_md_crack_uti
+from . import cal_md_crack_pre
+from . import cal_md_crack_run
 import gn_config
 from math import sqrt
 from math import pi

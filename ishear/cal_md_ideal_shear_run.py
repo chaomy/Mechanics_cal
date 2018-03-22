@@ -17,7 +17,7 @@ class cal_bcc_ideal_shear_run(object):
         (delta, x0) = self.load_input_params()
         data = np.zeros(7)
         res = minimize(self.runqe, x0, delta, tol=1e-3, method='Nelder-Mead')
-        print res
+        print(res)
         data[0], data[1], data[2:] = delta, res.fun, res.x
         np.savetxt("ishear.txt", data)
 
@@ -26,7 +26,7 @@ class cal_bcc_ideal_shear_run(object):
         (delta, x0) = self.load_input_params()
         data = np.zeros(7)
         res = minimize(self.runvasp, x0, delta, tol=1e-3, method='Nelder-Mead')
-        print res
+        print(res)
         data[0], data[1], data[2:] = delta, res.fun, res.x
         np.savetxt("ishear.txt", data)
 
@@ -39,7 +39,7 @@ class cal_bcc_ideal_shear_run(object):
             res = minimize(self.runlmp, x0, delta,
                            tol=1e-3, method='Nelder-Mead')
             x0 = res.x
-            print res
+            print(res)
             data[i][0], data[i][1], data[i][2:] = (delta), res.fun, res.x
         np.savetxt("ishear.txt", data)
 
@@ -83,7 +83,7 @@ class cal_bcc_ideal_shear_run(object):
         new_strain = basis.transpose() * strain * basis
         self.gn_primitive_lmps(new_strain, 'vasp')
         os.system("mpirun vasp > vasp.log")
-        print "cnt = ", self.cnt
+        print("cnt = ", self.cnt)
         (engy, stress, vol) = self.vasp_energy_stress_vol()
         self.recordstrain(delta, x, engy)
         os.system("mv OUTCAR outcar-{:03d}".format(self.cnt))

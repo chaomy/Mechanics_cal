@@ -20,7 +20,7 @@ import stroh_solve
 import ase.io
 import tool_elastic_constants
 import ase.lattice
-import cal_md_dislocation
+from . import cal_md_dislocation
 import gn_config
 import Intro_vasp
 import cal_intro_iso_dis
@@ -107,7 +107,7 @@ class cal_dis_edge(gn_config.bcc,
     def calang(self, a, b):
         x = dot(a, b) / (norm(a) * norm(b))
         rotangle = np.rad2deg(np.arccos(x))
-        print rotangle
+        print(rotangle)
         return rotangle
 
 

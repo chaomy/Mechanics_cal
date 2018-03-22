@@ -29,8 +29,8 @@ def get_subdir(dirs):
 
 
 dirlist = [x for x in os.listdir('.') if x.startswith(dirtemplate)]
-print "the list \n"
-print dirlist
+print("the list \n")
+print(dirlist)
 dirlist = get_subdir(dirlist)
 
 
@@ -41,14 +41,14 @@ for dir in dirlist:
     except IOError:
         msublist.append(dir)
     else:
-        print "There \n"
-        print lammpsfile
+        print("There \n")
+        print(lammpsfile)
         if os.stat(lammpsfile).st_size == 0:
             msublist.append(dir)
 
 
 # njobsrunning=qc.checkNQueue('frolov2').read().number
-print msublist
+print(msublist)
 
 # np=float(os.environ['SLURM_NPROCS'])
 # pid=float(os.environ['SLURM_PROCID'])
@@ -62,7 +62,7 @@ for j in range(len(msublist)):
     p1 = Popen(['lmp_mpi', '-i', 'gb4.in_final'])
     p1.wait()
     os.chdir(base_path)
-    print "New j we are looping", j, msublist[j]
+    print("New j we are looping", j, msublist[j])
 
 
 os.chdir(base_path)

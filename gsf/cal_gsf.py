@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-18 10:11:03
+# @Last Modified time: 2018-03-20 13:52:58
 
 
 import gn_lmp_infile
@@ -13,11 +13,8 @@ import gn_qe_inputs
 import gsf_data
 import gn_config
 import get_data
-import gn_kpoints
-import gn_incar
 import gn_pbs
 from utils import Intro_vasp
-from utils import cal_sub
 from gsf import cal_qe_gsf
 from gsf import cal_qe_gsf_pos
 from gsf import cal_qe_gsf_pre
@@ -44,14 +41,11 @@ class othoBccp110Factory(otho.SimpleOrthorhombicFactory):
 othoBccp110 = othoBccp110Factory()
 
 
-class cal_gsf(gn_config.bcc,
+class cal_gsf(gn_config.gnStructure,
               get_data.get_data,
-              gn_kpoints.gn_kpoints,
-              gn_incar.gn_incar,
               gn_pbs.gn_pbs,
               plt_drv.plt_drv,
               gn_qe_inputs.gn_qe_infile,
-              cal_sub.subjobs,
               cal_qe_gsf_pos.cal_qe_gsf_pos,
               cal_qe_gsf_pre.cal_qe_gsf_pre,
               cal_qe_gsf.cal_qe_gsf,
@@ -65,14 +59,11 @@ class cal_gsf(gn_config.bcc,
         self.mgsf = mgsf
         self.sample_gsf_num = 21
         self.disp_delta = 1. / (self.sample_gsf_num - 1)
-        cal_sub.subjobs.__init__(self)
-        gn_kpoints.gn_kpoints.__init__(self)
         get_data.get_data.__init__(self)
-        gn_incar.gn_incar.__init__(self)
         gn_pbs.gn_pbs.__init__(self)
         plt_drv.plt_drv.__init__(self)
         # config
-        gn_config.bcc.__init__(self, self.pot)
+        gn_config.gnStructure.__init__(self, self.pot)
         Intro_vasp.vasp_change_box.__init__(self, self.pot)
         # lmp
         gn_lmp_infile.gn_md_infile.__init__(self, self.pot)
@@ -98,8 +89,7 @@ class cal_gsf(gn_config.bcc,
     def gn_gsf_atoms(self):
         mgsf = self.mgsf
         atoms = self.set_bcc_convention(
-            in_direction=gsf_data.gsfbase[mgsf],
-            in_size=gsf_data.gsfsize[mgsf])
+            gsf_data.gsfbase[mgsf], gsf_data.gsfsize[mgsf])
         for i in range(gsf_data.gsfpopn[mgsf]):
             atoms.pop()
         return atoms
@@ -107,8 +97,8 @@ class cal_gsf(gn_config.bcc,
     def gn_gsf_one_layer(self, opt="211"):
         if opt in ["211"]:  # 211 plane
             atoms = self.set_bcc_convention(
-                in_direction=gsf_data.gsfbase['x111z112'],
-                in_size=(1, 1, 1))
+                gsf_data.gsfbase['x111z112'],
+                (1, 1, 1))
         if opt in ["110"]:  # 110 plane
             atoms = othoBccp110(latticeconstant=(self.pot['latbcc'] * sqrt(2),
                                                  self.pot['latbcc'],
@@ -143,10 +133,7 @@ class cal_gsf(gn_config.bcc,
                 ase.io.write("POSCAR", images=trans_atoms, format="vasp")
                 os.system("cp POSCAR pos{:03}".format(cn))
                 os.system("mv POSCAR {}".format(mdir))
-                os.system("cp va.pbs {}".format(mdir))
-                os.system("cp KPOINTS {}".format(mdir))
-                os.system("cp INCAR {}".format(mdir))
-                os.system("cp POTCAR {}".format(mdir))
+                os.system("cp va.pbs KPOINTS INCAR POTCAR {}".format(mdir))
                 cn += 1
 
     def set_pbs(self, dirname, opt='qe'):
@@ -177,7 +164,7 @@ class cal_gsf(gn_config.bcc,
         data = np.loadtxt('gsf.dat')
         gsf = (data[:, 3] - data[-1, 3]) / (2 * data[:, 2])
         usf = np.max(gsf)
-        print("usf = {} eV/A^2".format(usf))
+        print(("usf = {} eV/A^2".format(usf)))
 
     def plt_gsf(self):
         dftgsfNb111z110 = [0.0, 0.0055, 0.0183, 0.0292, 0.0389, 0.0442, 0.0389,

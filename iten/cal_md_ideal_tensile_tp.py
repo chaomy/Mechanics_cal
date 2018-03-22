@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-18 10:18:28
+# @Last Modified time: 2018-03-20 14:03:08
 
 
 import os
@@ -17,7 +17,7 @@ import get_data
 from scipy.optimize import minimize
 from optparse import OptionParser
 from md_pot_data import fluxdirs
-import cal_md_ideal_tensile_pre
+from . import cal_md_ideal_tensile_pre
 import md_pot_data
 from glob import glob
 
@@ -25,24 +25,19 @@ from glob import glob
 class cal_bcc_ideal_tensile_tp(get_data.get_data,
                                cal_md_ideal_tensile_pre.iten_pre,
                                gn_pbs.gn_pbs,
-                               gn_config.bcc):
+                               gn_config.gnStructure):
 
     def __init__(self, pot=md_pot_data.va_pot.Nb_pbe):
-        self.pot = pot
         self.pot = self.load_data('../BASICS/pot.dat')
         gn_pbs.gn_pbs.__init__(self)
         get_data.get_data.__init__(self)
-        gn_config.bcc.__init__(self, self.pot)
-        cal_md_ideal_tensile_pre.iten_pre.__init__(self, self.pot)
+        gn_config.gnStructure.__init__(self, self.pot)
+        cal_md_ideal_tensile_pre.iten_pre.__init__(self)
         self.alat = self.pot['lattice']
         self.range = (0, 13)
         self.npts = self.range[1] - self.range[0]
         self.delta = 0.02
-        e1 = [1., 0., 0.]
-        e2 = [0., 1., 0.]
-        e3 = [0., 0., 1.]
-        self.basis = np.mat([e1, e2, e3])
-        self.stress = None
+        self.basis = np.mat(np.identity(3))
 
     def loop_tensile_lmp(self):
         x0 = 0.91
@@ -55,7 +50,7 @@ class cal_bcc_ideal_tensile_tp(get_data.get_data,
             res = minimize(self.runlmp, x0, delta, method='Nelder-Mead',
                            options={'fatol': 5e-4, 'disp': True})
             x0 = res.x
-            print res
+            print(res)
             data[i][0] = delta
             data[i][1] = res.fun
             data[i][2:2 + 2] = res.x
@@ -102,7 +97,7 @@ class cal_bcc_ideal_tensile_tp(get_data.get_data,
         os.system("mpirun vasp > vasp.log")
         (engy, stress, vol) = self.vasp_energy_stress_vol()
         self.stress = stress.flatten()
-        print engy, self.stress
+        print(engy, self.stress)
         return engy
 
     def runlmp(self, x, delta):
@@ -118,23 +113,14 @@ class cal_bcc_ideal_tensile_tp(get_data.get_data,
         self.stress = raw[1:]
         return engy
 
-    def gn_convention_lmps(self,
-                           strain=np.mat(np.identity(3)),
+    def gn_convention_lmps(self, strain=np.mat(np.identity(3)),
                            tag='lmp'):
         alat = self.alat
         bas = np.mat(np.identity(3))
-        ##########################################################
         # very important (vasp add strain is basis right time strain)
-        ##########################################################
         va_bas = bas * strain
         cell = alat * va_bas
-        atoms = ase.lattice.cubic.BodyCenteredCubic(directions=[[1., 0., 0.],
-                                                                [0., 1., 0.],
-                                                                [0., 0., 1.]],
-                                                    latticeconstant=self.alat,
-                                                    size=(1, 1, 1),
-                                                    symbol=self.pot['element'],
-                                                    pbc=(1, 1, 1))
+        atoms = self.set_bcc_convention()
         pos = np.mat([[0.0, 0.0, 0.0], [0.5, 0.5, 0.5]]) * cell
         atoms.set_cell(cell)
         atoms.set_positions(pos)
@@ -148,15 +134,15 @@ class cal_bcc_ideal_tensile_tp(get_data.get_data,
         if given is True:
             delta = data[0]
             x0 = data[-2:]
-            print delta
-            print x0
+            print(delta)
+            print(x0)
         else:
             delta = data
             x0 = np.array([1., 1.])
         data = np.zeros(4)
         res = minimize(self.runvasp, x0, delta, method='Nelder-Mead',
                        options={'fatol': 5e-4, 'disp': True})
-        print res
+        print(res)
         data[0] = delta
         data[1] = res.fun
         data[2:] = res.x
@@ -201,7 +187,7 @@ class cal_bcc_ideal_tensile_tp(get_data.get_data,
         lat = 3.322404
         for i in range(npts):
             mdir = "dir-{:4.3f}".format(0.01 * i)
-            print mdir
+            print(mdir)
             os.chdir(mdir)
             (engy, stress, vol) = self.vasp_energy_stress_vol()
             atoms = ase.io.read('CONTCAR', format='vasp')
@@ -219,7 +205,7 @@ class cal_bcc_ideal_tensile_tp(get_data.get_data,
             file = flist[i]
             strain = float(file[-5:])
             (engy, vol, stress) = self.qe_get_energy_stress(file)
-            print stress
+            print(stress)
             data[i, 0] = strain
             data[i, 1] = engy / 4.
             data[i, 4], data[i, 5], data[i, 6] = \
