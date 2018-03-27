@@ -4,14 +4,12 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-24 16:57:00
+# @Last Modified time: 2018-03-27 16:15:43
 
 
 import os
 import ase
-import shutil
 import numpy as np
-import ase.lattice.cubic as Cubic
 import md_pot_data
 import gn_config
 import get_data
@@ -22,12 +20,12 @@ from optparse import OptionParser
 from utils import Intro_vasp
 from prec import cal_md_prec
 from gb import cal_md_gb_hcp_dis
-import cal_md_dislocation_hcp
-import cal_md_dislocation_bcc
-import cal_md_dislocation_fcc
-import cal_md_peierls_barrier
-import cal_md_dis_dipole
-import cal_md_dis_schmid
+from .cal_md_dislocation_hcp import md_dislocation_hcp
+from .cal_md_dislocation_bcc import md_dislocation_bcc
+from .cal_md_dislocation_fcc import md_dislocation_fcc
+from .cal_md_peierls_barrier import cal_barrier
+from .cal_md_dis_dipole import cal_dis_dipole
+from .cal_md_dis_schmid import cal_bcc_schmid
 import plt_drv
 
 
@@ -36,14 +34,14 @@ class md_dislocation(gn_config.gnStructure,
                      plt_drv.plt_drv,
                      Intro_vasp.vasp_change_box,
                      gn_lmp_infile.gn_md_infile,
-                     cal_md_peierls_barrier.cal_barrier,
-                     cal_md_dislocation_hcp.md_dislocation_hcp,
-                     cal_md_dislocation_bcc.md_dislocation_bcc,
-                     cal_md_dislocation_fcc.md_dislocation_fcc,
+                     cal_barrier,
+                     md_dislocation_hcp,
+                     md_dislocation_bcc,
+                     md_dislocation_fcc,
                      cal_md_prec.md_prec,
-                     cal_md_dis_dipole.cal_dis_dipole,
+                     cal_dis_dipole,
                      cal_md_gb_hcp_dis.gb_hcp_dis,
-                     cal_md_dis_schmid.cal_bcc_schmid):
+                     cal_bcc_schmid):
 
     def __init__(self, pot=md_pot_data.md_pot.mg_kim):
         self.pot = self.load_data('../BASICS/pot.dat')
@@ -53,13 +51,13 @@ class md_dislocation(gn_config.gnStructure,
         Intro_vasp.vasp_change_box.__init__(self)
         cal_md_prec.md_prec.__init__(self)
         cal_md_gb_hcp_dis.gb_hcp_dis.__init__(self)
-        cal_md_peierls_barrier.cal_barrier.__init__(self)
+        cal_barrier.__init__(self)
         gn_lmp_infile.gn_md_infile.__init__(self)
-        cal_md_dis_schmid.cal_bcc_schmid.__init__(self)
-        cal_md_dis_dipole.cal_dis_dipole.__init__(self)
-        cal_md_dislocation_bcc.md_dislocation_bcc.__init__(self)
-        cal_md_dislocation_fcc.md_dislocation_fcc.__init__(self)
-        cal_md_dislocation_hcp.md_dislocation_hcp.__init__(self)
+        cal_bcc_schmid.__init__(self)
+        cal_dis_dipole.__init__(self)
+        md_dislocation_bcc.__init__(self)
+        md_dislocation_fcc.__init__(self)
+        md_dislocation_hcp.__init__(self)
 
     def intro_kink_pair(self):
         e1 = 1. / 3. * np.array([1., 1., -2.])

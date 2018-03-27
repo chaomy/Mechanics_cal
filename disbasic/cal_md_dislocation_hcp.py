@@ -4,14 +4,12 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-02-20 15:32:07
+# @Last Modified time: 2018-03-27 16:10:27
 
-import ase
 import numpy as np
 import atomman as am
 from utils import stroh_solve
 from numpy import sqrt
-import ase.lattice.cubic as cubic
 import ase.lattice.orthorhombic as otho
 
 

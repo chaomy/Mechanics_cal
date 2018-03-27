@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:11:49
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-27 16:02:40
+# @Last Modified time: 2018-03-27 16:58:42
 
 
 import numpy as np
@@ -207,8 +207,8 @@ class md_crack_uti(object):
 
     def get_scalarB(self, surfE):
         b11, b22, b12, b16, b26, b66 = self.get_plane_strain_bij()
-        tmp1 = np.sqrt(0.5 * b11 * b22)
-        tmp2 = np.sqrt(np.sqrt(b22 / b11) + (2 * b12 + b66) / (2 * b11))
+        # tmp1 = np.sqrt(0.5 * b11 * b22)
+        # tmp2 = np.sqrt(np.sqrt(b22 / b11) + (2 * b12 + b66) / (2 * b11))
         # BB = tmp1 * tmp2
         BB = np.sqrt(0.5 * b11 * b22 * (np.sqrt(b22 / b11) +
                                         (2 * b12 + b66) / (2 * b11)))

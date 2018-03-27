@@ -3,9 +3,10 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-21 12:08:03
+# @Last Modified time: 2018-03-27 16:22:07
 
-from numpy import loadtxt, min, array
+
+from numpy import loadtxt, array
 from itertools import cycle
 
 
@@ -22,8 +23,8 @@ class cal_md_dis_emit_plt(object):
         # self.ax.set_ylim(1.4, 2.8)
         # self.ax.set_xlim(-0.12, 7.45)
         data = loadtxt('vcaw_112_Ke.txt')
-        xlist = array([5.5, 5.75, 5.80, 5.85, 5.90, 5.95, 
-            6.0, 6.05, 6.10, 6.15, 6.20, 6.25, 6.5])
+        xlist = array([5.5, 5.75, 5.80, 5.85, 5.90, 5.95,
+                       6.0, 6.05, 6.10, 6.15, 6.20, 6.25, 6.5])
         self.ax.plot(xlist, data[:, 1],
                      label=r'K$_{1e}$ [11$\overline{1}$](2$\overline{1}$1)',
                      **next(self.keysiter))
@@ -105,4 +106,3 @@ class cal_md_dis_emit_plt(object):
         self.add_x_labels(xlabiter, self.ax)
         self.add_y_labels(ylabiter, self.ax)
         self.fig.savefig('Fig15_k1e2k1c.png', **self.figsave)
-        return

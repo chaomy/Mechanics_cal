@@ -3,22 +3,22 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-27 16:05:06
+# @Last Modified time: 2018-03-27 16:57:18
 
 
 from optparse import OptionParser
 from numpy import cos, sin, sqrt
 from collections import OrderedDict
 import axes_check
-import plt_drv
 import numpy as np
 import md_pot_data
 import tool_elastic_constants
+import plt_drv
 from utils import stroh_solve
 from disbasic import cal_md_dislocation
-from crack import cal_md_crack_ini
-from . import cal_md_dis_emit_curtin
-from . import cal_md_dis_emit_plt
+from crack.cal_md_crack_ini import md_crack_ini
+from cal_md_dis_emit_curtin import cal_dis_emit_curtin
+from cal_md_dis_emit_plt import cal_md_dis_emit_plt
 
 
 vcaw = OrderedDict([('WTa50', {'lat': 3.2502,
@@ -116,154 +116,22 @@ vcaw = OrderedDict([('WTa50', {'lat': 3.2502,
                     ])
 
 
-# vcaw = OrderedDict([('WTa50', {'lat':   3.2502,
-#                                'ugsf1': 1.5988,
-#                                'ugsf2': 1.2763,   # 2.3793
-#                                'c11': 343.7798,
-#                                'c12': 187.0044,
-#                                'c44': 91.8360,
-#                                'surf': 3.941229200}),
-#                     ('WTa25', {'lat': 3.207,
-#                                'ugsf1': 2.1815,
-#                                'ugsf2': 1.8587,   # 1.7912
-#                                'c11': 458,
-#                                'c12': 195,
-#                                'c44': 109,
-#                                'surf': 4.65010}),  # 2.953
-#                     ('WTa20', {'lat': 3.19787,
-#                                'ugsf1': 2.191,
-#                                'ugsf2': 1.9972,   # 1.8815
-#                                'c11': 488,
-#                                'c12': 198,
-#                                'c44': 126,
-#                                'surf': 4.770549}),  # 3.0433
-#                     ('WTa15', {'lat': 3.18874,
-#                                'ugsf1': 2.241,    # 2.241
-#                                'ugsf2': 2.0836,  # 1.9472
-#                                'c11': 504,
-#                                'c12': 200,
-#                                'c44': 140,
-#                                'surf': 4.862739}),  # 3.109
-#                     ('WTa10', {'lat': 3.17787,
-#                                'ugsf1': 2.2584,   # 2.239
-#                                'ugsf2': 2.0945,   # 1.9952
-#                                'c11': 534,
-#                                'c12': 202,
-#                                'c44': 156,
-#                                'surf': 4.93457}),  # 3.157
-#                     ('WTa05', {'lat': 3.16613,
-#                                'ugsf1': 2.2446,
-#                                'ugsf2': 2.1324,    # 2.0327
-#                                'c11': 554,
-#                                'c12': 205,
-#                                'c44': 167,
-#                                'surf': 4.9918543}),  # 3.1945 (3.1945)
-#                     ('WRe00', {'lat': 3.17093,
-#                                # 2.1147 # 110   # 3.1831   =>
-#                                'ugsf1': 2.1203,
-#                                'ugsf2': 2.0213,
-#                                'c11': 534.2,
-#                                'c12': 193.8,
-#                                'c44': 177.1,
-#                                'surf': 4.847717}),
-#                     ('WRe05', {'lat': 3.1684646,
-#                                'ugsf1': 2.0251,  # 211
-#                                'ugsf2': 1.944,
-#                                'c11': 537.460016,
-#                                'c12': 198.714877,
-#                                'c44': 181.790297,
-#                                'surf': 4.7490852}),
-#                     ('WRe10', {'lat': 3.16596693,
-#                                'ugsf1': 1.9301,
-#                                'ugsf2': 1.8667,
-#                                'c11': 536.324450,
-#                                'c12': 203.742842,
-#                                'c44': 184.820205,
-#                                'surf': 4.6426819}),
-#                     ('WRe15', {'lat': 3.16346922,
-#                                'ugsf1': 1.8322,
-#                                'ugsf2': 1.7677,
-#                                'c11': 531.897067,
-#                                'c12': 208.441515,
-#                                'c44': 187.130407,
-#                                'surf': 4.5335292}),
-#                     ('WRe20', {'lat': 3.160970015,
-#                                'ugsf1': 1.7375,
-#                                'ugsf2': 1.6873,
-#                                'c11': 527.776820,
-#                                'c12': 211.722869,
-#                                'c44': 189.347735,
-#                                'surf': 4.42611199}),
-#                     ('WRe25', {'lat': 3.158786,
-#                                'ugsf1': 1.6469,
-#                                'ugsf2': 1.6102,
-#                                'c11': 528.780194,
-#                                'c12': 217.275650,
-#                                'c44': 191.632656,
-#                                'surf': 4.323485376}),
-#                     ('WRe50', {'lat': 3.1485,
-#                                'ugsf1': 1.2428,
-#                                'ugsf2': 1.1315,
-#                                'c11': 511.892,
-#                                'c12': 242.872,
-#                                'c44': 197.935,
-#                                'surf': 3.904985515})
-#                     ])
-# ('Ta1', {'lat': 3.321,
-#          'ugsf1': 1.000,
-#          'ugsf2': 0.840,
-#          'c11': 247,
-#          'c12': 170,
-#          'c44': 67,
-#          'surf': 2.27}),
-# ('Ta2', {'lat': 3.306,
-#          'ugsf1': 0.947,
-#          'ugsf2': 0.840,
-#          'c11': 266,
-#          'c12': 158,
-#          'c44': 87,
-#          'surf': 2.49}),
-# ('Nb', {'lat': 3.3224040,
-#         'ugsf1': 0.772,   # 211
-#         'ugsf2': 0.677,   # 110
-#         'c11': 246,
-#         'c12': 137,
-#         'c44': 20,
-#         'surf': 2.255})
-
-# ('Nbcite', {'lat': 3.309,
-#             'ugsf1': 0.823,
-#             'ugsf2': 0.705,
-#             'c11': 251,
-#             'c12': 133,
-#             'c44': 22,
-#             'surf': 2.36})
-# ('Mo', {'lat': 3.169,
-#         'ugsf1': 0.835,  # 211
-#         'ugsf2': 0.719,  # 110
-#         'c11': 462,
-#         'c12': 163,
-#         'c44': 102,
-#         'surf': 3.204})])
-
-
-class cal_dis_emit(cal_md_dis_emit_curtin.cal_dis_emit_curtin,
-                   cal_md_dis_emit_plt.cal_md_dis_emit_plt,
+class cal_dis_emit(cal_dis_emit_curtin,
+                   cal_md_dis_emit_plt,
+                   md_crack_ini,
                    plt_drv.plt_drv):
 
-    def __init__(self, pot=None):
-        if pot is None:
-            pot = md_pot_data.qe_pot.vca_W75Re25
+    def __init__(self, pot=md_pot_data.md_pot.Nb_meam):
         self.pot = pot
         self.mddis_drv = cal_md_dislocation.md_dislocation(self.pot)
-        cal_md_dis_emit_curtin.cal_dis_emit_curtin.__init__(self)
+        cal_dis_emit_curtin.__init__(self)
+        md_crack_ini.__init__(self)
         plt_drv.plt_drv.__init__(self)
         # self.theta = np.deg2rad(70.0)
         # x [1, 0, 0], y[0, 1, -1], z[0, 1, 1]
         # angle between [0, 1, -1] and [2, 1, -1]
         self.theta = 54.735610317245346
         # self.theta = 90 - self.theta
-        return
 
     def loop_table(self):
         npts = len(list(vcaw.keys()))
@@ -273,21 +141,17 @@ class cal_dis_emit(cal_md_dis_emit_curtin.cal_dis_emit_curtin,
             data[i, 0] = i
             data[i, 1:] = self.get_bcc_w_result110(vcaw[key])
         np.savetxt('vcaw_110_Ke.txt', data)
-
         for key, i in zip(list(vcaw.keys()), list(range(npts))):
             print(key)
             data[i, 0] = i
             data[i, 1:] = self.get_bcc_w_result211(vcaw[key])
         np.savetxt('vcaw_112_Ke.txt', data)
-        return
 
     def cal_crack(self, param, c):
-        drv = cal_md_crack_ini.md_crack_ini()
-
-        drv.set_params(c)
-        drv.set_plane_strain_bij()
-        drv.get_scalarB(param['surf'])
-        drv.get_coeffs()
+        self.set_params(c)
+        self.set_plane_strain_bij()
+        self.get_scalarB(param['surf'])
+        self.get_coeffs()
 
         s1, s2 = drv.ckcoeff.u1, drv.ckcoeff.u2
         theta = self.theta

@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-09 02:01:02
+# @Last Modified time: 2018-03-27 16:19:27
 
 
 import axes_check
@@ -46,7 +46,6 @@ class cal_dis_emit_curtin(object):
         for key in list(matconsts.keys())[:]:
             # self.get_cutin_result_mat_k2e(matconsts[key])
             self.get_cutin_result_mat_k1e(matconsts[key])
-        return
 
     def get_cutin_result_mat_k1e(self, param):
         c = tool_elastic_constants.elastic_constants(
@@ -106,8 +105,6 @@ class cal_dis_emit_curtin(object):
         print('k2e', k1e)
         print('k2e', k1e / coeff)
         # / Fmat2[1], k2e / cos(theta)
-        return
-
 
     # def get_cutin_result_mat_k2e(self, param):
     #     c = tool_elastic_constants.elastic_constants(

@@ -1,19 +1,10 @@
 #!/usr/bin/env python
 # encoding: utf-8
-
-###################################################################
-#
-# File Name : ./cal_md_stat_crack.py
-#
-###################################################################
-#
-# Purpose :  introduce crack for md calculation (LAMMPS)
-#
-# Creation Date :
-# Last Modified : Sun Apr  9 20:20:57 2016
-# Created By    : Chaoming Yang
-#
-###################################################################
+# -*- coding: utf-8 -*-
+# @Author: chaomy
+# @Date:   2018-03-27 16:28:18
+# @Last Modified by:   chaomy
+# @Last Modified time: 2018-03-27 16:33:12
 
 import Intro as Intr
 import os
@@ -23,22 +14,7 @@ import cal_compliance_constants as CAL
 import lmp_change_configs
 
 
-class crack_coeff:
-    Gg = None
-    BB = None
-    KK = None
-    Kg = None
-    p1 = None
-    p2 = None
-    q1 = None
-    q2 = None
-    u1 = None
-    u2 = None
-
-    class mtxs:
-        lij = None
-        sij = None
-
+# Nb surface_energy_list = [2.04, 2.36, 2.47]
 
 class md_crack(lmp_change_configs.lmp_change_configs):
 
@@ -46,12 +22,10 @@ class md_crack(lmp_change_configs.lmp_change_configs):
         lmp_change_configs.lmp_change_configs.__init__(self)
         self.pot = md_pot_data.md_pot.Nb_eam
         self.element = self.pot['element']
-        surface_energy_list = [2.04, 2.36, 2.47]
         self.surfaceE = self.pot['surf110']
         self.c11, self.c12, self.c44 = \
             self.pot['c11'], self.pot['c12'], self.pot['c44']
-        self.crackcoeff = crackcoeff
-        return
+        # self.crackcoeff = crack_coeff
 
     def get_base_mtx(self):
         x = np.array([1, 0, 0], "float")
@@ -202,7 +176,6 @@ class md_crack(lmp_change_configs.lmp_change_configs):
         ToMpaSqrtM = np.power(10, -1.5)
         self.crackcoeff.Kg = ToMpaSqrtM * np.sqrt(Gg / BB)
         self.crackcoeff.KK = self.crackcoeff.Kg
-        return
 
     def get_coeffs(self):
         sij = self.cal_sij()
@@ -223,7 +196,6 @@ class md_crack(lmp_change_configs.lmp_change_configs):
         self.crackcoeff.q1, self.crackcoeff.q2 = q1, q2
         self.crackcoeff.p1, self.crackcoeff.p2 = p1, p2
         self.crackcoeff.u1, self.crackcoeff.u2 = u1, u2
-        return
 
     def stat_crack(self):
         # execuable = "mpirun lmp_linux -in"
@@ -236,7 +208,6 @@ class md_crack(lmp_change_configs.lmp_change_configs):
             # os.system("%s in.read" % (execuable))
             # self.rename_cfg((K))
             # os.system("rm crackxyz/*")
-        return
 
     def md_crack(self):
         execuable = "mpirun lmp_mpi -in"
@@ -244,7 +215,6 @@ class md_crack(lmp_change_configs.lmp_change_configs):
         self.cal_scalarB()
         self.get_coeffs()
         self.Intro_Crack('cfg', self.crackcoeff)
-        return
 
     def stat_crack_continue(self):
         execuable = "mpirun lmp_linux -in"
@@ -257,7 +227,6 @@ class md_crack(lmp_change_configs.lmp_change_configs):
             os.system("rm crackxyz/*")
             os.system("%s in.read" % (execuable))
             self.rename_cfg(K)
-        return
 
     def Test_init(self):
         M = Intr.MD_ChangeBox()
@@ -267,7 +236,6 @@ class md_crack(lmp_change_configs.lmp_change_configs):
             K = Kg + 0.01 * i
             M.Intro_Crack_xyz(self.crackcoeff)
             os.system("cp ./Crack.txt Init/Crack_%g" % (0.01 * K))
-        return
 
 
 if __name__ == "__main__":
