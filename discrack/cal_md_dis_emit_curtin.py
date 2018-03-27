@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-27 16:19:27
+# @Last Modified time: 2018-03-27 17:01:22
 
 
 import axes_check
@@ -53,9 +53,7 @@ class cal_dis_emit_curtin(object):
             C12=param['c12'],
             C44=param['c44'])
 
-        axes = np.array([[-1, -1, 2],
-                         [1, 1, 1],
-                         [-1, 1, 0]])
+        axes = np.array([[-1, -1, 2], [1, 1, 1], [-1, 1, 0]])
         burgers = param['lat'] / np.sqrt(6.) * np.array([-1., -1., 2.])
 
         stroh = stroh_solve.Stroh(c, burgers, axes=axes)

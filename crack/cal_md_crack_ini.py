@@ -4,12 +4,13 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:11:31
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-27 16:46:07
+# @Last Modified time: 2018-03-27 17:46:15
 
 
-from .cal_md_crack_uti import md_crack_uti
-from .cal_md_crack_pre import md_crack_pre
-from .cal_md_crack_run import md_crack_run
+from crack.cal_md_crack_uti import md_crack_uti
+from crack.cal_md_crack_pre import md_crack_pre
+from crack.cal_md_crack_run import md_crack_run
+import md_pot_data
 import gn_config
 from math import sqrt
 from math import pi
@@ -55,7 +56,8 @@ class md_crack_ini(md_crack_pre,
                    md_crack_run,
                    gn_config.gnStructure):
 
-    def __init__(self):
+    def __init__(self, pot=md_pot_data.md_pot.Nb_meam):
+        self.pot = pot
         md_crack_pre.__init__(self)
         md_crack_run.__init__(self)
         md_crack_uti.__init__(self)
@@ -63,14 +65,5 @@ class md_crack_ini(md_crack_pre,
         self.ckcoeff = crack_coeff
         # self.set_params()
 
-    def set_params(self, elasticconstants):
-        self.elastic = elasticconstants
-        self.element = self.pot['element']
-        self.surfe100, self.surfe110, self.surfe111 = \
-            self.pot['surf100'], self.pot['surf110'], self.pot['surf111']
-        self.c11, self.c12, self.c44 = \
-            self.pot['c11'], self.pot['c12'], self.pot['c44']
-        self.burger = sqrt(3) / 2. * self.pot['lattice']
-        self.screw_coeff = self.burger / (2. * pi)
-        self.edge_coeff = self.burger / (2. * pi)
+    def set_params(self):
         self.nu = 0.33

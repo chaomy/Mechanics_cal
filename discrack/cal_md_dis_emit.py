@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-27 16:57:18
+# @Last Modified time: 2018-03-27 17:05:34
 
 
 from optparse import OptionParser
@@ -116,10 +116,8 @@ vcaw = OrderedDict([('WTa50', {'lat': 3.2502,
                     ])
 
 
-class cal_dis_emit(cal_dis_emit_curtin,
-                   cal_md_dis_emit_plt,
-                   md_crack_ini,
-                   plt_drv.plt_drv):
+class cal_dis_emit(cal_dis_emit_curtin, cal_md_dis_emit_plt,
+                   md_crack_ini, plt_drv.plt_drv):
 
     def __init__(self, pot=md_pot_data.md_pot.Nb_meam):
         self.pot = pot

@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:10:22
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-31 15:15:24
+# @Last Modified time: 2018-03-27 17:16:08
 
 
 import os
@@ -12,31 +12,19 @@ import os
 
 class md_crack_run(object):
 
-    def md_crack(self):
-        os.system("python gnStructure.py")
-        self.get_scalarB()
-        self.get_coeffs()
-        # self.Intro_Crack('cfg', self.crackcoeff)
-        return
-
     def cal_crack_anglecoeff(self):
         self.set_plane_strain_bij()
         self.get_scalarB()
         self.get_coeffs()
-        s1 = self.ckcoeff.u1
-        s2 = self.ckcoeff.u2
-        return
+        # s1 = self.ckcoeff.u1
+        # s2 = self.ckcoeff.u2
 
     def static_crack(self):
         self.set_plane_strain_bij()
-        self.get_scalarB()
+        self.get_scalarB(self.pot["surf110"])
         self.get_coeffs()
-
-        # atoms = ase.io.read('bcc.00306.dump', format='lammps-dump')
-        atoms = self.gn_perf_plate()
-        atoms = self.intro_crack_k1(atoms=atoms)
+        atoms = self.intro_crack_k1(atoms=self.gn_perf_plate())
         self.write_lmp_config_data(atoms, 'crack.txt')
-        return
 
     def static_crack_continue(self):
         execuable = "mpirun lmp_linux -in"
@@ -48,7 +36,6 @@ class md_crack_run(object):
             os.system("rm crackxyz/*")
             os.system("%s in.read" % (execuable))
             self.rename_cfg(K)
-        return
 
     def Test_init(self):
         Kg = self.get_scalarB()
@@ -57,4 +44,3 @@ class md_crack_run(object):
             K = Kg + 0.01 * i
             self.intro_crack_k1(self.crackcoeff)
             os.system("cp ./Crack.txt Init/Crack_%g" % (0.01 * K))
-        return
