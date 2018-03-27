@@ -27,10 +27,10 @@ class cal_md_surface(gn_config.gnStructure,
                      get_data.get_data,
                      gn_lmp_infile.gn_md_infile):
 
-    def __init__(self, pot=md_pot_data.md_pot.Nb_meam):
+    def __init__(self, pot=None):
         self.pot = pot
         get_data.get_data.__init__(self)
-        gn_lmp_infile.gn_md_infile.__init__(self, self.pot)
+        gn_lmp_infile.gn_md_infile.__init__(self)
         gn_config.gnStructure.__init__(self, self.pot)
 
     def gn_surface_atoms(self, tg):

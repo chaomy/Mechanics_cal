@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 01:09:32
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-30 14:54:28
+# @Last Modified time: 2018-03-27 15:58:47
 
 
 import numpy as np
@@ -177,7 +177,6 @@ class md_crack_pre(object):
                 y = np.concatenate([y, yrem])
             filename = "Crack.txt"
             xlo, xhi, ylo, yhi = min(x) - 4, max(x) + 4, min(y) - 4, max(y) + 4
-        return
 
 
 if __name__ == "__main__":

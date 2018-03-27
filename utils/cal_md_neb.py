@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-19 17:49:18
+# @Last Modified time: 2018-03-23 00:25:07
 
 
 import os
@@ -115,10 +115,26 @@ class lmps_neb_tools(get_data.get_data, gn_config.bcc):
         # os.system("rm ./Final_custom/dump.custom.*")
         # os.system("rm dummp.custom.*")
 
-    def change_index(self):  # sometimes useful for ordering for glob
-        for i in range(10):
-            os.system("mv ./screen.%d      screen.0%d" % (i, i))
-            os.system("mv ./log.lammps.%d  log.lammps.0%d" % (i, i))
+    def plot_neb_energy(self, neb_energy, figname='neb.png'):
+        fig = plt.figure(figsize=(8, 4))
+        ax = fig.add_subplot(111)
+        ax.get_xaxis().get_major_formatter().set_useOffset(False)
+
+        x = np.linspace(0, 1, len(neb_energy))
+
+        ax.plot(x, neb_energy, linestyle='--', marker='o',
+                markersize=12, label='energy')
+
+        plt.legend(bbox_to_anchor=(0.1, 0.1), mode='expand',
+                   borderaxespad=0.01, fontsize=19)
+
+        # (110): -110  (11-2) -110
+        plt.xlabel("Normalized reaction coordinate", {'fontsize': 19})
+        plt.ylabel("Energy [meV/|b|]", {'fontsize': 19})   #
+
+        plt.yticks(size=19)
+        plt.xticks(size=19)
+        plt.savefig(figname, bbox_inches='tight', pad_inches=0.03)
 
     def read_lmp_log_file(self, figname='neb.png'):
         # mydir = os.getcwd().split('/')[-1]
@@ -170,37 +186,6 @@ class lmps_neb_tools(get_data.get_data, gn_config.bcc):
         print("after delete", len(neb_energy))
         neb_energy = neb_energy - np.min(neb_energy)
         return neb_energy
-
-    def plot_neb_energy(self, neb_energy, figname='neb.png'):
-        fig = plt.figure(figsize=(8, 4))
-        ax = fig.add_subplot(111)
-        ax.get_xaxis().get_major_formatter().set_useOffset(False)
-
-        x = np.linspace(0, 1, len(neb_energy))
-
-        ax.plot(x, neb_energy, linestyle='--',
-                marker='o',
-                markersize=12,
-                label='energy')
-
-        plt.legend(bbox_to_anchor=(0.1, 0.1),
-                   mode='expand',
-                   borderaxespad=0.01,
-                   fontsize=19)
-
-        plt.xlabel("Normalized reaction coordinate",
-                   {'fontsize': 19})   # (110): -110  (11-2) -110
-        plt.ylabel("Energy [meV/|b|]",
-                   {'fontsize': 19})   #
-
-        plt.yticks(size=19)
-        plt.xticks(size=19)
-        plt.savefig(figname,
-                    bbox_inches='tight', pad_inches=0.03)
-        # dump the data #
-        fid = open("pickle_data", 'w')
-        A = pc.Pickler(fid)
-        A.dump([x, neb_energy])
 
     def restart_neb(self, cut=False):
         cut = True

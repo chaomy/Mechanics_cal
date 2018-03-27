@@ -3,10 +3,10 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-30 14:47:28
+# @Last Modified time: 2018-03-27 16:01:34
 
 from optparse import OptionParser
-from . import cal_md_crack_ini
+import cal_md_crack_ini
 
 
 if __name__ == "__main__":

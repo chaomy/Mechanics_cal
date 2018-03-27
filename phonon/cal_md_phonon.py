@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2018-03-07 13:09:29
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-22 17:27:57
+# @Last Modified time: 2018-03-23 14:57:20
 
 import numpy as np
 import ase
@@ -175,11 +175,11 @@ class lmp_phonon(get_data.get_data):
 
     def cal_phonon_auto(self):
         self.gn_primitive_lmps()
-        os.system("phonopy --dim=\"5 5 5\" -d")
+        os.system("~/anaconda2/bin/phonopy --dim=\"6 6 6\" -d")
         self.convert_pos_to_lmp_data() 
         os.system("lmp_mpi -i in.phonon")
         files = glob.glob("bcc.0.dump")
-        os.system("phonopy -f {} --lammps".format(files[0]))
+        os.system("~/anaconda2/bin/phonopy -f {} --lammps".format(files[0]))
         os.system("MutiPhonon_oneAtom.py")
 
 

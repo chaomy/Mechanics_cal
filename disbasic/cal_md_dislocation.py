@@ -4,10 +4,9 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-20 11:27:18
+# @Last Modified time: 2018-03-24 16:57:00
 
 
-from optparse import OptionParser
 import os
 import ase
 import shutil
@@ -16,21 +15,25 @@ import ase.lattice.cubic as Cubic
 import md_pot_data
 import gn_config
 import get_data
-from utils import Intro_vasp
-from prec import cal_md_prec
-from gb import cal_md_gb_hcp_dis
 import gn_pbs
 import gn_lmp_infile
 import atomman as am
-from . import cal_md_dislocation_hcp
-from . import cal_md_dislocation_bcc
-from . import cal_md_dislocation_fcc
-from . import cal_md_peierls_barrier
-from . import cal_md_dis_schmid
+from optparse import OptionParser
+from utils import Intro_vasp
+from prec import cal_md_prec
+from gb import cal_md_gb_hcp_dis
+import cal_md_dislocation_hcp
+import cal_md_dislocation_bcc
+import cal_md_dislocation_fcc
+import cal_md_peierls_barrier
+import cal_md_dis_dipole
+import cal_md_dis_schmid
+import plt_drv
 
 
 class md_dislocation(gn_config.gnStructure,
                      get_data.get_data, gn_pbs.gn_pbs,
+                     plt_drv.plt_drv,
                      Intro_vasp.vasp_change_box,
                      gn_lmp_infile.gn_md_infile,
                      cal_md_peierls_barrier.cal_barrier,
@@ -38,19 +41,22 @@ class md_dislocation(gn_config.gnStructure,
                      cal_md_dislocation_bcc.md_dislocation_bcc,
                      cal_md_dislocation_fcc.md_dislocation_fcc,
                      cal_md_prec.md_prec,
+                     cal_md_dis_dipole.cal_dis_dipole,
                      cal_md_gb_hcp_dis.gb_hcp_dis,
                      cal_md_dis_schmid.cal_bcc_schmid):
 
     def __init__(self, pot=md_pot_data.md_pot.mg_kim):
         self.pot = self.load_data('../BASICS/pot.dat')
+        plt_drv.plt_drv.__init__(self)
         gn_config.gnStructure.__init__(self, self.pot)
         gn_pbs.gn_pbs.__init__(self)
-        Intro_vasp.vasp_change_box.__init__(self, self.pot)
-        gn_lmp_infile.gn_md_infile.__init__(self, self.pot)
+        Intro_vasp.vasp_change_box.__init__(self)
         cal_md_prec.md_prec.__init__(self)
         cal_md_gb_hcp_dis.gb_hcp_dis.__init__(self)
         cal_md_peierls_barrier.cal_barrier.__init__(self)
+        gn_lmp_infile.gn_md_infile.__init__(self)
         cal_md_dis_schmid.cal_bcc_schmid.__init__(self)
+        cal_md_dis_dipole.cal_dis_dipole.__init__(self)
         cal_md_dislocation_bcc.md_dislocation_bcc.__init__(self)
         cal_md_dislocation_fcc.md_dislocation_fcc.__init__(self)
         cal_md_dislocation_hcp.md_dislocation_hcp.__init__(self)
@@ -64,7 +70,6 @@ class md_dislocation(gn_config.gnStructure,
         self.set_element('W')
 
         atoms = self.set_bcc_convention([e1, e2, e3], (30, 30, 60))
-
         xc1 = (0.0 + (-2.56656)) / 2. + 45 * \
             np.sqrt(6.) / 3. * self.pot['lattice']
         yc1 = (0.0 + (2.22271)) / 2. + 15 * np.sqrt(2.) * self.pot['lattice']
@@ -189,11 +194,7 @@ class md_dislocation(gn_config.gnStructure,
         self.set_element('Nb')
         print(v1, v2, v3)
 
-        atoms = Cubic.BodyCenteredCubic(directions=[v1, v2, v3],
-                                        latticeconstant=3.0,
-                                        size=(n, 1, 1),
-                                        symbol='Nb',
-                                        pbc=(1, 1, 1))
+        atoms = self.set_bcc_convention([v1, v2, v3], (n, 1, 1))
         ase.io.write("lmp_init.xyz", atoms, "xyz")
 
     def add_strain(self, atoms, delta):
@@ -208,6 +209,10 @@ class md_dislocation(gn_config.gnStructure,
         atoms.set_positions(positions)
         atoms.set_cell(cell)
         return atoms
+
+    def cnv_poscar_lmp(self):
+        atoms = ase.io.read("POSCAR", format='vasp')
+        self.write_lmp_config_data(atoms)
 
     def static_add_stress(self):
         atoms = self.prep_relaxed_dislocation()
@@ -255,7 +260,9 @@ if __name__ == "__main__":
                   'prec': drv.make_prec,
                   'onlyprec': drv.make_only_prec,
                   'gb': drv.make_gb,
-                  'dipole': drv.dipole_peierls_barrier}
+                  'dipole': drv.dipole_peierls_barrier,
+                  'plate': drv.make_screw_plate,
+                  'cnv': drv.cnv_poscar_lmp}
 
     if options.fargs is not None:
         dispatcher[options.mtype.lower()](options.fargs)

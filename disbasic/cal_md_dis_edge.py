@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-08-07 20:35:25
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-02-20 19:28:26
+# @Last Modified time: 2018-03-24 16:53:25
 
 from optparse import OptionParser
 from numpy import array, max, min
@@ -26,8 +26,7 @@ import Intro_vasp
 import cal_intro_iso_dis
 
 
-class cal_dis_edge(gn_config.bcc,
-                   cal_intro_iso_dis.cal_intro_iso_dis,
+class cal_dis_edge(gn_config.bcc, cal_intro_iso_dis.cal_intro_iso_dis,
                    Intro_vasp.vasp_change_box):
 
     def __init__(self, pot=None):

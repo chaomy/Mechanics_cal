@@ -3,21 +3,29 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-04 20:02:31
+# @Last Modified time: 2018-03-23 11:07:36
 
 from numpy import cos, sin, sqrt, mat
 from collections import OrderedDict
-import gn_config
+from utils import stroh_solve
+from crack import cal_md_crack_ini
+import numpy as np
 import ase
 import ase.io
-import numpy as np
-import md_pot_data
 import tool_elastic_constants
-from utils import stroh_solve
 import ase.lattice
-from . import cal_md_dislocation
 import atomman as am
-from crack import cal_md_crack_ini
+
+strain = mat([[1.0, 0.0, 0.0],
+              [0.5, 1.0, 0.5],
+              [0.0, 0.0, 1.0]])
+
+axes = np.array([[1, 1, -2],
+                 [-1, 1, 0],
+                 [1, 1, 1]])
+
+# burgers = self.pot['lattice'] / 2 * np.array([1., 1., 1.])
+
 
 matconsts = OrderedDict([('Al1', {'lat': 4.05,
                                   'ugsf': 0.167,
@@ -41,31 +49,21 @@ matconsts = OrderedDict([('Al1', {'lat': 4.05,
                                      'c44': 56.7})])
 
 
-class cal_dis_dipole(gn_config.bcc):
-
-    def __init__(self, pot=md_pot_data.md_pot.mg_kim):
-        self.pot = pot
-        self.mddis_drv = cal_md_dislocation.md_dislocation(self.pot)
-        gn_config.bcc.__init__(self, self.pot)
+class cal_dis_dipole(object):
 
     def set_dipole_box(self, sizen=1):
         n = 7 * sizen
         m = 11 * sizen
         t = 1 * sizen
-        print(self.pot)
-        alat = self.pot['lattice']
         atoms = ase.lattice.cubic.BodyCenteredCubic(
             directions=[[1., 1., -2.],
                         [-1., 1., 0],
                         [0.5, 0.5, 0.5]],
-            latticeconstant=alat,
+            latticeconstant=self.pot['lattice'],
             size=(n, m, t),
             symbol=self.pot['element'])
-        atoms = self.mddis_drv.cut_half_atoms_new(atoms, "cuty")
+        atoms = self.cut_half_atoms_new(atoms, "cuty")
         supercell = atoms.get_cell()
-        strain = mat([[1.0, 0.0, 0.0],
-                      [0.5, 1.0, 0.5],
-                      [0.0, 0.0, 1.0]])
         supercell = strain * supercell
         atoms.set_cell(supercell)
         atoms.wrap(pbc=[1, 1, 1])
@@ -97,10 +95,6 @@ class cal_dis_dipole(gn_config.bcc):
         supercell = atoms.get_cell()
         addstrain = False
         if addstrain is True:
-            print(len(atoms))
-            strain = mat([[1.0, 0.0, 0.0],
-                          [0.5, 1.0, 0.5],
-                          [0.0, 0.0, 1.0]])
             supercell = strain * supercell
             atoms.set_cell(supercell)
             atoms.wrap(pbc=[1, 1, 1])
@@ -202,13 +196,12 @@ class cal_dis_dipole(gn_config.bcc):
         # print "pre-ln alpha = biKijbj/4pi", stroh.preln, "ev/A"
 
     def bcc_screw_dipole_triangular_atoms(self, atoms=None, fname='qe.in'):
+
         c = tool_elastic_constants.elastic_constants(
             C11=self.pot['c11'],
             C12=self.pot['c12'],
             C44=self.pot['c44'])
-        axes = np.array([[1, 1, -2],
-                         [-1, 1, 0],
-                         [1, 1, 1]])
+
         burgers = self.pot['lattice'] / 2 * np.array([1., 1., 1.])
         stroh = stroh_solve.Stroh(c, burgers, axes=axes)
 
@@ -230,15 +223,11 @@ class cal_dis_dipole(gn_config.bcc):
         ase.io.write('tri_dis_poscar.vasp', atoms, format='vasp')
 
     def bcc_screw_dipole_configs_alongz(self, sizen=1):
+
         c = tool_elastic_constants.elastic_constants(
             C11=self.pot['c11'],
             C12=self.pot['c12'],
             C44=self.pot['c44'])
-
-        axes = np.array([[1, 1, -2],
-                         [-1, 1, 0],
-                         [1, 1, 1]])
-
         burgers = self.pot['lattice'] / 2 * np.array([1., 1., 1.])
         stroh = stroh_solve.Stroh(c, burgers, axes=axes)
 

@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-02-14 23:41:55
+# @Last Modified time: 2018-03-23 13:25:38
 
 
 import numpy as np
@@ -29,11 +29,7 @@ class vasp_change_box(cal_intro_iso_dis.cal_intro_iso_dis,
                       cal_add_strain.cal_add_strain,
                       cal_cut_cell.cal_cut_cell):
 
-    def __init__(self, pot=None):
-        self.pot = pot
-        self.set_intro_coeff()
-
-    def set_intro_coeff(self):
+    def __init__(self):
         self.pi = 3.141592653589793
         if self.pot['structure'] in ['bcc']:
             self.burger = np.sqrt(3.) / 2. * self.pot['lattice']

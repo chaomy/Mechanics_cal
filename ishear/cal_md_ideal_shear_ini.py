@@ -4,14 +4,14 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-20 14:35:09
+# @Last Modified time: 2018-03-23 10:54:10
 
 
-from . import cal_md_ideal_shear_pre
-from . import cal_md_ideal_shear_run
-from . import cal_md_ideal_shear_pos
-from . import cal_md_ideal_shear_plt
-from . import cal_md_ideal_shear_mesh
+from cal_md_ideal_shear_pre import cal_bcc_ideal_shear_pre
+from cal_md_ideal_shear_run import cal_bcc_ideal_shear_run
+from cal_md_ideal_shear_pos import cal_bcc_ideal_shear_pos
+from cal_md_ideal_shear_plt import cal_bcc_ideal_shear_plt
+from cal_md_ideal_shear_mesh import cal_bcc_ideal_shear_mesh
 import os
 import numpy as np
 import gn_config
@@ -26,11 +26,11 @@ class cal_bcc_ideal_shear(get_data.get_data,
                           gn_pbs.gn_pbs,
                           plt_drv.plt_drv,
                           gn_qe_inputs.gn_qe_infile,
-                          cal_md_ideal_shear_pre.cal_bcc_ideal_shear_pre,
-                          cal_md_ideal_shear_run.cal_bcc_ideal_shear_run,
-                          cal_md_ideal_shear_pos.cal_bcc_ideal_shear_pos,
-                          cal_md_ideal_shear_plt.cal_bcc_ideal_shear_plt,
-                          cal_md_ideal_shear_mesh.cal_bcc_ideal_shear_mesh):
+                          cal_bcc_ideal_shear_pre,
+                          cal_bcc_ideal_shear_run,
+                          cal_bcc_ideal_shear_pos,
+                          cal_bcc_ideal_shear_plt,
+                          cal_bcc_ideal_shear_mesh):
 
     def __init__(self, inpot, shtype='110'):
         self.pot = self.load_data('../BASICS/pot.dat')
@@ -39,11 +39,11 @@ class cal_bcc_ideal_shear(get_data.get_data,
         get_data.get_data.__init__(self)
         gn_config.gnStructure.__init__(self, self.pot)
         gn_qe_inputs.gn_qe_infile.__init__(self, self.pot)
-        cal_md_ideal_shear_pre.cal_bcc_ideal_shear_pre.__init__(self)
-        cal_md_ideal_shear_run.cal_bcc_ideal_shear_run.__init__(self)
-        cal_md_ideal_shear_pos.cal_bcc_ideal_shear_pos.__init__(self)
-        cal_md_ideal_shear_plt.cal_bcc_ideal_shear_plt.__init__(self)
-        cal_md_ideal_shear_mesh.cal_bcc_ideal_shear_mesh.__init__(self)
+        cal_bcc_ideal_shear_pre.__init__(self)
+        cal_bcc_ideal_shear_run.__init__(self)
+        cal_bcc_ideal_shear_pos.__init__(self)
+        cal_bcc_ideal_shear_plt.__init__(self)
+        cal_bcc_ideal_shear_mesh.__init__(self)
         self.npts = 20
         self.delta = 0.02
 

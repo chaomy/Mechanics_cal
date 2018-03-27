@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-21 12:10:10
+# @Last Modified time: 2018-03-27 16:05:06
 
 
 from optparse import OptionParser
@@ -21,8 +21,7 @@ from . import cal_md_dis_emit_curtin
 from . import cal_md_dis_emit_plt
 
 
-
-vcaw = OrderedDict([('WTa50', {'lat':   3.2502,
+vcaw = OrderedDict([('WTa50', {'lat': 3.2502,
                                'ugsf1': 1.5988,
                                'ugsf2': 1.2763,   # 2.3793
                                'c11': 343.7798,
@@ -436,6 +435,7 @@ if __name__ == '__main__':
     dispatcher = {'run': drv.loop_table,
                   'plt': drv.plt_k1,
                   'loopcurtin': drv.loop_curtin}
+
     if options.fargs is not None:
         dispatcher[options.mtype.lower()](options.fargs)
     else:

@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-20 14:03:08
+# @Last Modified time: 2018-03-23 14:39:13
 
 
 import os
@@ -17,7 +17,7 @@ import get_data
 from scipy.optimize import minimize
 from optparse import OptionParser
 from md_pot_data import fluxdirs
-from . import cal_md_ideal_tensile_pre
+import cal_md_ideal_tensile_pre
 import md_pot_data
 from glob import glob
 

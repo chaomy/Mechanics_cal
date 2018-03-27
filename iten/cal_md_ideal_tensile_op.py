@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-20 14:13:18
+# @Last Modified time: 2018-03-23 14:44:10
 
 
 import os
@@ -79,7 +79,7 @@ class cal_bcc_ideal_tensile_op(get_data.get_data,
         for i in range(npts):
             delta = self.delta * (self.range[0] + i)
             res = minimize(self.runlmp, x0, delta, method='Nelder-Mead',
-                           options={'fatol': 1e-3, 'disp': True})
+                           options={'fatol': 2e-4, 'disp': True})
             data[i][2], data[i][3] = res.x[0], res.x[1]
             x0 = res.x
             print(res)
@@ -171,7 +171,6 @@ class cal_bcc_ideal_tensile_op(get_data.get_data,
         data[-6:] = self.stress
         print(res)
         np.savetxt("iten.txt", data)
-        return
 
     def loop_prep_restart(self, opt1='va', opt2='tp'):
         raw = np.mat(np.loadtxt("iten.txt"))

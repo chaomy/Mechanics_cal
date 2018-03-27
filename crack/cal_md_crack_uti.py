@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:11:49
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-31 15:14:12
+# @Last Modified time: 2018-03-27 16:02:40
 
 
 import numpy as np
@@ -196,7 +196,6 @@ class md_crack_uti(object):
             sij[1, 5] * sij[2, 2] - sij[1, 2] * sij[2, 5]) / sij[2, 2]
         self.ckcoeff.bij_pstrain['b66'] = (
             sij[5, 5] * sij[2, 2] - sij[2, 5] * sij[2, 5]) / sij[2, 2]
-        return
 
     def get_plane_strain_bij(self):
         return (self.ckcoeff.bij_pstrain['b11'],
@@ -219,7 +218,6 @@ class md_crack_uti(object):
             Gg = 2 * surfE
         self.ckcoeff.Kg = np.sqrt(Gg / BB * 1e-3)
         self.ckcoeff.K1 = self.ckcoeff.Kg
-        return
 
     def get_coeffs(self):
         b11, b22, b12, b16, b26, b66 = self.get_plane_strain_bij()
@@ -233,4 +231,3 @@ class md_crack_uti(object):
         self.ckcoeff.q1, self.ckcoeff.q2 = q1, q2
         self.ckcoeff.p1, self.ckcoeff.p2 = p1, p2
         self.ckcoeff.u1, self.ckcoeff.u2 = u1, u2
-        return

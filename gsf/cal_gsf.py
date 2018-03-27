@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-20 13:52:58
+# @Last Modified time: 2018-03-23 14:45:32
 
 
 import gn_lmp_infile
@@ -64,9 +64,9 @@ class cal_gsf(gn_config.gnStructure,
         plt_drv.plt_drv.__init__(self)
         # config
         gn_config.gnStructure.__init__(self, self.pot)
-        Intro_vasp.vasp_change_box.__init__(self, self.pot)
+        Intro_vasp.vasp_change_box.__init__(self)
         # lmp
-        gn_lmp_infile.gn_md_infile.__init__(self, self.pot)
+        gn_lmp_infile.gn_md_infile.__init__(self)
         cal_md_gsf.cal_md_gsf.__init__(self)
         # qe
         gn_qe_inputs.gn_qe_infile.__init__(self, self.pot)

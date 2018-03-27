@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-13 23:58:41
+# @Last Modified time: 2018-03-24 16:55:00
 
 
 import os
@@ -100,9 +100,7 @@ class md_dislocation_bcc(object):
         e3 = array([1., 1., 1.])
         # atoms = self.set_bcc_convention([e1, e2, e3], (60, 40, 3))  # z peri
         # 18
-        atoms = self.set_bcc_convention(
-            [e1, e2, e3], (60, 40, 80))  # z peri 18
-
+        atoms = self.set_bcc_convention([e1, e2, e3], (60, 40, 80))  # z peri 18
         atoms = self.intro_single_screw_atoms(atoms)
         #  atoms = self.intro_dipole_screw_with_image_atoms(atoms);
 
@@ -110,10 +108,8 @@ class md_dislocation_bcc(object):
 
         self.write_lmp_config_data(atoms)
 
-        self.mymkdir("restart")
-        self.mymkdir("cfg")
-
         self.gn_md_minimize_cfg("lmp_init.txt",
                                 "W.set.txt",    # "Nb.eam.alloy.webarchive",
                                 "W")
+
         os.system("rm cfg/* ; mpirun -n 4 lmp_mpi -in in.minimize")

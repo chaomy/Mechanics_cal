@@ -3,12 +3,12 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-18 07:46:21
+# @Last Modified time: 2018-03-23 11:18:26
 
 
 from optparse import OptionParser
 import md_pot_data
-from . import cal_md_ideal_shear_ini as init
+import cal_md_ideal_shear_ini as init
 
 
 if __name__ == '__main__':
@@ -22,7 +22,6 @@ if __name__ == '__main__':
     (options, args) = parser.parse_args()
     # drv = init.cal_bcc_ideal_shear(md_pot_data.va_pot.Nb_pbe, '211')
     drv = init.cal_bcc_ideal_shear(md_pot_data.va_pot.Nb_pbe, '110')
-
     dispatcher = {'qeone': drv.get_qe_stress,
                   'restart': drv.loop_prep_restart,
                   'twin': drv.gn_shear_twin_path,

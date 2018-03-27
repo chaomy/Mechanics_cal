@@ -4,13 +4,13 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:11:31
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-08-31 15:13:04
+# @Last Modified time: 2018-03-27 16:01:52
 
 
 import md_pot_data
-from . import cal_md_crack_uti
-from . import cal_md_crack_pre
-from . import cal_md_crack_run
+import cal_md_crack_uti
+import cal_md_crack_pre
+import cal_md_crack_run
 import gn_config
 from math import sqrt
 from math import pi
@@ -29,7 +29,6 @@ class md_crack_ini(cal_md_crack_pre.md_crack_pre,
         gn_config.bcc.__init__(self, self.pot)
         self.ckcoeff = cal_md_crack_uti.crack_coeff
         # self.set_params()
-        return
 
     def set_params(self, elasticconstants):
         self.elastic = elasticconstants
@@ -42,4 +41,3 @@ class md_crack_ini(cal_md_crack_pre.md_crack_pre,
         self.screw_coeff = self.burger / (2. * pi)
         self.edge_coeff = self.burger / (2. * pi)
         self.nu = 0.33
-        return
