@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:11:49
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-27 17:51:15
+# @Last Modified time: 2018-03-27 23:19:58
 
 
 from numpy import sqrt, sin, cos, abs
@@ -36,6 +36,15 @@ class crack_coeff:
 
 class md_crack_uti(object):
 
+    def loop_211(self):
+        self.aniso_211()
+        K1 = self.ckcoeff.K1
+        for i in range(20):
+            self.ckcoeff.K1 = K1 + 0.05 * i
+            print(self.ckcoeff.K1)
+            atoms = self.intro_crack_k1(atoms=self.gn_perf_plate())
+            self.write_lmp_config_data(atoms, 'crack_{:03d}.txt'.format(i))
+
     def aniso_211(self):
         c = tool_elastic_constants.elastic_constants(
             C11=self.pot['c11'],
@@ -45,8 +54,11 @@ class md_crack_uti(object):
         e2 = [0, 1, -1]
         e3 = [0, 1, 1]
         axes = np.array([e1, e2, e3])
+
         burgers = self.pot["lattice"] / 2. * np.array([1., 1., -1.])
+        burgers = axes_check.axes_check(axes).dot(burgers)
         stroh = stroh_solve.Stroh(c, burgers, axes=axes)
+
         A = np.mat(np.zeros([3, 3]), dtype='complex')
         A[:, 0] = np.mat(stroh.A[0]).transpose()
         A[:, 1] = np.mat(stroh.A[2]).transpose()
@@ -59,28 +71,33 @@ class md_crack_uti(object):
 
         Linv = np.real(np.complex(0, 1) * A * np.linalg.inv(B))
         Gamma = 0.5 * Linv
-        surf = self.pot["surf110"]
-        k1c = sqrt(2 * surf / abs(Gamma[1, 1] * 1e3))
-        theta = np.deg2rad(54.735610317245346)
+
+        self.ckcoeff.K1 = sqrt(
+            2 * self.pot["surf110"] / abs(Gamma[1, 1] * 1e3))
+        # theta = np.deg2rad(54.735610317245346)
+        theta = np.deg2rad(35.2643896828)
         omega = np.mat([[cos(theta), sin(theta), 0.0],
                         [-sin(theta), cos(theta), 0.0],
                         [0.0, 0.0, 1.0]])
         Gamma = omega * Gamma * omega.transpose()
         Gamma = np.abs(np.linalg.inv(Gamma))
         Gamma = Gamma * 1e9  # Pa
+        print(self.ckcoeff.K1)
 
-        print(k1c)
         if axes is not None:
             burgers = axes_check.axes_check(axes).dot(burgers)
             c = c.transform(axes)
 
-        # (coeff, Kg) = self.cal_crack(param, c)
-        # self.set_params(c)
-        self.set_plane_strain_bij()
-        self.get_scalarB(self.pot["surf110"])
+        G00 = Gamma[0, 0]
+        usf = 0.67405172613
+        k1e = np.sqrt(G00 * usf) * 1e-6
+        print(self.ckcoeff.K1, k1e)
+
+        self.set_plane_strain_bij(c.Sij)
+        # self.get_scalarB(self.pot["surf110"]) get the same k1c
         self.get_coeffs()
-        atoms = self.intro_crack_k1(atoms=self.gn_perf_plate())
-        self.write_lmp_config_data(atoms, 'crack.txt')
+        # atoms = self.intro_crack_k1(atoms=self.gn_perf_plate())
+        # self.write_lmp_config_data(atoms, 'crack.txt')
 
     def get_crack_coeffs(self):
         return (self.ckcoeff.u1, self.ckcoeff.u2, self.ckcoeff.p1,
@@ -103,110 +120,6 @@ class md_crack_uti(object):
         z /= np.sqrt(zz)
         lij = np.mat([x, y, z], "float")
         return lij
-
-    # def change_sij(self, L, s66):
-    #     s99 = np.zeros([9, 9], "float")
-    #     s66new = np.zeros([6, 6], "float")
-    #     s99new = np.zeros([9, 9], "float")
-    #     for i in range(6):
-    #         for j in range(6):
-    #             s99[i, j] = s66
-    #     for p in range(3):
-    #         for q in range(3):
-    #             for r in range(3):
-    #                 for s in range(3):
-    #                     for i in range(3):
-    #                         for j in range(3):
-    #                             for k in range(3):
-    #                                 for l in range(3):
-    #                                     if i == 0 and j == 0:
-    #                                         m = 0
-    #                                     if k == 0 and l == 0:
-    #                                         n = 0
-    #                                     if p == 0 and q == 0:
-    #                                         u = 0
-    #                                     if r == 0 and s == 0:
-    #                                         v = 0
-
-    #                                     if i == 1 and j == 1:
-    #                                         m = 1
-    #                                     if k == 1 and l == 1:
-    #                                         n = 1
-    #                                     if p == 1 and q == 1:
-    #                                         u = 1
-    #                                     if r == 1 and s == 1:
-    #                                         v = 1
-
-    #                                     if i == 2 and j == 2:
-    #                                         m = 2
-    #                                     if k == 2 and l == 2:
-    #                                         n = 2
-    #                                     if p == 2 and q == 2:
-    #                                         u = 2
-    #                                     if r == 2 and s == 2:
-    #                                         v = 2
-
-    #                                     if i == 1 and j == 2:
-    #                                         m = 3
-    #                                     if k == 1 and l == 2:
-    #                                         n = 3
-    #                                     if p == 1 and q == 2:
-    #                                         u = 3
-    #                                     if r == 1 and s == 2:
-    #                                         v = 3
-
-    #                                     if i == 2 and j == 0:
-    #                                         m = 4
-    #                                     if k == 2 and l == 0:
-    #                                         n = 4
-    #                                     if p == 2 and q == 0:
-    #                                         u = 4
-    #                                     if r == 2 and s == 0:
-    #                                         v = 4
-
-    #                                     if i == 0 and j == 1:
-    #                                         m = 5
-    #                                     if k == 0 and l == 1:
-    #                                         n = 5
-    #                                     if p == 0 and q == 1:
-    #                                         u = 5
-    #                                     if r == 0 and s == 1:
-    #                                         v = 5
-
-    #                                     if i == 2 and j == 1:
-    #                                         m = 6
-    #                                     if k == 2 and l == 1:
-    #                                         n = 6
-    #                                     if p == 2 and q == 1:
-    #                                         u = 6
-    #                                     if r == 2 and s == 1:
-    #                                         v = 6
-
-    #                                     if i == 0 and j == 2:
-    #                                         m = 7
-    #                                     if k == 0 and l == 2:
-    #                                         n = 7
-    #                                     if p == 0 and q == 2:
-    #                                         u = 7
-    #                                     if r == 0 and s == 2:
-    #                                         v = 7
-
-    #                                     if i == 1 and j == 0:
-    #                                         m = 8
-    #                                     if k == 1 and l == 0:
-    #                                         n = 8
-    #                                     if p == 1 and q == 0:
-    #                                         u = 8
-    #                                     if r == 1 and s == 0:
-    #                                         v = 8
-    #                                     s99new[u, v] += L[p, i] * L[q, j] * \
-    #                                         L[r, k] * L[s, l] * s99[m, n]
-    #     for i in range(6):
-    #         for j in range(6):
-    #             s66new[i, j] = s99new[i, j]
-    #         # print s99new
-    #         # print s66new
-    #     return s66new
 
     def cubic_cal_complience(self, c11, c12, c44):
         M = np.zeros([6, 6], "float")
@@ -234,8 +147,7 @@ class md_crack_uti(object):
         # sij = self.change_sij(L,sij)
         return sij
 
-    def set_plane_strain_bij(self):
-        sij = self.cal_sij()
+    def set_plane_strain_bij(self, sij):
         self.ckcoeff.bij_pstrain['b11'] = (
             sij[0, 0] * sij[2, 2] - sij[0, 2] * sij[0, 2]) / sij[2, 2]
         self.ckcoeff.bij_pstrain['b22'] = (
@@ -257,6 +169,7 @@ class md_crack_uti(object):
                 self.ckcoeff.bij_pstrain['b26'],
                 self.ckcoeff.bij_pstrain['b66'])
 
+    # Gets the critical K1c
     def get_scalarB(self, surfE):
         b11, b22, b12, b16, b26, b66 = self.get_plane_strain_bij()
         # tmp1 = np.sqrt(0.5 * b11 * b22)
@@ -264,12 +177,9 @@ class md_crack_uti(object):
         # BB = tmp1 * tmp2
         BB = np.sqrt(0.5 * b11 * b22 * (np.sqrt(b22 / b11) +
                                         (2 * b12 + b66) / (2 * b11)))
-        if surfE is None:
-            Gg = 2 * self.surfe110
-        else:
-            Gg = 2 * surfE
+        Gg = 2 * surfE
         self.ckcoeff.Kg = np.sqrt(Gg / BB * 1e-3)
-        self.ckcoeff.K1 = self.ckcoeff.Kg
+        print("Kg is ", self.ckcoeff.Kg)
 
     def get_coeffs(self):
         b11, b22, b12, b16, b26, b66 = self.get_plane_strain_bij()

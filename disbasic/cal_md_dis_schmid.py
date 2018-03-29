@@ -4,17 +4,15 @@
 # @Author: chaomy
 # @Date:   2018-02-06 14:17:35
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-22 23:48:08
+# @Last Modified time: 2018-03-28 00:53:34
 
 
-from optparse import OptionParser
 import ase
 import ase.io
 import copy
 import os
 import numpy as np
 import glob
-import md_pot_data
 import atomman as am
 import atomman.lammps as lmp
 import atomman.unitconvert as uc
@@ -50,7 +48,8 @@ class cal_bcc_schmid(object):
     #                          filename="lmp_init.txt")
 
     def make_screw_plate(self, size=[40, 60, 2], rad=[100, 115],
-                         move=[0., 0., 0.], tag='[211]', filename="lmp_init.txt", opt=None):
+                         move=[0., 0., 0.], tag='[211]',
+                         filename="lmp_init.txt", opt=None):
 
         alat = uc.set_in_units(self.pot['lattice'], 'angstrom')
         C11 = uc.set_in_units(self.pot['c11'], 'GPa')
@@ -159,14 +158,25 @@ class cal_bcc_schmid(object):
 
         shift = np.array([-0.50000, -0.500, 0.0000])
         new_pos = system.atoms_prop(key='pos', scale=True) + shift
-        system.atoms_prop(key='pos',
-                          value=new_pos,
-                          scale=True)
+        system.atoms_prop(key='pos', value=new_pos, scale=True)
 
         new_pos = system.atoms_prop(key='pos') + move
         system.atoms_prop(key='pos', value=new_pos)
 
         disp = stroh.displacement(system.atoms_prop(key='pos'))
+
+        # pull
+        pull = True
+        if pull is True:
+            core_rows = [disp[:, 2].argsort()[-3:][::-1]]
+            print(disp[core_rows])
+            exclus = np.arange(len(disp), dtype=int)
+            unitburger = np.mean(disp[core_rows][:, 2])
+            print(unitburger)
+            exclus = np.delete(exclus, core_rows)
+            disp[core_rows] -= 1. / 3. * unitburger
+            # disp[exclus] -= 1. / 3. * unitburger
+
         system.atoms_prop(key='pos', value=system.atoms_prop(key='pos') + disp)
 
         new_pos = system.atoms_prop(key='pos') - move
@@ -175,6 +185,8 @@ class cal_bcc_schmid(object):
         shift = np.array([0.500000, 0.500000, 0.000000])
         new_pos = system.atoms_prop(key='pos', scale=True) + shift
         system.atoms_prop(key='pos', value=new_pos, scale=True)
+
+        new_pos = system.atoms_prop(key='pos', scale=False)
 
         # for lammps read structure
         lmp.atom_data.dump(system, filename)

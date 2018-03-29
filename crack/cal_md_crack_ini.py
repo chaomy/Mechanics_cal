@@ -4,33 +4,16 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:11:31
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-27 17:46:15
+# @Last Modified time: 2018-03-27 22:40:22
 
 
 from crack.cal_md_crack_uti import md_crack_uti
 from crack.cal_md_crack_pre import md_crack_pre
 from crack.cal_md_crack_run import md_crack_run
+import get_data
 import md_pot_data
 import gn_config
-from math import sqrt
-from math import pi
 
-
-# class crack_coeff:
-# Gg = None
-# BB = None
-# KK = None
-# Kg = None
-# p1 = None
-# p2 = None
-# q1 = None
-# q2 = None
-# u1 = None
-# u2 = None
-
-# class mtxs:
-#     lij = None
-#     sij = None
 
 class crack_coeff:
     Gg = None
@@ -54,14 +37,16 @@ class crack_coeff:
 class md_crack_ini(md_crack_pre,
                    md_crack_uti,
                    md_crack_run,
-                   gn_config.gnStructure):
+                   gn_config.gnStructure,
+                   get_data.get_data):
 
-    def __init__(self, pot=md_pot_data.md_pot.Nb_meam):
-        self.pot = pot
+    def __init__(self, pot=md_pot_data.md_pot.Nb_eam):
+        self.pot = self.load_data("../BASICS/pot.dat")
         md_crack_pre.__init__(self)
         md_crack_run.__init__(self)
         md_crack_uti.__init__(self)
         gn_config.gnStructure.__init__(self, self.pot)
+        get_data.get_data.__init__(self)
         self.ckcoeff = crack_coeff
         # self.set_params()
 

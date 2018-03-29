@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-09 02:44:35
+# @Last Modified time: 2018-03-27 18:16:11
 
 import numpy as np
 
@@ -75,7 +75,6 @@ class cal_cut_cell(object):
 
     def cut_y_normal_atoms(self, atoms, gp_n=1):
         cell = atoms.get_cell()
-
         # cut along glide plane normal
         dh = 20.
         y_above = cell[gp_n, gp_n] - dh

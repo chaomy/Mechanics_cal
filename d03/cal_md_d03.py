@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-#- * - coding : utf - 8 - * -
-#@Author : chaomy
-#@Date : 2018 - 01 - 25 16 : 19 : 21
-#@Last Modified by : chaomy
-#@Last Modified time : 2018 - 01 - 25 18 : 40 : 08
+# -*- coding: utf-8 -*-
+# Author : chaomy
+# Date : 2018 - 01 - 25 16 : 19 : 21
+# Last Modified by : chaomy
+# Last Modified time : 2018 - 01 - 25 18 : 40 : 08
 
 
 from optparse import OptionParser

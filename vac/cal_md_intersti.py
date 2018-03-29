@@ -9,18 +9,13 @@ import os
 import numpy as np
 import ase.lattice
 import md_pot_data
-
-try:
-    import atomman as am
-    import atomman.lammps as lmp
-    import atomman.unitconvert as uc
-    import gn_config
-    import get_data
-    import gn_lmp_infile
-    import gn_pbs
-
-except ImportError:
-    print("error during import")
+import atomman as am
+import atomman.lammps as lmp
+import atomman.unitconvert as uc
+import gn_config
+import get_data
+import gn_lmp_infile
+import gn_pbs
 
 
 class cal_md_intersti(gn_config.hcp,
@@ -52,7 +47,6 @@ class cal_md_intersti(gn_config.hcp,
                                                               pbc=(1, 1, 1))
         self._root = os.getcwd()
         self._run_lmp = "lmp_mpi -i in.init"
-        return
 
     def write_and_run(self, dirname, atoms):
         system, elements = am.convert.ase_Atoms.load(atoms)
@@ -206,8 +200,8 @@ class cal_md_intersti(gn_config.hcp,
         eoctahedral = self.cal_octahedral(atomsper.copy())
         etetrahedral = self.cal_tetrahedral(atomsper.copy())
         print("100 110 111", edumbb100, edumbb110, edumbb111)
-        print("ecrowdion octahedral etetrahedral", \
-            ecrowdion, eoctahedral, etetrahedral)
+        print("ecrowdion octahedral etetrahedral",
+              ecrowdion, eoctahedral, etetrahedral)
         return
 
     def loop_collect_r(self):  # total is 14 ####

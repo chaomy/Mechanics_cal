@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-27 16:15:43
+# @Last Modified time: 2018-03-27 23:49:50
 
 
 import os
@@ -20,12 +20,12 @@ from optparse import OptionParser
 from utils import Intro_vasp
 from prec import cal_md_prec
 from gb import cal_md_gb_hcp_dis
-from .cal_md_dislocation_hcp import md_dislocation_hcp
-from .cal_md_dislocation_bcc import md_dislocation_bcc
-from .cal_md_dislocation_fcc import md_dislocation_fcc
-from .cal_md_peierls_barrier import cal_barrier
-from .cal_md_dis_dipole import cal_dis_dipole
-from .cal_md_dis_schmid import cal_bcc_schmid
+from cal_md_dislocation_hcp import md_dislocation_hcp
+from cal_md_dislocation_bcc import md_dislocation_bcc
+from cal_md_dislocation_fcc import md_dislocation_fcc
+from cal_md_peierls_barrier import cal_barrier
+from cal_md_dis_dipole import cal_dis_dipole
+from cal_md_dis_schmid import cal_bcc_schmid
 import plt_drv
 
 
@@ -103,7 +103,8 @@ class md_dislocation(gn_config.gnStructure,
 
         atoms = self.set_bcc_convention(directions=[[e1[0], e1[1], e1[2]],
                                                     [e2[0], e2[1], e2[2]],
-                                                    [e3[0], e3[1], e3[2]]], size=(n, m, t))
+                                                    [e3[0], e3[1], e3[2]]],
+                                        size=(n, m, t))
 
         # perfect positions
         p = self.pot['lattice'] * self.bccneigh
@@ -150,7 +151,8 @@ class md_dislocation(gn_config.gnStructure,
         t = 1
         atoms = self.set_bcc_convention(directions=[[e1[0], e1[1], e1[2]],
                                                     [e2[0], e2[1], e2[2]],
-                                                    [e3[0], e3[1], e3[2]]], size=(n, t, m))
+                                                    [e3[0], e3[1], e3[2]]],
+                                        size=(n, t, m))
 
         atoms = self.cut_half_atoms_new(atoms, "cutz")
         supercell = atoms.get_cell()
@@ -230,6 +232,7 @@ class md_dislocation(gn_config.gnStructure,
         atoms = ase.io.read('dump.37', format='lammps-dump')
         self.write_lmp_config_data(atoms, "relaxed.txt")
         return atoms
+
 
 if __name__ == "__main__":
     usage = "usage:%prog [options] arg1 [options] arg2"

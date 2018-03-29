@@ -1,10 +1,9 @@
 #!/usr/bin/env python
-# encoding: utf-8
 # -*- coding: utf-8 -*-
 # @Author: chaomy
 # @Date:   2017-11-23 09:46:18
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-23 14:36:21
+# @Last Modified time: 2018-03-28 21:32:42
 
 
 from optparse import OptionParser
@@ -15,23 +14,21 @@ import os
 import numpy as np
 import ase.lattice
 import shutil
-import md_pot_data
 import gn_config
 import get_data
-import gn_lmp_infile
 import gn_pbs
 import atomman as am
 import atomman.lammps as lmp
+import md_pot_data
 
 
 class cal_md_vacancy(gn_config.gnStructure,
                      get_data.get_data,
-                     gn_pbs.gn_pbs,
-                     gn_lmp_infile.gn_md_infile):
+                     gn_pbs.gn_pbs):
 
     def __init__(self):
-        self.pot = self.load_data("../BASICS/pot.dat")
-        gn_lmp_infile.gn_md_infile.__init__(self) 
+        # self.pot = self.load_data("../BASICS/pot.dat")
+        self.pot = md_pot_data.va_pot.Nb_pbe
         gn_config.gnStructure.__init__(self, self.pot)
 
     def bcc_vacancy_prep(self):
@@ -39,7 +36,6 @@ class cal_md_vacancy(gn_config.gnStructure,
         self.mymkdir("bulk")
         self.write_lmp_config_data(atoms, "bulk/lmp_init.txt")
         os.system("cp in.minimize bulk")
-
         atoms.pop(16 * 16 * 8)
         self.mymkdir("vacancy")
         self.write_lmp_config_data(atoms, "vacancy/lmp_init.txt")
@@ -58,22 +54,27 @@ class cal_md_vacancy(gn_config.gnStructure,
         with open("bulk/lmp_init.txt", 'r') as fid:
             system = lmp.atom_data.load(data=fid.read(), units='metal')
         natoms = system.atoms.natoms
-        print("vac formation energy", vacancyeng - (natoms - 1) * bulkeng / (natoms))
+        print("vac formation energy",
+              vacancyeng - (natoms - 1) * bulkeng / (natoms))
 
     def migration_prep(self):
         sz = 16
-        perf_atoms = self.set_bcc_convention().repeat((sz, sz, sz))
+        # sz = 4
+        perf_atoms = self.set_bcc_convention(size=[sz, sz, sz])
         vect = np.array([1, 1, 1]) * self.pot['lattice']
 
         pos1 = vect * sz * 0.5
         pos2 = vect * sz * 0.5 + 0.5 * vect
         pos3 = vect * 0.0
+
         dellist = []
         atoms = perf_atoms.copy()
         for atom in atoms:
-            if ((pos1 - atom.position) == ([0, 0, 0])).all() or \
-                    ((pos2 - atom.position) == ([0, 0, 0])).all() or \
-                    ((pos3 - atom.position) == ([0, 0, 0])).all():
+            if np.isclose(pos1 - atom.position, np.array([0, 0, 0])).all() or \
+                    np.isclose(pos2 - atom.position,
+                               np.array([0, 0, 0])).all() or \
+                    np.isclose(pos3 - atom.position,
+                               np.array([0, 0, 0])).all():
                 dellist.append(atom.index)
         print(dellist)
         del atoms[dellist]
@@ -82,10 +83,18 @@ class cal_md_vacancy(gn_config.gnStructure,
         atoms2 = atoms.copy()
 
         atoms1.append(ase.Atom('Nb', pos1))
+        # atoms1.append(ase.Atom('Nb', pos3))
+        # set this atom to be other type so we can fix it in lammps
         atoms1.append(ase.Atom('W', pos3))
         atoms2.append(ase.Atom('Nb', pos2))
+        # atoms2.append(ase.Atom('Nb', pos3))
         atoms2.append(ase.Atom('W', pos3))
 
+        # for vasp
+        self.write_poscar_fix(atoms1, "posi")  # change it manually then
+        self.write_poscar_fix(atoms2, "posf")
+
+        # for md
         system, elements = am.convert.ase_Atoms.load(atoms1)
         lmp.atom_data.dump(system, "init.txt")
         shutil.copy("init.txt", "init0.txt")
@@ -112,6 +121,7 @@ class cal_md_vacancy(gn_config.gnStructure,
         drv.bcc_vacancy_prep()
         drv.bcc_vacancy_run()
         drv.bcc_vacancy_cal()
+
 
 if __name__ == '__main__':
     usage = "usage:%prog [options] arg1 [options] arg2"

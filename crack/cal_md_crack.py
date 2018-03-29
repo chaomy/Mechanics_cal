@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-27 17:26:28
+# @Last Modified time: 2018-03-27 20:22:15
 
 from optparse import OptionParser
 import cal_md_crack_ini
@@ -15,7 +15,6 @@ if __name__ == "__main__":
     parser.add_option('-t', "--mtype", action="store",
                       type="string", dest="mtype", help="",
                       default="prp_r")
-
     parser.add_option('-a', "--delta", action="store",
                       type='string', dest="fargs",
                       default=None)
@@ -24,7 +23,8 @@ if __name__ == "__main__":
     drv = cal_md_crack_ini.md_crack_ini()
     dispatcher = {'stat': drv.static_crack,
                   'coeff': drv.cal_crack_anglecoeff,
-                  'ani211': drv.aniso_211}
+                  'ani211': drv.aniso_211,
+                  'loop211': drv.loop_211}
 
     if options.fargs is not None:
         dispatcher[options.mtype.lower()](options.fargs)

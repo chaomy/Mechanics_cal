@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 01:09:32
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-27 17:46:33
+# @Last Modified time: 2018-03-27 18:21:33
 
 
 from numpy.lib import scimath as SM
@@ -24,62 +24,27 @@ class md_crack_pre(object):
         self.write_lmp_config_data(atoms)
         return atoms
 
-    # called by mpi
-    def updata_position(self, x, y, xc, yc):
-        ckcoeff = self.ckcoeff
-        u1, u2, p1, p2, q1, q2 = self.get_crack_coeffs()
-        k1 = ckcoeff.K1
-        for i in range(len(x)):
-            dx, dy = x[i] - xc, y[i] - yc
-            r = sqrt(dx * dx + dy * dy)
-            coeff = 100 * k1 * sqrt(2 * r / pi)
-            if y[i] < yc:
-                theta = arctan2(-dy, dx)
-                ux = 1. / (u1 - u2) * \
-                    (u1 * p2 * smsqrt(cos(theta) - u2 * sin(theta)) -
-                     u2 * p1 * smsqrt(cos(theta) - u1 * sin(theta)))
-
-                uy = 1. / (u1 - u2) * \
-                    (u1 * q2 * smsqrt(cos(theta) - u2 * sin(theta)) -
-                     u2 * q1 * smsqrt(cos(theta) - u1 * sin(theta)))
-
-                ux = coeff * ux.real
-                uy = coeff * uy.real
-            if y[i] >= yc:
-                theta = arctan2(dy, dx)
-                ux = 1. / (u1 - u2) * \
-                    (u1 * p2 * smsqrt(cos(theta) - u2 * sin(theta)) -
-                     u2 * p1 * smsqrt(cos(theta) - u1 * sin(theta)))
-
-                uy = 1. / (u1 - u2) * \
-                    (u1 * q2 * smsqrt(cos(theta) - u2 * sin(theta)) -
-                     u2 * q1 * smsqrt(cos(theta) - u1 * sin(theta)))
-                ux = coeff * ux.real
-                uy = -coeff * uy.real
-            print(ux, uy)
-            x[i] += ux
-            y[i] += uy
-        return (x, y)
-
     def intro_crack_k1(self, center=None, atoms=None):
         u1, u2, p1, p2, q1, q2 = self.get_crack_coeffs()
         k1 = self.ckcoeff.K1
         natoms = len(atoms)
         cell = atoms.get_cell()
         pos = atoms.get_positions()
+        radius1 = 150
+        radius2 = 160
+        delindex = []
 
         if center is None:
             xc = 0.5 * cell[0, 0]
             yc = 0.5 * cell[1, 1]
         else:
             (xc, yc) = center
-
         for i in range(natoms):
             xs, ys = pos[i, 0], pos[i, 1]
             dx, dy = xs - xc, ys - yc
             r = sqrt(dx * dx + dy * dy)
             coeff = 100 * k1 * sqrt(2 * r / pi)
-            if r < 140:
+            if r < radius2:
                 if ys < yc:
                     theta = arctan2(-dy, dx)
                     ux = 1. / (u1 - u2) * \
@@ -103,8 +68,51 @@ class md_crack_pre(object):
                     ux = coeff * ux.real
                     uy = -coeff * uy.real
                 pos[i, 0], pos[i, 1] = xs + ux, ys + uy
+                if r > radius1:
+                    atoms[i].symbol = 'W'
+            else:
+                delindex.append(atoms[i].index)
+
         atoms.set_positions(pos)
+        del atoms[delindex]
         return atoms
+
+    # # called by mpi
+    # def updata_position(self, x, y, xc, yc):
+    #     ckcoeff = self.ckcoeff
+    #     u1, u2, p1, p2, q1, q2 = self.get_crack_coeffs()
+    #     k1 = ckcoeff.K1
+    #     for i in range(len(x)):
+    #         dx, dy = x[i] - xc, y[i] - yc
+    #         r = sqrt(dx * dx + dy * dy)
+    #         coeff = 100 * k1 * sqrt(2 * r / pi)
+    #         if y[i] < yc:
+    #             theta = arctan2(-dy, dx)
+    #             ux = 1. / (u1 - u2) * \
+    #                 (u1 * p2 * smsqrt(cos(theta) - u2 * sin(theta)) -
+    #                  u2 * p1 * smsqrt(cos(theta) - u1 * sin(theta)))
+
+    #             uy = 1. / (u1 - u2) * \
+    #                 (u1 * q2 * smsqrt(cos(theta) - u2 * sin(theta)) -
+    #                  u2 * q1 * smsqrt(cos(theta) - u1 * sin(theta)))
+
+    #             ux = coeff * ux.real
+    #             uy = coeff * uy.real
+    #         if y[i] >= yc:
+    #             theta = arctan2(dy, dx)
+    #             ux = 1. / (u1 - u2) * \
+    #                 (u1 * p2 * smsqrt(cos(theta) - u2 * sin(theta)) -
+    #                  u2 * p1 * smsqrt(cos(theta) - u1 * sin(theta)))
+
+    #             uy = 1. / (u1 - u2) * \
+    #                 (u1 * q2 * smsqrt(cos(theta) - u2 * sin(theta)) -
+    #                  u2 * q1 * smsqrt(cos(theta) - u1 * sin(theta)))
+    #             ux = coeff * ux.real
+    #             uy = -coeff * uy.real
+    #         print(ux, uy)
+    #         x[i] += ux
+    #         y[i] += uy
+    #     return (x, y)
 
     # def Mpi_Intro_Crack_xyz(self, atoms):
     #     natoms = len(atoms)
