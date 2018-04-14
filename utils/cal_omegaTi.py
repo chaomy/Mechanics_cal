@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2018-03-28 21:31:56
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-29 00:52:01
+# @Last Modified time: 2018-04-04 22:05:03
 
 import ase
 import gn_config
@@ -26,7 +26,7 @@ class cal_omegaTi(gn_config.gnStructure):
         gn_config.gnStructure.__init__(self, self.pot)
 
     def build_omegaTi(self):
-        atoms = omegaTi(latticeconstant=(4.887, 4.887, 2.678),
+        atoms = omegaTi(latticeconstant=(4.905, 4.905, 2.765),
                        size=(1, 1, 1), symbol=('Nb'))
         ase.io.write("POSCAR_omegaTi", atoms, "vasp")
         self.write_lmp_config_data(atoms)

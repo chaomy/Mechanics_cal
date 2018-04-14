@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-23 00:25:07
+# @Last Modified time: 2018-04-02 21:44:12
 
 
 import os
@@ -153,6 +153,7 @@ class lmps_neb_tools(get_data.get_data, gn_config.bcc):
         data = np.ndarray([len(neb_energy), 2])
         data[:, 0] = np.linspace(0, 1, len(neb_energy))
         data[:, 1] = neb_energy
+        print("max_engy", np.max(data[:, 1]))
         np.savetxt('data.txt', data)
 
     def read_screen(self):
@@ -200,6 +201,25 @@ class lmps_neb_tools(get_data.get_data, gn_config.bcc):
             print(atoms)
             self.write_lmp_config_data(atoms, "dump.init.data")
 
+    def interp(self):
+        atomsi = ase.io.read("contcar.init", format='vasp')
+        print(atomsi.get_cell())
+
+        atomsf = ase.io.read("contcar.final", format='vasp')
+        print(atomsf.get_cell())
+        
+        npts = 6 
+        delta = 1/(npts-1)  
+        for i in range(npts):
+            r = (i) * delta 
+            print(r)
+            pos = (1 - r) * atomsi.get_positions() + r * atomsf.get_positions() 
+            atoms = atomsi.copy()
+            atoms.set_positions(pos) 
+            mdir = "{:02d}".format(i) 
+            self.mymkdir(mdir)
+            # os.system("cp INCAR KPOINTS POTCAR {}".format())
+            ase.io.write("{}/POSCAR".format(mdir), images=atoms, format='vasp')
 
 if __name__ == '__main__':
     usage = "usage:%prog [options] arg1 [options] arg2"
@@ -215,7 +235,8 @@ if __name__ == '__main__':
     dispatcher = {'plt': drv.read_lmp_log_file,
                   'screen': drv.read_screen,
                   'rst': drv.restart_neb,
-                  'adj': drv.create_final_screw}
+                  'adj': drv.create_final_screw,
+                  'inter': drv.interp}
 
     if options.fargs is not None:
         dispatcher[options.mtype.lower()](options.fargs)

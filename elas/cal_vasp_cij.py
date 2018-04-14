@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-21 18:42:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-03 15:40:52
+# @Last Modified time: 2018-04-13 20:11:31
 
 
 import glob
@@ -21,14 +21,12 @@ import gn_pbs
 import output_data
 
 
-class cal_cij(gn_config.bcc,
-              gn_config.fcc,
-              gn_config.hcp,
-              get_data.get_data,
+class cal_cij(get_data.get_data,
               gn_incar.gn_incar,
               gn_pbs.gn_pbs,
               output_data.output_data,
-              cal_add_strain.cal_add_strain):
+              cal_add_strain.cal_add_strain,
+              gn_config.gnStructure):
 
     def __init__(self):
         self.pot = md_pot_data.va_pot.Nb_pbe
@@ -36,20 +34,14 @@ class cal_cij(gn_config.bcc,
         gn_incar.gn_incar.__init__(self)
         output_data.output_data.__init__(self)
         cal_add_strain.cal_add_strain.__init__(self)
+        gn_config.gnStructure.__init__(self, self.pot)
 
         # self.unit_delta = 0.002 near equilibrim
-        self.unit_delta = 0.003 
+        self.unit_delta = 0.003
         self.npts = 50
         self.volume = None
         self.energy0 = None
         self.cij_type_list = ['c12', 'c44']
-
-        if self.pot["structure"] == 'bcc':
-            gn_config.bcc.__init__(self, self.pot)
-        elif self.pot["structure"] == 'fcc':
-            gn_config.fcc.__init__(self, self.pot)
-        elif self.pot["structure"] == 'hcp':
-            gn_config.hcp.__init__(self, self.pot)
 
     def fit_para(self, delta_list, energy_list):
         xdata = delta_list

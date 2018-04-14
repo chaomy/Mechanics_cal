@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-18 07:48:14
+# @Last Modified time: 2018-04-04 00:18:05
 
 
 from itertools import cycle
@@ -44,6 +44,7 @@ class cal_bcc_ideal_shear_plt(object):
         self.fig.savefig("fig-engy.png", **self.figsave)
 
     def plt_energy_stress_lmp(self, fname='stress.txt'):
+    # def plt_energy_stress_lmp(self, fname='ishear.txt'):
         til = os.getcwd().split('/')[-1].split('_')[-2:]
         raw = np.loadtxt(fname)
         ylabeliter = cycle(['E [eV]', r'$\tau$ [Gpa]'])
@@ -52,7 +53,7 @@ class cal_bcc_ideal_shear_plt(object):
         axlist = [self.ax1, self.ax2]
         self.ax1.plot(raw[:, 0], (raw[:, 1] - raw[0, 1]),
                       label='engy', **next(self.keysiter))
-        self.ax2.plot(raw[:, 0], raw[:, -1],
+        self.ax2.plot(raw[:, 0], raw[:, -1], 
                       label='stress', **next(self.keysiter))
         self.add_legends(*axlist)
         self.set_tick_size(*axlist)
@@ -60,56 +61,49 @@ class cal_bcc_ideal_shear_plt(object):
         self.add_x_labels(cycle([r'$\epsilon$']), self.ax2)
         self.fig.savefig("fig-ishear.png", **self.figsave)
 
-    def plt_energy_stress(self, ptype='211', fname='stress.txt'):
-        til = os.getcwd().split('/')[-1].split('_')[-2:]
+    def plt_energy_stress(self, fname='stress.txt'):
         raw = np.loadtxt(fname)
         ylabeliter = cycle(['E [eV]', r'$\tau$ [Gpa]'])
         self.set_keys()
         self.set_211plt()
         axlist = [self.ax1, self.ax2]
-        print(raw[:, 0])
         index = np.where(raw[:, 1] < -100.0)
         raw[:, 1][index] = raw[:, 1][index] / unitconv.uengy['rytoeV']
-        self.ax1.plot(raw[:, 0], (raw[:, 1] - raw[0, 1]),
-                      label='engy', **next(self.keysiter))
-
-        if ptype in ['211']:
-            # yy = raw[:, -3]
-            yy = raw[:, -2]
-        elif ptype in ['110']:
-            yy = -raw[:, -1]
-
+        self.ax1.plot(raw[:, 0], (raw[:, 1] - raw[0, 1]), label='engy', **next(self.keysiter))
+        yy = raw[:, -1]
         # call interp
         ply = polyfit(raw[:, 0], yy, 2)
         print(polyval(ply, [0.08]))
-
-        self.ax2.plot(raw[:, 0], yy,
-                      label='stress', **next(self.keysiter))
+        self.ax2.plot(raw[:, 0], yy, label='stress', **next(self.keysiter))
         self.add_legends(*axlist)
         self.set_tick_size(*axlist)
         self.add_y_labels(ylabeliter, *axlist)
         self.add_x_labels(cycle([r'$\epsilon$']), self.ax2)
-        self.ax1.set_title('{} {}'.format(*til), fontsize=self.myfontsize)
         self.fig.savefig("fig-ishear.png", **self.figsave)
 
-    def plt_cmp(self):
-        pln = '211'
+    def plt_cmp_pth(self, tg='va'):
         self.set_211plt()
-        self.set_keys('upper left')
-        axlist = [self.ax1, self.ax2]
-        filelist = ['stress.adp.p{}'.format(pln), 'stress.pbe.p{}'.format(pln)]
-        til = 'ideal shear along ({})'.format(pln)
-        lablist = ['adp', 'pbe']
-        ylabeliter = cycle(['E [eV]', r'$\tau$ [Gpa]'])
-        for i in range(len(filelist)):
-            raw = np.loadtxt(filelist[i])
-            self.ax1.plot(raw[:, 0], (raw[:, 1] - raw[0, 1]),
-                          label=lablist[i], **next(self.keysiter))
-            self.ax2.plot(raw[:, 0], raw[:, -1],
-                          label=lablist[i], **next(self.keysiter))
-        self.add_legends(*axlist)
-        self.set_tick_size(*axlist)
-        self.add_y_labels(ylabeliter, *axlist)
-        self.add_x_labels(cycle([r'$\epsilon$']), self.ax2)
-        # self.ax1.set_title(til, fontsize=self.myfontsize)
-        self.fig.savefig("fig-cmp-{}.png".format(pln), **self.figsave)
+        self.set_keys()
+        ylabeliter = cycle(['Energy per atom [eV]', r'Shear stress [Gpa]'])
+        cc = 1.0
+        if tg in ['va']:
+            cc = 0.1 
+
+        # vasp use Bar -> times 0.1 to be GPa
+        lab = '{211}<111>'  
+        raw = np.loadtxt('stress.{}.211.txt'.format(tg))
+        self.ax1.plot(raw[:, 0], raw[:, 1] - raw[0, 1], label=lab, **next(self.keysiter))
+        if tg in ['md']:
+            self.ax2.plot(raw[:, 0], cc * raw[:, -1], label=lab, **next(self.keysiter))
+        if tg in ['va']:
+            self.ax2.plot(raw[:, 0], cc * raw[:, -2], label=lab, **next(self.keysiter))
+        lab = '{110}<111>'
+        raw = np.loadtxt('stress.{}.110.txt'.format(tg))
+        self.ax1.plot(raw[:, 0], raw[:, 1] - raw[0, 1], label=lab, **next(self.keysiter))
+        self.ax2.plot(raw[:, 0], cc * raw[:, -1], label=lab, **next(self.keysiter))
+
+        self.add_legends(*self.axls)
+        self.set_tick_size(*self.axls)
+        self.add_y_labels(ylabeliter, *self.axls)
+        self.add_x_labels(cycle([r'Shear strain']), self.ax2)
+        self.fig.savefig("fig-cmp-{}.png".format(tg), **self.figsave)

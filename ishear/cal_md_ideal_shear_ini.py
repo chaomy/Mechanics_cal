@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-23 10:54:10
+# @Last Modified time: 2018-04-05 02:31:51
 
 
 from cal_md_ideal_shear_pre import cal_bcc_ideal_shear_pre
@@ -46,28 +46,22 @@ class cal_bcc_ideal_shear(get_data.get_data,
         cal_bcc_ideal_shear_mesh.__init__(self)
         self.npts = 20
         self.delta = 0.02
-
         shd111p211 = {'e1': np.array([1., 1., 1.]),
                       'e2': np.array([1., 1., -2.]),
                       'e3': np.array([-1., 1., 0.])}
-
         shd111p110 = {'e1': np.array([1., 1., 1.]),
                       'e2': np.array([1., -1, 0]),
                       'e3': np.array([1, 1., -2])}
-
         if shtype == '211':
             e1 = shd111p211['e1']
             e2 = shd111p211['e2']
             e3 = shd111p211['e3']
-
         elif shtype == '110':
             e1 = shd111p110['e1']
             e2 = shd111p110['e2']
             e3 = shd111p110['e3']
-
         e1 = e1 / np.linalg.norm(e1)
         e2 = e2 / np.linalg.norm(e2)
         e3 = e3 / np.linalg.norm(e3)
-
         self.basis = np.mat([e1, e2, e3])
         self.setup_qe_params()

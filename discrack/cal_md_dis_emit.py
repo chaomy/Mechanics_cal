@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-27 17:05:34
+# @Last Modified time: 2018-03-31 17:47:17
 
 
 from optparse import OptionParser
@@ -145,19 +145,20 @@ class cal_dis_emit(cal_dis_emit_curtin, cal_md_dis_emit_plt,
             data[i, 1:] = self.get_bcc_w_result211(vcaw[key])
         np.savetxt('vcaw_112_Ke.txt', data)
 
-    def cal_crack(self, param, c):
-        self.set_params(c)
-        self.set_plane_strain_bij()
+    def cal_crack(self, param, c, theta):
+        self.set_params()
+        self.set_plane_strain_bij(c.Sij)
         self.get_scalarB(param['surf'])
         self.get_coeffs()
-
         s1, s2 = drv.ckcoeff.u1, drv.ckcoeff.u2
-        theta = self.theta
+        if theta is None:
+            theta = self.theta
         tmp = 1. / (s1 - s2)
         costhe = cos(theta)
         sinthe = sin(theta)
-        coeff = np.real(tmp * (s1 / sqrt(costhe + s1 * sinthe) -
+        coeff = np.real(tmp * (s1 / sqrt(costhe + s1 * sinthe) - 
                                s2 / sqrt(costhe + s2 * sinthe)))
+        print(coeff)
         return (coeff, drv.ckcoeff.Kg)
 
     def get_bcc_w_result211(self, param):
@@ -170,6 +171,7 @@ class cal_dis_emit(cal_dis_emit_curtin, cal_md_dis_emit_plt,
         e3 = [0, 1, 1]
         # glide plane [2, 1, -1]
         axes = np.array([e1, e2, e3])
+
         # x [1, 0, 0], y[0, 1, -1], z[0, 1, 1]
         burgers = param['lat'] / 2. * np.array([1., 1., -1.])
 
@@ -187,7 +189,6 @@ class cal_dis_emit(cal_dis_emit_curtin, cal_md_dis_emit_plt,
         Linv = np.real(np.complex(0, 1) * A * np.linalg.inv(B))
         Gamma = 0.5 * Linv
         surf = param['surf']
-        print(Gamma[1, 1])
         k1c = sqrt(2 * surf / abs(Gamma[1, 1] * 1e3))
 
         theta = np.deg2rad(54.735610317245346)
@@ -201,7 +202,6 @@ class cal_dis_emit(cal_dis_emit_curtin, cal_md_dis_emit_plt,
         # K1c
         # G11 = Gamma[1, 1]
         # k1c = sqrt(2 * surf / G11) * 1e6
-        # print k1c, k1cn
 
         # Ke
         if axes is not None:
@@ -209,10 +209,10 @@ class cal_dis_emit(cal_dis_emit_curtin, cal_md_dis_emit_plt,
             burgers = T.dot(burgers)
             c = c.transform(axes)
 
-        (coeff, Kg) = self.cal_crack(param, c)
+        (coeff, Kg) = self.cal_crack(param, c, theta=theta)
+        print(Kg)
         usf = param['ugsf1']  # J/m^2
 
-        # Gamma = (svect * Gamma * svect.transpose())[0, 0]  # in GPa
         G00 = Gamma[0, 0]
         k1e = np.sqrt(G00 * usf) * 1e-6
         k1e = k1e / coeff
@@ -248,19 +248,17 @@ class cal_dis_emit(cal_dis_emit_curtin, cal_md_dis_emit_plt,
 
         # k1c
         surf = param['surf']
-        print(Gamma[1, 1])
         k1c = sqrt(2 * surf / abs(Gamma[1, 1] * 1e3))
 
         theta = np.deg2rad(90.0)
         omega = np.mat([[cos(theta), sin(theta), 0.0],
                         [-sin(theta), cos(theta), 0.0],
                         [0.0, 0.0, 1.0]])
-
-        Gamma = omega * Gamma * omega.transpose()
+        Gamma = omega * Gamma * omega.transpose()  # rotates for theta
         Gamma = np.abs(np.linalg.inv(Gamma))
         Gamma = Gamma * 1e9  # Pa
 
-        # # K1c
+        # K1c
         # G11 = Gamma[1, 1]
         # surf = param['surf']
         # k1c = sqrt(2 * surf / G11) * 1e6
@@ -268,14 +266,14 @@ class cal_dis_emit(cal_dis_emit_curtin, cal_md_dis_emit_plt,
         # Ke
         phi = np.deg2rad(90 - 54.735610317245346)
         svect = np.mat(np.array([cos(phi), 0.0, sin(phi)]))
-        Gamma = (svect * Gamma * svect.transpose())[0, 0]  # in GPa
+        Gamma = (svect * Gamma * svect.transpose())[0, 0]  # in GPa projects for phi
 
         if axes is not None:
             T = axes_check.axes_check(axes)
             burgers = T.dot(burgers)
             c = c.transform(axes)
 
-        (coeff, Kg) = self.cal_crack(param, c)
+        (coeff, Kg) = self.cal_crack(param, c, theta)
         usf = param['ugsf2']  # J/m^2
 
         G00 = Gamma

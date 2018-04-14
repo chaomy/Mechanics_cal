@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-02-20 22:50:21
+# @Last Modified time: 2018-04-06 15:16:40
 
 from ase import Atoms
 import ase.lattice.orthorhombic as otho
@@ -33,13 +33,9 @@ class md_gb_hcp(object):
         atoms = othoHCP(latticeconstant=(self.pot['ahcp'],
                                          self.pot['ahcp'] * sqrt(3.),
                                          self.pot['chcp']),
-                        size=(4, 4, 2),
-                        symbol=self.pot['element'])
-
-        print(atoms.get_cell())
+                        size=(4, 4, 2), symbol=self.pot['element'])
 
         # pmat = self.hcp_til_mtx(30)
-
         ase.io.write("perf_hcp", images=atoms, format='vasp')
         ang = 30
         atoms.rotate(30, 'z', center='COU', rotate_cell=True)

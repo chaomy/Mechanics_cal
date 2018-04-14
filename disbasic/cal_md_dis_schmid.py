@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2018-02-06 14:17:35
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-28 00:53:34
+# @Last Modified time: 2018-04-04 00:00:12
 
 
 import ase
@@ -47,7 +47,7 @@ class cal_bcc_schmid(object):
     #                          move=[0., 0., 0.], tag='[211]',
     #                          filename="lmp_init.txt")
 
-    def make_screw_plate(self, size=[40, 60, 2], rad=[100, 115],
+    def make_screw_plate(self, size=[80, 120, 2], rad=[200, 230],
                          move=[0., 0., 0.], tag='[211]',
                          filename="lmp_init.txt", opt=None):
 

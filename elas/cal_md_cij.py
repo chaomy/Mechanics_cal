@@ -1,10 +1,9 @@
 #!/usr/bin/env python
-# encoding: utf-8
 # -*- coding: utf-8 -*-
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-12 13:56:03
+# @Last Modified time: 2018-04-09 18:51:34
 
 
 from optparse import OptionParser
@@ -50,7 +49,6 @@ class cal_md_cij(get_data.get_data,
         os.system("cp ../%s  ." % (self.pot["file"]))
         os.system("mpirun -n 8 lmp_mpi -in in.shear")
         os.chdir(os.pardir)
-        return
 
     def cal_elastic_constant(self):
         self.pot = self.load_data('pot.dat')

@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-04 20:53:50
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-20 14:41:33
+# @Last Modified time: 2018-04-03 20:42:42
 
 
 from md_pot_data import unitconv
@@ -98,10 +98,10 @@ class cal_bcc_ideal_shear_pos(object):
             data = np.ndarray([npts, 7])
         if opt == 'clc':
             for i in range(npts):
-                dirname = "dir-{:03d}".format(i)
-                print(dirname)
-                if os.path.isdir(dirname):
-                    os.chdir(dirname)
+                mdir = "dir-{:03d}".format(i)
+                print(mdir)
+                if os.path.isdir(mdir):
+                    os.chdir(mdir)
                     raw = self.load_ishear_txt()
                     data[i, :7] = raw
                     # stress
@@ -117,17 +117,23 @@ class cal_bcc_ideal_shear_pos(object):
                 np.savetxt('stress.txt', data)
 
     def va_loop_stress(self):
-        npts = self.npts
+        npts = 20
         data = np.ndarray([npts, 2 + 5 + 6])
         for i in range(npts):
-            dirname = "dir-{:03d}".format(i)
-            os.chdir(dirname)
-            raw = self.load_ishear_txt()
-            self.get_va_stress()
-            print("raw is", raw)
+            raw = np.loadtxt("ishear-{:03}".format(i))
+            (engy, stsvec, vol) = self.vasp_energy_stress_vol(
+                "outcar-{:03}".format(i))
+            stsvec = self.get_va_stress(stsvec)
             data[i, :7] = raw
-            data[i, 7:] = self.get_va_stress()
-            os.chdir(self.root)
+            data[i, 1] = engy
+            data[i, 7:] = stsvec  # self.get_va_stress()
+        np.savetxt("stress.txt", data)
+
+    def lmp_loop_stress(self):
+        npts = 20 
+        data = np.loadtxt("ishear.txt")
+        for i in range(npts):
+            data[i][-6:] = self.get_va_stress(data[i][-6:]) 
         np.savetxt("stress.txt", data)
 
     def load_sfile_txt(self):
@@ -170,9 +176,9 @@ class cal_bcc_ideal_shear_pos(object):
         tag = 'interp'
         if tag == 'interp':
             # interpolate
-            spl = InterpolatedUnivariateSpline(raw[:, 0], raw[:, 1])
-            # spl.set_smoothing_factor(0.5)
+            spl = InterpolatedUnivariateSpline(raw[:, 0], raw[:, 1],k=3.2)
             splder1 = spl.derivative()
+            splder1.set_smoothing_factor(3.0)
             for i in range(len(raw)):
                 # append the stress to the last column
                 print("coeff", convunit / vol[i])
@@ -221,26 +227,25 @@ class cal_bcc_ideal_shear_pos(object):
         else:
             data_init = np.loadtxt('restart.txt')
         np.savetxt('restart.txt', data_init)
-        dirname = os.getcwd().split('/')[-1]
-        self.set_pbs(dirname, 'qe')
+        mdir = os.getcwd().split('/')[-1]
+        self.set_pbs(mdir, 'qe')
         return data_init
 
     def loop_prep_restart_from_log(self):
         npts = self.npts
         data = np.ndarray([npts, 7])
         for i in range(0, npts):
-            dirname = "dir-{:03d}".format(i)
-            if os.path.isdir(dirname):
-                os.chdir(dirname)
-                print(dirname)
+            mdir = "dir-{:03d}".format(i)
+            if os.path.isdir(mdir):
+                os.chdir(mdir)
+                print(mdir)
                 raw = self.prep_restart_from_log()
                 os.chdir(os.pardir)
                 data[i, :] = raw
         np.savetxt('ishear.txt', data)
 
-    def get_va_stress(self):
+    def get_va_stress(self, stsvec):
         basis = self.basis
-        (engy, stsvec, vol) = self.vasp_energy_stress_vol()
         vaspmtx = np.mat(np.zeros([3, 3]))
 
         vaspmtx[0, 0] = stsvec[0]

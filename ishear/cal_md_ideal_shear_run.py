@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-18 07:13:28
+# @Last Modified time: 2018-04-05 02:32:09
 
 
 from scipy.optimize import minimize
@@ -31,16 +31,32 @@ class cal_bcc_ideal_shear_run(object):
         np.savetxt("ishear.txt", data)
 
     def loop_shear_lmp(self):
-        x0 = np.array([1.2, 1.1, 0.9, 0., 0.])
+        # This is a typical starting point coming from running of Nb
+        # for 110
+        x0 = np.array([9.995455382221108964e-01,
+                       1.075933203165313046e+00,
+                       1.085678403318995455e+00,
+                       2.548558462285926973e-01,
+                       3.139171320878977878e-02])
+
+        # for 211
+        # x0 = np.array([9.529678394166982702e-01,
+        #                1.016847096128853600e+00,
+        #                1.048118345240103277e+00,
+        #                1.389246099431499289e-04,
+        #                -2.142860303806213597e-04])
+
         npts = self.npts
-        data = np.ndarray([npts, 7])
+        # 1 strain  + energy + 5 strains + 6 stresses
+        data = np.ndarray([npts, 7 + 6])
         for i in range(npts):
             delta = self.delta * i
             res = minimize(self.runlmp, x0, delta,
-                           tol=1e-3, method='Nelder-Mead')
-            x0 = res.x
+                           tol=1e-4, method='Nelder-Mead')
             print(res)
-            data[i][0], data[i][1], data[i][2:] = (delta), res.fun, res.x
+            info = np.loadtxt("out.txt")
+            data[i][0], data[i][1], data[i][2:7], data[
+                i][7:] = (delta), res.fun, res.x, info[1:]
         np.savetxt("ishear.txt", data)
 
     def recordstrain(self, delta, x, fval):
@@ -77,9 +93,8 @@ class cal_bcc_ideal_shear_run(object):
 
     def runvasp(self, x, delta):
         basis = self.basis
-        strain = np.mat([[x[0], 0.0, 0.0],
-                         [-delta, x[1], 0.0],
-                         [x[3], x[4], x[2]]])
+        strain = np.mat(
+            [[x[0], 0.0, 0.0], [-delta, x[1], 0.0], [x[3], x[4], x[2]]])
         new_strain = basis.transpose() * strain * basis
         self.gn_primitive_lmps(new_strain, 'vasp')
         os.system("mpirun vasp > vasp.log")

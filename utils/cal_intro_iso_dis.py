@@ -10,10 +10,7 @@ class cal_intro_iso_dis(object):
     def __init__(self):
         self.screw_coeff = self.burger / (2. * self.pi)
 
-    def intro_single_screw_atoms(self, atoms,
-                                 center=None,
-                                 sign=None,
-                                 orient=[0, 1, 2]):
+    def intro_single_screw_atoms(self, atoms, center=None, sign=None, orient=[0, 1, 2]):
 
         ucell = atoms.get_cell()
         atom_position = atoms.get_positions()
@@ -43,8 +40,7 @@ class cal_intro_iso_dis(object):
         atoms.set_positions(atom_position)
         return atoms
 
-    def intro_single_edge_atoms(self, atoms, center=None,
-                                sign=1, orient=None):
+    def intro_single_edge_atoms(self, atoms, center=None, sign=1, orient=None):
         # default
         bdir = 0  # burger
         ndir = 1  # glide plane normal

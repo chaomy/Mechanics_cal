@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-02-20 22:50:43
+# @Last Modified time: 2018-04-06 15:37:05
 
 import shutil
 import re
@@ -17,7 +17,6 @@ class md_gb_pre(object):
         bicrystals = self.read_gb_list()
         for bicrystal in bicrystals:
             self.build_tiltgb_bcc(bicrystal)
-        return
 
     def read_gb_list(self):
         with open('BuildGBlist.lst_Marinica110', 'r') as f:
@@ -111,7 +110,5 @@ class md_gb_pre(object):
                     w.write(data)
                     w.close()
                     o.close()
-                except OSError:
-                    print("Hmmmmm \n")
                 else:
                     print(filename)

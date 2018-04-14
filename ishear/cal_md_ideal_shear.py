@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-23 11:18:26
+# @Last Modified time: 2018-04-03 23:51:39
 
 
 from optparse import OptionParser
@@ -18,7 +18,6 @@ if __name__ == '__main__':
                       type="string", dest="mtype")
     parser.add_option('-p', "--param", action="store",
                       type='string', dest="fargs")
-
     (options, args) = parser.parse_args()
     # drv = init.cal_bcc_ideal_shear(md_pot_data.va_pot.Nb_pbe, '211')
     drv = init.cal_bcc_ideal_shear(md_pot_data.va_pot.Nb_pbe, '110')
@@ -28,7 +27,9 @@ if __name__ == '__main__':
                   'loopre': drv.loop_prep_restart_from_log,
                   'clcqe': drv.qe_loop_stress,
                   'clcva': drv.va_loop_stress,
-                  'clclmp': drv.convert_stress,
+                  # 'cnvvasp': drv.convert_stress_vasp,
+                  # 'clclmp': drv.convert_stress,
+                  'clclmp': drv.lmp_loop_stress,
                   'prepva': drv.loop_prep_vasp,
                   'iva': drv.vasp_relax,
                   'ivasp': drv.vasp_relax,
@@ -39,7 +40,7 @@ if __name__ == '__main__':
                   'pltstress': drv.plt_energy_stress,
                   'pltlmp': drv.plt_energy_stress_lmp,
                   'pltvc': drv.plt_vc,
-                  'pltcmp': drv.plt_cmp,
+                  'pltpth': drv.plt_cmp_pth,
                   'pltchk': drv.plt_check,
                   'trans': drv.transdata,
                   'setpbs': drv.loop_set_pbs,

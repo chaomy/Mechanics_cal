@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-12 22:04:04
+# @Last Modified time: 2018-04-13 20:17:24
 
 
 import ase.lattice.hexagonal as Hexagonal
@@ -12,7 +12,6 @@ import ase.io
 import numpy as np
 import glob
 from scipy.interpolate import interp1d
-import matplotlib.pylab as plt
 from optparse import OptionParser
 import os
 import ase.io
@@ -26,9 +25,7 @@ import md_pot_data
 import plt_drv
 
 
-class cal_lattice(gn_config.bcc,
-                  gn_config.fcc,
-                  gn_config.hcp,
+class cal_lattice(gn_config.gnStructure,
                   gn_pbs.gn_pbs,
                   get_data.get_data,
                   gn_kpoints.gn_kpoints,
@@ -37,9 +34,10 @@ class cal_lattice(gn_config.bcc,
 
     def __init__(self):
         self.figsize = (8, 6)
-        self.npts = 20
+        self.npts = 10
         self.kpoints = [31, 31, 31]
-        self.pot = md_pot_data.va_pot.Nb_pbe
+        self.pot = md_pot_data.va_pot.Mo_pbe
+        gn_config.gnStructure.__init__(self)
         plt_drv.plt_drv.__init__(self)
         gn_kpoints.gn_kpoints.__init__(self)
         get_data.get_data.__init__(self)
@@ -67,15 +65,14 @@ class cal_lattice(gn_config.bcc,
         self.ax.plot(lattice, energy, label="lat = {:5f}".format(
             2 * InterPoints[i]), **next(self.keysiter))
         self.add_legends(self.ax)
-
-        plt.savefig("lattice.png")
+        self.fig.savefig("lattice.png")
 
     def set_pbs(self, mdir):
         self.set_pbs_type('va')
-        self.set_wall_time(10)
+        self.set_wall_time(8)
         self.set_job_title(mdir)
         self.set_nnodes(1)
-        self.set_ppn(12)
+        self.set_ppn(8)
         self.set_main_job("mpirun vasp")
         self.write_pbs(od=True)
 
@@ -94,12 +91,8 @@ class cal_lattice(gn_config.bcc,
 
     def gn_bcc(self):
         alat0 = self.pot['latbcc']
-        delta = 0.001
-        # rng = [-20, 20]
-        # rng = [20, 100]
-        rng = [-500, -400]
-        # rng = [400, 500]
-        gn_config.bcc.__init__(self, self.pot)
+        delta = 0.0005
+        rng = [-15, 15]
         for i in range(rng[0], rng[1]):
             self.pot["latbcc"] = alat0 + i * delta
             if i >= 0:
@@ -115,7 +108,6 @@ class cal_lattice(gn_config.bcc,
         alat0 = self.pot["latfcc"]
         delta = 0.005
         rng = [-50, 50]
-        gn_config.fcc.__init__(self, self.pot)
         for i in range(rng[0], rng[1]):
             self.pot["latfcc"] = alat0 + i * delta
             if i >= 0:
@@ -128,14 +120,13 @@ class cal_lattice(gn_config.bcc,
             self.prepare_vasp_inputs(mdir)
 
     def gn_hcp_mesh(self):
-        da = 0.01
+        da = 0.02
         dc = 0.02
-        shift = -da * (20 + 45)
-        shift = -dc * 8
-        for i in range(20):
-            for j in range(16):
+        shift = -da * 30
+        shift = -dc * 15
+        for i in range(60):
+            for j in range(30):
                 mdir = "dir-{:03d}-{:03d}".format(i, j)
-
                 aa = self.pot["ahcp"] + shift + da * i
                 cc = self.pot["chcp"] + shift + dc * j
                 atoms = Hexagonal.HexagonalClosedPacked(
