@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:11:49
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-04-05 14:30:12
+# @Last Modified time: 2018-04-29 14:48:29
 
 
 from numpy import sqrt, sin, cos, abs
@@ -74,6 +74,7 @@ class md_crack_uti(object):
 
         self.ckcoeff.K1 = sqrt(
             2 * self.pot["surf110"] / abs(Gamma[1, 1] * 1e3))
+
         # theta = np.deg2rad(54.735610317245346)
         theta = np.deg2rad(35.2643896828)
         omega = np.mat([[cos(theta), sin(theta), 0.0],
@@ -95,7 +96,7 @@ class md_crack_uti(object):
         print(self.ckcoeff.K1, k1e)
         self.set_plane_strain_bij(c.Sij)
         # self.get_scalarB(self.pot["surf110"]) get the same k1c
-        
+
         self.get_coeffs()
         atoms = self.intro_crack_k1(atoms=self.gn_perf_plate())
         self.write_lmp_config_data(atoms, 'crack.txt')

@@ -1,21 +1,21 @@
 #!/usr/bin/env python
-# encoding: utf-8
+# -*- coding: utf-8 -*-
+# @Author: chaomy
+# @Date:   2018-04-25 23:53:39
+# @Last Modified by:   chaomy
+# @Last Modified time: 2018-04-25 23:53:57
+
 
 import os
 import ase
 from optparse import OptionParser
 import ase.lattice.hexagonal as Hexagonal
 import ase.lattice.cubic as Cubic
-
-try:
-    import gn_config
-    import gn_pbs
-    import get_data
-    import Intro_vasp
-    import gn_lmp_infile
-
-except ImportError:
-    print("error during import")
+import gn_config
+import gn_pbs
+import get_data
+import Intro_vasp
+import gn_lmp_infile
 
 
 class md_precipitate(gn_config.bcc,
@@ -40,7 +40,6 @@ class md_precipitate(gn_config.bcc,
                                    [0, 1, 0],
                                    [0, 0, 1]]
         self.root_dir = os.getcwd()
-        return
 
     def bulk(self):
         size = (40, 40, 30)
@@ -52,7 +51,6 @@ class md_precipitate(gn_config.bcc,
                                             pbc=(1, 1, 1))
 
         self.write_lmp_config_data(atoms)
-        return
 
     def interface(self):
         l_size = (1, 1, 1)
@@ -67,7 +65,6 @@ class md_precipitate(gn_config.bcc,
         ase.io.write(filename="init.cfg",
                      images=atoms,
                      format='cfg')
-        return
 
 usage = "usage:%prog [options] arg1 [options] arg2"
 parser = OptionParser(usage=usage)

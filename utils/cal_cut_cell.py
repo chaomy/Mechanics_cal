@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-27 18:16:11
+# @Last Modified time: 2018-04-27 16:26:53
 
 import numpy as np
 
@@ -110,17 +110,15 @@ class cal_cut_cell(object):
 
     def cut_z_normal_atoms(self, atoms):
         index_list = []
-        z_crit = -0.2 * np.sqrt(3.) / 4.0 * self.pot['lattice']
-        # z_crit = -0.2 * np.sqrt(3.) / 2.0 * self.pot['lattice']
-
+        # z_crit = -0.2 * np.sqrt(3.) / 4.0 * self.pot['lattice']
+        z_crit = -0.2 * np.sqrt(3.) / 0.7 * self.pot['lattice']
         for i in range(len(atoms)):
             atom = atoms[i]
             if (atom.position[2] < z_crit):
                 index_list.append(atom.index)
-
         if index_list is not []:
             print("delete %s atoms" % (len(index_list)))
-            # del atoms[index_list]
+            del atoms[index_list]
         return atoms
 
     def cut_x_normal_atoms(self, atoms, bdir=0):

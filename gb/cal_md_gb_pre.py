@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-04-06 15:37:05
+# @Last Modified time: 2018-04-18 16:17:56
 
 import shutil
 import re
@@ -78,37 +78,34 @@ class md_gb_pre(object):
         max_x = int(Lx / stepx)
         stepz = 0.05
         max_z = int(Lz / stepz)
-        for i in range(1):  # (0,max_x):
-            for j in range(1):  # (0,max_z):
-                x = float(xsh) + stepx * (i - 0)
-                z = float(zsh) + stepz * (j - 0)
-                filename = './gb-' + \
-                    str(angle) + '-' + str(angle_phi) + \
-                    '/mesh-' + str(x) + '-' + str(z)
-                try:
-                    # shutil.rmtree('filename')
-                    shutil.copytree('Base_Marinica', filename)
-                    o = open(filename + '/gb4.in', "r")
-                    w = open(filename + '/gb4.in_final', "w")
-                    data = open(filename + '/gb4.in').read()
+        # for i in range(1):  # (0,max_x):
+        #     for j in range(1):  # (0,max_z):
+        #         x = float(xsh) + stepx * (i - 0)
+        #         z = float(zsh) + stepz * (j - 0)
+        #         filename = './gb-' + \
+        #             str(angle) + '-' + str(angle_phi) + \
+        #             '/mesh-' + str(x) + '-' + str(z)
+        #         try:
+        #             # shutil.rmtree('filename')
+        #             shutil.copytree('Base_Marinica', filename)
+        #             o = open(filename + '/gb4.in', "r")
+        #             w = open(filename + '/gb4.in_final', "w")
+        #             data = open(filename + '/gb4.in').read()
 
-                    data = re.sub("latticeparam", str(alat), data)
-                    data = re.sub("xsize", str(Lx), data)
-                    data = re.sub("zsize", str(Lz), data)
+        #             data = re.sub("latticeparam", str(alat), data)
+        #             data = re.sub("xsize", str(Lx), data)
+        #             data = re.sub("zsize", str(Lz), data)
 
-                    data = re.sub("xmove", str(x), data)
-                    data = re.sub("zmove", str(z), data)
+        #             data = re.sub("xmove", str(x), data)
+        #             data = re.sub("zmove", str(z), data)
 
-                    data = re.sub("xorientup", xupper, data)
-                    data = re.sub("yorientup", yupper, data)
-                    data = re.sub("zorientup", zupper, data)
+        #             data = re.sub("xorientup", xupper, data)
+        #             data = re.sub("yorientup", yupper, data)
+        #             data = re.sub("zorientup", zupper, data)
 
-                    data = re.sub("xorientlow", xlower, data)
-                    data = re.sub("yorientlow", ylower, data)
-                    data = re.sub("zorientlow", zlower, data)
+        #             data = re.sub("xorientlow", xlower, data)
+        #             data = re.sub("yorientlow", ylower, data)
+        #             data = re.sub("zorientlow", zlower, data)
 
-                    w.write(data)
-                    w.close()
-                    o.close()
-                else:
-                    print(filename)
+        #             w.write(data)
+        #             w.close()

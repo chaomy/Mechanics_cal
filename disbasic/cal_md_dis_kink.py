@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2018-03-13 23:59:29
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-19 16:23:00
+# @Last Modified time: 2018-05-01 22:30:21
 
 
 import atomman as am
@@ -403,6 +403,97 @@ class bcc_kink(gn_config.bcc,
 
         atoms.set_positions(atom_position)
         self.write_lmp_config_data(atoms)
+
+    def intro_kink_screw_dislocations(self, atoms, center1, center2, H=None, tilpnt=1. / 4., sign=1):
+        # find how many layer of atoms #
+        #  (layerList, distance) = \
+        #  ase.utils.geometry.get_layers(atoms, [0, 0, 1], tolerance=0.01);
+        boundary = 'ppp'
+
+        lxid = 0  # glide plane
+        lyid = 2  # y
+        lzid = 1  # dislocation line
+
+        cell = atoms.get_cell()
+        nleft = tilpnt * cell[lzid, lzid]
+        nrigh = (1 - tilpnt) * cell[lzid, lzid]
+
+        if H is None:
+            H = 0.5 * (center2[lxid] - center1[lxid])
+
+        alpha = 0.1
+        xc0, yc0 = center1[0], center1[1]
+
+        # cut atoms (do not need for peierodic boundary condition ) ###
+        if not boundary == 'ppp':
+            # not using the ppp bounary condition ####
+            # we have some other treaments ####
+            lowx = 5 * (0.5 * (2.56656))
+            higx = cell[0, 0] - lowx
+
+            lowy = 5 * 2.22271
+            higy = cell[1, 1] - lowy
+
+            ##########################################################
+            # the vol I cut here is
+            # (lowx * y + (lowy * (x - 2 * lowx))) * 2 * z
+            ##########################################################
+            vol = np.linalg.det(cell)
+            areaxy = (cell[0, 0] - 2 * lowx) * cell[1, 1]
+            volcut = ((lowx * cell[1, 1] + lowy *
+                       (cell[0, 0] - 2 * lowx)) * 2 * cell[2, 2])
+
+            print(("vol[%f] - volcut[%f] = %f " % (vol, volcut, vol - volcut)))
+            print(("area is [%f]" % (areaxy)))  # 29094.182232  A^2
+
+            index_list = []
+        cut = None  # only cut y direction ####
+        #  shift   = True;
+        shift = False
+
+        # loop over atoms to add displacement #
+        for atom in atoms:
+            pos = atom.position
+
+            if not boundary == 'ppp':
+                # cut  10 A along x and y  #
+                if cut == "xy":
+                    if ((pos[lxid] < lowx) or (pos[lxid] > higx) or
+                            (pos[lxid] > higy) or (pos[lxid] < lowy)):
+                        index_list.append(atom.index)
+
+                elif cut == "y":
+                    if ((pos[lyid] > higy) or (pos[lyid] < lowy)):
+                        index_list.append(atom.index)
+
+            # calculate the h #####
+            h = H * (1 + math.tanh(alpha * (pos[lzid] - nleft))) - \
+                H * (1 + math.tanh(alpha * (pos[lzid] - nrigh)))
+
+            xc = xc0 + h
+            yc = yc0
+
+            # calculate the displacement #####
+            dx = pos[lxid] - xc
+            dy = pos[lyid] - yc
+
+            # add shift if peierodic along x   ######
+            if shift is True:
+                if pos[lxid] > xc:
+                    # 0.3 or 0.2 for e1 = 1 -1 0
+                    pos[lzid] += 0.25 * self.burger
+
+            theta = np.arctan2(dy, dx)
+            dz = sign * self.screw_coeff * theta
+            pos[lzid] -= dz
+
+            # assign the position ###
+            atom.position = pos
+
+        if not boundary == 'ppp':
+            # delete boundary atoms ####
+            del atoms[index_list]
+        return atoms
 
 
 if __name__ == "__main__":

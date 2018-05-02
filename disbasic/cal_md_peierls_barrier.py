@@ -3,13 +3,14 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-04-02 22:14:58
+# @Last Modified time: 2018-05-01 15:57:17
 
 
 from multiprocessing import Pool
 from scipy.interpolate import InterpolatedUnivariateSpline
 from optparse import OptionParser
 from utils import Intro_vasp
+import ase.utils.geometry
 import md_pot_data
 import os
 import ase
@@ -68,10 +69,29 @@ class cal_barrier(object):
         m = 11 * sizen
         t = 1
 
-        # self.pot['lattice'] = 3.167
-        # self.pot["lattice"] = 3.14339
-        print(self.pot["lattice"])
         atoms = self.set_bcc_convention([e1, e2, e3], (n, t, m))
+
+        (layerList, distance) = ase.utils.geometry.get_layers(
+            atoms, [0, 1, 0], tolerance=0.05)  # the normal of z direction
+
+        layer1_index, layer2_index, layer3_index = [], [], []
+
+        for i in range(len(atoms)):
+            if layerList[i] in [1, 4]:
+                layer1_index.append(i)
+                atoms[i].symbol = 'W'
+
+            if layerList[i] in [2]:
+                layer2_index.append(i)
+                atoms[i].symbol = 'Mo'
+
+            if layerList[i] in [3, 0]:
+                layer3_index.append(i)
+                atoms[i].symbol = 'Ta'
+
+        print(len(layer1_index),
+              len(layer2_index),
+              len(layer3_index))
 
         # add shiftment to the supercell #
         atoms = self.cut_half_atoms_new(atoms, "cutz")
@@ -87,25 +107,39 @@ class cal_barrier(object):
         sy = 5 * sizen
         ix = 10.5 * sizen
 
-        c1 = [(sx) * unitx, (sy + 1. / 3.) * unity]
-        c2 = [(sx + ix) * unitx, (sy + 2. / 3.) * unity]
+        ase.io.write("perf_poscar", images=atoms, format='vasp')
+
+        # change symbol back
+        for atom in atoms:
+            atom.symbol = 'Nb'
+
+        ci1 = [(sx) * unitx, (sy + 1. / 3.) * unity]
+        ci2 = [(sx + ix) * unitx, (sy + 2. / 3.) * unity]
         self.write_lmp_config_data(self.intro_dipole_screw_atoms_LMP(
-            atoms.copy(), center=[c1, c2], lattice=self.pot['lattice']),
-            "init.txt")
+            atoms.copy(), center=[ci1, ci2], lattice=self.pot['lattice']), "init.txt")
 
         movex = 1.0
-        c1 = [(sx + movex) * unitx, (sy + 1. / 3.) * unity]
-        c2 = [(sx + ix + movex) * unitx, (sy + 2. / 3.) * unity]
+        cf1 = [(sx + movex) * unitx, (sy + 1. / 3.) * unity]
+        cf2 = [(sx + ix + movex) * unitx, (sy + 2. / 3.) * unity]
         self.write_lmp_config_data(self.intro_dipole_screw_atoms_LMP(
-            atoms.copy(), center=[c1, c2], lattice=self.pot['lattice']),
-            "final.txt")
+            atoms.copy(), center=[cf1, cf2], lattice=self.pot['lattice']), "final.txt")
+
+        data = np.array([ci1[0], ci1[1], cf1[0], cf1[1]])
+        np.savetxt("dis_center.txt", data)
 
         # write in the middle
+        ci1[0] += 0.5 * (cf1[0] - ci1[0])
+        ci2[0] += 0.5 * (cf2[0] - ci2[0])
+        ci1[1] -= 0.1
+        ci2[1] += 0.1
+        ase.io.write("test.txt", images=self.intro_dipole_screw_atoms_LMP(
+            atoms.copy(), center=[ci1, ci2],
+            lattice=self.pot['lattice']), format="vasp")
+
         # for i in range(16):
         #     movex = (i + 1) / 16.
         #     c1 = [(sx + movex) * unitx, (sy + 1. / 3.) * unity]
         #     c2 = [(sx + ix + movex) * unitx, (sy + 2. / 3.) * unity]
-
         #     self.write_lmp_coords(self.intro_dipole_screw_atoms_LMP(
         #         atoms.copy(), center=[c1, c2], lattice=self.pot['lattice']),
         #         "lmp_{:d}.txt".format(i + 1))

@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2018-04-06 15:42:15
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-04-13 20:00:26
+# @Last Modified time: 2018-04-28 14:17:41
 
 
 from optparse import OptionParser
@@ -14,16 +14,19 @@ import get_data
 import glob
 import os
 import md_pot_data
+import gn_pbs
 import plt_drv
 
 
-class cal_md_twin(gn_config.gnStructure,
-                  get_data.get_data,
-                  plt_drv.plt_drv):
+class cal_md_twin(gn_config.gnStructure, get_data.get_data,
+                  plt_drv.plt_drv, gn_pbs.gn_pbs):
 
     def __init__(self):
         get_data.get_data.__init__(self)
-        self.pot = self.load_data("../BASICS_MO/pot.dat")
+        # self.pot = self.load_data("../BASICS_MO/pot.dat")
+        self.pot = self.load_data("../BASICS/pot.dat")
+        # self.pot = md_pot_data.va_pot.Nb_pbe
+        gn_pbs.gn_pbs.__init__(self)
         plt_drv.plt_drv.__init__(self)
         gn_config.gnStructure.__init__(self, self.pot)
 
@@ -33,33 +36,59 @@ class cal_md_twin(gn_config.gnStructure,
                                          [2, -1, -1]], (1, 1, layer))
         return atoms
 
+    def set_pbs(self, mdir):
+        self.set_pbs_type('va')
+        self.set_wall_time(40)
+        self.set_job_title(mdir)
+        self.set_nnodes(4)
+        self.set_ppn(12)
+        self.set_main_job("mpirun vasp")
+        self.write_pbs(od=False)
+
+    def prepare_vasp_inputs(self, mdir):
+        self.set_pbs(mdir)
+        os.system("mv va.pbs {}".format(mdir))
+        os.system("cp KPOINTS {}".format(mdir))
+        os.system("cp INCAR {}".format(mdir))
+        os.system("cp POTCAR {}".format(mdir))
+
     def bcc211(self):
         layer = 4
-        atoms = self.perfbcc(2 * layer)
+        # layer = 3
+        total = 15
+        atoms = self.perfbcc(total)
         la = self.pot["latbcc"]
         uz = la * np.sqrt(6) / 6.
         ux = la * np.sqrt(3) / 6.
         pos = atoms.get_positions()
         disp = np.zeros(pos.shape)
 
-        # lambda = INF
-        # for i in range(layer * 6):
-        #     print(6 * layer + i * uz, i * ux)
-        #     disp[layer * 6 + i, 0] = i * ux
-
         cell = atoms.get_cell()
-        cell[2, 2] += layer * 6
+        print("vacumm", uz * 10)
+        cell[2, 2] += uz * 12
         atoms.set_cell(cell)
 
-        for shif in range(layer * 6 - 6):
+        opt = 'md'
+        startshif = 5
+
+        for shif in range(layer * 6):
             atoms_shift = atoms.copy()
-            for i in range(layer * 6):
+            for i in range((total - startshif) * 6):
                 if (i < shif):
-                    disp[layer * 6 + i, 0] = i * ux
+                    disp[startshif * 6 + i, 0] = i * ux
                 else:
-                    disp[layer * 6 + i, 0] = shif * ux
+                    disp[startshif * 6 + i, 0] = shif * ux
             atoms_shift.translate(disp)
-            self.write_lmp_config_data(atoms_shift, "pos_{:03}".format(shif))
+            atoms_shift.set_positions(atoms_shift.get_positions() +
+                                      np.array([0., 0., 6 * uz]))
+            if opt in ['md']:
+                self.write_lmp_config_data(atoms_shift,
+                                           "pos_{:03}".format(shif))
+            elif opt in ['va']:
+                mdir = 'dir_{:03d}'.format(shif)
+                self.mymkdir(mdir)
+                ase.io.write("{}/POSCAR".format(mdir), atoms_shift, 'vasp')
+                self.prepare_vasp_inputs(mdir)
 
     def run(self):
         fls = glob.glob("pos_*")

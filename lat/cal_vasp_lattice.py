@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-04-13 20:17:24
+# @Last Modified time: 2018-04-13 21:37:36
 
 
 import ase.lattice.hexagonal as Hexagonal
@@ -25,26 +25,23 @@ import md_pot_data
 import plt_drv
 
 
-class cal_lattice(gn_config.gnStructure,
-                  gn_pbs.gn_pbs,
-                  get_data.get_data,
-                  gn_kpoints.gn_kpoints,
-                  gn_incar.gn_incar,
-                  plt_drv.plt_drv):
+class cal_lattice(gn_pbs.gn_pbs, gn_config.gnStructure,
+                  get_data.get_data, gn_kpoints.gn_kpoints,
+                  gn_incar.gn_incar, plt_drv.plt_drv):
 
     def __init__(self):
         self.figsize = (8, 6)
         self.npts = 10
         self.kpoints = [31, 31, 31]
         self.pot = md_pot_data.va_pot.Mo_pbe
-        gn_config.gnStructure.__init__(self)
+        gn_config.gnStructure.__init__(self, self.pot)
         plt_drv.plt_drv.__init__(self)
         gn_kpoints.gn_kpoints.__init__(self)
         get_data.get_data.__init__(self)
         gn_incar.gn_incar.__init__(self)
         gn_pbs.gn_pbs.__init__(self)
 
-    def interpolate_lattice(self, filename):
+    def interpolate_lattice(self, filename='lat.dat'):
         data = np.loadtxt(filename)
         print(data[:, 1])
 
@@ -62,7 +59,7 @@ class cal_lattice(gn_config.gnStructure,
         print((np.min(Ynew)))
 
         self.set_111plt()
-        self.ax.plot(lattice, energy, label="lat = {:5f}".format(
+        self.ax.plot(lattice, energy, label="lat = {:7f}".format(
             2 * InterPoints[i]), **next(self.keysiter))
         self.add_legends(self.ax)
         self.fig.savefig("lattice.png")
@@ -76,11 +73,6 @@ class cal_lattice(gn_config.gnStructure,
         self.set_main_job("mpirun vasp")
         self.write_pbs(od=True)
 
-    def loop_kpts(self):
-        files = glob.glob('./DATA*')
-        for file in files:
-            cal_lattice(file)
-
     def prepare_vasp_inputs(self, mdir):
         self.set_pbs(mdir)
         os.system("mv POSCAR {}".format(mdir))
@@ -92,7 +84,7 @@ class cal_lattice(gn_config.gnStructure,
     def gn_bcc(self):
         alat0 = self.pot['latbcc']
         delta = 0.0005
-        rng = [-15, 15]
+        rng = [15, 40]
         for i in range(rng[0], rng[1]):
             self.pot["latbcc"] = alat0 + i * delta
             if i >= 0:
@@ -155,7 +147,7 @@ class cal_lattice(gn_config.gnStructure,
             self.prepare_vasp_inputs(mdir)
 
     def collect_data(self, tag='hcp'):
-        rng = [-50, 50]
+        rng = [-15, 40]
         data = np.zeros([rng[1] - rng[0], 3])
         cnt = 0
         for i in range(rng[0], rng[1]):
@@ -188,7 +180,6 @@ if __name__ == '__main__':
     (options, args) = parser.parse_args()
     drv = cal_lattice()
     dispatcher = {'plt': drv.interpolate_lattice,
-                  'loop': drv.loop_kpts,
                   'bcc': drv.gn_bcc,
                   'fcc': drv.gn_fcc,
                   'hcp': drv.gn_hcp,

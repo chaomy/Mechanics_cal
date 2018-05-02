@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-04-04 00:18:05
+# @Last Modified time: 2018-04-29 22:47:01
 
 
 from itertools import cycle
@@ -44,7 +44,7 @@ class cal_bcc_ideal_shear_plt(object):
         self.fig.savefig("fig-engy.png", **self.figsave)
 
     def plt_energy_stress_lmp(self, fname='stress.txt'):
-    # def plt_energy_stress_lmp(self, fname='ishear.txt'):
+        # def plt_energy_stress_lmp(self, fname='ishear.txt'):
         til = os.getcwd().split('/')[-1].split('_')[-2:]
         raw = np.loadtxt(fname)
         ylabeliter = cycle(['E [eV]', r'$\tau$ [Gpa]'])
@@ -53,7 +53,7 @@ class cal_bcc_ideal_shear_plt(object):
         axlist = [self.ax1, self.ax2]
         self.ax1.plot(raw[:, 0], (raw[:, 1] - raw[0, 1]),
                       label='engy', **next(self.keysiter))
-        self.ax2.plot(raw[:, 0], raw[:, -1], 
+        self.ax2.plot(raw[:, 0], raw[:, -1],
                       label='stress', **next(self.keysiter))
         self.add_legends(*axlist)
         self.set_tick_size(*axlist)
@@ -69,7 +69,8 @@ class cal_bcc_ideal_shear_plt(object):
         axlist = [self.ax1, self.ax2]
         index = np.where(raw[:, 1] < -100.0)
         raw[:, 1][index] = raw[:, 1][index] / unitconv.uengy['rytoeV']
-        self.ax1.plot(raw[:, 0], (raw[:, 1] - raw[0, 1]), label='engy', **next(self.keysiter))
+        self.ax1.plot(raw[:, 0], (raw[:, 1] - raw[0, 1]),
+                      label='engy', **next(self.keysiter))
         yy = raw[:, -1]
         # call interp
         ply = polyfit(raw[:, 0], yy, 2)
@@ -87,20 +88,25 @@ class cal_bcc_ideal_shear_plt(object):
         ylabeliter = cycle(['Energy per atom [eV]', r'Shear stress [Gpa]'])
         cc = 1.0
         if tg in ['va']:
-            cc = 0.1 
+            cc = 0.1
 
         # vasp use Bar -> times 0.1 to be GPa
-        lab = '{211}<111>'  
+        lab = '{211}<111>'
         raw = np.loadtxt('stress.{}.211.txt'.format(tg))
-        self.ax1.plot(raw[:, 0], raw[:, 1] - raw[0, 1], label=lab, **next(self.keysiter))
+        self.ax1.plot(raw[:, 0], raw[:, 1] - raw[0, 1],
+                      label=lab, **next(self.keysiter))
         if tg in ['md']:
-            self.ax2.plot(raw[:, 0], cc * raw[:, -1], label=lab, **next(self.keysiter))
+            self.ax2.plot(raw[:, 0], cc * raw[:, -1],
+                          label=lab, **next(self.keysiter))
         if tg in ['va']:
-            self.ax2.plot(raw[:, 0], cc * raw[:, -2], label=lab, **next(self.keysiter))
+            self.ax2.plot(raw[:, 0], cc * raw[:, -2],
+                          label=lab, **next(self.keysiter))
         lab = '{110}<111>'
         raw = np.loadtxt('stress.{}.110.txt'.format(tg))
-        self.ax1.plot(raw[:, 0], raw[:, 1] - raw[0, 1], label=lab, **next(self.keysiter))
-        self.ax2.plot(raw[:, 0], cc * raw[:, -1], label=lab, **next(self.keysiter))
+        self.ax1.plot(raw[:, 0], raw[:, 1] - raw[0, 1],
+                      label=lab, **next(self.keysiter))
+        self.ax2.plot(raw[:, 0], cc * raw[:, -1],
+                      label=lab, **next(self.keysiter))
 
         self.add_legends(*self.axls)
         self.set_tick_size(*self.axls)

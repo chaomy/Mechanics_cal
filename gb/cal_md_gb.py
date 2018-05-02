@@ -1,10 +1,9 @@
 #!/usr/bin/env python
-# encoding: utf-8
 # -*- coding: utf-8 -*-
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-04-06 15:13:29
+# @Last Modified time: 2018-04-26 00:16:08
 
 
 import cal_md_gb_hcp
@@ -66,13 +65,11 @@ if __name__ == "__main__":
                   'run': drv.loop_run,
                   'index': drv.hcp_tilt_index,
                   'build': drv.build_hcp_gb,
-                  'angle': drv.loop_angle,
                   'plt': drv.loop_plt_angle,
+                  '0001': drv.loop_angle_0001,
                   '1100': drv.loop_angle_1100,
-                  '1120': drv.loop_angle_1120}
-
-    # 'loop': drv.loop_dispx_hcp,
-    # 'thk': drv.loop_thickness
+                  '1120': drv.loop_angle_1120,
+                  '1100g': drv.give_angle_1100}
 
     if options.fargs is not None:
         dispatcher[options.mtype.lower()](options.fargs)

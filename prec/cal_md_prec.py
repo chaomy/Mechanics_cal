@@ -2,7 +2,7 @@
 # @Author: chaomy
 # @Date:   2018-02-20 14:11:07
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-04-13 14:30:22
+# @Last Modified time: 2018-04-27 17:00:18
 
 import ase.lattice.orthorhombic as otho
 import ase.lattice.cubic as cubic
@@ -16,8 +16,15 @@ class othoHCPFractory(otho.SimpleOrthorhombicFactory):
                      [0.0, 1. / 2., 1. / 3.],
                      [1. / 2., 1. / 2., 5. / 6.]]
 
-othoHCP = othoHCPFractory()
 
+class othoHCPFractoryB(otho.SimpleOrthorhombicFactory):
+    bravais_basis = [[0.0, 0.0, 0.0],
+                     [0.5, 0.0, 0.5],
+                     [1. / 3., 1. / 2., 0.0],
+                     [5. / 6., 1. / 2., 1. / 2.]]
+
+othoHCP = othoHCPFractory()
+othoHCPB = othoHCPFractoryB()
 # unit cell
 
 
@@ -86,16 +93,78 @@ class D03FactoryP211(otho.SimpleOrthorhombicFactory):
                      0, 1, 0, 0,
                      0, 0, 1, 0)
 
+
+class D03FactoryP211B(otho.SimpleOrthorhombicFactory):
+    bravais_basis = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.25],
+                     [0.0, 0.0, 0.5], [0.0, 0.0, 0.75],
+
+                     [dz, 0.5, 0.0 + dx], [dz, 0.5, 0.25 + dx],
+                     [dz, 0.5, 0.5 + dx], [dz, 0.5, 0.75 + dx],
+
+                     [2 * dz, 0.0, 0.0 + 2 * dx], [2 * dz, 0.0, 0.25 + 2 * dx],
+                     [2 * dz, 0.0, 0.5 + 2 * dx], [2 * dz, 0.0, 0.75 + 2 * dx],
+
+                     [3 * dz, 0.5, 0.0], [3 * dz, 0.5, 0.25],
+                     [3 * dz, 0.5, 0.5], [3 * dz, 0.5, 0.75],
+
+                     [4 * dz, 0.0, 0.0 + dx], [4 * dz, 0.0, 0.25 + dx],
+                     [4 * dz, 0.0, 0.5 + dx], [4 * dz, 0.0, 0.75 + dx],
+
+                     [5 * dz, 0.5, 0.0 + 2 * dx], [5 * dz, 0.5, 0.25 + 2 * dx],
+                     [5 * dz, 0.5, 0.5 + 2 * dx], [5 * dz, 0.5, 0.75 + 2 * dx]]
+
+    element_basis = (1, 0, 0, 0,
+                     0, 1, 0, 0,
+                     0, 0, 1, 0,
+                     1, 0, 0, 0,
+                     0, 1, 0, 0,
+                     0, 0, 1, 0)
+
 # Mg3Nd = D03Factory()
 # Mg3Nd = D03FactoryP110B()
 Mg3Nd = D03FactoryP211()
+Mg3NdB = D03FactoryP211B()
 
 # vol = (342.169 - 20.276) = 321.893 * 55.582636 * 449.269099
 
 
 class md_prec(object):
+    # def make_screw_prec(self):
+
+    def make_screw_prec(self):
+        ux = self.pot["ahcp"] * sqrt(3)
+        uy = self.pot["chcp"]
+        uz = self.pot['ahcp']
+
+        # sz = [80, 80, 100]
+        sz = [80, 80, 1]
+        atoms = othoHCPB(latticeconstant=(ux, uy, uz),
+                         size=sz, symbol=self.pot['element'])
+
+        lata, latc = self.pot["ahcp"], self.pot["chcp"]
+        cell = atoms.get_cell()
+
+        lob = np.array([ux * (sz[0] - 30), 0.0 + 55,
+                        uz * (1. / 2. * sz[2] - 5)])
+        hib = np.array([ux * (sz[0] - 20), uy * sz[1] - 56,
+                        uz * (1. / 2. * sz[2] + 5)])
+
+        atoms = self.make_cubic("in", atoms, lob, hib)
+
+        # atoms2 = self.buildd03B()
+        # atoms2.set_positions(lob + atoms2.get_positions())
+        # atoms2 = self.make_cubic("out", atoms2, lob - 1.0, hib + 1.0)
+
+        atoms = self.build_screw_basal_hcp_atoms(atoms)
+        atoms = self.cut_y_normal_atoms(atoms)
+        # atoms = self.cut_z_normal_atoms(atoms)
+        atoms = self.assign_ynormal_fixatoms(atoms)
+        # atoms.extend(atoms2)
+        # print("volume", cell[0, 0] * (cell[1, 1] - 40.0) * cell[2, 2])
+        self.write_lmp_config_data(atoms, "lmp_init.txt")
 
     def make_prec(self):
+        # [1-210], [0001], [10-10]
         ux, uy, uz = self.pot['ahcp'], self.pot[
             'chcp'], self.pot['ahcp'] * sqrt(3.)
 
@@ -109,9 +178,9 @@ class md_prec(object):
         self.burger = self.pot["lattice"]
         cell = atoms.get_cell()
 
-        lob = np.array([ux * (sz[0] - 40), 0.0 + 36,
+        lob = np.array([ux * (sz[0] - 40), 0.0 + 55,
                         uz * (1. / 2. * sz[2] - 5)])
-        hib = np.array([ux * (sz[0] - 20), uy * sz[1] - 36,
+        hib = np.array([ux * (sz[0] - 20), uy * sz[1] - 56,
                         uz * (1. / 2. * sz[2] + 5)])
 
         atoms = self.make_cubic("in", atoms, lob, hib)
@@ -173,7 +242,32 @@ class md_prec(object):
         # Uinv = np.linalg.inv(U)
         # pos = atoms.get_scaled_positions()
         # print np.linalg.det(U)
+        self.write_lmp_config_data(atoms, "lmp_d03.txt")
         return atoms
+
+    def buildd03B(self):
+        la = latd03 = 7.46627803307887
+        # type C  x: [1, 1, 1], y[-1  1  0], z [-1 -1  2]
+        atoms = Mg3NdB(latticeconstant=(la * sqrt(6) / 2.,
+                                        la * sqrt(2) / 2.,
+                                        la * sqrt(3)), size=(20, 85, 10), symbol=('Mg', 'Nd'))
+        self.write_lmp_config_data(atoms, "lmp_d03.txt")
+        return atoms
+
+    def buildHCP(self):
+        ux, uy, uz = self.pot['ahcp'], self.pot[
+            'chcp'], self.pot['ahcp'] * sqrt(3.)
+        sz = [2, 2, 2]
+        atoms = othoHCP(latticeconstant=(ux, uy, uz),
+                        size=sz, symbol=self.pot['element'])
+        self.write_lmp_config_data(atoms, "lmp_HCP.txt")
+
+    def buildd03small(self):
+        la = latd03 = 7.46627803307887
+        atoms = Mg3Nd(latticeconstant=(la * sqrt(3),
+                                       la * sqrt(2) / 2.,
+                                       la * sqrt(6) / 2.), size=(2, 2, 2), symbol=('Mg', 'Nd'))
+        self.write_lmp_config_data(atoms, "lmp_d03.txt")
 
     def cal_thermo(self):
         ux, uy, uz = self.pot['ahcp'], self.pot[

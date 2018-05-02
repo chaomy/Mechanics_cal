@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2018-02-06 14:17:35
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-04-04 00:00:12
+# @Last Modified time: 2018-05-01 21:50:51
 
 
 import ase
@@ -18,6 +18,9 @@ import atomman.lammps as lmp
 import atomman.unitconvert as uc
 
 
+# make plate -> change orient -> add shear
+
+
 class cal_bcc_schmid(object):
 
     def __init__(self):
@@ -26,9 +29,7 @@ class cal_bcc_schmid(object):
 
     # calculate elastic constant of screw dislocation
     def cal_screw_const(self, tag='intro'):
-        axes = np.array([[1, 1, -2],
-                         [-1, 1, 0],
-                         [1, 1, 1]])
+        axes = np.array([[1, 1, -2], [-1, 1, 0], [1, 1, 1]])
 
         alat = uc.set_in_units(self.pot['lattice'], 'angstrom')
         C11 = uc.set_in_units(self.pot['c11'], 'GPa')
@@ -43,61 +44,43 @@ class cal_bcc_schmid(object):
         print("K (biKijbj)", stroh.K_coeff, "eV/A")
         print("pre-ln alpha = biKijbj/4pi", stroh.preln, "ev/A")
 
-    #     drv.make_screw_plate(size=[80, 120, 2], rad=[200, 230],
-    #                          move=[0., 0., 0.], tag='[211]',
-    #                          filename="lmp_init.txt")
-
-    def make_screw_plate(self, size=[80, 120, 2], rad=[200, 230],
-                         move=[0., 0., 0.], tag='[211]',
-                         filename="lmp_init.txt", opt=None):
+    def make_screw_plate(self, size=[40, 60, 3], rad=[100, 115],
+                         move=[0., 0., 0.], filename="lmp_init.txt", opt=None):
 
         alat = uc.set_in_units(self.pot['lattice'], 'angstrom')
         C11 = uc.set_in_units(self.pot['c11'], 'GPa')
         C12 = uc.set_in_units(self.pot['c12'], 'GPa')
         C44 = uc.set_in_units(self.pot['c44'], 'GPa')
 
-        if tag == '[110]':
-            axes = np.array([[-1, 0, 1],
-                             [1, -2, 1],
-                             [1, 1, 1]])
-            unitx = alat * np.sqrt(2)
-            unity = alat * np.sqrt(6)
-            sizex = size[1]
-            sizey = size[0]
-            shftx = 0.5 * alat * np.sqrt(2) / 2.
-            shfty = 0.5 * alat * np.sqrt(6.) / 2.
+        axes = np.array([[1, -2, 1], [1, 0, -1], [1, 1, 1]])
 
-        elif tag == '[211]':
-            axes = np.array([[1, -2, 1],
-                             [1, 0, -1],
-                             [1, 1, 1]])
-            unitx = alat * np.sqrt(6)
-            unity = alat * np.sqrt(2)
-            sizex = size[0]
-            sizey = size[1]
-            shftx = -0.5 * alat * np.sqrt(6.) / 3.
-            shfty = -1. / 3. * alat * np.sqrt(2) / 2.
+        unitx = alat * np.sqrt(6)
+        unity = alat * np.sqrt(2)
+        sizex = size[0]
+        sizey = size[1]
 
         sizez = size[2]
         c = am.ElasticConstants(C11=C11, C12=C12, C44=C44)
-        burgers = 0.5 * alat * np.array([1., 1., 1.])
+        burgers = 0.5 * alat * -np.array([1., 1., 1.])
 
         # initializing a new Stroh object using the data
         stroh = am.defect.Stroh(c, burgers, axes=axes)
 
         # monopole system
         box = am.Box(a=alat, b=alat, c=alat)
-        atoms = am.Atoms(natoms=2, prop={'atype': 2, 'pos': [[0.0, 0.0, 0.0],
-                                                             [0.5, 0.5, 0.5]]})
+        atoms = am.Atoms(natoms=2, prop={'atype': 2, 'pos': [
+                         [0.0, 0.0, 0.0], [0.5, 0.5, 0.5]]})
 
         ucell = am.System(atoms=atoms, box=box, scale=True)
         system = am.rotate_cubic(ucell, axes)
 
-        center = [0.5 * unitx * sizex, 0.5 * unity * sizey]
-        shift = np.array([shftx, shfty, 0.00000000000000])
-        new_pos = system.atoms_prop(key='pos') + shift
-        system.atoms_prop(key='pos', value=new_pos)
+        shftx = -0.5 * alat * np.sqrt(6.) / 3.
+        shfty = -1. / 3. * alat * np.sqrt(2) / 2.
+        # shfty = 2. / 3. * alat * np.sqrt(2) / 2.
 
+        center = [0.5 * unitx * sizex, 0.5 * unity * sizey]
+        new_pos = system.atoms_prop(key='pos') + np.array([shftx, shfty, 0.0])
+        system.atoms_prop(key='pos', value=new_pos)
         system.supersize((0, sizex), (0, sizey), (0, sizez))
 
         # to make a plate #
@@ -113,7 +96,6 @@ class cal_bcc_schmid(object):
         ase_atoms = am.convert.ase_Atoms.dump(system, elements)
         pos = ase_atoms.get_positions()
         delindex = []
-
         for i in range(len(pos)):
             atom = ase_atoms[i]
             dx = pos[i, 0] - center[0]
@@ -124,28 +106,23 @@ class cal_bcc_schmid(object):
                 delindex.append(atom.index)
             if r < radius2:
                 atom.symbol = 'W'
-
         del ase_atoms[delindex]
+
         (system, elements) = am.convert.ase_Atoms.load(ase_atoms)
 
         # use neb, it's to generate init configuration
         if opt in ['neb']:
             system_init = copy.deepcopy(system)
 
-            shift = np.array([-0.50000000000,
-                              -0.500000000000,
-                              0.00000000000000])
-            new_pos = system_init.atoms_prop(key='pos',
-                                             scale=True) + shift
-            system_init.atoms_prop(key='pos',
-                                   value=new_pos,
-                                   scale=True)
+            shift = np.array([-0.5, -0.5, 0.0])
+            new_pos = system_init.atoms_prop(key='pos', scale=True) + shift
+            system_init.atoms_prop(key='pos', value=new_pos, scale=True)
 
             disp = stroh.displacement(system_init.atoms_prop(key='pos'))
-            system_init.atoms_prop(key='pos',
-                                   value=system_init.atoms_prop(key='pos') + disp)
+            system_init.atoms_prop(
+                key='pos', value=system_init.atoms_prop(key='pos') + disp)
 
-            shift = np.array([0.50000, 0.50000, 0.00000])
+            shift = np.array([0.5, 0.50, 0.0])
             new_pos = system_init.atoms_prop(key='pos', scale=True) + shift
             system_init.atoms_prop(key='pos', value=new_pos, scale=True)
 
@@ -156,7 +133,7 @@ class cal_bcc_schmid(object):
         ase.io.write("lmp_perf.cfg", images=ase_atoms, format='cfg')
         lmp.atom_data.dump(system, "lmp_perf.txt")
 
-        shift = np.array([-0.50000, -0.500, 0.0000])
+        shift = np.array([-0.5, -0.5, 0.0])
         new_pos = system.atoms_prop(key='pos', scale=True) + shift
         system.atoms_prop(key='pos', value=new_pos, scale=True)
 
@@ -166,7 +143,7 @@ class cal_bcc_schmid(object):
         disp = stroh.displacement(system.atoms_prop(key='pos'))
 
         # pull
-        pull = True
+        pull = False
         if pull is True:
             core_rows = [disp[:, 2].argsort()[-3:][::-1]]
             print(disp[core_rows])
@@ -190,6 +167,9 @@ class cal_bcc_schmid(object):
 
         # for lammps read structure
         lmp.atom_data.dump(system, filename)
+
+        dis_atoms = am.convert.ase_Atoms.dump(system, elements)
+        return (ase_atoms, dis_atoms)
 
     # change orient such that dislocation line is along x
     def change_orient(self, ase_atoms=None, outfile="new_dis.cfg"):
@@ -228,35 +208,54 @@ class cal_bcc_schmid(object):
         #  lmp.atom_data.dump(system, "lmp_tmp.txt")
         #  os.system("mv lmp_tmp.txt {}/lmp_init_0.txt".format(dirname))
 
-        cell = np.mat(atoms.get_cell())
-        pos = np.mat(atoms.get_positions())
-        # add along  xz  which is  kai = 90
-        #  strain = np.mat([[1.0, 0.0, 0.0],
-        #  [0.0, 1.0, 0.0],
-        #  [delta, 0.0, 1.0]])
+        #  add along  xz  which is  kai = 90
+        #  strain = np.mat([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [delta, 0.0, 1.0]])
 
+        strain = np.mat([[1.0, 0.0, 0.0], [delta, 1.0, 0.0], [0.0, 0.0, 1.0]])
+        new_cell = strain * np.mat(atoms.get_cell())
+        pos = np.mat(atoms.get_positions()) * strain
+        atoms.set_cell(new_cell)
+        atoms.set_positions(pos)
+        return atoms
+
+    def add_shear_yz(self, atoms, delta):
+        # add shear
         strain = np.mat([[1.0, 0.0, 0.0],
-                         [delta, 1.0, 0.0],
-                         [0.0, 0.0, 1.0]])
-
-        new_cell = strain * cell
-        pos = pos * strain
+                         [0.0, 1.0, 0.0],
+                         [0.0, delta, 1.0]])
+        new_cell = strain * np.mat(atoms.get_cell())
+        pos = np.mat(atoms.get_positions()) * strain
         atoms.set_cell(new_cell)
         atoms.set_positions(pos)
         return atoms
 
     def prep_mrss(self):
+        self._range = (1, 5)
+        self._delta = 0.0001
+        perf_atoms, dis_atoms = self.make_screw_plate()
+        for i in range(self._range[0], self._range[1]):
+            delta = self._delta * i
+            mdir = "dir_{:04f}".format(delta)
+            self.mymkdir(mdir)
+            dis_atoms = self.add_shear_yz(dis_atoms.copy(), delta)
+            perf_atoms = self.add_shear_yz(perf_atoms.copy(), delta)
+            self.write_lmp_config_data(
+                dis_atoms, "{}/lmp_init.txt".format(mdir))
+            self.write_lmp_config_data(
+                perf_atoms, "{}/lmp_perf.txt".format(mdir))
+            os.system("cp in.minimize {}".format(mdir))
+
+    def prep_mrss_change_orient(self):
         files = glob.glob("out/*")
-        self._range = (25, 40)
-        self._delta = 0.002   # totla is  5  percent
+        self._range = (10, 12)
+        self._delta = 0.002   # total is  5  percent
 
         for i in range(self._range[0], self._range[1]):
             delta = self._delta * i
 
             # add espsilon xz direction  (z direction shear along x)
             dirname = 'dir-%.4f' % (delta)
-            if not os.path.isdir(dirname):
-                os.mkdir(dirname)
+            self.mymkdir(dirname)
 
             dis_atoms = ase.io.read(files[-1], format='lammps-dump')
             dis_atoms.wrap(pbc=[1, 1, 1])
@@ -301,52 +300,6 @@ class cal_bcc_schmid(object):
             #  cfgname = "dis_z_%.4f" % (delta)
             #  ase.io.write(cfgname, images=ase_atoms,
             #  format='cfg')
-
-    def draw_ddmap(self):
-        #  for i in range(self._range[0], self._range[1]):
-        self._delta = 0.004
-        for i in range(0, 10):
-            #  delta = self._delta * i
-            delta = self._delta * i
-            dirname = 'dir-%.4f' % (delta)
-            filelist = glob.glob("%s/bcc.*.dump" % (dirname))
-            #  dumpname = "dump%.4f" % (delta)
-            dumpname = filelist[-1]
-            ase_atoms = ase.io.read(dumpname, format='lammps-dump')
-
-            # change the orientation back
-            strain = np.mat([[1.0, 0.0, 0.0],
-                             [delta, 1.0, 0.0],
-                             [0.0, 0.0, 1.0]])
-
-            invstrain = np.linalg.inv(strain)
-
-            cell = ase_atoms.get_cell()
-            print("before add strain", cell)
-
-            cell = invstrain * cell
-            print("after add strain ", cell)
-
-            pos = np.mat(ase_atoms.get_positions())
-            pos = pos * invstrain
-
-            newcell = copy.deepcopy(cell)
-            newcell[0, 0] = cell[2, 2]
-            newcell[2, 2] = cell[0, 0]
-
-            newpos = copy.deepcopy(pos)
-
-            newpos[:, 0] = pos[:, 2]
-            newpos[:, 1] = pos[:, 1]
-            newpos[:, 2] = pos[:, 0]
-
-            ase_atoms.set_cell(newcell)
-            ase_atoms.set_positions(newpos)
-
-            cfgname = "dis_z_%.4f" % (delta)
-            print(cfgname)
-            ase.io.write(cfgname, images=ase_atoms,
-                         format='cfg')
 
     def run_lmp(self, tag='lmp'):
         #  for i in range(self._range[0], self._range[1]):
@@ -413,11 +366,8 @@ class cal_bcc_schmid(object):
 #     (options, args) = parser.parse_args()
 #     drv = cal_bcc_schmid()
 
-#     dispatcher = {'plate': drv.make_screw_plate,
-#                   'change': drv.change_orient,
-#                   'mrss': drv.prep_mrss,
+#     dispatcher = {'change': drv.change_orient,
 #                   'run': drv.run_lmp,
-#                   'ddmap': drv.draw_ddmap,
 #                   'static': drv.static_shear,
 #                   'const': drv.cal_screw_const}
 

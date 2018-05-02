@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-04-05 02:22:32
+# @Last Modified time: 2018-04-29 14:38:55
 
 
 import os
@@ -78,7 +78,8 @@ class cal_bcc_ideal_tensile_op(get_data.get_data,
         data = np.ndarray([npts, 10])
         for i in range(npts):
             delta = self.delta * (self.range[0] + i)
-            res = minimize(self.runlmp, x0, delta, tol=1e-4, method='Nelder-Mead')
+            res = minimize(self.runlmp, x0, delta,
+                           tol=2.5e-5, method='Nelder-Mead')
             data[i][2], data[i][3] = res.x[0], res.x[1]
             x0 = res.x
             print(res)

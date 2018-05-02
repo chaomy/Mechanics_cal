@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-23 11:07:36
+# @Last Modified time: 2018-05-01 22:39:43
 
 from numpy import cos, sin, sqrt, mat
 from collections import OrderedDict
@@ -51,14 +51,12 @@ matconsts = OrderedDict([('Al1', {'lat': 4.05,
 
 class cal_dis_dipole(object):
 
-    def set_dipole_box(self, sizen=1):
+    def set_dipole_box(self, sizen=1):  # 7 x 11 x 1
         n = 7 * sizen
         m = 11 * sizen
         t = 1 * sizen
         atoms = ase.lattice.cubic.BodyCenteredCubic(
-            directions=[[1., 1., -2.],
-                        [-1., 1., 0],
-                        [0.5, 0.5, 0.5]],
+            directions=[[1., 1., -2.], [-1., 1., 0], [0.5, 0.5, 0.5]],
             latticeconstant=self.pot['lattice'],
             size=(n, m, t),
             symbol=self.pot['element'])
@@ -69,39 +67,7 @@ class cal_dis_dipole(object):
         atoms.wrap(pbc=[1, 1, 1])
         return atoms
 
-    def set_dipole_triangular_box(self, sizen=1):
-        u = 1. / 3. * np.array([1., -2., 1.])
-        v = 1. / 3. * np.array([2., -1., -1.])
-        z = 1. / 3. * np.array([1., 1., 1.])
-
-        # n1u = 3 * n - 1
-        # n1v = 0
-        # n2u = 0
-        # n2v = 3 * n - 1
-        # c1z = 1. / 3.
-        # c2z = -c1z
-
-        # c1 = n1u * u + n1v * v + c1z * z
-        # c2 = n2u * u + n2v * v + c2z * z
-
-        # print c1; print c2
-        atoms = ase.lattice.cubic.BodyCenteredCubic(
-            directions=[[1., -2., 1.],
-                        [2., -1., -1.],
-                        [1., 1., 1.]],
-            latticeconstant=self.pot['latbcc'],
-            size=(4, 4, 1),
-            symbol=self.pot['element'])
-        supercell = atoms.get_cell()
-        addstrain = False
-        if addstrain is True:
-            supercell = strain * supercell
-            atoms.set_cell(supercell)
-            atoms.wrap(pbc=[1, 1, 1])
-        ase.io.write('tri_perf_poscar.vasp', images=atoms, format='vasp')
-        return atoms
-
-    def loop_table(self):
+    def loop_table(self):  # repeat curtain results
         for key in list(matconsts.keys()):
             print(key)
             self.get_cutin_result(matconsts[key])
@@ -121,6 +87,7 @@ class cal_dis_dipole(object):
                          [-1, 1, 0]])
         burgers = param['lat'] * sqrt(2.) / 2. * np.array([-1., 1., 0])
         stroh = stroh_solve.Stroh(c, burgers, axes=axes)
+
         A = mat(np.zeros([3, 3]), dtype='complex')
         A[:, 0] = mat(stroh.A[0]).transpose()
         A[:, 1] = mat(stroh.A[2]).transpose()
@@ -195,39 +162,9 @@ class cal_dis_dipole(object):
         # print "K (biKijbj)", stroh.K_coeff, "eV/A"
         # print "pre-ln alpha = biKijbj/4pi", stroh.preln, "ev/A"
 
-    def bcc_screw_dipole_triangular_atoms(self, atoms=None, fname='qe.in'):
-
-        c = tool_elastic_constants.elastic_constants(
-            C11=self.pot['c11'],
-            C12=self.pot['c12'],
-            C44=self.pot['c44'])
-
-        burgers = self.pot['lattice'] / 2 * np.array([1., 1., 1.])
-        stroh = stroh_solve.Stroh(c, burgers, axes=axes)
-
-        atoms = self.set_dipole_triangular_box()
-        pos = atoms.get_positions()
-        cell = atoms.get_cell()
-
-        c1 = [0.51 * cell[0, 0], 1. / 3. * cell[1, 1]]
-        c2 = [2 * cell[1, 0], 2. / 3. * cell[1, 1]]
-        print(cell, c1, c2)
-
-        shiftc1 = np.ones(np.shape(pos)) * np.array([c1[0], c1[1], 0.0])
-        shiftc2 = np.ones(np.shape(pos)) * np.array([c2[0], c2[1], 0.0])
-
-        disp1 = stroh.displacement(pos - shiftc1)
-        disp2 = stroh.displacement(pos - shiftc2)
-
-        atoms.set_positions(pos + np.real(disp1) - np.real(disp2))
-        ase.io.write('tri_dis_poscar.vasp', atoms, format='vasp')
-
     def bcc_screw_dipole_configs_alongz(self, sizen=1):
-
         c = tool_elastic_constants.elastic_constants(
-            C11=self.pot['c11'],
-            C12=self.pot['c12'],
-            C44=self.pot['c44'])
+            C11=self.pot['c11'], C12=self.pot['c12'], C44=self.pot['c44'])
         burgers = self.pot['lattice'] / 2 * np.array([1., 1., 1.])
         stroh = stroh_solve.Stroh(c, burgers, axes=axes)
 
@@ -250,12 +187,16 @@ class cal_dis_dipole(object):
         # shiftc2 = \
         # np.ones(np.shape(pos)) * np.array([c2[0, 0], c2[0, 1], 0.0])
 
-        opt = 'not pull'
+        opt = 'original'
         if opt in ['split']:
             c1 = self.pot['posleft'] + \
                 np.array([0.0, 0.21 * self.pot['yunit']])
             c2 = self.pot['posrigh'] + \
                 np.array([0.0, -0.21 * self.pot['yunit']])
+        elif opt in ['move']:
+            c1 = [(sx + 0.5) * unitx, (sy + 1. / 3. - 0.95 * 1. / 3.) * unity]
+            c2 = [(sx + ix + 0.5) * unitx,
+                  (sy + 2. / 3. + 0.95 * 1. / 3.) * unity]
         else:
             c1 = [(sx) * unitx, (sy + 1. / 3.) * unity]
             c2 = [(sx + ix) * unitx, (sy + 2. / 3.) * unity]
@@ -281,17 +222,22 @@ class cal_dis_dipole(object):
                     dp[2] -= 1. / 6. * unitz
 
         atoms.set_positions(pos + np.real(disp1) - np.real(disp2))
+
+        # periodic boundary conditions
+        # c2l = [(sx - ix + 0.5) * unitx, (sy + 2. / 3. + 0.95 * 1. / 3.) * unity]
+        # shft = np.ones(np.shape(pos)) * np.array([c2l[0], c2l[1], 0.0])
+        # disp3 = stroh.displacement(pos - shft)
+        # atoms.set_positions(atoms.get_positions() - np.real(disp3))
+
+        atoms.wrap(pbc=[1, 1, 1])
         self.write_lmp_config_data(atoms, 'init.txt')
         ase.io.write("perf_poscar", atoms_perf, format='vasp')
-        # ase.io.write('POSCAR', atoms, format='vasp')
+        ase.io.write('POSCAR', atoms, format='vasp')
         return (atoms, atoms_perf)
-
 
 if __name__ == '__main__':
     drv = cal_dis_dipole()
-    # drv.bcc_screw_dipole_configs_alongz()
     # drv.bcc_screw_dipole_triangular_atoms()
-    drv.print_dis_constants()
+    # drv.print_dis_constants()
     # drv.get_cutin_result()
-    # drv.loop_table()
     # drv.cal_crack()

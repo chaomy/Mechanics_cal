@@ -4,16 +4,12 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-20 23:25:21
+# @Last Modified time: 2018-04-30 16:03:11
 
-try:
-    import numpy as np
-    import atomman as am
-    import atomman.unitconvert as uc
-    import matplotlib.pyplot as plt
-
-except ImportError:
-    print("error during import")
+import numpy as np
+import atomman as am
+import atomman.unitconvert as uc
+import matplotlib.pyplot as plt
 
 
 class cubic_cij:
@@ -23,6 +19,7 @@ class cubic_cij:
 
 
 class cal_intro_ani_dis(object):
+
     def calQ(self):
         c11, c12, c44 = self.cij.c11, self.cij.c12, self.cij.c44
         e = c44 / (c12 + c44)
@@ -43,7 +40,6 @@ class cal_intro_ani_dis(object):
         nn12 = -n1 * n2 * ((f - 1) * n3sqr + e)
         nn12 /= Dp
         Q11 = self.integrate(nn11)
-        return
 
     def fcc_edge(self):
         axes = np.array([[1, 0, -1],
@@ -102,4 +98,3 @@ class cal_intro_ani_dis(object):
         plt.xlabel('x-position (Angstrom)', fontsize='large')
         plt.ylabel('y-position (Angstrom)', fontsize='large')
         plt.show()
-        return

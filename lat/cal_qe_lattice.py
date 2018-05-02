@@ -3,7 +3,7 @@
 # @Author: yangchaoming
 # @Date:   2017-06-13 15:37:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-11-07 21:28:14
+# @Last Modified time: 2018-04-29 02:11:58
 
 import os
 import numpy as np
@@ -29,9 +29,9 @@ class cal_lattice(gn_config.bcc,
                   gn_pbs.gn_pbs):
 
     def __init__(self, inpot=None):
-        if inpot is None: 
+        if inpot is None:
             self.pot = md_pot_data.qe_pot.pbe_w
-        else: 
+        else:
             self.pot = inpot
         output_data.output_data.__init__(self)
         get_data.get_data.__init__(self)
@@ -44,7 +44,6 @@ class cal_lattice(gn_config.bcc,
         self.mass = self.pot['mass']
         self.kpnts = [44, 44, 44]
         self.root = os.getcwd()
-        return
 
     def cal_bcc_lattice(self):
         for i in range(-15, 15):
@@ -56,17 +55,15 @@ class cal_lattice(gn_config.bcc,
             self.pot['latbcc'] = self.alat0 + i * 0.006
             atoms = self.set_bcc_primitive((1, 1, 1))
             self.gn_qe_bcc_lattice_infile(atoms)
-            self.set_my_pbs(mdir)  
+            self.set_my_pbs(mdir)
             os.system("mv qe.in {}".format(mdir))
             os.system('cp $POTDIR/{} {}'.format(self.pot['file'],
                                                 mdir))
-        return
 
     def goandsub(self, mdir, rootdir):
         os.chdir(mdir)
         os.system('qsub va.pbs')
         os.chdir(rootdir)
-        return
 
     def loop_degauss(self, opt='prep'):
         degauss0 = 0.02
@@ -85,7 +82,6 @@ class cal_lattice(gn_config.bcc,
             elif opt == 'clc':
                 os.system("cp {}/kpts.txt kpts_{:4.3f}.txt".format(mdir,
                                                                    degauss))
-        return
 
     def loop_kpoints(self):
         self.set_ecut('{}'.format(48))
@@ -99,7 +95,6 @@ class cal_lattice(gn_config.bcc,
             os.system('mv qe.in {}'.format(mdir))
             os.system('cp $POTDIR/{} {}'.format(self.pot['file'],
                                                 mdir))
-        return
 
     def loop_kpoints_ecut(self, opt='clc'):
         for i in range(43, 50):
@@ -116,7 +111,6 @@ class cal_lattice(gn_config.bcc,
             elif opt == 'dat':
                 os.system("cp ecut.txt ../ecut_{:02}.txt".format(kpts))
             os.chdir(self.root)
-        return
 
     def loop_ecut(self):
         for ecut in range(28, 52):
@@ -128,7 +122,6 @@ class cal_lattice(gn_config.bcc,
             os.system('mv qe.in {}'.format(mdir))
             os.system('cp $POTDIR/{} {}'.format(self.pot['file'],
                                                 mdir))
-        return
 
     def clc_data(self, tag='ecut'):
         dirlist = glob.glob("dir-*")
@@ -142,16 +135,15 @@ class cal_lattice(gn_config.bcc,
             (engylist[i], vol, stress) = self.qe_get_energy_stress()
             os.chdir(os.pardir)
         np.savetxt('{}.txt'.format(tag), [ecutlist, engylist])
-        return
 
     def clc_lattice(self, tag='bcc'):
         rng = [-15, 15]
         cnt = 0
         data = np.zeros([rng[1] - rng[0], 2])
         for i in range(rng[0], rng[1]):
-            if i >= 0: 
+            if i >= 0:
                 mdir = "dir-p-{:03d}".format(i)
-            else: 
+            else:
                 mdir = "dir-n-{:03d}".format(abs(i))
             os.chdir(mdir)
             (energy, vol, stress) = self.qe_get_energy_stress('qe.out')
@@ -163,7 +155,6 @@ class cal_lattice(gn_config.bcc,
             os.chdir(self.root)
         print(data)
         np.savetxt('lat.txt', data)
-        return
 
     def plt_data(self, tag='ecut', data=None):
         if tag in ['lat']:
@@ -177,7 +168,6 @@ class cal_lattice(gn_config.bcc,
         self.set_keys()
         self.ax.plot(np.sort(val), engy)
         self.fig.savefig('{}.png'.format(tag))
-        return
 
     def loop_clc_data(self, opt):
         degauss0 = 0.02
@@ -189,7 +179,6 @@ class cal_lattice(gn_config.bcc,
             self.clc_data(tag='kpts')
             os.system("cp kpts.txt ../kpts_{:4.3f}.txt".format(degauss))
             os.chdir(self.root_dir)
-        return
 
     def loop_plt_data(self, tag='kpts'):
         filelist = glob.glob('{}_*'.format(tag))
@@ -203,7 +192,6 @@ class cal_lattice(gn_config.bcc,
             self.ax.plot(np.sort(data[0]), data[1], label=tag)
             self.ax.legend()
         self.fig.savefig('fig-default.png')
-        return
 
     def loop_run(self):
         dirlist = glob.glob("dir-*")
@@ -212,7 +200,6 @@ class cal_lattice(gn_config.bcc,
             os.chdir(mdir)
             os.system("mpirun pw.x < qe.in > qe.out")
             os.chdir(self.root)
-        return
 
     def gn_qe_bcc_lattice_infile(self, atoms):
         self.set_thr('1.0D-6')
@@ -228,7 +215,6 @@ class cal_lattice(gn_config.bcc,
             fid = self.qe_write_pos(fid, atoms)
             fid = self.qe_write_kpts(fid)
             fid.close()
-        return
 
     def find_lattice(self, data=None):
         if data is None:
@@ -251,8 +237,6 @@ mpirun pw.x < qe.in > qe.out
                          """)
         self.write_pbs(od=od)
         os.system("mv va.pbs %s" % (mdir))
-        return
-
 
     def loop_pots(self):
         potlist = {'WTa0.25': md_pot_data.qe_pot.vca_W75Ta25,
@@ -266,7 +250,6 @@ mpirun pw.x < qe.in > qe.out
             os.chdir(key)
             self.cal_bcc_lattice()
             os.chdir(os.pardir)
-        return 
 
 if __name__ == '__main__':
     usage = "usage:%prog [options] arg1 [options] arg2"

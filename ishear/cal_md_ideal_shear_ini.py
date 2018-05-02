@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-04-05 02:31:51
+# @Last Modified time: 2018-04-29 22:12:03
 
 
 from cal_md_ideal_shear_pre import cal_bcc_ideal_shear_pre

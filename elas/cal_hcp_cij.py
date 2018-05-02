@@ -3,9 +3,10 @@
 # @Author: chaomy
 # @Date:   2018-04-09 18:51:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-04-13 20:44:01
+# @Last Modified time: 2018-04-13 22:23:48
 
 from optparse import OptionParser
+import get_data
 import os
 import ase.io
 import ase
@@ -33,10 +34,12 @@ othoHCP = othoHCPFractory()
 evA3toGpa = 160.21766208
 
 
-class cal_cij_hcp(gn_config.gnStructure, gn_pbs.gn_pbs):
+class cal_cij_hcp(gn_config.gnStructure, gn_pbs.gn_pbs,
+                  get_data.get_data):
 
     def __init__(self):
         self.pot = md_pot_data.md_pot.mg_Poco
+        get_data.get_data.__init__(self)
         gn_pbs.gn_pbs.__init__(self)
         gn_config.gnStructure.__init__(self, self.pot)
 
@@ -100,7 +103,6 @@ class cal_cij_hcp(gn_config.gnStructure, gn_pbs.gn_pbs):
 
     def va_prep(self):
         for kk in ['B', 'Ca', 'Cb', 'Cc', 'D']:
-            data = np.ndarray([10, 2])
             mdir = 'DIR_{}'.format(kk)
             self.mymkdir(mdir)
             os.chdir(mdir)
@@ -112,6 +114,20 @@ class cal_cij_hcp(gn_config.gnStructure, gn_pbs.gn_pbs):
                 tmp = "dir_{:03d}".format(i)
                 self.mymkdir(tmp)
                 self.prepare_vasp_inputs(tmp)
+            os.chdir(os.pardir)
+
+    def va_clc(self):
+        for kk in ['B', 'Ca', 'Cb', 'Cc', 'D']:
+            data = np.ndarray([10, 2])
+            mdir = 'DIR_{}'.format(kk)
+            os.chdir(mdir)
+            for i in range(10):
+                d = i * 0.0005 - 5 * 0.0005
+                os.chdir("dir_{:03d}".format(i))
+                (energy, vol, atoms) = self.vasp_energy_stress_vol_quick()
+                data[i, :] = d, energy
+                os.chdir(os.pardir)
+            np.savetxt("data.txt", data, fmt="%.10f")
             os.chdir(os.pardir)
 
     def md_cals(self):
@@ -134,7 +150,8 @@ class cal_cij_hcp(gn_config.gnStructure, gn_pbs.gn_pbs):
 
     def fit(self):
         yy = np.zeros(5)
-        vol = np.linalg.det(self.gn_otho_hcp().get_cell())
+        # vol = np.linalg.det(self.gn_otho_hcp().get_cell())
+        vol = np.linalg.det(self.gn_hcp().get_cell())
         for kk, i in zip(['B', 'Ca', 'Cb', 'Cc', 'D'], range(5)):
             data = np.loadtxt("dir_{}/data.txt".format(kk))
             data[:, 1] /= vol
@@ -167,7 +184,8 @@ if __name__ == '__main__':
     drv = cal_cij_hcp()
     dispatcher = {'cal': drv.md_cals,
                   'fit': drv.fit,
-                  'va': drv.va_prep}
+                  'va': drv.va_prep,
+                  'vaclc': drv.va_clc}
     if options.fargs is not None:
         dispatcher[options.mtype.lower()](options.fargs)
     else:

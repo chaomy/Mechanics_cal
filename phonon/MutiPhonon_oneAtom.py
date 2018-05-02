@@ -1,8 +1,9 @@
 #!/Users/chaomingyang/anaconda2/bin/python
+# -*- coding: utf-8 -*-
 
 import numpy as np
 import os
-import pickle
+import pickle as pc
 from phonopy import Phonopy
 from phonopy.interface.vasp import read_vasp
 from phonopy.file_IO import parse_FORCE_SETS
@@ -54,19 +55,25 @@ class Phonon_Post(object):
     def load_band_data(self):
         f = open("band.conf", 'r')
         PC = pickle.Unpickler(f)
-        Band_data = PC.load()
-        for i in range(len(Band_data)):
-            (q, d, freq, eigv) = Band_data[i]
-        return Band_data
+        band_data = PC.load()
+        for i in range(len(band_data)):
+            (q, d, freq, eigv) = band_data[i]
+        return band_data
 
     def generate_band_structure(self):
         bands = []
-        self.append_band(bands, [0.000, 0.000, 0.500], [0.000, 0.000, 0.000])
-        self.append_band(bands, [0.000, 0.000, 0.000], [0.250, -0.250, 0.250])
-        self.append_band(bands, [0.250, -0.250, 0.250], [0.250, 0.250, 0.250])
-        self.append_band(bands, [0.250, 0.250, 0.250], [0.000, 0.000, 0.000])
-        self.append_band(bands, [0.000, 0.000, 0.000], [-0.250, 0.000, 0.500])
+        # self.append_band(bands, [0.000, 0.000, 0.500], [0.000, 0.000, 0.000])
+        # self.append_band(bands, [0.000, 0.000, 0.000], [0.250, 0.250, 0.250])
+        # self.append_band(bands, [0.250, 0.250, 0.250], [0.5, -0.5, 0.5])
+        # self.append_band(bands, [0.5, -0.5, 0.5], [0.000, 0.000, 0.000])
 
+        # to be consistent with PRB paper
+        self.append_band(bands, [0.000, 0.000, 0.000], [0.5, -0.5, 0.5])
+        self.append_band(bands, [0.5, -0.5, 0.5], [0.250, 0.250, 0.250])
+        self.append_band(bands, [0.250, 0.250, 0.250], [0.000, 0.000, 0.000])
+        self.append_band(bands, [0.000, 0.000, 0.000], [0.000, 0.000, 0.500])
+
+        # self.append_band(bands, [0.000, 0.000, 0.000], )
         #  self.append_band(bands, [-0.049, 0.049, 0.526], [0.000, 0.000, 0.000])
         #  self.append_band(bands, [0.000, 0.000, 0.000], [0.239, -0.239, 0.239])
         #  self.append_band(bands, [0.239, -0.239, 0.239], [0.190, 0.288, 0.287])
@@ -83,28 +90,23 @@ class Phonon_Post(object):
         ax = self._phonon.plot_band_structure(labels=['M1', '\Gamma', 'X1', 'R', '\Gamma',
                                                       'B1', 'M2'])
         plt.savefig("band.png")
-        # ax.show()
-
-        f = open("band.conf", 'w')
-        PC = pickle.Pickler(f)
-        Band_data = []
+        band_data = []
         for q, d, freq, eigv in zip(q_points,
                                     distances,
                                     frequencies,
                                     eigvecs):
             for i in range(51):
-                Band_data.append((q[i],
+                band_data.append((q[i],
                                   d[i],
                                   freq[i],
                                   eigv[i]))
-        PC.dump(Band_data)
-        self._band_data = Band_data
+        np.save("band.conf", band_data)
 
     def find_imaginary_frequency(self):
-        Band_data = self._band_data
+        band_data = self._band_data
         with open("band.info", 'w') as fid:
-            for i in range(len(Band_data)):
-                (q, d, freq, eigv) = Band_data[i]
+            for i in range(len(band_data)):
+                (q, d, freq, eigv) = band_data[i]
                 for j in range(3):
                     if freq[j] < -0.030:
                         fid.write(
@@ -118,9 +120,7 @@ class Phonon_Post(object):
 
     def generate_dos(self):
         self._phonon.set_mesh([20, 20, 20])
-        self._phonon.set_thermal_properties(t_step=10,
-                                            t_max=1000,
-                                            t_min=0)
+        self._phonon.set_thermal_properties(t_step=10, t_max=1000, t_min=0)
         self._phonon.set_total_DOS(sigma=0.1)
         # self._phonon.plot_total_DOS().show()
 
@@ -162,4 +162,4 @@ if __name__ == '__main__':
     M.generate_band_structure()
     # M.find_imaginary_frequency()
     # M.generate_modulation_of_imaginary_points()
-#    M.generate_dos()
+    # M.generate_dos()

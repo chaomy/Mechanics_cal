@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2018-03-07 13:09:29
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-23 14:57:20
+# @Last Modified time: 2018-04-28 18:47:40
 
 import numpy as np
 import ase
@@ -65,9 +65,7 @@ class lmp_phonon(get_data.get_data):
                          [0.0, 0.0, 0.973610]])
         self.gn_primitive_lmps(strain)
 
-    def gn_primitive_lmps(self, strain=np.mat([[1., 0., 0.],
-                                               [0., 1., 0.],
-                                               [0., 0., 1.]])):
+    def gn_primitive_lmps(self, strain=np.mat(np.identity(3))):
         alat = self.pot['lattice']
         cell = np.mat([[-0.5, 0.5, 0.5],
                        [0.5, -0.5, 0.5],
@@ -156,9 +154,9 @@ class lmp_phonon(get_data.get_data):
                                transformedkpath[i, 2]))
         print(stringlist)
         for i in range(len(stringlist) - 1):
-            print("self.append_band(bands, %s, %s)" \
-                % (stringlist[i],
-                   stringlist[i + 1]))
+            print("self.append_band(bands, %s, %s)"
+                  % (stringlist[i],
+                     stringlist[i + 1]))
 
     def convert_pos_to_lmp_data_norm(self, filename="POSCAR-001"):
         ase_atoms = ase.io.read(filename, format='vasp')
@@ -176,7 +174,7 @@ class lmp_phonon(get_data.get_data):
     def cal_phonon_auto(self):
         self.gn_primitive_lmps()
         os.system("~/anaconda2/bin/phonopy --dim=\"6 6 6\" -d")
-        self.convert_pos_to_lmp_data() 
+        self.convert_pos_to_lmp_data()
         os.system("lmp_mpi -i in.phonon")
         files = glob.glob("bcc.0.dump")
         os.system("~/anaconda2/bin/phonopy -f {} --lammps".format(files[0]))

@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-04-05 02:22:50
+# @Last Modified time: 2018-04-29 14:39:42
 
 
 import os
@@ -48,7 +48,7 @@ class cal_bcc_ideal_tensile_tp(get_data.get_data,
         for i in range(npts):
             delta = self.delta * (self.range[0] + i)
             res = minimize(self.runlmp, x0, delta,
-                           tol=1e-4, method='Nelder-Mead')
+                           tol=5e-5, method='Nelder-Mead')
             x0 = res.x
             print(res)
             data[i][0] = delta

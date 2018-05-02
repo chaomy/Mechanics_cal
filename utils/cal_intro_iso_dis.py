@@ -10,6 +10,42 @@ class cal_intro_iso_dis(object):
     def __init__(self):
         self.screw_coeff = self.burger / (2. * self.pi)
 
+    def core_center(self):
+        # work for 7 x 11
+        boxMod = np.array([0.0, 0.0])
+        n = 7
+
+        a1 = np.array([23.0991, 8.89085]) + boxMod
+        a2 = np.array([24.3824, 11.1136]) + boxMod      # easy core only
+        a3 = np.array([25.6657, 8.89085]) + boxMod  # split core
+        a4 = np.array([26.949, 11.1136]) + boxMod      # hard core only
+        a5 = np.array([28.2322, 8.89085]) + boxMod      # another easy core
+
+        aeasy_core = (a1 + a2 + a3) / 3.0
+        ahard_core = (a2 + a3 + a4) / 3.0
+        aeasy_core2 = (a3 + a4 + a5) / 3.0
+        asplit = a3
+        aM_point = 0.5 * (ahard_core + asplit)
+
+        dx = a3 - a1
+
+        inter = 0.5 * (3 * n - 1)
+
+        b1 = a2 + inter * dx
+        b2 = a3 + inter * dx
+        b3 = a4 + inter * dx
+        b4 = a5 + inter * dx
+        b5 = b3 + dx
+
+        beasy_core = (b1 + b2 + b3) / 3.0
+        bhard_core = (b2 + b3 + b4) / 3.0
+        beasy_core2 = (b3 + b4 + b5) / 3.0
+        bsplit = b3
+        bM_point = 0.5 * (bhard_core + bsplit)
+
+        return ([aeasy_core, ahard_core, asplit, aM_point, aeasy_core2],
+                [beasy_core, bhard_core, bsplit, bM_point, beasy_core2])
+
     def intro_single_screw_atoms(self, atoms, center=None, sign=None, orient=[0, 1, 2]):
 
         ucell = atoms.get_cell()
@@ -47,9 +83,9 @@ class cal_intro_iso_dis(object):
         # tdir = 2  # line direction
 
         # hcp
-        bdir = 0 
-        ndir = 1 
-        tdir = 2 
+        bdir = 0
+        ndir = 1
+        tdir = 2
 
         ucell = atoms.get_cell()
         atom_position = atoms.get_positions()
@@ -241,8 +277,7 @@ class cal_intro_iso_dis(object):
         return atoms
 
     def intro_split_core(self, atoms, lattice=None,
-                         move_x=None,
-                         in_tag=None, input_s=None):
+                         move_x=None, in_tag=None, input_s=None):
         atoms.wrap(pbc=[1, 1, 1])
         atom_position = atoms.get_positions()
 

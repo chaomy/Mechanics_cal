@@ -2,7 +2,7 @@
 # @Author: chaomy
 # @Date:   2017-12-03 11:07:29
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-02-21 00:29:35
+# @Last Modified time: 2018-04-26 13:27:26
 
 import os
 from numpy import sqrt, arccos, arcsin, rad2deg
@@ -12,19 +12,16 @@ from numpy import mat, unique
 
 class md_gb_loop(object):
 
-    def find_angles(self):
-        ags = []
-        res = []
-
-        # npts = 7
-
+    def find_angles_0001(self, il=[[1, 2, 3, 4, 5, 6, 7],
+                                   [1, 2, 3, 4, 5, 6, 7, 8]],
+                         jl=[1, 2]):
         ux = self.pot["ahcp"]
         uy = sqrt(3) / 2. * self.pot["ahcp"]
 
-        cnt = 0
+        ags = []
+        res = []
 
-        jl = [1, 2]
-        il = [[1, 2, 3, 4, 5, 6, 7], [1, 2, 3, 4, 5, 6, 7, 8]]
+        cnt = 0
 
         for j in jl:
             for i in il[j - 1]:
@@ -53,14 +50,9 @@ class md_gb_loop(object):
         for ee in b:
             self.ag.append(res[ee])
 
-        print(self.ag)
-
-    def loop_angle(self, opt='prep'):
-
-        self.find_angles()
-
+    def loop_angle_0001(self, opt='prep'):
+        self.find_angles_0001()
         npts = len(self.ag)
-
         j = 0
         self.gbdat = ndarray([2, npts + 1])
         self.gbdat[0, 0], self.gbdat[0, 1] = 0, 0
@@ -70,7 +62,8 @@ class md_gb_loop(object):
 
             if opt in ['prep']:
                 self.mymkdir(mdir)
-                self.build_hcp_gb_lmp(ee[0], ee[1], (30, 40), (0.0, 0.0, 0.0))
+                self.build_hcp_gb_lmp(
+                    ee[0], ee[1], (60, 70), (0.0, 0.0, 0.0), '0001')
                 os.system('mv in.gb {}'.format(mdir))
                 self.mymkdir('{}/out'.format(mdir))
 
@@ -84,66 +77,4 @@ class md_gb_loop(object):
                 j += 1
                 self.gbdat[0, j] = ee[0]
                 self.gbdat[1, j] = loadtxt('lmp.dat')
-                os.chdir(os.pardir)
-
-        if (1 == 0):  # this is not correct
-            for i, j in zip(list(range(1, npts)), list(range(0, npts - 1))):
-                idx = i + 0.5
-                idy = 1
-
-                lx = idx * ux
-                ly = idy * uy
-
-                ll = sqrt(lx**2 + ly**2)
-                # ll = sqrt(idx**2 + 3./4.) * self.pot["ahcp"]
-
-                ang = rad2deg(arcsin(ly / ll))
-
-                mdir = "dir_{:03}_{:02.3f}".format(i, ang)
-
-                if opt in ['prep']:
-                    self.mymkdir(mdir)
-                    self.build_hcp_gb_lmp(ang, ll, (30, 40), (0.0, 0.0, 0.0))
-                    os.system('mv in.gb {}'.format(mdir))
-                    self.mymkdir('{}/out'.format(mdir))
-
-                elif opt in ['run']:
-                    os.chdir(mdir)
-                    os.system('mpirun -n 4 lmp_mpi -i in.gb')
-                    os.chdir(os.pardir)
-
-                elif opt in ['read']:
-                    os.chdir(mdir)
-                    self.gbdat[0, j] = ang
-                    self.gbdat[1, j] = loadtxt('lmp.dat')
-                    os.chdir(os.pardir)
-
-    def loop_thickness(self, opt='prep'):
-        for i in range(30, 100, 10):
-            thk = (i, i + 10)
-            mdir = 'thk_{:4.3f}'.format(thk[0])
-            if opt in ['prep']:
-                self.mymkdir(mdir)
-                self.build_hcp_gb(15, thk, (0.0, 0.0, 0.0))
-                os.system('mv in.gb {}'.format(mdir))
-                self.mymkdir('{}/out'.format(mdir))
-
-            elif opt in ['run']:
-                os.chdir(mdir)
-                os.system('mpirun -n 4 lmp_mpi -i in.gb')
-                os.chdir(os.pardir)
-
-    def loop_dispx_hcp(self, opt='prep'):
-        for i in range(20):
-            dispx = 0.05 * i
-            mdir = 'dispx-{:4.3f}'.format(dispx)
-            if opt in ['prep']:
-                self.mymkdir(mdir)
-                self.build_hcp_gb(0., (30, 40), (dispx, 0.0, 0.0))
-                os.system('mv in.gb {}'.format(mdir))
-                self.mymkdir('{}/out'.format(mdir))
-
-            elif opt in ['run']:
-                os.chdir(mdir)
-                os.system('mpirun -n 4 lmp_mpi -i in.gb')
                 os.chdir(os.pardir)

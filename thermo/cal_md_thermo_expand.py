@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-21 18:42:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-04-13 17:24:37
+# @Last Modified time: 2018-04-15 21:14:19
 
 
 from optparse import OptionParser
@@ -122,7 +122,7 @@ class cal_md_thermo(gn_config.gnStructure,
     def add_vol_expan(self):
         atoms = ase.io.read("dump", format='lammps-dump')
         cell = atoms.get_cell()
-        atoms.set_cell(1.0070 * cell, scale_atoms=True)
+        atoms.set_cell(1.0040 * cell, scale_atoms=True)
         self.write_lmp_config_data(atoms)
         return atoms
 
