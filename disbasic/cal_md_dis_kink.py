@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2018-03-13 23:59:29
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-05-01 22:30:21
+# @Last Modified time: 2018-05-01 22:55:21
 
 
 import atomman as am
@@ -37,6 +37,26 @@ class bcc_kink(gn_config.bcc,
         Intro_vasp.vasp_change_box.__init__(self, self._alat)
         gn_lmp_infile.gn_md_infile.__init__(self)
         self.shmid_drv = cal_md_dis_schmid.cal_bcc_schmid(self.pot)
+
+    def intro_kink_pair(self):
+        e1 = 1. / 3. * np.array([1., 1., -2.])
+        e2 = 1. / 2. * np.array([-1., 1., 0])
+        e3 = np.array([0.5, 0.5, 0.5])
+
+        atoms = self.set_bcc_convention([e1, e2, e3], (30, 30, 60))
+        xc1 = (0.0 + (-2.56656)) / 2. + 45 * \
+            np.sqrt(6.) / 3. * self.pot['lattice']
+        yc1 = (0.0 + (2.22271)) / 2. + 15 * np.sqrt(2.) * self.pot['lattice']
+        H = np.sqrt(2. / 3.0) * self.pot['lattice']
+
+        h = 0.0 * H
+        atoms = self.intro_kink_screw_dislocations(
+            atoms, (xc1, yc1), (xc1 + H, yc1), h, 1. / 4.)
+
+        ase.io.write("lmp_init.cfg", atoms, "cfg")
+        fname = "init.data"
+        self.write_lmp_config_data(atoms, fname)
+        self.gn_md_minimize_cfg("init.data", "./w_eam4.fs", "W")
 
         ############################################################
         # cluster method  (large supercell) # make a plate # run some MD

@@ -4,12 +4,14 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-04-30 16:03:11
+# @Last Modified time: 2018-05-01 22:52:15
 
 import numpy as np
 import atomman as am
 import atomman.unitconvert as uc
 import matplotlib.pyplot as plt
+import stroh_solve
+import tool_elastic_constants
 
 
 class cubic_cij:
@@ -19,6 +21,100 @@ class cubic_cij:
 
 
 class cal_intro_ani_dis(object):
+
+    def cal_nye(self):
+        torient = 'z'
+        if torient == 'y':
+            e1 = 1. / 3. * np.array([1., 1., -2.])
+            e2 = np.array([0.5, 0.5, 0.5])
+            e3 = 1. / 2. * np.array([1, -1, 0])
+
+        e1 = 1. / 3. * np.array([1., 1., -2.])
+        e2 = 1. / 2. * np.array([-1., 1., 0])
+        e3 = np.array([0.5, 0.5, 0.5])
+
+        # unit cell
+        unit_cell = np.array([e1, e2, e3])
+
+        sizen = 1
+        n = 7 * sizen
+        m = 11 * sizen
+        t = 3
+
+        atoms = self.set_bcc_convention(directions=[[e1[0], e1[1], e1[2]],
+                                                    [e2[0], e2[1], e2[2]],
+                                                    [e3[0], e3[1], e3[2]]],
+                                        size=(n, m, t))
+
+        # perfect positions
+        p = self.pot['lattice'] * self.bccneigh
+
+        # atoms = self.intro_dipole_screw_atoms(atoms, self.pot['lattice'])
+        atoms = self.intro_single_screw_atoms(atoms)
+
+        ase.io.write("lmp_dis.cfg", atoms, "cfg")
+
+        # system
+        system, elements = am.convert.ase_Atoms.load(atoms)
+
+        r = (3**0.5 / 2. + 1) / 2.
+        system.nlist(self.pot['lattice'] * r)
+        nye_rlt = am.defect.nye_tensor(system, p, axes=unit_cell)
+
+        print(np.max(nye_rlt['strain'][:]))
+        # for key, value in nye_rlt.iteritems():
+        #     print key, value
+        #     system.atoms_prop(key=key, value=value)
+
+        # int_sum = np.empty(3)
+        # for i in range(3):
+        #     int_sum[i] = am.plot.interpolate_contour(system, 'Nye_tensor',
+        #                                              index=[1, i],
+        #                                              cmap='bwr')[0]
+        # print('burgers vector estimate = ', int_sum)
+
+        ############################################################
+        # since lammmps can only use  xy xz yz
+        # new x is old y ; new y is old z ; new z is old x
+        # x  1  1 -2
+        # y  1  1  1
+        # z  1 -1  0
+        ############################################################
+
+    def print_dis_constants(self):
+        struct = "hex"
+        if struct in ["cubic"]:
+            # Cubic
+            c = tool_elastic_constants.elastic_constants(
+                C11=self.pot['c11'],
+                C12=self.pot['c12'],
+                C44=self.pot['c44'])
+            axes = np.array([[1, -1, 1],
+                             [2, 1, -1],
+                             [0, 1, 1]])
+            burgers = self.pot['lattice'] / 2 * np.array([1., 1., 1.])
+            stroh = stroh_solve.Stroh(c, burgers, axes=axes)
+            print(stroh.A[0])
+
+        # hexagonal
+        if struct in ["hex"]:
+            print(self.pot["lattice"])
+            axes = np.array([[1, 0, 0],
+                             [0, 1, 0],
+                             [0, 0, 1]])
+
+        burgers = self.pot['lattice'] / 2 * np.array([1., 1, 0])
+        c = am.ElasticConstants()
+        c.hexagonal(C11=326.08, C33=357.50, C12=129.56, C13=119.48, C44=92.54)
+        stroh = stroh_solve.Stroh(c, burgers, axes=axes)
+        print(stroh.A)
+        print(stroh.L)
+
+        # print(c)
+        # print stroh.L
+        # print "K tensor", stroh.K_tensor
+        # print "K (biKijbj)", stroh.K_coeff, "eV/A"
+        # print "pre-ln alpha = biKijbj/4pi", stroh.preln, "ev/A"
 
     def calQ(self):
         c11, c12, c44 = self.cij.c11, self.cij.c12, self.cij.c44
