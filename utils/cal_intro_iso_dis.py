@@ -202,10 +202,8 @@ class cal_intro_iso_dis(object):
                 [beasy_core, bhard_core, bsplit, bM_point, beasy_core2])
 
     def intro_dipole_screw_atoms_vasp(self, atoms,
-                                      lattice=3.307,
-                                      move_x=0,
-                                      in_tag='easy_easy',
-                                      input_s=1.0):
+                                      lattice=3.307, move_x=0,
+                                      in_tag='easy_easy', input_s=1.0):
 
         atoms.wrap(pbc=[1, 1, 1])
         atom_position = atoms.get_positions()

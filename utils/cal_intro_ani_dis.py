@@ -4,14 +4,15 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-05-01 22:52:15
+# @Last Modified time: 2018-05-01 23:02:59
 
 import numpy as np
 import atomman as am
 import atomman.unitconvert as uc
 import matplotlib.pyplot as plt
-import stroh_solve
 import tool_elastic_constants
+from collections import OrderedDict 
+from . import stroh_solve
 
 
 class cubic_cij:

@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-04-29 14:38:55
+# @Last Modified time: 2018-05-07 14:28:26
 
 
 import os
@@ -73,19 +73,19 @@ class cal_bcc_ideal_tensile_op(get_data.get_data,
     def loop_tensile_lmp(self):
         npts = self.npts
         data = np.ndarray([npts, 10])
-        x0 = np.array([0.91, 1.11])
+        x0 = np.array([0.80, 1.20])
         npts = self.range[1] - self.range[0]
         data = np.ndarray([npts, 10])
-        for i in range(npts):
+        for i in range(2, 8):
             delta = self.delta * (self.range[0] + i)
             res = minimize(self.runlmp, x0, delta,
-                           tol=2.5e-5, method='Nelder-Mead')
+                           tol=1e-4, method='Nelder-Mead')
             data[i][2], data[i][3] = res.x[0], res.x[1]
-            x0 = res.x
             print(res)
             data[i][0] = delta
             data[i][1] = res.fun
             data[i][4:] = self.stress
+            print(self.stress)
         np.savetxt("iten.txt", data, fmt='%6.5f')
         np.savetxt("iten.md.op.txt", data, fmt='%6.5f')
 

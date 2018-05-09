@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-21 18:42:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-05 15:13:13
+# @Last Modified time: 2018-05-08 13:44:54
 
 
 import os
@@ -16,11 +16,8 @@ import md_pot_data
 import plt_drv
 
 
-class cal_md_lattice(gn_config.bcc,
-                     gn_config.fcc,
-                     gn_config.hcp,
-                     get_data.get_data,
-                     plt_drv.plt_drv):
+class cal_md_lattice(gn_config.bcc, gn_config.fcc, gn_config.hcp,
+                     get_data.get_data, plt_drv.plt_drv):
 
     def __init__(self):
         self.pot = md_pot_data.va_pot.Nb_pbe

@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-04-13 21:37:36
+# @Last Modified time: 2018-05-08 12:40:47
 
 
 import ase.lattice.hexagonal as Hexagonal
@@ -33,7 +33,8 @@ class cal_lattice(gn_pbs.gn_pbs, gn_config.gnStructure,
         self.figsize = (8, 6)
         self.npts = 10
         self.kpoints = [31, 31, 31]
-        self.pot = md_pot_data.va_pot.Mo_pbe
+        # self.pot = md_pot_data.va_pot.Mo_pbe
+        self.pot = md_pot_data.va_pot.Nb_pbe
         gn_config.gnStructure.__init__(self, self.pot)
         plt_drv.plt_drv.__init__(self)
         gn_kpoints.gn_kpoints.__init__(self)
@@ -45,7 +46,7 @@ class cal_lattice(gn_pbs.gn_pbs, gn_config.gnStructure,
         data = np.loadtxt(filename)
         print(data[:, 1])
 
-        lattice = np.abs(data[:, 0])
+        lattice = np.abs(2 * data[:, 0])
         energy = data[:, 1]
 
         InterPoints = np.linspace(lattice[0], lattice[-1], 101)
@@ -55,12 +56,11 @@ class cal_lattice(gn_pbs.gn_pbs, gn_config.gnStructure,
 
         print("min energy ", np.min(energy))
         print("num", np.argmin(energy), "lattice", InterPoints[i])
-
         print((np.min(Ynew)))
 
         self.set_111plt()
-        self.ax.plot(lattice, energy, label="lat = {:7f}".format(
-            2 * InterPoints[i]), **next(self.keysiter))
+        self.ax.plot(lattice, energy, label="lat = {:8f}".format(
+            InterPoints[i]), **next(self.keysiter))
         self.add_legends(self.ax)
         self.fig.savefig("lattice.png")
 
@@ -83,8 +83,8 @@ class cal_lattice(gn_pbs.gn_pbs, gn_config.gnStructure,
 
     def gn_bcc(self):
         alat0 = self.pot['latbcc']
-        delta = 0.0005
-        rng = [15, 40]
+        delta = 0.00002
+        rng = [-15, 15]
         for i in range(rng[0], rng[1]):
             self.pot["latbcc"] = alat0 + i * delta
             if i >= 0:
@@ -146,8 +146,8 @@ class cal_lattice(gn_pbs.gn_pbs, gn_config.gnStructure,
             ase.io.write(filename="POSCAR", images=atoms, format='vasp')
             self.prepare_vasp_inputs(mdir)
 
-    def collect_data(self, tag='hcp'):
-        rng = [-15, 40]
+    def collect_data(self, tag='bcc'):
+        rng = [-15, 15]
         data = np.zeros([rng[1] - rng[0], 3])
         cnt = 0
         for i in range(rng[0], rng[1]):

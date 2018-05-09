@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-11-23 09:46:18
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-04-28 14:04:44
+# @Last Modified time: 2018-05-04 00:22:24
 
 
 from optparse import OptionParser
@@ -27,7 +27,6 @@ class cal_md_vacancy(gn_config.gnStructure, get_data.get_data, gn_pbs.gn_pbs):
     def __init__(self):
         self.pot = self.load_data("../BASICS/pot.dat")
         # self.pot = md_pot_data.va_pot.Nb_pbe
-        # self.pot = md_pot_data.md_pot.Nb_eam
         gn_config.gnStructure.__init__(self, self.pot)
 
     def bcc_vacancy_prep(self):
@@ -58,7 +57,6 @@ class cal_md_vacancy(gn_config.gnStructure, get_data.get_data, gn_pbs.gn_pbs):
 
     def migration_prep(self):
         sz = 16
-        # sz = 4
         perf_atoms = self.set_bcc_convention(size=[sz, sz, sz])
         vect = np.array([1, 1, 1]) * self.pot['lattice']
 
@@ -110,11 +108,15 @@ class cal_md_vacancy(gn_config.gnStructure, get_data.get_data, gn_pbs.gn_pbs):
         os.system("rm bcc.final.*")
 
     def cal_vac_form(self):  # vasp PAW_PBE
-        engy_vac = -2510.53396459
-        num_atoms = 250
-        engy_cohe = self._pot['ebcc']
-        eform = engy_vac - engy_cohe * (num_atoms - 1)
-        print(eform)
+        # engy_vac = -2510.53396459
+        # num_atoms = 250
+        # engy_cohe = self._pot['ebcc']
+        # eform = engy_vac - engy_cohe * (num_atoms - 1)
+        # print(eform)
+        engy_vac = -1278.94822939
+        num_atoms = 128
+        engy_cohe = md_pot_data.va_pot.Nb_pbe['ebcc']
+        print(engy_vac - engy_cohe * (num_atoms - 1))
 
     def auto(self):
         drv.bcc_vacancy_prep()
@@ -136,8 +138,9 @@ if __name__ == '__main__':
                   'frun': drv.bcc_vacancy_run,
                   'fcal': drv.bcc_vacancy_cal,
                   'mprep': drv.migration_prep,
-                  'auto': drv.auto}
-    # 'cal': cal_vac_form
+                  'auto': drv.auto,
+                  'vasp': drv.cal_vac_form}
+
     # 'mrun': migration_run,
     if options.fargs is not None:
         dispatcher[options.mtype.lower()](options.fargs)

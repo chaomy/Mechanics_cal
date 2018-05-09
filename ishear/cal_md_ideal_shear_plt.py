@@ -3,11 +3,12 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-04-29 22:47:01
+# @Last Modified time: 2018-05-05 13:52:47
 
 
 from itertools import cycle
 from md_pot_data import unitconv
+from matplotlib.ticker import FormatStrFormatter
 from numpy import polyfit, polyval
 import numpy as np
 import plt_drv
@@ -86,17 +87,25 @@ class cal_bcc_ideal_shear_plt(object):
         self.set_211plt()
         self.set_keys()
         ylabeliter = cycle(['Energy per atom [eV]', r'Shear stress [Gpa]'])
+        if tg in ['md']:
+            self.ax1.set_ylim([-0.01, 0.172])
+            self.ax2.set_ylim([-7.5, 8.8])
+        elif tg in ['va']:
+            self.ax1.set_ylim([-0.01, 0.170])
+            self.ax2.set_ylim([-7.2, 8.0])
+        self.ax1.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
+        self.ax2.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+
         cc = 1.0
         if tg in ['va']:
             cc = 0.1
-
         # vasp use Bar -> times 0.1 to be GPa
         lab = '{211}<111>'
         raw = np.loadtxt('stress.{}.211.txt'.format(tg))
         self.ax1.plot(raw[:, 0], raw[:, 1] - raw[0, 1],
                       label=lab, **next(self.keysiter))
         if tg in ['md']:
-            self.ax2.plot(raw[:, 0], cc * raw[:, -1],
+            self.ax2.plot(raw[:, 0], cc * raw[:, -3],
                           label=lab, **next(self.keysiter))
         if tg in ['va']:
             self.ax2.plot(raw[:, 0], cc * raw[:, -2],
@@ -107,7 +116,6 @@ class cal_bcc_ideal_shear_plt(object):
                       label=lab, **next(self.keysiter))
         self.ax2.plot(raw[:, 0], cc * raw[:, -1],
                       label=lab, **next(self.keysiter))
-
         self.add_legends(*self.axls)
         self.set_tick_size(*self.axls)
         self.add_y_labels(ylabeliter, *self.axls)

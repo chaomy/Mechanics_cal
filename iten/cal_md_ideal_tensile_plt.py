@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-04-03 12:27:40
+# @Last Modified time: 2018-05-05 14:34:16
 
 
 from optparse import OptionParser
@@ -49,7 +49,7 @@ class cal_md_ideal_tensile_plt(plt_drv.plt_drv):
         self.set_211plt()
         raw = np.loadtxt('iten.va.{}.txt'.format(tg))
         if tg in ['op']:
-          raw[:, 1] /= 2.0
+            raw[:, 1] /= 2.0
         ylabeliter = cycle(['dE', 'Sxx', 'Syy', 'Szz'])
         self.ax1.plot(raw[:, 0], raw[:, 1] - raw[0, 1],
                       label='PAW-PBE', **next(self.keysiter))
@@ -57,10 +57,10 @@ class cal_md_ideal_tensile_plt(plt_drv.plt_drv):
                       label='PAW-PBE', **next(self.keysiter))
         raw = np.loadtxt('iten.md.{}.txt'.format(tg))
         if tg in ['op']:
-          raw[:, 1] /= 2.0
-        self.ax1.plot(raw[:, 0], raw[:, 1] - raw[0, 1], 
+            raw[:, 1] /= 2.0
+        self.ax1.plot(raw[:, 0], raw[:, 1] - raw[0, 1],
                       label='MEAM', **next(self.keysiter))
-        self.ax2.plot(raw[:, 0], raw[:, 4], 
+        self.ax2.plot(raw[:, 0], raw[:, 4],
                       label='MEAM', **next(self.keysiter))
         self.add_legends(*self.axls)
         self.add_y_labels(ylabeliter, *self.axls)
@@ -71,20 +71,26 @@ class cal_md_ideal_tensile_plt(plt_drv.plt_drv):
     def cmp_path_plt(self, tg='md'):
         self.set_211plt()
         self.set_keys('upper left')
-        raw = np.loadtxt('iten.{}.op.txt'.format(tg)) 
+        raw = np.loadtxt('iten.{}.op.txt'.format(tg))
         raw = raw[:25, :]
         raw[:, 1] /= 2.0
-        ylabeliter = cycle(['Energy per atom [eV]', 'Stress along tensile [Gpa]'])
+        if tg in ['md']:
+            self.ax1.set_ylim([-0.02, 0.63])
+        elif tg in ['va']:
+            self.ax1.set_ylim([-0.01, 0.61])
+        self.ax2.set_ylim([-15, 19])
+        ylabeliter = cycle(
+            ['Energy per atom [eV]', 'Stress along tensile [Gpa]'])
         self.ax1.plot(raw[:, 0], (raw[:, 1] - raw[0, 1]),
-                      label='TP', **next(self.keysiter))
+                      label='OP', **next(self.keysiter))
         self.ax2.plot(raw[:, 0], raw[:, 4],
-                      label='TP', **next(self.keysiter))
+                      label='OP', **next(self.keysiter))
         raw = np.loadtxt('iten.{}.tp.txt'.format(tg))
         raw = raw[:25, :]
         self.ax1.plot(raw[:, 0], raw[:, 1] - raw[0, 1],
-                      label='OP', **next(self.keysiter))
+                      label='TP', **next(self.keysiter))
         self.ax2.plot(raw[:, 0], raw[:, 4],
-                      label='OP', **next(self.keysiter))
+                      label='TP', **next(self.keysiter))
         self.add_legends(*self.axls)
         self.add_y_labels(ylabeliter, *self.axls)
         self.add_x_labels(cycle([r'$\varepsilon_{xx}$']), self.ax2)
@@ -130,7 +136,7 @@ if __name__ == '__main__':
     dispatcher = {'plt': drv.plt_energy_stress,
                   'cell': drv.plt_cell,
                   'cmp': drv.cmp_pot_plt,
-                  'pth': drv.cmp_path_plt, 
+                  'pth': drv.cmp_path_plt,
                   'mesh': drv.plt_mesh}
 
     if options.fargs is not None:

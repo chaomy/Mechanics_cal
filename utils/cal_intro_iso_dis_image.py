@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-21 11:27:54
+# @Last Modified time: 2018-05-02 00:53:50
 
 
 class cal_intro_iso_dis_image(object):
@@ -41,9 +41,8 @@ class cal_intro_iso_dis_image(object):
                 yc1 + second_neigh_list[i][1] * ucell[1, 1])
 
         for i in range(len(positive_positions[0])):
-            atoms = self.intro_single_screw_atoms(atoms,
-                                                  center=[positive_positions[0][i],
-                                                          positive_positions[1][i]],
+            atoms = self.intro_single_screw_atoms(atoms, center=[positive_positions[0][i],
+                                                                 positive_positions[1][i]],
                                                   sign=1)
         return atoms
 
@@ -129,6 +128,7 @@ class cal_intro_iso_dis_image(object):
 
         second_neigh_list = [[2, 0], [2, 1], [2, 2], [
             1, 2], [0, 2], [-1, 2], [-2, 2], [-2, 1]]
+
         for i in range(8):
             second_neigh_list.append(
                 [-1 * second_neigh_list[i][0], -1 * second_neigh_list[i][1]])
@@ -166,13 +166,9 @@ class cal_intro_iso_dis_image(object):
 
         for i in range(len(positive_positions[0])):
             atoms = self.intro_single_screw_atoms(
-                atoms,
-                center=[positive_positions[0][i],
-                        positive_positions[1][i]],
-                sign=1)
+                atoms, center=[positive_positions[0][i],
+                               positive_positions[1][i]], sign=1)
             atoms = self.intro_single_screw_atoms(
-                atoms,
-                center=[negative_positions[0][i],
-                        negative_positions[1][i]],
-                sign=-1)
+                atoms, center=[negative_positions[0][i],
+                               negative_positions[1][i]], sign=-1)
         return atoms

@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2018-04-06 15:42:15
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-04-28 14:17:41
+# @Last Modified time: 2018-05-04 08:14:30
 
 
 from optparse import OptionParser
@@ -114,6 +114,27 @@ class cal_md_twin(gn_config.gnStructure, get_data.get_data,
         self.ax.plot(data, **next(self.keysiter))
         self.fig.savefig("fig_twin.png", **self.figsave)
 
+    def twin_vasp(self):
+        coeff = 16.021766208
+
+        area = 2.8771910028406178 * 4.6984332329907597
+        twin = -419.44619583
+        notwin = -419.90847454
+        twine = 0.5 * (twin - notwin) / area
+        # 0.27394446746637624
+        print("DFT", 1e3 * twine, "meV / A^2", 1e3 * twine * coeff, "mJ / m^2")
+
+        area = 2.876451 * 4.697224
+        twin = -625.112243060988
+        notwin = -625.599993817906
+        twine = 0.5 * (twin - notwin) / area
+        print("MEAMS", 1e3 * twine, "meV / A^2",
+              1e3 * twine * coeff, "mJ / m^2")
+
+    # twin
+    # DFT   twin energy : -419.44619583
+    # DFT   no tiwn : -419.90847454
+
 
 if __name__ == '__main__':
     usage = "usage:%prog [options] arg1 [options] arg2"
@@ -126,7 +147,8 @@ if __name__ == '__main__':
     drv = cal_md_twin()
     dispatcher = {'bcc211': drv.bcc211,
                   'run': drv.run,
-                  'plt': drv.plt}
+                  'plt': drv.plt,
+                  'vasp': drv.twin_vasp}
 
     if options.fargs is not None:
         dispatcher[options.mtype.lower()](options.fargs)

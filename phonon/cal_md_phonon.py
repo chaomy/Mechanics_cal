@@ -4,7 +4,8 @@
 # @Author: chaomy
 # @Date:   2018-03-07 13:09:29
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-04-28 18:47:40
+# @Last Modified time: 2018-05-08 13:54:17
+
 
 import numpy as np
 import ase
@@ -76,15 +77,13 @@ class lmp_phonon(get_data.get_data):
         cell = strain * cell
         print(cell)
         cell = alat * self.lmp_change_box(cell)
-
         atoms = ase.Atoms(
             'Nb', positions=[[0, 0, 0]], cell=cell, pbc=[1, 1, 1])
         ase.io.write("POSCAR", images=atoms, format='vasp')
-
         pos = np.array([[0, 0, 0]])
-
         file_name = 'lmp_init.txt'
         atom_num = 1
+        print(cell)
         with open(file_name, mode="w") as fout:
             fout.write("#lmp data config")
             fout.write("\n")
@@ -97,7 +96,6 @@ class lmp_phonon(get_data.get_data):
                        % (cell[1, 0],
                           cell[2, 0],
                           cell[2, 1]))
-
             fout.write("Atoms\n")
             fout.write("\n")
             for i in range(atom_num):
@@ -138,13 +136,11 @@ class lmp_phonon(get_data.get_data):
         #  unitcell = self.lmp_change_box(unitcell)
         # N[0.5 0.5 0.0]','\Gamma','H[1.0 0.0 0.0]','P[0.5 0.5 0.5]','\Gamma'
         # '\Gamma','H[1.0 0.0 0.0]','P[0.5 0.5 0.5]','\Gamma', N[0.5 0.5 0.0]',
-
         standardkpath = np.mat([[0.0, 0.0, 0.0],
                                 [1.0, 0.0, 0.0],
                                 [0.5, 0.5, 0.5],
                                 [0.0,  0., 0.],
                                 [0.5, 0.5, 0.0]], 'float')
-
         transformedkpath = (unitcell * standardkpath.transpose()).transpose()
         stringlist = []
         for i in range(len(transformedkpath)):
@@ -179,6 +175,8 @@ class lmp_phonon(get_data.get_data):
         files = glob.glob("bcc.0.dump")
         os.system("~/anaconda2/bin/phonopy -f {} --lammps".format(files[0]))
         os.system("MutiPhonon_oneAtom.py")
+        os.system("cp band.conf.npy band.conf.lmp.npy")
+        os.system("")
 
 
 if __name__ == '__main__':

@@ -2,7 +2,7 @@
 # @Author: chaomy
 # @Date:   2018-02-20 14:11:07
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-04-27 17:00:18
+# @Last Modified time: 2018-05-07 16:15:20
 
 import ase.lattice.orthorhombic as otho
 import ase.lattice.cubic as cubic
@@ -190,9 +190,9 @@ class md_prec(object):
         pos += lob
         atoms2.set_positions(pos)
         atoms2 = self.make_cubic("out", atoms2, lob - 1.0, hib + 1.0)
+
         atoms = self.intro_single_edge_atoms(
             atoms, center=[ux * 40, 40 * uy, 15 * uz])
-
         atoms = self.cut_y_normal_atoms(atoms)
         atoms = self.cut_x_normal_atoms(atoms)
         atoms = self.assign_ynormal_fixatoms(atoms)
@@ -201,9 +201,45 @@ class md_prec(object):
         print("volume", cell[0, 0] * (cell[1, 1] - 40.0) * cell[2, 2])
         self.write_lmp_config_data(atoms, "lmp_init.txt")
 
+    def make_r60_prec(self):
+        ux, uy, uz = self.pot['ahcp'], self.pot[
+            'chcp'], self.pot['ahcp'] * sqrt(3.)
+
+        sz = (140, 80, 60)
+        atoms = othoHCP(latticeconstant=(ux, uy, uz),
+                        size=sz, symbol=self.pot['element'])
+        lata, latc = self.pot["ahcp"], self.pot["chcp"]
+        self.burger = self.pot["lattice"]
+
+        cell = atoms.get_cell()
+        lob = np.array([ux * 78, 0.0 + 55, -50 * uz])
+        hib = np.array([ux * 105, uy * sz[1] - 56, -18 * uz])
+
+        atoms.rotate(60, 'y')
+        atoms = self.make_cubic("in", atoms, lob, hib)
+        atoms.rotate(-60, 'y')
+
+        atoms = self.intro_single_edge_atoms(
+            atoms, center=[ux * 40, 40 * uy, 15 * uz])
+        atoms = self.cut_y_normal_atoms(atoms)
+        atoms = self.cut_x_normal_atoms(atoms)
+        atoms = self.assign_ynormal_fixatoms(atoms)
+
+        atoms.rotate(60, 'y')
+        # make precipitates
+        atoms2 = self.buildd03()
+        atoms2.set_positions(atoms2.get_positions() + lob)
+        atoms2 = self.make_cubic("out", atoms2, lob - 1.0, hib + 1.0)
+        atoms.extend(atoms2)
+
+        # self.write_lmp_config_data(atoms, "lmp_rotate.txt")
+        atoms.rotate(-60, 'y')
+        self.write_lmp_config_data(atoms, "lmp_init.txt")
+
     def make_only_prec(self):
         ux, uy, uz = self.pot['ahcp'], self.pot[
             'chcp'], self.pot['ahcp'] * sqrt(3.)
+
         sz = (40, 10, 10)
         atoms = othoHCP(latticeconstant=(ux, uy, uz),
                         size=sz, symbol=self.pot['element'])
@@ -211,16 +247,20 @@ class md_prec(object):
         self.burger = self.pot["lattice"]
 
         cell = atoms.get_cell()
-        lob = np.array([ux * 10, 0.0, 3 * uz])
-        hib = np.array([ux * 20, uy * 10, 8 * uz])
+        lob = np.array([ux * 15, 0.0, -13 * uz])
+        hib = np.array([ux * 23, uy * 10, -8 * uz])
 
+        atoms.rotate(60, 'y')
         atoms = self.make_cubic("in", atoms, lob, hib)
+
+        # make precipitates
         atoms2 = self.buildd03()
-        pos = atoms2.get_positions()
-        pos += lob
-        atoms2.set_positions(pos)
+        atoms2.set_positions(atoms2.get_positions() + lob)
         atoms2 = self.make_cubic("out", atoms2, lob - 1.0, hib + 1.0)
+
         atoms.extend(atoms2)
+        self.write_lmp_config_data(atoms, "lmp_rotate.txt")
+        atoms.rotate(-60, 'y')
         self.write_lmp_config_data(atoms, "lmp_init.txt")
 
     def buildd03(self):
@@ -250,7 +290,7 @@ class md_prec(object):
         # type C  x: [1, 1, 1], y[-1  1  0], z [-1 -1  2]
         atoms = Mg3NdB(latticeconstant=(la * sqrt(6) / 2.,
                                         la * sqrt(2) / 2.,
-                                        la * sqrt(3)), size=(20, 85, 10), symbol=('Mg', 'Nd'))
+                                        la * sqrt(3)), size=(20, 85, 15), symbol=('Mg', 'Nd'))
         self.write_lmp_config_data(atoms, "lmp_d03.txt")
         return atoms
 
@@ -279,7 +319,3 @@ class md_prec(object):
         lata, latc = self.pot["ahcp"], self.pot["chcp"]
         self.burger = self.pot["lattice"]
         self.write_lmp_config_data(atoms, "thermo2.txt")
-
-if __name__ == '__main__':
-    drv = md_prec()
-    drv.make_only_prec()

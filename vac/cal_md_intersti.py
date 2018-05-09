@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-04-28 16:31:13
+# @Last Modified time: 2018-05-04 07:06:14
 
 
 from optparse import OptionParser
@@ -22,9 +22,7 @@ import gn_lmp_infile
 import gn_pbs
 
 
-class cal_md_intersti(gn_config.gnStructure,
-                      get_data.get_data,
-                      gn_pbs.gn_pbs,
+class cal_md_intersti(gn_config.gnStructure, get_data.get_data, gn_pbs.gn_pbs,
                       gn_lmp_infile.gn_md_infile):
 
     def __init__(self):
@@ -59,11 +57,6 @@ class cal_md_intersti(gn_config.gnStructure,
         self.mymkdir(dirname)
         self.write_lmp_config_data(atoms, "{}/init.txt".format(dirname))
 
-        # engyinter = self.write_and_run(dirname, atoms)
-        # engyincre = engyinter - eperatom * (atoms.get_number_of_atoms())
-        # print("energy increment :", engyincre)
-        # return engyincre
-
     def cal_dumbbell_110(self, atoms, dirname="dumb110"):
         alat = self.pot['lattice']
         eperatom = self.pot['ebcc']
@@ -79,11 +72,6 @@ class cal_md_intersti(gn_config.gnStructure,
 
         self.mymkdir(dirname)
         self.write_lmp_config_data(atoms, "{}/init.txt".format(dirname))
-
-        # engyinter = self.write_and_run(dirname, atoms)
-        # engyincre = engyinter - eperatom * (atoms.get_number_of_atoms())
-        # print("110 dumbel interstitial: ", engyincre)
-        # return engyincre
 
     def cal_dumbbell_111(self, atoms, dirname="dumb111"):
         alat = self.pot['lattice']
@@ -101,58 +89,32 @@ class cal_md_intersti(gn_config.gnStructure,
         self.mymkdir(dirname)
         self.write_lmp_config_data(atoms, "{}/init.txt".format(dirname))
 
-        # engyinter = self.write_and_run(dirname, atoms)
-        # engyincre = engyinter - eperatom * (atoms.get_number_of_atoms())
-        # print("111 dumbel interstitial: ", engyincre)
-        # return engyincre
-
     def cal_crowdion(self, atoms, dirname="crowdion"):
         alat = self.pot['lattice']
         eperatom = self.pot['ebcc']
-
         b1 = 0.25
-
         pos1 = np.array([b1, b1, b1]) * alat
         atoms.append(ase.atom.Atom('W', position=pos1))
 
         self.mymkdir(dirname)
         self.write_lmp_config_data(atoms, "{}/init.txt".format(dirname))
 
-        # engyinter = self.write_and_run(dirname, atoms)
-        # engyincre = engyinter - eperatom * (atoms.get_number_of_atoms())
-        # print("energy crowdion: ", engyincre)
-        # return engyincre
-
     def cal_octahedral(self, atoms, dirname="octahedral"):
         alat = self.pot['lattice']
         eperatom = self.pot['ebcc']
-
         b = 0.5
         pos1 = np.array([b, b, 0]) * alat
         atoms.append(ase.atom.Atom('W', position=pos1))
-
         self.mymkdir(dirname)
         self.write_lmp_config_data(atoms, "{}/init.txt".format(dirname))
-
-        # engyinter = self.write_and_run(dirname, atoms)
-        # engyincre = engyinter - eperatom * (atoms.get_number_of_atoms())
-        # print("energy octahedral: ", engyincre)
-        # return engyincre
 
     def cal_tetrahedral(self, atoms, dirname="eoctahedral"):
         alat = self.pot['lattice']
         eperatom = self.pot['ebcc']
-
         pos1 = np.array([0.25, 0.5, 0]) * alat
         atoms.append(ase.atom.Atom('W', position=pos1))
-
         self.mymkdir(dirname)
         self.write_lmp_config_data(atoms, "{}/init.txt".format(dirname))
-
-        # engyinter = self.write_and_run(dirname, atoms)
-        # engyincre = engyinter - eperatom * (atoms.get_number_of_atoms())
-        # print("energy octahedral: ", engyincre)
-        # return engyincre
 
     def prep_interstitials(self):  # reported size 25 x 25 x 25
         alat = self.pot['lattice']
@@ -160,13 +122,11 @@ class cal_md_intersti(gn_config.gnStructure,
         sizen = 25
         atoms = atoms.repeat((sizen, sizen, sizen))
         pos = np.array([alat,  alat,  alat]) * 0.5
-
         for atom in atoms:
             if ((pos - atom.position) == ([0, 0, 0])).all():
                 index = atom.index
                 print("del {}  atom".format(index))
         del atoms[index]
-
         atomsper = self._unitatoms.copy().repeat((sizen, sizen, sizen))
 
         self.cal_dumbbell_100(atoms.copy())
@@ -183,7 +143,8 @@ class cal_md_intersti(gn_config.gnStructure,
         for dd in dls:
             os.chdir(dd)
             os.system("cp ../in.init .")
-            os.system("mpirun lmp_mpi -i in.init")
+            os.system("rm bcc.init.*")
+            os.system("mpirun -n 2 lmp_mpi -i in.init")
             os.chdir(os.pardir)
 
     def load(self):
@@ -192,10 +153,12 @@ class cal_md_intersti(gn_config.gnStructure,
         for dd in dls:
             data = np.loadtxt("{}/out".format(dd))
             print(dd, data[0] - data[1] * self.pot["ebcc"])
-
         va_pbe = {"100": -2521.89426063,
                   "111": -2522.80887145}
 
+    def convert(self):
+        atoms = ase.io.read("POSCAR", format='vasp')
+        self.write_lmp_config_data(atoms)
 
 if __name__ == '__main__':
     usage = "usage:%prog [options] arg1 [options] arg2"
@@ -210,7 +173,8 @@ if __name__ == '__main__':
 
     dispatcher = {'prep': drv.prep_interstitials,
                   'run': drv.run,
-                  'load': drv.load}
+                  'load': drv.load,
+                  'cnv': drv.convert}
     if options.fargs is not None:
         dispatcher[options.mtype.lower()](options.fargs)
     else:

@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-04-29 14:39:42
+# @Last Modified time: 2018-05-02 13:59:18
 
 
 import os
@@ -113,8 +113,7 @@ class cal_bcc_ideal_tensile_tp(get_data.get_data,
         self.stress = raw[1:]
         return engy
 
-    def gn_convention_lmps(self, strain=np.mat(np.identity(3)),
-                           tag='lmp'):
+    def gn_convention_lmps(self, strain=np.mat(np.identity(3)), tag='lmp'):
         alat = self.alat
         bas = np.mat(np.identity(3))
         # very important (vasp add strain is basis right time strain)

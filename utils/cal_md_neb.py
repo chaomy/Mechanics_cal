@@ -4,9 +4,11 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-04-02 21:44:12
+# @Last Modified time: 2018-05-04 18:28:17
 
 
+from optparse import OptionParser
+from itertools import cycle
 import os
 import re
 import glob
@@ -15,15 +17,16 @@ import numpy as np
 import pickle as pc
 import ase
 import ase.io
-from optparse import OptionParser
 import get_data
 import gn_config
+import plt_drv
 
 
-class lmps_neb_tools(get_data.get_data, gn_config.bcc):
+class lmps_neb_tools(get_data.get_data, gn_config.bcc, plt_drv.plt_drv):
 
     def __init__(self):
         get_data.get_data.__init__(self)
+        plt_drv.plt_drv.__init__(self)
 
     def loop_mk_files(self):
         for i in range(8):
@@ -116,25 +119,22 @@ class lmps_neb_tools(get_data.get_data, gn_config.bcc):
         # os.system("rm dummp.custom.*")
 
     def plot_neb_energy(self, neb_energy, figname='neb.png'):
-        fig = plt.figure(figsize=(8, 4))
-        ax = fig.add_subplot(111)
-        ax.get_xaxis().get_major_formatter().set_useOffset(False)
+        self.set_111plt()
 
+        next(self.keysiter)
+        next(self.keysiter)
         x = np.linspace(0, 1, len(neb_energy))
+        self.ax.plot(x, neb_energy, label='MEAMS', **next(self.keysiter))
 
-        ax.plot(x, neb_energy, linestyle='--', marker='o',
-                markersize=12, label='energy')
-
-        plt.legend(bbox_to_anchor=(0.1, 0.1), mode='expand',
-                   borderaxespad=0.01, fontsize=19)
-
+        self.add_legends(*self.axls)
         # (110): -110  (11-2) -110
-        plt.xlabel("Normalized reaction coordinate", {'fontsize': 19})
-        plt.ylabel("Energy [meV/|b|]", {'fontsize': 19})   #
-
-        plt.yticks(size=19)
-        plt.xticks(size=19)
-        plt.savefig(figname, bbox_inches='tight', pad_inches=0.03)
+        xlabeliter = cycle(["Normalized reaction coordinate"])
+        # ylabeliter = cycle(['Energy per Burgers length [meV/|b|]'])
+        ylabeliter = cycle(['Energy [eV]'])
+        self.add_x_labels(xlabeliter, *self.axls)
+        self.add_y_labels(ylabeliter, *self.axls)
+        self.set_tick_size(*self.axls)
+        self.fig.savefig(figname, **self.figsave)
 
     def read_lmp_log_file(self, figname='neb.png'):
         # mydir = os.getcwd().split('/')[-1]
@@ -147,6 +147,7 @@ class lmps_neb_tools(get_data.get_data, gn_config.bcc):
             mfile = "log.lammps.%d" % (i)
             print(mfile)
             neb_energy.append(self.md_get_final_energy(mfile))
+        print(np.argmax(neb_energy))
         neb_energy = np.array(neb_energy)
         neb_energy -= np.min(neb_energy)
         self.plot_neb_energy(neb_energy, figname)
@@ -207,16 +208,16 @@ class lmps_neb_tools(get_data.get_data, gn_config.bcc):
 
         atomsf = ase.io.read("contcar.final", format='vasp')
         print(atomsf.get_cell())
-        
-        npts = 6 
-        delta = 1/(npts-1)  
+
+        npts = 6
+        delta = 1 / (npts - 1)
         for i in range(npts):
-            r = (i) * delta 
+            r = (i) * delta
             print(r)
-            pos = (1 - r) * atomsi.get_positions() + r * atomsf.get_positions() 
+            pos = (1 - r) * atomsi.get_positions() + r * atomsf.get_positions()
             atoms = atomsi.copy()
-            atoms.set_positions(pos) 
-            mdir = "{:02d}".format(i) 
+            atoms.set_positions(pos)
+            mdir = "{:02d}".format(i)
             self.mymkdir(mdir)
             # os.system("cp INCAR KPOINTS POTCAR {}".format())
             ase.io.write("{}/POSCAR".format(mdir), images=atoms, format='vasp')

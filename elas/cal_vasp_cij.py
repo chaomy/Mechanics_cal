@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-21 18:42:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-04-13 20:11:31
+# @Last Modified time: 2018-05-08 13:49:22
 
 
 import glob
@@ -21,12 +21,9 @@ import gn_pbs
 import output_data
 
 
-class cal_cij(get_data.get_data,
-              gn_incar.gn_incar,
-              gn_pbs.gn_pbs,
-              output_data.output_data,
-              cal_add_strain.cal_add_strain,
-              gn_config.gnStructure):
+class cal_cij(get_data.get_data, gn_incar.gn_incar,
+              gn_pbs.gn_pbs, output_data.output_data,
+              cal_add_strain.cal_add_strain, gn_config.gnStructure):
 
     def __init__(self):
         self.pot = md_pot_data.va_pot.Nb_pbe
@@ -37,11 +34,9 @@ class cal_cij(get_data.get_data,
         gn_config.gnStructure.__init__(self, self.pot)
 
         # self.unit_delta = 0.002 near equilibrim
-        self.unit_delta = 0.003
-        self.npts = 50
-        self.volume = None
-        self.energy0 = None
-        self.cij_type_list = ['c12', 'c44']
+        self.unit_delta = 0.0003
+        self.npts = 8
+        self.cij_type_list = ['c11', 'c12', 'c44']
 
     def fit_para(self, delta_list, energy_list):
         xdata = delta_list
@@ -56,9 +51,9 @@ class cal_cij(get_data.get_data,
         return a
 
     def collect_data_cij(self):
-        for mtype in self.cij_type_list:
-            self.set_cij_type(mtype)
-            out_file_name = "data_%s.txt" % (mtype)
+        for mtype in ['c11', 'c12', 'c44']:
+            data = np.ndarray([2 * self.npts, 2])
+            cn = 0
             for j in range(-self.npts, self.npts):
                 delta = self.unit_delta * j
                 if j >= 0:
@@ -66,21 +61,17 @@ class cal_cij(get_data.get_data,
                 else:
                     dirname = "dir-%s-n%03d" % (mtype, np.abs(j))
                 os.chdir(dirname)
-                print("i am in ", dirname)
                 (energy, stress, vol) = self.vasp_energy_stress_vol()  # in eV
                 os.chdir(os.pardir)
-                self.output_delta_energy(delta,
-                                         energy,
-                                         file_name=out_file_name)
+                data[cn, 0], data[cn, 1] = delta, energy
+                cn += 1
+            np.savetxt("data_{}.txt".format(mtype), data)
 
     def obtain_cij(self, opt='np'):
         self.set_volume_energy0()
-        if opt is 'np':
-            raw1 = np.loadtxt("data_c11.txt")
-            raw2 = np.loadtxt("data_c12.txt")
-            raw3 = np.loadtxt("data_c44.txt")
-        else:
-            delta_list, energy_list = self.get_delta_energy("data_c11.txt")
+        raw1 = np.loadtxt("data_c11.txt")
+        raw2 = np.loadtxt("data_c12.txt")
+        raw3 = np.loadtxt("data_c44.txt")
 
         delta_list, energy_list = raw1[:, 0], raw1[:, 1]
         c11_plus_c12 = self.fit_para(delta_list, energy_list)
@@ -101,52 +92,19 @@ class cal_cij(get_data.get_data,
             fout.write("C11\t%f\t\nC12\t%f\t\nC44\t%f\t\n" % (c11, c12, c44))
             fout.close()
 
-    def obtain_cij_old(self):
-        self.volume = 18.30
-        # self.energy0 = -10.09407662
-        self.energy0 = -10.09207329
-
-        data = np.loadtxt("c11_summary_35.00")
-        delta_list = np.array(data[:, 0])
-        energy_list = np.array(data[:, 1])
-        c11_plus_c12 = self.fit_para(delta_list, energy_list)
-
-        data = np.loadtxt("c12_summary_35.00")
-        delta_list = np.array(data[:, 0])
-        energy_list = np.array(data[:, 1])
-        c11_minus_c12 = self.fit_para(delta_list, energy_list)
-
-        data = np.loadtxt("c44_summary_35.00")
-        delta_list = np.array(data[:, 0])
-        energy_list = np.array(data[:, 1])
-        c44 = self.fit_para(delta_list, energy_list)
-
-        c11 = (0.111111111111111 * c11_plus_c12 +
-               0.333333333333333 * c11_minus_c12)
-        c12 = (0.111111111111111 * c11_plus_c12 -
-               0.166666666666667 * c11_minus_c12)
-        c44 = 0.25 * c44
-        print(c11, c12, c44)
-
     def set_volume_energy0(self):
         self.volume = self.pot["lattice"] ** 3 / 2.
         self.energy0 = -10.09207329
 
-    def set_cij_type(self, cij_type):
-        self.cij_type = cij_type
-
     def loop_prepare_cij_otho(self):
         for kk in ['D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'D8', 'D9']:
-            # for j in range(-self.npts, self.npts):
             for j in list(range(-100, -50)) + list(range(50, 100)):
                 delta = self.unit_delta * j
                 if j >= 0:
                     mdir = "dir-%s-p%03d" % (kk, j)
                 else:
                     mdir = "dir-%s-n%03d" % (kk, -j)
-
                 self.mymkdir(mdir)
-
                 atoms = self.set_bcc_primitive((1, 1, 1))
                 atoms = self.strain_for_otho(delta, atoms, kk)
                 ase.io.write("POSCAR", images=atoms, format="vasp")
@@ -160,22 +118,16 @@ class cal_cij(get_data.get_data,
     def loop_prepare_cij(self):
         for mtype in self.cij_type_list:
             self.cij_type = mtype
-            # for j in range(-self.npts, self.npts):
-            for j in range(-80, -50):
-                # for j in range(50, 80):
+            for j in range(-self.npts, self.npts):
                 delta = self.unit_delta * j
                 if j >= 0:
                     mdir = "dir-%s-p%03d" % (mtype, j)
                 else:
                     mdir = "dir-%s-n%03d" % (mtype, np.abs(j))
-
                 self.mymkdir(mdir)
                 atoms = self.write_bcc_primitive_with_strain(delta=delta,
                                                              in_tag=mtype,
                                                              write=False)
-                # atoms = self.write_bcc_with_strain(delta=delta,
-                #                                    in_tag=mtype,
-                #                                    write=False)
                 ase.io.write("POSCAR", images=atoms, format="vasp")
                 os.system("cp va.pbs {}".format(mdir))
                 os.system("cp POTCAR {}".format(mdir))
@@ -184,11 +136,8 @@ class cal_cij(get_data.get_data,
                 os.system("cp INCAR {}".format(mdir))
 
     def ouput_data_cij(self):
-        for i in range(len(self.cij_type_list)):
-            mtype = self.cij_type_list[i]
-            self.set_cij_type(mtype)
+        for i in range(['c11', 'c12', 'c44']):
             out_file_name = "data_%s.txt" % (mtype)
-
             for j in range(-self.npts, self.npts):
                 delta = self.unit_delta * j
                 if j >= 0:
@@ -199,12 +148,8 @@ class cal_cij(get_data.get_data,
                 print("i am in ", mdir)
                 (energy, volume) = self.vasp_energy_stress_vol_quick()
                 os.chdir(self.root_dir)
+                self.output_delta_energy(delta, energy, out_file_name)
 
-                self.output_delta_energy(delta, energy,
-                                         file_name=out_file_name)
-        #  fout = open("%s_summary"%cname,"w")
-            #  fout.write("%22.16f %22.16f\n"%(delta_increment*i, energy))
-        #  answer = fit_para(cname,E0)
 
 if __name__ == "__main__":
     usage = "usage:%prog [options] arg1 [options] arg2"
@@ -225,9 +170,3 @@ if __name__ == "__main__":
         dispatcher[options.mtype.lower()](options.fargs)
     else:
         dispatcher[options.mtype.lower()]()
-
-    #  A.set_volume_energy0()
-    #  A.obtain_cij_old()
-    #  c12 = 0.25 * C11plus2C12 + 0.75 * C11minusC12
-    #  c11 = 0.25 * C11plus2C12 - 0.25 * C11minusC12
-    #  c44 = float(get_cxx("c44",Lattice_constant,delta_increment,nt,E0)) * (1./4.) * inv_V0  * unit_conversion1

@@ -3,11 +3,10 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-04-03 23:51:39
+# @Last Modified time: 2018-05-04 10:53:45
 
 
 from optparse import OptionParser
-import md_pot_data
 import cal_md_ideal_shear_ini as init
 
 
@@ -19,8 +18,7 @@ if __name__ == '__main__':
     parser.add_option('-p', "--param", action="store",
                       type='string', dest="fargs")
     (options, args) = parser.parse_args()
-    # drv = init.cal_bcc_ideal_shear(md_pot_data.va_pot.Nb_pbe, '211')
-    drv = init.cal_bcc_ideal_shear(md_pot_data.va_pot.Nb_pbe, '110')
+    drv = init.cal_bcc_ideal_shear()
     dispatcher = {'qeone': drv.get_qe_stress,
                   'restart': drv.loop_prep_restart,
                   'twin': drv.gn_shear_twin_path,

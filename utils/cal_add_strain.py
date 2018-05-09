@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-12 16:05:28
+# @Last Modified time: 2018-05-07 21:20:15
 
 
 import numpy as np
@@ -15,6 +15,9 @@ class cal_add_strain(cal_add_strain_otho.strain_otho):
 
     def __init__(self):
         cal_add_strain_otho.strain_otho.__init__(self)
+        self.addstrain = {'vol': self.add_volumeric_strain,
+                          'otho': self.volume_conserving_ortho_strain_atoms,
+                          'mono': self.volume_conserving_mono_strain_atoms}
 
     def volume_conserving_ortho_strain(self, delta):
         atom_number, supercell_base, comment, atom_position =\
@@ -47,14 +50,12 @@ class cal_add_strain(cal_add_strain_otho.strain_otho):
                            atom_position[2, i]))
             fid.close()
 
-    def add_volumeric_strain(self, atoms, delta):
-        cell = np.mat(atoms.get_cell())
-        positions = np.mat(atoms.get_positions())
+    def add_volumeric_strain(self, delta, atoms):
         strain = np.mat([[1 + delta, 0, 0],
                          [0, 1 + delta, 0],
                          [0, 0, 1 + delta]], "float")
-        cell = strain * cell
-        positions = positions * strain
+        cell = strain * np.mat(atoms.get_cell())
+        positions = np.mat(atoms.get_positions()) * strain
         atoms.set_positions(positions)
         atoms.set_cell(cell)
         return atoms
@@ -63,12 +64,8 @@ class cal_add_strain(cal_add_strain_otho.strain_otho):
         strain = np.mat([[1 + delta, 0, 0],
                          [0, 1 - delta, 0],
                          [0, 0, 1 / (1 - delta**2)]])
-
-        cell = atoms.get_cell()
-        pos = np.mat(atoms.get_positions())
-
-        cell = strain * cell
-        pos = pos * strain
+        cell = strain * atoms.get_cell()
+        pos = np.mat(atoms.get_positions()) * strain
         atoms.set_positions(pos)
         atoms.set_cell(cell)
         return atoms
@@ -79,10 +76,8 @@ class cal_add_strain(cal_add_strain_otho.strain_otho):
                          [0, 0, 1 / (1 - delta**2)]])
         cell = atoms.get_cell()
         pos = np.mat(atoms.get_positions())
-
         cell = strain * cell
         pos = pos * strain
-
         atoms.set_positions(pos)
         atoms.set_cell(cell)
         return atoms

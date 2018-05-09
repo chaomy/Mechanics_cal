@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-04-29 22:12:03
+# @Last Modified time: 2018-05-05 11:23:39
 
 
 from cal_md_ideal_shear_pre import cal_bcc_ideal_shear_pre
@@ -19,6 +19,7 @@ import gn_pbs
 import get_data
 import plt_drv
 import gn_qe_inputs
+import md_pot_data
 
 
 class cal_bcc_ideal_shear(get_data.get_data,
@@ -32,7 +33,7 @@ class cal_bcc_ideal_shear(get_data.get_data,
                           cal_bcc_ideal_shear_plt,
                           cal_bcc_ideal_shear_mesh):
 
-    def __init__(self, inpot, shtype='110'):
+    def __init__(self, input=md_pot_data.va_pot.Nb_pbe, shtype='110'):
         self.pot = self.load_data('../BASICS/pot.dat')
         gn_pbs.gn_pbs.__init__(self)
         plt_drv.plt_drv.__init__(self)

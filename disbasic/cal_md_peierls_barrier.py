@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-05-01 15:57:17
+# @Last Modified time: 2018-05-05 11:00:42
 
 
 from multiprocessing import Pool
@@ -26,10 +26,6 @@ import gn_pbs
 #  import atomman as am
 #  import atomman.lammps as lmp
 #  import atomman.unitconvert as uc
-
-
-def unwrap_self_run_lammps(arg, **kwarg):
-    return cal_barrier.run_lmp_minimize(*arg, **kwarg)
 
 
 class cal_barrier(object):
@@ -58,74 +54,84 @@ class cal_barrier(object):
 
         ase.io.write("peierls_final.cfg", new_atoms2, format='cfg')
 
-    # use dipole to calcualte Peierls barrier
-    def dipole_peierls_barrier(self):
-        e1 = [1., 1., -2.]
-        e2 = [0.5, 0.5, 0.5]
-        e3 = [1, -1, 0]
-
-        sizen = 1
-        n = 7 * sizen
-        m = 11 * sizen
-        t = 1
-
-        atoms = self.set_bcc_convention([e1, e2, e3], (n, t, m))
-
-        (layerList, distance) = ase.utils.geometry.get_layers(
-            atoms, [0, 1, 0], tolerance=0.05)  # the normal of z direction
-
-        layer1_index, layer2_index, layer3_index = [], [], []
-
-        for i in range(len(atoms)):
-            if layerList[i] in [1, 4]:
-                layer1_index.append(i)
-                atoms[i].symbol = 'W'
-
-            if layerList[i] in [2]:
-                layer2_index.append(i)
-                atoms[i].symbol = 'Mo'
-
-            if layerList[i] in [3, 0]:
-                layer3_index.append(i)
-                atoms[i].symbol = 'Ta'
-
-        print(len(layer1_index),
-              len(layer2_index),
-              len(layer3_index))
-
-        # add shiftment to the supercell #
-        atoms = self.cut_half_atoms_new(atoms, "cutz")
-        supercell = atoms.get_cell()
-        strain = np.mat([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.5, 0.5, 1.0]])
-        supercell = strain * supercell
-        atoms.set_cell(supercell)
+    def aniso_dipole_peierls_barrier_image(self, sizen=1):
+        sx = 10.0 * sizen
+        sy = 5 * sizen
+        ix = 10.5 * sizen
 
         unitx = np.sqrt(6) / 3. * self.pot['lattice']
         unity = np.sqrt(2) / 2. * self.pot['lattice']
+
+        # dx, dy = 0.1, -0.133333333
+        dx, dy = 0.0, 0.0
+
+        ci1 = [(sx + dx) * unitx, (sy + 1. / 3. + dy) * unity]
+        atoms = self.bcc_screw_dipole_alongz_with_image(
+            self.set_dipole_box(1), ci1)
+        atoms = self.convert_alongz_to_alongy(atoms)
+        self.write_lmp_config_data(atoms, "init.txt")
+        ase.io.write("init.ref", images=atoms, format="vasp")
+
+        ci2 = [(sx + 1.0) * unitx, (sy + 1. / 3.) * unity]
+        atoms = self.bcc_screw_dipole_alongz_with_image(
+            self.set_dipole_box(1), ci2)
+        atoms = self.convert_alongz_to_alongy(atoms)
+        self.write_lmp_config_data(atoms, "final.txt")
+        np.savetxt("dis_center.txt", np.array(
+            [ci1[0], ci1[1], ci1[0] + unitx, ci1[1]]))
+
+    def aniso_dipole_peierls_barrier(self, sizen=1):
+        sx = 10.0 * sizen
+        sy = 5 * sizen
+        ix = 10.5 * sizen
+
+        unitx = np.sqrt(6) / 3. * self.pot['lattice']
+        unity = np.sqrt(2) / 2. * self.pot['lattice']
+
+        ci1 = [(sx) * unitx, (sy + 1. / 3.) * unity]
+        ci2 = [(sx + ix) * unitx, (sy + 2. / 3.) * unity]
+
+        atoms = self.set_dipole_box(sizen)
+        atoms = self.bcc_screw_dipole_alongz_atoms(atoms, ci1, ci2)
+        atoms = self.convert_alongz_to_alongy(atoms)
+        self.write_lmp_config_data(atoms, "init.txt")
+
+        movex = 1.0
+        cf1 = [(sx + movex) * unitx, (sy + 1. / 3.) * unity]
+        cf2 = [(sx + ix + movex) * unitx, (sy + 2. / 3.) * unity]
+
+        atoms = self.set_dipole_box(sizen)
+        atoms = self.bcc_screw_dipole_alongz_atoms(atoms, cf1, cf2)
+        atoms = self.convert_alongz_to_alongy(atoms)
+        self.write_lmp_config_data(atoms, "final.txt")
+
+        np.savetxt("dis_center.txt", np.array(
+            [ci1[0], ci1[1], cf1[0], cf1[1]]))
+        print((sx) * unitx, (sy) * unity)
+
+    def dipole_peierls_barrier(self, sizen=1):
+        atoms = self.set_dipole_box_alongy(sizen)
 
         sx = 10.0 * sizen
         sy = 5 * sizen
         ix = 10.5 * sizen
 
-        ase.io.write("perf_poscar", images=atoms, format='vasp')
-
-        # change symbol back
-        for atom in atoms:
-            atom.symbol = 'Nb'
+        unitx = np.sqrt(6) / 3. * self.pot['lattice']
+        unity = np.sqrt(2) / 2. * self.pot['lattice']
 
         ci1 = [(sx) * unitx, (sy + 1. / 3.) * unity]
         ci2 = [(sx + ix) * unitx, (sy + 2. / 3.) * unity]
         self.write_lmp_config_data(self.intro_dipole_screw_atoms_LMP(
-            atoms.copy(), center=[ci1, ci2], lattice=self.pot['lattice']), "init.txt")
+            atoms.copy(), center=[ci1, ci2]), "init.txt")
 
         movex = 1.0
         cf1 = [(sx + movex) * unitx, (sy + 1. / 3.) * unity]
         cf2 = [(sx + ix + movex) * unitx, (sy + 2. / 3.) * unity]
         self.write_lmp_config_data(self.intro_dipole_screw_atoms_LMP(
-            atoms.copy(), center=[cf1, cf2], lattice=self.pot['lattice']), "final.txt")
+            atoms.copy(), center=[cf1, cf2]), "final.txt")
 
-        data = np.array([ci1[0], ci1[1], cf1[0], cf1[1]])
-        np.savetxt("dis_center.txt", data)
+        np.savetxt("dis_center.txt", np.array(
+            [ci1[0], ci1[1], cf1[0], cf1[1]]))
 
         # write in the middle
         ci1[0] += 0.5 * (cf1[0] - ci1[0])
@@ -133,8 +139,7 @@ class cal_barrier(object):
         ci1[1] -= 0.1
         ci2[1] += 0.1
         ase.io.write("test.txt", images=self.intro_dipole_screw_atoms_LMP(
-            atoms.copy(), center=[ci1, ci2],
-            lattice=self.pot['lattice']), format="vasp")
+            atoms.copy(), center=[ci1, ci2]), format="vasp")
 
         # for i in range(16):
         #     movex = (i + 1) / 16.
@@ -234,18 +239,6 @@ class cal_barrier(object):
 
             self.write_lmp_config_data(atoms, filename_data)
             os.chdir(os.pardir)
-
-    def run_lmp_minimize(self, loc_dir):
-        os.chdir(loc_dir)
-        os.system("lmp_mpi -in in.minimize")
-        os.chdir(os.pardir)
-
-    def multi_thread_minimize(self):
-        dir_list = glob.glob("dir-*")
-        num_threads = len(dir_list)
-        pool = Pool(processes=num_threads)
-        pool.map(unwrap_self_run_lammps,
-                 list(zip([self] * num_threads, dir_list)))
 
     def collect_peierls_energy(self):
         num = self.num_configures
@@ -355,21 +348,6 @@ class cal_barrier(object):
         plt.savefig("tmp.png")
         print(np.max(stress))
 
-    def loop_rcut(self):
-        import cal_md_neb
-        drvneb = cal_md_neb.lmps_neb_tools()
-        npt = 10
-        for i in range(npt):
-            rcut = 5.18 + 0.01 * i
-            dirname = 'dir-%5.4f' % (rcut)
-            os.system("cp ../engy1000/{}/dummy.lamm*  .".format(dirname))
-            potname = 'pot_%5.4f_lat' % (rcut)
-            self.pot = self.load_data('../{}'.format(potname))
-            drv.dipole_peierls_barrier()
-            drvneb.create_final_screw()
-            os.system("mpirun -n 16 lmp_mpi -i in.neb_dislocation_dipole -p 16x1")
-            drvneb.read_lmp_log_file(figname='fig.%5.4f.png' % (rcut))
-
     def convert_dump_to_poscar(self):
         initfile = glob.glob("bcc.init.*")[-1]
         finalfile = glob.glob("bcc.final.*")[-1]
@@ -390,6 +368,5 @@ class cal_barrier(object):
 #                   'looprcut': drv.loop_rcut,
 #                   'minimize': drv.multi_thread_minimize}
 
-    #  job.collect_peierls_energy()
     #  drv.peierls()
     #  job.multi_thread_minimize()
