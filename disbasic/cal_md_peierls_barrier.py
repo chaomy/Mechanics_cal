@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-05-05 11:00:42
+# @Last Modified time: 2018-05-12 20:22:50
 
 
 from multiprocessing import Pool
@@ -156,7 +156,6 @@ class cal_barrier(object):
         self.make_screw_plate(size=[200, 260, 2], rad=[340, 380],
                               move=move1, tag='[211]',
                               filename="final.txt", opt='neb')
-
         os.system("cp init.txt  init0.txt")
         os.system("cp final.txt init1.txt")
 

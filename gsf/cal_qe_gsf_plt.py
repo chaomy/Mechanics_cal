@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-06 00:48:21
+# @Last Modified time: 2018-05-25 20:35:36
 
 
 import os
@@ -62,11 +62,9 @@ class cal_gsf(gn_config.bcc,
         self.root_dir = os.getcwd()
         self.sample_gsf_num = 21
         self.disp_delta = 1. / (self.sample_gsf_num - 1)
-        return
 
     def set_gsf_surface_type(self, gsf_surface_type):
         self._gsf_surface_type = gsf_surface_type
-        return
 
     def gn_gsf_atoms(self):
         if self._gsf_surface_type == '100_100':
@@ -214,9 +212,7 @@ class cal_gsf(gn_config.bcc,
 
             self.prepare_vasp_inputs(dir_name)
             os.system("cp POSCAR.vasp ../POSCAR%03d.vasp" % (i))
-
             os.chdir(self.root_dir)
-        return
 
     def collect_vasp_gsf_energy(self):  # to be done
         disp_list, energy_list, area_list = [], [], []

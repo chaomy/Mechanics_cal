@@ -1,10 +1,9 @@
 #!/usr/bin/env python
-# encoding: utf-8
 # -*- coding: utf-8 -*-
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-05-07 21:20:15
+# @Last Modified time: 2018-05-17 21:10:38
 
 
 import numpy as np

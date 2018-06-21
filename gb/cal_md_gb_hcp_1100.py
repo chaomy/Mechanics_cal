@@ -2,7 +2,7 @@
 # @Author: chaomy
 # @Date:   2017-12-03 11:07:29
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-04-29 22:47:14
+# @Last Modified time: 2018-06-10 23:19:29
 
 import os
 from numpy import sqrt, arccos, arcsin, rad2deg
@@ -12,19 +12,17 @@ from numpy import mat, unique
 
 class md_gb_hcp_1100(object):
 
-    def find_angles_1100(self, il=[[1, 2, 3, 4, 5, 6, 7, 8],
-                                   [1, 2, 3, 4, 5, 6, 7, 8],
-                                   [1, 2, 3, 4, 5, 6, 7, 8],
-                                   [1, 2, 3, 4, 5, 6, 7, 8]],
+    def find_angles_1100(self, il=[[1, 2, 3, 4, 5, 6, 7, 8, 9],
+                                   [1, 2, 3, 4, 5, 6, 7, 8, 9],
+                                   [1, 2, 3, 4, 5, 6, 7, 8, 9],
+                                   [1, 2, 3, 4, 5, 6, 7, 8, 9],
+                                   [1, 2, 3, 4, 5, 6, 7, 8, 9]],
                          jl=[1, 2, 3, 4]):
         ags = []
         res = []
-
         ux = self.pot["ahcp"]
         uy = self.pot["chcp"]
-
         cnt = 0
-
         for j in jl:
             for i in il[j - 1]:
                 idx = i
@@ -52,8 +50,8 @@ class md_gb_hcp_1100(object):
             self.ag.append(res[ee])
 
     def give_angle_1100(self, opt='run'):
-        # self.find_angles_1100(il=[[], [1]], jl=[2])   # 72.877
-        self.find_angles_1100(il=[[1], [1]], jl=[1])    # 58.361
+        self.find_angles_1100(il=[[], [1]], jl=[2])   # 72.877
+        # self.find_angles_1100(il=[[1], [1]], jl=[1])    # 58.361
 
         npts = 2
         j = 0
@@ -74,7 +72,7 @@ class md_gb_hcp_1100(object):
                     if opt in ['prep']:
                         self.mymkdir(mdir)
                         self.build_hcp_gb_lmp(
-                            ee[0], ee[1], (50, 60), (dx, 0.0, dz))
+                            ee[0], ee[1], (50, 60), (dx, 0.0, dz), '1100')
                         os.system('mv in.gb {}'.format(mdir))
                         self.mymkdir('{}/out'.format(mdir))
 
@@ -94,7 +92,6 @@ class md_gb_hcp_1100(object):
                         os.system(
                             "cp {}/out/rel.chkpt.0 hcp.gb.{:03}".format(mdir, j))
                         j += 1
-                    # savetxt("gbdat.all", self.gbdat)
 
         if opt in ['read']:
             self.set_111plt()
@@ -116,7 +113,8 @@ class md_gb_hcp_1100(object):
 
             if opt in ['prep']:
                 self.mymkdir(mdir)
-                self.build_hcp_gb_lmp(ee[0], ee[1], (40, 50), (0.0, 0.0, 0.0))
+                self.build_hcp_gb_lmp(
+                    ee[0], ee[1], (40, 50), (0.0, 0.0, 0.0), '1100')
                 os.system('mv in.gb {}'.format(mdir))
                 self.mymkdir('{}/out'.format(mdir))
 

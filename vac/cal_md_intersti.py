@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-05-04 07:06:14
+# @Last Modified time: 2018-06-03 15:55:54
 
 
 from optparse import OptionParser
@@ -119,20 +119,18 @@ class cal_md_intersti(gn_config.gnStructure, get_data.get_data, gn_pbs.gn_pbs,
     def prep_interstitials(self):  # reported size 25 x 25 x 25
         alat = self.pot['lattice']
         atoms = self._unitatoms.copy()
-        sizen = 25
+        sizen = 5
         atoms = atoms.repeat((sizen, sizen, sizen))
         pos = np.array([alat,  alat,  alat]) * 0.5
         for atom in atoms:
             if ((pos - atom.position) == ([0, 0, 0])).all():
                 index = atom.index
-                print("del {}  atom".format(index))
+                print("del {} atom".format(index))
         del atoms[index]
         atomsper = self._unitatoms.copy().repeat((sizen, sizen, sizen))
-
         self.cal_dumbbell_100(atoms.copy())
         self.cal_dumbbell_110(atoms.copy())
         self.cal_dumbbell_111(atoms.copy())
-
         self.cal_crowdion(atomsper.copy())
         self.cal_octahedral(atomsper.copy())
         self.cal_tetrahedral(atomsper.copy())
@@ -172,8 +170,7 @@ if __name__ == '__main__':
     drv = cal_md_intersti()
 
     dispatcher = {'prep': drv.prep_interstitials,
-                  'run': drv.run,
-                  'load': drv.load,
+                  'run': drv.run, 'load': drv.load,
                   'cnv': drv.convert}
     if options.fargs is not None:
         dispatcher[options.mtype.lower()](options.fargs)

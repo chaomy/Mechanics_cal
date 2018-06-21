@@ -1,10 +1,9 @@
 #!/usr/bin/env python
-# encoding: utf-8
 # -*- coding: utf-8 -*-
 # @Author: chaomy
 # @Date:   2018-02-06 14:17:35
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-05-01 21:50:51
+# @Last Modified time: 2018-05-15 16:50:30
 
 
 import ase
@@ -16,6 +15,7 @@ import glob
 import atomman as am
 import atomman.lammps as lmp
 import atomman.unitconvert as uc
+from utils import stroh_solve
 
 
 # make plate -> change orient -> add shear
@@ -44,9 +44,57 @@ class cal_bcc_schmid(object):
         print("K (biKijbj)", stroh.K_coeff, "eV/A")
         print("pre-ln alpha = biKijbj/4pi", stroh.preln, "ev/A")
 
-    def make_screw_plate(self, size=[40, 60, 3], rad=[100, 115],
+    def make_screw_plate(self, size=[40, 60, 3], rad=[90, 100],
                          move=[0., 0., 0.], filename="lmp_init.txt", opt=None):
+        e1 = [1, -2, 1]
+        e2 = [1, 0, -1]
+        e3 = [1, 1, 1]
+        axes = np.array([e1, e2, e3])
+        alat = self.pot['lattice']
+        c = am.ElasticConstants(C11=self.pot['c11'],
+                                C12=self.pot['c12'],
+                                C44=self.pot['c44'])
+        ux = np.sqrt(6) / 3. * self.pot['lattice']
+        uy = np.sqrt(2) / 2. * self.pot['lattice']
 
+        burgers = 0.5 * alat * np.array([1., 1., 1.])
+        stroh = am.defect.Stroh(c, burgers, axes=axes)
+
+        atoms = self.set_bcc_convention(
+            [e1, e2, e3], (size[0], size[1], size[2]))
+        pos = atoms.get_positions()
+
+        center = np.array([3 * 0.5 * size[0] * ux, size[1] * uy])
+
+        delindex = []
+        radius2 = rad[0] * rad[0]
+        radiusout2 = rad[1] * rad[1]
+        for i in range(len(pos)):
+            atom = atoms[i]
+            dx = pos[i, 0] - center[0]
+            dy = pos[i, 1] - center[1]
+            r = dx * dx + dy * dy
+            if r > radiusout2:
+                delindex.append(atom.index)
+            if r < radius2:
+                atom.symbol = 'W'
+        del atoms[delindex]
+
+        pos = atoms.get_positions()
+        discenter = np.array(
+            [center[0] + 0.5 * ux, center[1] + 1. / 3. * uy, 0.0])
+        shf = np.ones(pos.shape) * discenter
+        print(pos - shf)
+        d1 = stroh.displacement(pos - shf)
+
+        # before displace generate perfect atoms
+        ase.io.write("lmp_perf.cfg", images=atoms, format='cfg')
+        self.write_lmp_config_data(atoms, 'lmp_perf.txt')
+        atoms.set_positions(pos + np.real(d1))
+        self.write_lmp_config_data(atoms, 'lmp_init.txt')
+        np.savetxt("dis_center.txt", discenter)
+
+    def make_screw_plate_old(self, size=[40, 60, 3], rad=[100, 115], move=[0., 0., 0.], filename="lmp_init.txt", opt=None):
         alat = uc.set_in_units(self.pot['lattice'], 'angstrom')
         C11 = uc.set_in_units(self.pot['c11'], 'GPa')
         C12 = uc.set_in_units(self.pot['c12'], 'GPa')
@@ -70,11 +118,11 @@ class cal_bcc_schmid(object):
         box = am.Box(a=alat, b=alat, c=alat)
         atoms = am.Atoms(natoms=2, prop={'atype': 2, 'pos': [
                          [0.0, 0.0, 0.0], [0.5, 0.5, 0.5]]})
-
         ucell = am.System(atoms=atoms, box=box, scale=True)
         system = am.rotate_cubic(ucell, axes)
 
-        shftx = -0.5 * alat * np.sqrt(6.) / 3.
+        # shftx = 0.5 * alat * np.sqrt(6.) / 3.
+        shftx = 0.0
         shfty = -1. / 3. * alat * np.sqrt(2) / 2.
         # shfty = 2. / 3. * alat * np.sqrt(2) / 2.
 
@@ -84,10 +132,8 @@ class cal_bcc_schmid(object):
         system.supersize((0, sizex), (0, sizey), (0, sizez))
 
         # to make a plate #
-        radius = rad[0]
-        radiusout = rad[1]
-        radius2 = radius * radius
-        radiusout2 = radiusout * radiusout
+        radius2 = rad[0] * rad[0]
+        radiusout2 = rad[1] * rad[1]
 
         elements = []
         for atom in system.atoms:

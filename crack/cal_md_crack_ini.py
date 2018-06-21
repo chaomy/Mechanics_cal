@@ -1,10 +1,9 @@
 #!/usr/bin/env python
-# encoding: utf-8
 # -*- coding: utf-8 -*-
 # @Author: chaomy
 # @Date:   2017-07-05 08:11:31
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-31 14:43:53
+# @Last Modified time: 2018-05-16 12:44:46
 
 
 from crack.cal_md_crack_uti import md_crack_uti
@@ -48,7 +47,6 @@ class md_crack_ini(md_crack_pre,
         gn_config.gnStructure.__init__(self, self.pot)
         get_data.get_data.__init__(self)
         self.ckcoeff = crack_coeff
-        # self.set_params()
 
     def set_params(self):
         self.nu = 0.33

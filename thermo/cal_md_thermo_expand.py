@@ -1,12 +1,11 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# @Author: yang37
-# @Date:   2017-06-21 18:42:47
-# @Last Modified by:   chaomy
-# @Last Modified time: 2018-04-15 21:14:19
-
+#@Author : yang37
+#@Date : 2017 - 06 - 21 18 : 42 : 47
+#@Last Modified by : chaomy
+#@Last Modified time : 2018 - 06 - 19 15 : 00 : 00
 
 from optparse import OptionParser
+from glob import glob
 import matplotlib.pylab as plt
 import ase
 import ase.io
@@ -19,7 +18,6 @@ import get_data
 import gn_lmp_infile
 import plt_drv
 import md_pot_data
-from glob import glob
 
 
 class cal_md_thermo(gn_config.gnStructure,
@@ -28,8 +26,9 @@ class cal_md_thermo(gn_config.gnStructure,
                     plt_drv.plt_drv):
 
     def __init__(self):
-        self.pot = self.load_data("../BASICS/pot.dat")
-        # self.pot = md_pot_data.va_pot.Nb_pbe
+        #self.pot = self.load_data("../BASICS/pot.dat")
+        self.pot = md_pot_data.md_pot.mg_Poco
+#self.pot = md_pot_data.va_pot.Nb_pbe
         self.size = np.array([16, 16, 16])
         gn_lmp_infile.gn_md_infile.__init__(self)
         gn_config.gnStructure.__init__(self, self.pot)
@@ -78,7 +77,7 @@ class cal_md_thermo(gn_config.gnStructure,
         deltat = 50
         lat = self.pot["lattice"]
 
-        # 50 to 2500  K
+# 50 to 2500 K
         for i in range(50):
             tend = initt + deltat * i
             self.pot["lattice"] = lat * (1 + tend * thermocoeff)
@@ -115,6 +114,13 @@ class cal_md_thermo(gn_config.gnStructure,
         print(temp, lx)
         return (temp, lx)
 
+    def get_lat_at_given_temp(self):
+        data = np.loadtxt("log")
+# Step TotEng Temp Lx Ly Lz v_S11 v_S22 v_S33 v_S12 v_S13 v_S23
+        print(np.mean(data[-200:, 3]) / 7.0,
+              np.mean(data[-200:, 4]) / 7.0,
+              np.mean(data[-200:, 5]) / 7.0)
+
     def theormo_expand_plt(self):
         temp_lx = np.loadtxt("temp_lx.txt")
         print(temp_lx)
@@ -142,7 +148,8 @@ if __name__ == '__main__':
                   'clc': drv.run_thermo,
                   'plt': drv.draw_temp_vol,
                   'themoplt': drv.theormo_expand_plt,
-                  'add': drv.add_vol_expan}
+                  'add': drv.add_vol_expan,
+                  'temp': drv.get_lat_at_given_temp}
 
     if options.fargs is not None:
         dispatcher[options.mtype.lower()](options.fargs)

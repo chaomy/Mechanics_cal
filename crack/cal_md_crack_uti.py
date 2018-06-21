@@ -1,10 +1,9 @@
 #!/usr/bin/env python
-# encoding: utf-8
 # -*- coding: utf-8 -*-
 # @Author: chaomy
 # @Date:   2017-07-05 08:11:49
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-04-29 14:48:29
+# @Last Modified time: 2018-05-16 22:17:32
 
 
 from numpy import sqrt, sin, cos, abs
@@ -36,10 +35,21 @@ class crack_coeff:
 
 class md_crack_uti(object):
 
+    def gn_perf_plate(self):
+        e1 = [1, 0, 0]
+        e2 = [0, -1, 1]
+        # e2 = [0, 1, -1]
+        e3 = [0, 1, 1]
+        atoms = self.set_bcc_convention(
+            directions=[e2, e1, e3], size=(90, 105, 5))
+        # atoms = self.set_bcc_convention(
+        #     directions=[e2, e3, e1], size=(100, 100, 5))
+        return atoms
+
     def loop_211(self):
         self.aniso_211()
         K1 = self.ckcoeff.K1
-        for i in range(20):
+        for i in range(3, 8):
             self.ckcoeff.K1 = K1 + 0.05 * i
             print(self.ckcoeff.K1)
             atoms = self.intro_crack_k1(atoms=self.gn_perf_plate())
@@ -50,10 +60,13 @@ class md_crack_uti(object):
             C11=self.pot['c11'],
             C12=self.pot['c12'],
             C44=self.pot['c44'])
+
         e1 = [1, 0, 0]
-        e2 = [0, 1, -1]
+        e2 = [0, -1, 1]
         e3 = [0, 1, 1]
-        axes = np.array([e1, e2, e3])
+
+        axes = np.array([e2, e1, e3])
+        # axes = np.array([e1, e2, e3])
 
         burgers = self.pot["lattice"] / 2. * np.array([1., 1., -1.])
         burgers = axes_check.axes_check(axes).dot(burgers)
@@ -90,10 +103,11 @@ class md_crack_uti(object):
             c = c.transform(axes)
 
         G00 = Gamma[0, 0]
-        usf = 0.67405172613
+        usf = 0.57405172613
         k1e = np.sqrt(G00 * usf) * 1e-6
         print(Gamma)
         print(self.ckcoeff.K1, k1e)
+
         self.set_plane_strain_bij(c.Sij)
         # self.get_scalarB(self.pot["surf110"]) get the same k1c
 

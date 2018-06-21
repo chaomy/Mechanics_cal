@@ -1,10 +1,9 @@
 #!/usr/bin/env python
-# encoding: utf-8
 # -*- coding: utf-8 -*-
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-02-21 09:44:41
+# @Last Modified time: 2018-05-10 17:01:25
 
 import numpy as np
 import os
@@ -20,7 +19,6 @@ class md_gb_indx(object):
         v0 = np.array([1, 0, 0])
         vn = np.array([0, 0, 1])
         SQRT3 = sqrt(3)
-
         cnt = 0
         ratiolist = []
         rot = {'x': None,
@@ -79,7 +77,7 @@ basis   ${b2}  0.5   0.5
                        [-sin(theta), cos(theta), 0.0],
                        [0.0, 0.0, 1.0]])
         nmat = (matx * base.transpose()).transpose()
-        # basis z || 1100
+        # x || [12-10]; y || 0001;   basis z || 1100
         self.bs = """basis   0.0   0.0   0.0    &
 basis   0.5   0.0   0.5    &
 basis   0.0   0.5   ${b1}  &

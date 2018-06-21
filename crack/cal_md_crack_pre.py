@@ -1,10 +1,9 @@
 #!/usr/bin/env python
-# encoding: utf-8
 # -*- coding: utf-8 -*-
 # @Author: chaomy
 # @Date:   2017-07-05 01:09:32
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-27 18:21:33
+# @Last Modified time: 2018-05-17 15:33:41
 
 
 from numpy.lib import scimath as SM
@@ -18,11 +17,6 @@ smsqrt = SM.sqrt
 
 
 class md_crack_pre(object):
-
-    def gn_perf_plate(self):
-        atoms = self.set_bcc_convention(size=(120, 120, 5))
-        self.write_lmp_config_data(atoms)
-        return atoms
 
     def intro_crack_k1(self, center=None, atoms=None):
         u1, u2, p1, p2, q1, q2 = self.get_crack_coeffs()
@@ -72,7 +66,6 @@ class md_crack_pre(object):
                     atoms[i].symbol = 'W'
             else:
                 delindex.append(atoms[i].index)
-
         atoms.set_positions(pos)
         del atoms[delindex]
         return atoms

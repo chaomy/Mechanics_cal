@@ -1,10 +1,9 @@
 #!/usr/bin/env python
-# encoding: utf-8
 # -*- coding: utf-8 -*-
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-05-07 16:53:46
+# @Last Modified time: 2018-06-08 22:17:04
 
 
 import os
@@ -48,10 +47,10 @@ class md_dislocation(gn_config.gnStructure,
                      cal_md_dis_crack.dis_init_crack):
 
     def __init__(self, pot=md_pot_data.md_pot.mg_kim):
-        # self.pot = pot 
-        self.pot = md_pot_data.md_pot.Nb_eam 
+        # self.pot = pot
+        # self.pot = md_pot_data.md_pot.Nb_eam
         # self.pot = md_pot_data.md_pot.mg_Poco
-        # self.pot = self.load_data('../BASICS/pot.dat')
+        self.pot = self.load_data('../BASICS/pot.dat')
         # self.pot = self.load_data('../BASICS_MO/pot.dat')
         plt_drv.plt_drv.__init__(self)
         gn_config.gnStructure.__init__(self, self.pot)
@@ -88,6 +87,23 @@ class md_dislocation(gn_config.gnStructure,
         self.write_lmp_config_data(atoms, fname)
         self.gn_md_minimize_cfg("init.data", "./w_eam4.fs", "W")
 
+    def convert_axes(self):
+        atoms = ase.io.read("dump.before", format="lammps-dump")
+        cell = atoms.get_cell()
+        tm = cell[0, 0]
+        cell[0, 0] = cell[1, 1]
+        cell[1, 1] = tm
+
+        pos = atoms.get_positions()
+        tm = np.copy(pos[:, 0])
+        pos[:, 0] = np.copy(pos[:, 1])
+        pos[:, 1] = tm
+
+        atoms.set_cell(cell)
+        atoms.set_positions(pos)
+        self.write_lmp_config_data(atoms, "dump.after")
+
+
 if __name__ == "__main__":
     usage = "usage:%prog [options] arg1 [options] arg2"
     parser = OptionParser(usage=usage)
@@ -107,7 +123,6 @@ if __name__ == "__main__":
                   'bedge': drv.build_edge_basal_hcp,  # hcp basal
                   'bscrew': drv.build_screw_basal_hcp,  # hcp basal
                   'thermo': drv.cal_thermo,
-                  'prec': drv.make_prec,
                   'sprec': drv.make_screw_prec,
                   'd03': drv.buildd03small,
                   'hcp': drv.buildHCP,
@@ -120,7 +135,9 @@ if __name__ == "__main__":
                   'find': drv.cost_method_find_core,
                   'pimage': drv.aniso_dipole_peierls_barrier_image,
                   'ponly': drv.make_only_prec,
-                  'r60': drv.make_r60_prec}
+                  'r00': drv.make_prec,
+                  'r60': drv.make_r60_prec,
+                  'axes': drv.convert_axes}
 
     if options.fargs is not None:
         dispatcher[options.mtype.lower()](options.fargs)

@@ -1,15 +1,33 @@
 #!/usr/bin/env python
-# encoding: utf-8
 # -*- coding: utf-8 -*-
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-04-27 16:26:53
+# @Last Modified time: 2018-06-04 23:27:44
 
 import numpy as np
 
 
 class cal_cut_cell(object):
+
+    def assign_cubic(self, atoms, opt, symbol, *args):
+        if args[0] == []:
+            cell = atoms.get_cell()
+            lob = np.array([0.0, 0.0, 0.0])
+            hib = np.array([cell[0, 0], cell[1, 1], cell[2, 2]])
+        elif len(args) == 2:
+            lob = args[0]
+            hib = args[1]
+
+        if opt in ['in']:
+            for i in range(len(atoms)):
+                if all(((atoms[i].position - lob) * (atoms[i].position - hib)) <= 0.0):
+                    atoms[i].symbol = symbol
+        else:
+            for i in range(len(atoms)):
+                if any(((atoms[i].position - lob) * (atoms[i].position - hib)) > 0.0):
+                    atoms[i].symbol = symbol
+        return atoms
 
     def assign_ynormal_fixatoms(self, atoms, gp_n=1):
         cell = atoms.get_cell()
@@ -31,18 +49,17 @@ class cal_cut_cell(object):
         return atoms
 
     def make_cubic(self, opt, atoms, *args):
-        if len(args) == 2:
+        if args[0] == []:
+            cell = atoms.get_cell()
+            lob = np.array([0.0, 0.0, 0.0])
+            hib = np.array([cell[0, 0], cell[1, 1], cell[2, 2]])
+        elif len(args) == 2:
             lob = args[0]
             hib = args[1]
         elif len(args) == 1:
             arr = args[0]
             lob = arr[:3]
             hib = arr[3:]
-        else:
-            cell = atoms.get_cell()
-            lob = np.array([0.5 * cell[0, 0], 0.0, 0.25 * cell[2, 2]])
-            hib = np.array([0.75 * cell[0, 0],  cell[1, 1], 0.75 * cell[2, 2]])
-
         index = []
         if opt in ["in"]:
             for i in range(len(atoms)):

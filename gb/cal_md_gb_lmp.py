@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-11-01 01:54:26
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-04-26 00:36:49
+# @Last Modified time: 2018-05-09 11:46:31
 
 from numpy import sqrt
 
@@ -15,7 +15,8 @@ class md_gb_lmp(object):
         self.tilt = {'0001': self.hcp_til_mtx_z0001,
                      '1100': self.hcp_til_mtx_z1100,
                      '1120': self.hcp_til_mtx_z1120}
-        self.zunit = {'0001': sqrt(3) * self.pot['ahcp'],
+
+        self.zunit = {'1100': sqrt(3) * self.pot['ahcp'],
                       '1120': self.pot['ahcp'],
                       '0001': self.pot['chcp']}
 

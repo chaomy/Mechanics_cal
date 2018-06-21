@@ -4,7 +4,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-06 03:11:33
+# @Last Modified time: 2018-06-02 22:51:53
 
 
 import os
@@ -22,45 +22,45 @@ class cal_va_gsf(object):
 
     def prepare_vasp_inputs(self, mdir):
         self.set_pbs_type('va')
-        self.set_wall_time(30)
-        self.set_job_title(mdir[:3])
-        self.set_nnodes(1)
+        self.set_wall_time(80)
+        self.set_job_title(mdir[-4:])
+        self.set_nnodes(4)
         self.set_main_job("mpirun vasp")
-        self.write_pbs(od=True)
+        self.write_pbs(od=False)
         os.system("mv va.pbs {}".format(mdir))
         os.system("cp INCAR {}".format(mdir))
         os.system("cp POTCAR {}".format(mdir))
         os.system("cp KPOINTS {}".format(mdir))
         os.system("cp POSCAR {}".format(mdir))
 
-    def gn_va_single_dir_gsf(self, mtype='relax'):
-        # if self.mgsf in ['x111z110']:
-        #     atoms = self.gn_bcc110()
-        # elif self.mgsf in ['x111z112']:
+    def test(self):
+        mgsf = self.mgsf
+        atoms = self.set_bcc_convention(
+            gsf_data.gsfbase[mgsf], (1, 1, 1))
+        print(atoms.get_scaled_positions())
+        ase.io.write('perf_poscar', images=atoms, format='vasp')
 
+    def gn_va_single_dir_gsf(self, mtype='relax'):
         atoms = self.gn_gsf_atoms()
         atoms.wrap()
+        print(atoms.get_cell())
+
         perf_cells = deepcopy(atoms.get_cell())
         ase.io.write('perf_poscar', images=atoms, format='vasp')
 
-        disps = np.linspace(0, 1.0, 21)
+        # disps = np.linspace(0, 1.0, 21)
+        disps = np.linspace(0, 1.0, 9) 
         disps = np.append(disps, 0.0)
         npts = len(disps)
 
         for i, disp in zip(list(range(npts)), disps):
             dirname = 'dir-{}-{:4.3f}'.format(self.mgsf, disp)
             self.mymkdir(dirname)
-
-            if self.mgsf in ['x111z110']:
-                disp_vector = [disp, disp, 0]
-            else:
-                disp_vector = [disp, 0.0, 0.0]
-
+            disp_vector = [disp, 0.0, 0.0]
             disp_matrix_direct = self.gn_displacement(
                 atoms.copy(), disp_vector)
             disp_matrix = deepcopy(disp_matrix_direct)
             disp_matrix[:, 0] = disp_matrix_direct[:, 0] * perf_cells[0, 0]
-
             local_atoms = atoms.copy()
             local_atoms.translate(disp_matrix)
             ase.io.write('POSCAR', images=local_atoms, format='vasp')
@@ -78,9 +78,7 @@ class cal_va_gsf(object):
             os.chdir(mdir)
 
             disp_vector = [i * delta, 0, 0]
-            disp_matrix_direct = self.gn_displacement(atoms.copy(),
-                                                      disp_vector)
-
+            disp_matrix_direct = self.gn_displacement(atoms.copy(), disp_vector)
             disp_matrix = copy.deepcopy(disp_matrix_direct)
 
             cell_length_x = perf_cells[0, 0]
@@ -94,7 +92,6 @@ class cal_va_gsf(object):
 
             self.prepare_vasp_inputs(mdir)
             os.system("cp POSCAR.vasp ../POSCAR%03d.vasp" % (i))
-
             os.chdir(os.pardir)
 
     def collect_vasp_gsf_energy(self):  # to be done

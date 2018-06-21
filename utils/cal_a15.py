@@ -3,9 +3,10 @@
 # @Author: chaomy
 # @Date:   2018-03-28 21:31:56
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-28 22:12:32
+# @Last Modified time: 2018-06-04 01:02:04
 
 import ase
+import ase.io
 import gn_config
 import ase.lattice.cubic as cubic
 import md_pot_data
@@ -17,12 +18,13 @@ class A15Factory(cubic.SimpleCubicFactory):
                      [0.25, 0.5, 0.],
                      [0.75, 0.5, 0.],
                      [0., 0.25, 0.5],
-                     [0., 0.75, 0.5], 
-                     [0.5, 0., 0.25], 
+                     [0., 0.75, 0.5],
+                     [0.5, 0., 0.25],
                      [0.5, 0., 0.75]]
 
 
 a15 = A15Factory()
+
 
 class cal_a15(gn_config.gnStructure):
 
@@ -33,8 +35,14 @@ class cal_a15(gn_config.gnStructure):
     def build_a15(self):
         atoms = a15(latticeconstant=5.292, size=(1, 1, 1), symbol=('Nb'))
         ase.io.write("POSCAR_A15", atoms, "vasp")
-        self.write_lmp_config_data(atoms) 
+        self.write_lmp_config_data(atoms)
+
+    def convert(self):
+        atoms = ase.io.read("CONTCAR", format='vasp')
+        self.write_lmp_config_data(atoms)
+
 
 if __name__ == '__main__':
     drv = cal_a15()
-    drv.build_a15()
+    # drv.build_a15()
+    drv.convert()

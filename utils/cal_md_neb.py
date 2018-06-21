@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-05-04 18:28:17
+# @Last Modified time: 2018-06-04 01:39:18
 
 
 from optparse import OptionParser
@@ -120,7 +120,6 @@ class lmps_neb_tools(get_data.get_data, gn_config.bcc, plt_drv.plt_drv):
 
     def plot_neb_energy(self, neb_energy, figname='neb.png'):
         self.set_111plt()
-
         next(self.keysiter)
         next(self.keysiter)
         x = np.linspace(0, 1, len(neb_energy))

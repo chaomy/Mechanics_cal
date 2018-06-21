@@ -1,10 +1,9 @@
 #!/usr/bin/env python
-# encoding: utf-8
 # -*- coding: utf-8 -*-
 # @Author: chaomy
 # @Date:   2018-03-07 13:09:29
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-05-08 13:54:17
+# @Last Modified time: 2018-05-17 21:10:18
 
 
 import numpy as np
@@ -176,8 +175,7 @@ class lmp_phonon(get_data.get_data):
         os.system("~/anaconda2/bin/phonopy -f {} --lammps".format(files[0]))
         os.system("MutiPhonon_oneAtom.py")
         os.system("cp band.conf.npy band.conf.lmp.npy")
-        os.system("")
-
+        os.system("MyPhononPlot_one_atom.py -t cmp")
 
 if __name__ == '__main__':
     usage = "usage:%prog [options] arg1 [options] arg2"

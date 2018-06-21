@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-03-17 07:47:12
+# @Last Modified time: 2018-05-25 11:19:16
 
 
 import os
@@ -46,7 +46,7 @@ class cal_md_gsf(output_data.output_data):
 
     def run_lmp_gsf(self, loc_dir):
         os.chdir(loc_dir)
-        os.system("lmp_mpi -in {}".format(self.infile))
+        os.system("lmp_mpi -in {} > log".format(self.infile))
         os.chdir(os.pardir)
 
     def loop_md_gsf(self):

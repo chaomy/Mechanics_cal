@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-04-05 03:12:41
+# @Last Modified time: 2018-06-02 22:52:12
 
 
 import gn_lmp_infile
@@ -14,21 +14,21 @@ import gsf_data
 import gn_config
 import get_data
 import gn_pbs
+import numpy as np
+import ase.io
+import ase.lattice.orthorhombic as otho
+import ase.lattice.cubic as cubic
+import os
 from utils import Intro_vasp
 from gsf import cal_qe_gsf
 from gsf import cal_qe_gsf_pos
 from gsf import cal_qe_gsf_pre
 from gsf import cal_md_gsf
 from gsf import cal_va_gsf
-import numpy as np
 from copy import deepcopy
 from math import sqrt
 from optparse import OptionParser
 from itertools import cycle
-import ase.io
-import ase.lattice.orthorhombic as otho
-import ase.lattice.cubic as cubic
-import os
 
 # x [sqrt(2) a ; y = a; z = sqrt(2) a]
 
@@ -54,8 +54,9 @@ class cal_gsf(gn_config.gnStructure,
               cal_md_gsf.cal_md_gsf,
               cal_va_gsf.cal_va_gsf):
 
-    def __init__(self, pot=md_pot_data.va_pot.Nb_pbe, mgsf='x111z112'):
-        self.pot = self.load_data("../BASICS/pot.dat")
+    def __init__(self, pot=md_pot_data.va_pot.Nb_pbe, mgsf='x111z110'):
+        # self.pot = self.load_data("../BASICS/pot.dat")
+        self.pot = pot
         self.mgsf = mgsf
         self.sample_gsf_num = 21
         self.disp_delta = 1. / (self.sample_gsf_num - 1)
@@ -79,8 +80,7 @@ class cal_gsf(gn_config.gnStructure,
         atoms = othoBccp110(latticeconstant=(self.pot['latbcc'] * sqrt(2),
                                              self.pot['latbcc'],
                                              self.pot['latbcc'] * sqrt(2)),
-                            size=(1, 1, 15),
-                            symbol=self.pot['element'])
+                            size=(1, 1, 15), symbol=self.pot['element'])
         for i in range(12):
             atoms.pop()
         ase.io.write('poscar', images=atoms, format='vasp')
@@ -90,6 +90,7 @@ class cal_gsf(gn_config.gnStructure,
         mgsf = self.mgsf
         atoms = self.set_bcc_convention(
             gsf_data.gsfbase[mgsf], gsf_data.gsfsize[mgsf])
+        # make vacuum
         for i in range(gsf_data.gsfpopn[mgsf]):
             atoms.pop()
         return atoms
@@ -137,18 +138,17 @@ class cal_gsf(gn_config.gnStructure,
                 cn += 1
 
     def set_pbs(self, dirname, opt='qe'):
-        self.set_nnodes(2)
+        self.set_nnodes(4)
         self.set_ppn(12)
-        self.set_job_title("{}".format(dirname))
-        self.set_wall_time(110)
+        self.set_job_title("{}".format(dirname[:-3]))
+        self.set_wall_time(80)
         if opt in ['qe']:
             self.set_main_job("""mpirun pw.x < qe.in > qe.out""")
         if opt in ['va']:
             self.set_main_job("""mpirun vasp > vasp.log""")
         self.write_pbs(od=False)
 
-    def gn_displacement(self, atoms,
-                        displacement_vector):
+    def gn_displacement(self, atoms, displacement_vector):
         positions = atoms.get_positions()
         atom_num = len(positions)
         displacement = deepcopy(positions)
@@ -167,35 +167,35 @@ class cal_gsf(gn_config.gnStructure,
         print(("usf = {} eV/A^2".format(usf)))
 
     def plt_gsf(self):
-        dftgsfNb111z110 = np.array([0., 0.00167638, 0.00599298, 0.01182841, 0.01852898,
-                                    0.02530569, 0.03141966, 0.03630433, 0.03971606, 0.04163203,
-                                    0.04225003, 0.04163574, 0.03971602, 0.03630445, 0.03141966,
-                                    0.02530578, 0.01853107, 0.01183409, 0.00599302, 0.0016581,
-                                    0.])
-        dftgsfNb111z211 = np.array([6.80514395e-06, 1.83502186e-03, 6.93362803e-03, 1.44651471e-02,
-                                    2.35590385e-02, 3.19023669e-02, 3.90516144e-02, 4.38369621e-02,
-                                    4.71244383e-02, 4.82233951e-02, 4.78565091e-02, 4.61849586e-02,
-                                    4.31651020e-02, 3.93205656e-02, 3.42556153e-02, 2.78791954e-02,
-                                    2.06429604e-02, 1.32393336e-02, 6.52369207e-03, 1.77392350e-03,
-                                    0.00000000e+00])
-        dftdisp = np.linspace(0, 1, len(dftgsfNb111z110))
+        dftgsf = {'x111z110': np.array([0., 0.00167638, 0.00599298, 0.01182841, 0.01852898,
+                                        0.02530569, 0.03141966, 0.03630433, 0.03971606, 0.04163203,
+                                        0.04225003, 0.04163574, 0.03971602, 0.03630445, 0.03141966,
+                                        0.02530578, 0.01853107, 0.01183409, 0.00599302, 0.0016581,
+                                        0.]),
+                  'x111z112': np.array([6.80514395e-06, 1.83502186e-03, 6.93362803e-03, 1.44651471e-02,
+                                        2.35590385e-02, 3.19023669e-02, 3.90516144e-02, 4.38369621e-02,
+                                        4.71244383e-02, 4.82233951e-02, 4.78565091e-02, 4.61849586e-02,
+                                        4.31651020e-02, 3.93205656e-02, 3.42556153e-02, 2.78791954e-02,
+                                        2.06429604e-02, 1.32393336e-02, 6.52369207e-03, 1.77392350e-03,
+                                        0.00000000e+00])}
+        ylabes = {'x111z112': r"GSF [111](211) [eV/A$^2$]",
+                  'x111z110': r"GSF [111](110) [eV/A$^2$]"}
+        dftdisp = np.linspace(0, 1, len(dftgsf[self.mgsf]))
         self.set_111plt()
         coeff = 16.021766208
         kk = 'gsf.{}'.format(self.mgsf)
         data = np.loadtxt(kk + ".dat")
         gsf = (data[:, 3] - np.min(data[:, 3])) / (data[:, 2])
-
-        if self.mgsf in ["x111z110"]:
-            self.ax.plot(dftdisp, dftgsfNb111z110, label='PAW-PBE', **next(self.keysiter))
-            self.add_y_labels(
-                cycle([r"GSF [111](110) [eV/A$^2$]"]), *self.axls)
-        elif self.mgsf in ["x111z112"]:
-            self.ax.plot(dftdisp, dftgsfNb111z211, label='PAW-PBE', **next(self.keysiter)) 
-            self.add_y_labels(
-                cycle([r"GSF [111](211) [eV/A$^2$]"]), *self.axls)
+        self.ax.plot(dftdisp, dftgsf[self.mgsf],
+                     label='PAW-PBE', **next(self.keysiter))
+        self.add_y_labels(
+            cycle([ylabes[self.mgsf]]), *self.axls)
         next(self.keysiter)
-        self.ax.plot(data[:, 1], gsf, label="MEAM", **next(self.keysiter))        
-        self.add_x_labels(cycle(["Normalized dispament along [111]"]), *self.axls)
+        self.ax.plot(data[:, 1], gsf, label="MEAM", **next(self.keysiter))
+        print("GSF " + self.mgsf, np.max(gsf), np.max(dftgsf[self.mgsf]), (np.max(
+            gsf) - np.max(dftgsf[self.mgsf])) / np.max(dftgsf[self.mgsf]))
+        self.add_x_labels(
+            cycle(["Normalized dispament along [111]"]), *self.axls)
         self.add_legends(*self.axls)
         self.set_tick_size(*self.axls)
         self.fig.savefig('fig_gsf.{}.png'.format(self.mgsf), **self.figsave)
@@ -262,7 +262,8 @@ if __name__ == '__main__':
                   'plttol': drv.plt_tol,
                   'trans': drv.transdata,
                   'bcc110': drv.gn_bcc110,
-                  'one': drv.gn_gsf_one_layer}
+                  'one': drv.gn_gsf_one_layer,
+                  'test': drv.test}
 
     if options.fargs is not None:
         dispatcher[options.mtype.lower()](options.fargs)
