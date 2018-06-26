@@ -4,7 +4,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-06-25 20:57:22
+# @Last Modified time: 2018-06-25 20:58:47
 
 
 import os
@@ -36,7 +36,8 @@ class subjobs(object):
                     # os.system(
                     #     "mv {}/log.lammps {}/log.lammps.01".format(mdir, mdir))
                     os.system("cp va.cnt.pbs {}/va.pbs".format(mdir))
-                    self.goandsub(mdir)
+                    # self.goandsub(mdir)
+                    os.system("rm {}/pf.o*".format(mdir))
             except StopIteration:
                 break
 
