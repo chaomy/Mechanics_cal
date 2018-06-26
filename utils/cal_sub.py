@@ -4,7 +4,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-06-25 20:43:22
+# @Last Modified time: 2018-06-25 20:48:40
 
 
 import os
@@ -33,6 +33,7 @@ class subjobs(object):
                 mdir = next(self.diriter)
                 print(mdir)
             except StopIteration:
+                break
 
     def loop_sub_jobs(self):
         while True:
