@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-21 18:42:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-06-25 17:34:24
+# @Last Modified time: 2018-06-25 22:15:11
 
 
 from itertools import cycle
@@ -111,8 +111,8 @@ class cal_md_thermo(gn_config.gnStructure,
 
         self.add_legends(*self.axls)
         self.set_tick_size(*self.axls)
-        self.add_y_labels(cycle(['Presssure (GPa)']), *self.axls)
-        self.add_x_labels(cycle(['Relative volume (V / V$_0$)']), *self.axls)
+        self.add_y_labels(cycle(['Presssure [GPa]']), *self.axls)
+        self.add_x_labels(cycle(['Relative volume [V / V$_0]$']), *self.axls)
         self.fig.savefig("fig-p2v.png", **self.figsave)
 
     def p2v_wrap(self):

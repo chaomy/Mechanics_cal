@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-21 18:42:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-06-25 17:40:22
+# @Last Modified time: 2018-06-25 22:13:44
 
 
 from optparse import OptionParser
@@ -195,7 +195,7 @@ class MyphononPlot(plt_drv.plt_drv):
 
         # plot experiment
         self.ax = self.plot_exp(**{'ax': self.ax, 'pltkeys': keyslist[2]})
-        self.add_y_labels(cycle(['Frequency (THz)']), self.ax)
+        self.add_y_labels(cycle(['Frequency [THz]']), self.ax)
         self.add_legends(self.ax)
         self.set_tick_size(self.ax)
         plt.savefig("mphonon.png", **self.figsave)
