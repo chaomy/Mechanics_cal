@@ -4,7 +4,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-06-25 20:39:41
+# @Last Modified time: 2018-06-25 20:43:22
 
 
 import os
@@ -26,6 +26,13 @@ class subjobs(object):
         fls = glob.glob("dir-*")
         for e in fls:
             os.system("scp {}/in.rst $FLUX:{}/{}".format(e, pth, e))
+
+    def cnt_job(self):
+        while True:
+            try:
+                mdir = next(self.diriter)
+                print(mdir)
+            except StopIteration:
 
     def loop_sub_jobs(self):
         while True:
@@ -70,5 +77,6 @@ if __name__ == "__main__":
     dispatcher = {'sub': drv.loop_sub_jobs,
                   'shearcnt': drv.loop_shear_cnt,
                   'mpbs': drv.mpbs,
-                  'to': drv.trans_to}
+                  'to': drv.trans_to,
+                  'cnt': drv.cnt_job}
     dispatcher[options.mtype.lower()]()
