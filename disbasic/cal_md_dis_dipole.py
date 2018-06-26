@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-05-02 17:04:58
+# @Last Modified time: 2018-06-25 16:08:31
 
 from numpy import cos, sin, sqrt, mat
 from utils import stroh_solve
@@ -208,13 +208,11 @@ class cal_dis_dipole(object):
             for ps, dp in zip(pos, disp1):
                 dis = np.linalg.norm(ps[:2] - c1)
                 if (dis < radius):
-                    print(dis)
                     dp[2] += 1. / 6. * uz
                     # add shirt
             for ps, dp in zip(pos, disp2):
                 dis = np.linalg.norm(ps[:2] - c2)
                 if (dis < radius):
-                    print(dis)
                     dp[2] -= 1. / 6. * uz
 
         atoms.set_positions(pos + np.real(disp1) - np.real(disp2))

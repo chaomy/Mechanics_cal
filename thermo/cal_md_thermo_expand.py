@@ -26,10 +26,11 @@ class cal_md_thermo(gn_config.gnStructure,
                     plt_drv.plt_drv):
 
     def __init__(self):
-        #self.pot = self.load_data("../BASICS/pot.dat")
-        self.pot = md_pot_data.md_pot.mg_Poco
-#self.pot = md_pot_data.va_pot.Nb_pbe
-        self.size = np.array([16, 16, 16])
+        self.pot = self.load_data("../BASICS/pot.dat")
+        # self.pot = md_pot_data.md_pot.mg_Poco
+        # self.pot = md_pot_data.va_pot.Nb_pbe
+        # self.size = np.array([16, 16, 16])
+        self.size = np.array([8, 8, 8])
         gn_lmp_infile.gn_md_infile.__init__(self)
         gn_config.gnStructure.__init__(self, self.pot)
         plt_drv.plt_drv.__init__(self)
@@ -77,11 +78,10 @@ class cal_md_thermo(gn_config.gnStructure,
         deltat = 50
         lat = self.pot["lattice"]
 
-# 50 to 2500 K
-        for i in range(50):
+        for i in range(50):  # 50 to 2500 K
             tend = initt + deltat * i
             self.pot["lattice"] = lat * (1 + tend * thermocoeff)
-            atoms = self.set_bcc_convention().repeat(([15, 15, 15]))
+            atoms = self.set_bcc_convention().repeat(([12, 12, 12]))
             mdir = "dir-{:05.0f}".format(tend)
             self.mymkdir(mdir)
             self.write_lmp_config_data(atoms, mdir + "/lmp_init.txt")
@@ -93,6 +93,8 @@ class cal_md_thermo(gn_config.gnStructure,
                                            'pend': oneatm})
             tstart = tend
             shutil.copy2("in.npt", mdir)
+            shutil.copy2("in.rst", mdir)
+            shutil.copy2("va.pbs", mdir)
 
     def get_temp_lat(self, filename="log.lammps"):
         raw = self.mreadlines(filename)
@@ -115,15 +117,17 @@ class cal_md_thermo(gn_config.gnStructure,
         return (temp, lx)
 
     def get_lat_at_given_temp(self):
-        data = np.loadtxt("log")
-# Step TotEng Temp Lx Ly Lz v_S11 v_S22 v_S33 v_S12 v_S13 v_S23
-        print(np.mean(data[-200:, 3]) / 7.0,
-              np.mean(data[-200:, 4]) / 7.0,
-              np.mean(data[-200:, 5]) / 7.0)
+        data = np.loadtxt("log.out")
+        # Step TotEng Temp Lx Ly Lz v_S11 v_S22 v_S33 v_S12 v_S13 v_S23
+
+        # Step TotEng PotEng Temp Press Pxx Pyy Pzz Lx Ly Lz. Nb
+        lat = np.mean([np.mean(data[-100:, -3]) / 12.0,
+                       np.mean(data[-100:, -2]) / 12.0,
+                       np.mean(data[-100:, -1]) / 12.0])
+        print(lat, 100 * (lat / self.pot['lattice'] - 1.0))
 
     def theormo_expand_plt(self):
         temp_lx = np.loadtxt("temp_lx.txt")
-        print(temp_lx)
 
     def add_vol_expan(self):
         atoms = ase.io.read("dump", format='lammps-dump')

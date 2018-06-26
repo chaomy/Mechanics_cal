@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-21 18:42:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-04-29 03:44:48
+# @Last Modified time: 2018-06-25 17:34:24
 
 
 from itertools import cycle
@@ -28,7 +28,6 @@ class cal_md_thermo(gn_config.gnStructure,
 
     def __init__(self):
         self.pot = self.load_data("../BASICS/pot.dat")
-        # self.pot = md_pot_data.va_pot.Nb_pbe
         # gn_lmp_infile.gn_md_infile.__init__(self)
         gn_config.gnStructure.__init__(self, self.pot)
         plt_drv.plt_drv.__init__(self)
@@ -105,7 +104,8 @@ class cal_md_thermo(gn_config.gnStructure,
         vol = vol**3
         dft_vol = dft_vol / dft_vol[0]
 
-        self.ax.plot(vol[:npt], press[:npt], label='MEAM', **next(self.keysiter))
+        self.ax.plot(vol[:npt], press[:npt],
+                     label='MEAM', **next(self.keysiter))
         self.ax.plot(dft_vol[:npt], dft_press[:npt], label='PAW-PBE',
                      **next(self.keysiter))
 

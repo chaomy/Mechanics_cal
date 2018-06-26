@@ -4,7 +4,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-02-22 20:51:03
+# @Last Modified time: 2018-06-25 20:39:41
 
 
 import os
@@ -20,6 +20,12 @@ class subjobs(object):
 
     def get_dirs(self):
         self.diriter = iter(glob.glob('dir[-_]*'))
+
+    def trans_to(self):
+        pth = "/scratch/qiliang_flux/chaomy/MD/Nb/MEAMS/THERMO"
+        fls = glob.glob("dir-*")
+        for e in fls:
+            os.system("scp {}/in.rst $FLUX:{}/{}".format(e, pth, e))
 
     def loop_sub_jobs(self):
         while True:
@@ -63,5 +69,6 @@ if __name__ == "__main__":
     drv = subjobs()
     dispatcher = {'sub': drv.loop_sub_jobs,
                   'shearcnt': drv.loop_shear_cnt,
-                  'mpbs': drv.mpbs}
+                  'mpbs': drv.mpbs,
+                  'to': drv.trans_to}
     dispatcher[options.mtype.lower()]()

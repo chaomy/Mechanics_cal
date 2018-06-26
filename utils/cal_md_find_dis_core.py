@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2018-05-01 21:43:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-05-02 22:29:05
+# @Last Modified time: 2018-06-25 16:13:53
 
 
 import ase
@@ -24,10 +24,12 @@ class md_find_core(object):
         init = [0.1, -0.01]
         initlist = np.loadtxt("dis_traj.txt.start")
 
+        # init = initlist[0]
         for i in range(1, 21):
             init = initlist[i - 1]
             atoms_rlx = ase.io.read(
                 "dump.all.{}".format(i), format="lammps-dump")
+            atoms_rlx.wrap(pbc=[1, 1, 1])
 
             # find 3 atom rows
             cut_tm = 2.7**2
@@ -37,7 +39,7 @@ class md_find_core(object):
 
             atoms_perf = ase.io.read("perf_poscar", format='vasp')
             atoms_perf.wrap(pbc=[1, 1, 1])
-            prfpos = atoms_perf.get_positions()
+            prfpos = atoms_perf.get_positions(True)
 
             for i in range(len(prfpos)):
                 dx = prfpos[i, 0] - centers[0]
@@ -56,20 +58,19 @@ class md_find_core(object):
             rs = rs[1:]
             cidx = cidx[1:]
 
-            print(len(cidx))
-            self.pos_rlx = atoms_rlx.get_positions()[cidx]
+            self.pos_rlx = atoms_rlx.get_positions(True)[cidx]
             self.pos_prf = prfpos[cidx]
             self.cidx = cidx
 
-            print(rs)
-            print(self.pos_prf)
-            print(self.pos_rlx)
+            # print(rs)
+            print("pos perf ", self.pos_prf)
+            print("pos relaxed ", self.pos_rlx)
 
             res = minimize(self.cost_func, np.array(
-                init), method='Nelder-Mead', tol=5e-4)
-            print(res.x)
+                init), method='Nelder-Mead', tol=5e-3)
+
+            print("dis core pos", res.x)
             data.append(res.x)
-            # init = res.x
         np.savetxt("dis_traj.txt", np.array(data), fmt="%.7f")
 
     def mesh_cost(self):
@@ -90,6 +91,7 @@ class md_find_core(object):
 
     def cost_func(self, d):
         pos_sln = self.dis_ref(d).get_positions()[self.cidx]
+        print(self.pos_rlx[:, 1], pos_sln[:, 1])
         e1 = np.linalg.norm(self.pos_rlx[:, 1] - pos_sln[:, 1])
         return e1
 
@@ -99,6 +101,8 @@ class md_find_core(object):
         unity = np.sqrt(2) / 2. * self.pot['lattice']
 
         ci1 = [(sx + d[0]) * unitx, (sy + 1. / 3. + d[1]) * unity]
+        ci2 = [(sx + d[0]) * unitx, (sy + 2. / 3. + d[1]) * unity]
+
         atoms = self.set_dipole_box(1)
         atoms = self.bcc_screw_dipole_alongz_with_image(atoms, ci1)
         return self.convert_alongz_to_alongy(atoms)

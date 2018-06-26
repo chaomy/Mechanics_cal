@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-05-05 11:23:50
+# @Last Modified time: 2018-06-24 17:07:37
 
 
 from scipy.optimize import minimize
@@ -40,11 +40,11 @@ class cal_bcc_ideal_shear_run(object):
                        3.139171320878977878e-02])
 
         # for 211
-        # x0 = np.array([9.529678394166982702e-01,
-        #                1.016847096128853600e+00,
-        #                1.048118345240103277e+00,
-        #                1.389246099431499289e-04,
-        #                -2.142860303806213597e-04])
+        x0 = np.array([9.529678394166982702e-01,
+                       1.016847096128853600e+00,
+                       1.048118345240103277e+00,
+                       1.389246099431499289e-04,
+                       -2.142860303806213597e-04])
 
         npts = self.npts
         # 1 strain  + energy + 5 strains + 6 stresses
@@ -58,6 +58,7 @@ class cal_bcc_ideal_shear_run(object):
             data[i][0], data[i][1], data[i][2:7], data[
                 i][7:] = (delta), res.fun, res.x, info[1:]
         np.savetxt("ishear.txt", data)
+        self.lmp_loop_stress()
 
     def recordstrain(self, delta, x, fval):
         fid = open("s.txt", "a")

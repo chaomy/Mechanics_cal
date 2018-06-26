@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-06-03 15:55:54
+# @Last Modified time: 2018-06-24 16:03:22
 
 
 from optparse import OptionParser
@@ -119,7 +119,7 @@ class cal_md_intersti(gn_config.gnStructure, get_data.get_data, gn_pbs.gn_pbs,
     def prep_interstitials(self):  # reported size 25 x 25 x 25
         alat = self.pot['lattice']
         atoms = self._unitatoms.copy()
-        sizen = 5
+        sizen = 20
         atoms = atoms.repeat((sizen, sizen, sizen))
         pos = np.array([alat,  alat,  alat]) * 0.5
         for atom in atoms:
@@ -170,7 +170,8 @@ if __name__ == '__main__':
     drv = cal_md_intersti()
 
     dispatcher = {'prep': drv.prep_interstitials,
-                  'run': drv.run, 'load': drv.load,
+                  'run': drv.run,
+                  'load': drv.load,
                   'cnv': drv.convert}
     if options.fargs is not None:
         dispatcher[options.mtype.lower()](options.fargs)

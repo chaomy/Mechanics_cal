@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-05-05 14:34:16
+# @Last Modified time: 2018-06-24 15:40:46
 
 
 from optparse import OptionParser
@@ -68,7 +68,7 @@ class cal_md_ideal_tensile_plt(plt_drv.plt_drv):
         self.set_tick_size(*self.axls)
         self.fig.savefig('fig-iten-cmp-{}.png'.format(tg), **self.figsave)
 
-    def cmp_path_plt(self, tg='md'):
+    def cmp_path_plt(self, tg='md'):  # plot OP and PT together
         self.set_211plt()
         self.set_keys('upper left')
         raw = np.loadtxt('iten.{}.op.txt'.format(tg))

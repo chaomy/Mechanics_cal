@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-06-21 00:39:26
+# @Last Modified time: 2018-06-21 00:41:59
 
 import os
 from glob import glob
@@ -33,7 +33,7 @@ class md_gb_run(object):
             os.system("cp in.npt {}".format(mdir))
             os.system("mkdir {}/dump".format(mdir))
 
-    def loop_grand_liquid(self):
+    def loop_grand(self):
         for o in ['n', 'p']:
             for i in range(0, 6):
                 mdir = 'dir_{}_{:02d}'.format(o, i)
@@ -43,12 +43,6 @@ class md_gb_run(object):
                 os.system(
                     "cp init.{}.{:02d}.txt {}/init.txt".format(o, i, mdir))
                 self.mymkdir("{}/dump".format(mdir))
-
-    def loop_grand(self):
-        for o in ['n', 'p']:
-            for i in range(0, 6):
-                mdir = 'dir_{}_{:02d}'.format(o, i)
-                print(glob("rst.*"))
 
     def make_gb_grand_canonical(self, opt='p', n=4):
         atoms = ase.io.read("dump/dump.00000", format='lammps-dump')

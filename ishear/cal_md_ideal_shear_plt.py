@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-05-05 13:52:47
+# @Last Modified time: 2018-06-25 17:12:08
 
 
 from itertools import cycle
@@ -88,8 +88,8 @@ class cal_bcc_ideal_shear_plt(object):
         self.set_keys()
         ylabeliter = cycle(['Energy per atom [eV]', r'Shear stress [Gpa]'])
         if tg in ['md']:
-            self.ax1.set_ylim([-0.01, 0.172])
-            self.ax2.set_ylim([-7.5, 8.8])
+            self.ax1.set_ylim([-0.01, 0.170])
+            self.ax2.set_ylim([-7.2, 8.0])
         elif tg in ['va']:
             self.ax1.set_ylim([-0.01, 0.170])
             self.ax2.set_ylim([-7.2, 8.0])

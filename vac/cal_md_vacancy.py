@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-11-23 09:46:18
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-05-04 00:22:24
+# @Last Modified time: 2018-06-24 16:33:17
 
 
 from optparse import OptionParser
@@ -26,7 +26,6 @@ class cal_md_vacancy(gn_config.gnStructure, get_data.get_data, gn_pbs.gn_pbs):
 
     def __init__(self):
         self.pot = self.load_data("../BASICS/pot.dat")
-        # self.pot = md_pot_data.va_pot.Nb_pbe
         gn_config.gnStructure.__init__(self, self.pot)
 
     def bcc_vacancy_prep(self):

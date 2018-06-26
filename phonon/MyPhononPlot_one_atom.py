@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-21 18:42:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-04-28 23:43:38
+# @Last Modified time: 2018-06-25 17:40:22
 
 
 from optparse import OptionParser
@@ -124,7 +124,7 @@ class MyphononPlot(plt_drv.plt_drv):
         else:
             self.set_phonon_keys()
             pltkeys = self.pltkwargs
-        plt.ylim(0, 6.5)
+        plt.ylim(0, 7.0)
         ax.plot(distances, freqs[:, 0], label=kwargs['label'], **pltkeys)
         # ax.plot(distances, freqs[:, 0], **pltkeys)
         ax.plot(distances, freqs[:, 1], **pltkeys)

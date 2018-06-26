@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-06-02 22:52:12
+# @Last Modified time: 2018-06-25 17:17:52
 
 
 import gn_lmp_infile
@@ -178,6 +178,10 @@ class cal_gsf(gn_config.gnStructure,
                                         4.31651020e-02, 3.93205656e-02, 3.42556153e-02, 2.78791954e-02,
                                         2.06429604e-02, 1.32393336e-02, 6.52369207e-03, 1.77392350e-03,
                                         0.00000000e+00])}
+
+        dftgsf['x111z110'] = dftgsf['x111z110'] * 1.02
+        dftgsf['x111z112'] = dftgsf['x111z112'] * 1.038
+
         ylabes = {'x111z112': r"GSF [111](211) [eV/A$^2$]",
                   'x111z110': r"GSF [111](110) [eV/A$^2$]"}
         dftdisp = np.linspace(0, 1, len(dftgsf[self.mgsf]))
@@ -188,6 +192,7 @@ class cal_gsf(gn_config.gnStructure,
         gsf = (data[:, 3] - np.min(data[:, 3])) / (data[:, 2])
         self.ax.plot(dftdisp, dftgsf[self.mgsf],
                      label='PAW-PBE', **next(self.keysiter))
+
         self.add_y_labels(
             cycle([ylabes[self.mgsf]]), *self.axls)
         next(self.keysiter)

@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-21 18:42:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-05-08 13:44:54
+# @Last Modified time: 2018-06-21 16:57:45
 
 
 import os
@@ -22,14 +22,10 @@ class cal_md_lattice(gn_config.bcc, gn_config.fcc, gn_config.hcp,
     def __init__(self):
         self.pot = md_pot_data.va_pot.Nb_pbe
         get_data.get_data.__init__(self)
-        gn_config.bcc.__init__(self, self.pot)
-        gn_config.fcc.__init__(self, self.pot)
-        gn_config.hcp.__init__(self, self.pot)
         plt_drv.plt_drv.__init__(self)
 
     def gn_temp_atoms(self):
-        atoms = self.set_bcc_convention(in_direction=self.pot["latbcc"],
-                                        in_size=(3, 3, 3))
+        atoms = self.set_bcc_convention(self.pot["latbcc"], in_size=(5, 5, 5))
         self.write_lmp_config_data(atoms)
         return atoms
 
@@ -42,25 +38,6 @@ class cal_md_lattice(gn_config.bcc, gn_config.fcc, gn_config.hcp,
             atoms = self.set_bcc_convention(in_size=(1, 1, 1))
             self.write_lmp_config_data(atoms)
             os.system("lmp_mpi -i in.init")
-
-    def cal_temp_lattice(self):
-        temp = 300.0
-        atoms = self.gn_temp_atoms()
-        lattice_dir = "dir-lattice-%4.3f" % (temp)
-        os.chdir(lattice_dir)
-
-        self.write_lmp_config_data(atoms)
-        self.gn_md_temp_lattice("lmp_init.txt",
-                                temp,
-                                self._lattice_potential,
-                                self._lattice_element)
-
-        os.system("cp ../%s  ." % (self._lattice_potential))
-        os.system("lmp_mpi -in in.lattice")
-        lattice = self.get_lmp_lattice()
-        os.chdir(os.pardir)
-        lattice = float(lattice)
-        return lattice / 5.0
 
     def run_lmp_lattice(self, loc_dir):
         os.chdir(loc_dir)
@@ -99,7 +76,8 @@ if __name__ == '__main__':
     drv = cal_md_lattice()
 
     dispatcher = {'bcc': drv.cal_lat_bcc,
-                  'plt': drv.plt_lat}
+                  'plt': drv.plt_lat,
+                  'temp': drv.gn_temp_atoms}
 
     if options.fargs is not None:
         dispatcher[options.mtype.lower()](options.fargs)

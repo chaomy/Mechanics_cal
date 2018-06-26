@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-06-04 23:27:44
+# @Last Modified time: 2018-06-24 17:26:51
 
 import numpy as np
 
@@ -180,7 +180,6 @@ class cal_cut_cell(object):
 
         index_list = []
         # delele half atoms
-        print(yy_max)
         inv_cell_t = np.linalg.inv(cell.transpose())
 
         for i in range(len(atoms)):
@@ -190,14 +189,12 @@ class cal_cut_cell(object):
             if b >= y_max:
                 index_list.append(atom.index)
 
-        print(len(index_list))
         del atoms[index_list]
 
         # change the supercell
         cell[cutIndx, :] = cell[cutIndx, :] * 0.5
 
         atoms.set_cell(cell)
-        print(len(atoms.get_positions()))
         return atoms
 
     def cut_half_atoms(self, atoms):
