@@ -4,7 +4,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-06-25 20:50:43
+# @Last Modified time: 2018-06-25 20:52:39
 
 
 import os
@@ -33,6 +33,8 @@ class subjobs(object):
                 mdir = next(self.diriter)
                 if len(glob.glob("{}/pf.o*".format(mdir))) > 0:
                     print(mdir)
+                    os.system(
+                        "mv {}/log.lammps {}/log.lammps.01".format(mdir, mdir))
             except StopIteration:
                 break
 
@@ -41,11 +43,11 @@ class subjobs(object):
             try:
                 mdir = next(self.diriter)
                 print(mdir)
-                self.gonadsub(mdir)
+                self.goandsub(mdir)
             except StopIteration:
                 break
 
-    def gonadsub(self, mdir):
+    def goandsub(self, mdir):
         os.chdir(mdir)
         os.system("qsub va.pbs")
         os.chdir(os.pardir)
