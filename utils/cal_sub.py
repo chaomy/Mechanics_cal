@@ -4,7 +4,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-06-25 20:48:40
+# @Last Modified time: 2018-06-25 20:49:57
 
 
 import os
@@ -31,7 +31,8 @@ class subjobs(object):
         while True:
             try:
                 mdir = next(self.diriter)
-                print(mdir)
+                if (glob.glob("{}/pf.o*".format(mdir)).size() > 0):
+                    print(mdir)
             except StopIteration:
                 break
 
