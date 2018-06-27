@@ -3,13 +3,15 @@
 # @Author: chaomy
 # @Date:   2018-03-28 21:31:56
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-06-04 01:02:04
+# @Last Modified time: 2018-06-26 00:56:27
 
 import ase
 import ase.io
 import gn_config
 import ase.lattice.cubic as cubic
 import md_pot_data
+import glob
+import os
 
 
 class A15Factory(cubic.SimpleCubicFactory):
@@ -41,8 +43,18 @@ class cal_a15(gn_config.gnStructure):
         atoms = ase.io.read("CONTCAR", format='vasp')
         self.write_lmp_config_data(atoms)
 
+    def convert_lmp_to_POSCAR(self):
+        fls = glob.glob("dump.*")
+        for i in range(len(fls)):
+            atoms = ase.io.read(fls[i], format="lammps-dump")
+            ase.io.write("poscar.{:02d}".format(
+                i), images=atoms, format="vasp")
+            mdir = "dir_{:02d}".format(i)
+            os.mkdir(mdir)
+            os.system("cp INCAR KPOINTS va.pbs POTCAR {}".format(mdir))
+            os.system("cp poscar.{:02d} {}/POSCAR".format(i, mdir))
 
 if __name__ == '__main__':
     drv = cal_a15()
     # drv.build_a15()
-    drv.convert()
+    drv.convert_lmp_to_POSCAR()

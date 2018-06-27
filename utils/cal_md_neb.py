@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-06-04 01:39:18
+# @Last Modified time: 2018-06-27 01:52:07
 
 
 from optparse import OptionParser
@@ -123,13 +123,13 @@ class lmps_neb_tools(get_data.get_data, gn_config.bcc, plt_drv.plt_drv):
         next(self.keysiter)
         next(self.keysiter)
         x = np.linspace(0, 1, len(neb_energy))
-        self.ax.plot(x, neb_energy, label='MEAMS', **next(self.keysiter))
+        self.ax.plot(x, 1e3 * neb_energy, label='MEAMS', **next(self.keysiter))
 
         self.add_legends(*self.axls)
         # (110): -110  (11-2) -110
         xlabeliter = cycle(["Normalized reaction coordinate"])
-        # ylabeliter = cycle(['Energy per Burgers length [meV/|b|]'])
-        ylabeliter = cycle(['Energy [eV]'])
+        ylabeliter = cycle(['Energy per length [meV/|b|]'])
+        # ylabeliter = cycle(['Energy [meV]'])
         self.add_x_labels(xlabeliter, *self.axls)
         self.add_y_labels(ylabeliter, *self.axls)
         self.set_tick_size(*self.axls)

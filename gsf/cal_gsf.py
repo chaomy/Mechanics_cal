@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-06-25 17:17:52
+# @Last Modified time: 2018-06-27 01:46:08
 
 
 import gn_lmp_infile
@@ -182,22 +182,24 @@ class cal_gsf(gn_config.gnStructure,
         dftgsf['x111z110'] = dftgsf['x111z110'] * 1.02
         dftgsf['x111z112'] = dftgsf['x111z112'] * 1.038
 
-        ylabes = {'x111z112': r"GSF [111](211) [eV/A$^2$]",
-                  'x111z110': r"GSF [111](110) [eV/A$^2$]"}
+        ylabes = {'x111z112': r"GSF [111](211) [meV/A$^2$]",
+                  'x111z110': r"GSF [111](110) [meV/A$^2$]"}
         dftdisp = np.linspace(0, 1, len(dftgsf[self.mgsf]))
         self.set_111plt()
-        coeff = 16.021766208
+        coeff = 16.021766208 * 1e3
         kk = 'gsf.{}'.format(self.mgsf)
         data = np.loadtxt(kk + ".dat")
         gsf = (data[:, 3] - np.min(data[:, 3])) / (data[:, 2])
-        self.ax.plot(dftdisp, dftgsf[self.mgsf],
+        self.ax.plot(dftdisp, 1e3 * dftgsf[self.mgsf],
                      label='PAW-PBE', **next(self.keysiter))
-
         self.add_y_labels(
             cycle([ylabes[self.mgsf]]), *self.axls)
         next(self.keysiter)
-        self.ax.plot(data[:, 1], gsf, label="MEAM", **next(self.keysiter))
+        self.ax.plot(data[:, 1], 1e3 * gsf,
+                     label="MEAM", **next(self.keysiter))
         print("GSF " + self.mgsf, np.max(gsf), np.max(dftgsf[self.mgsf]), (np.max(
+            gsf) - np.max(dftgsf[self.mgsf])) / np.max(dftgsf[self.mgsf]))
+        print("GSF " + self.mgsf, coeff * np.max(gsf), coeff * np.max(dftgsf[self.mgsf]), (np.max(
             gsf) - np.max(dftgsf[self.mgsf])) / np.max(dftgsf[self.mgsf]))
         self.add_x_labels(
             cycle(["Normalized dispament along [111]"]), *self.axls)
