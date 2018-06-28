@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-21 18:42:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-06-25 22:15:11
+# @Last Modified time: 2018-06-28 02:07:32
 
 
 from itertools import cycle
@@ -103,9 +103,9 @@ class cal_md_thermo(gn_config.gnStructure,
         vol = vol / vol[0]
         vol = vol**3
         dft_vol = dft_vol / dft_vol[0]
-
         self.ax.plot(vol[:npt], press[:npt],
                      label='MEAM', **next(self.keysiter))
+        next(self.keysiter)
         self.ax.plot(dft_vol[:npt], dft_press[:npt], label='PAW-PBE',
                      **next(self.keysiter))
 

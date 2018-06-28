@@ -4,6 +4,7 @@
 #@Last Modified by : chaomy
 #@Last Modified time : 2018 - 06 - 19 15 : 00 : 00
 
+from itertools import cycle
 from optparse import OptionParser
 from glob import glob
 import matplotlib.pylab as plt
@@ -119,12 +120,15 @@ class cal_md_thermo(gn_config.gnStructure,
     def get_lat_at_given_temp(self):
         data = np.loadtxt("log.out")
         # Step TotEng Temp Lx Ly Lz v_S11 v_S22 v_S33 v_S12 v_S13 v_S23
-
         # Step TotEng PotEng Temp Press Pxx Pyy Pzz Lx Ly Lz. Nb
-        lat = np.mean([np.mean(data[-100:, -3]) / 12.0,
-                       np.mean(data[-100:, -2]) / 12.0,
-                       np.mean(data[-100:, -1]) / 12.0])
-        print(lat, 100 * (lat / self.pot['lattice'] - 1.0))
+        Nodes = 200
+        lat = np.max([np.mean(data[-Nodes:, -3]) / 12.0,
+                      np.mean(data[-Nodes:, -2]) / 12.0,
+                      np.mean(data[-Nodes:, -1]) / 12.0])
+        lat0 = 3.32237981449018
+        # print(lat, 100 * (lat / self.pot['lattice'] - 1.0))
+        print(lat, 100 * (lat / lat0 - 1.0))
+        return(100 * (lat / lat0 - 1.0))
 
     def theormo_expand_plt(self):
         temp_lx = np.loadtxt("temp_lx.txt")
@@ -135,6 +139,39 @@ class cal_md_thermo(gn_config.gnStructure,
         atoms.set_cell(1.0040 * cell, scale_atoms=True)
         self.write_lmp_config_data(atoms)
         return atoms
+
+    def trans(self):
+        pth = "$FLUX:/scratch/qiliang_flux/chaomy/MD/Nb/MEAMS/THERMO"
+        initt = 50
+        deltat = 50
+        data = np.ndarray([50, 2])
+        c = 0
+        for i in range(50):  # 50 to 2500 K
+            tend = initt + deltat * i
+            mdir = "dir-{:05.0f}".format(tend)
+            if os.path.isdir(mdir):
+                os.chdir(mdir)
+                data[c][0] = tend
+                data[c][1] = self.get_lat_at_given_temp()
+                os.chdir(os.pardir)
+                c += 1
+            # os.system("scp {}/{}/log.lammps {}".format(pth, mdir, mdir))
+        data = data[:c]
+        np.savetxt("data.txt", data)
+
+    def plot(self):
+        self.set_keys()
+        self.set_111plt()
+        data = np.loadtxt("data.txt")
+        self.ax.plot(data[:, 0], data[:, 1],
+                     label='MEAM', **next(self.keysiter))
+        next(self.keysiter)
+        # self.ax.plot(dft_vol[:npt], dft_press[:npt], label='PAW-PBE', **next(self.keysiter))
+        self.add_legends(*self.axls)
+        self.set_tick_size(*self.axls)
+        self.add_x_labels(cycle(['Temperature K']), *self.axls)
+        self.add_y_labels(cycle([r'[$\Delta$ L / L\%]']), *self.axls)
+        self.fig.savefig("FIG_THERMO_EXPAND.png", **self.figsave)
 
 
 if __name__ == '__main__':
@@ -153,7 +190,9 @@ if __name__ == '__main__':
                   'plt': drv.draw_temp_vol,
                   'themoplt': drv.theormo_expand_plt,
                   'add': drv.add_vol_expan,
-                  'temp': drv.get_lat_at_given_temp}
+                  'temp': drv.get_lat_at_given_temp,
+                  'trans': drv.trans,
+                  'plt': drv.plot}
 
     if options.fargs is not None:
         dispatcher[options.mtype.lower()](options.fargs)
