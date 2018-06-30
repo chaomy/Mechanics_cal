@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-06-25 17:12:08
+# @Last Modified time: 2018-06-29 02:19:15
 
 
 from itertools import cycle
@@ -107,15 +107,23 @@ class cal_bcc_ideal_shear_plt(object):
         if tg in ['md']:
             self.ax2.plot(raw[:, 0], cc * raw[:, -3],
                           label=lab, **next(self.keysiter))
+            print(np.max(raw[:, -3]))
+            print(raw[:, 0][np.argmax(raw[:, -3])])
         if tg in ['va']:
             self.ax2.plot(raw[:, 0], cc * raw[:, -2],
-                          label=lab, **next(self.keysiter))
+                          label=lab, **next(self.keysiter))  
+            print(np.max(raw[:, -2]))
+            print(raw[:, 0][np.argmax(raw[:, -2])])
         lab = '{110}<111>'
         raw = np.loadtxt('stress.{}.110.txt'.format(tg))
         self.ax1.plot(raw[:, 0], raw[:, 1] - raw[0, 1],
                       label=lab, **next(self.keysiter))
         self.ax2.plot(raw[:, 0], cc * raw[:, -1],
                       label=lab, **next(self.keysiter))
+
+        print(np.max(raw[:, -1]))
+        print(raw[:, 0][np.argmax(raw[:, -1])])
+
         self.add_legends(*self.axls)
         self.set_tick_size(*self.axls)
         self.add_y_labels(ylabeliter, *self.axls)

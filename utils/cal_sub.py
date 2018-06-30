@@ -4,7 +4,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-06-28 03:07:33
+# @Last Modified time: 2018-06-30 02:08:01
 
 
 import os
@@ -51,7 +51,7 @@ class subjobs(object):
                 break
 
     def goandsub(self, mdir):
-        os.system("cp va.pbs in.rst {}".format(mdir))
+        os.system("cp va.pbs {}".format(mdir))
         os.chdir(mdir)
         os.system("qsub va.pbs")
         os.chdir(os.pardir)
