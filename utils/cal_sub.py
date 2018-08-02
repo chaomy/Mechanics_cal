@@ -4,7 +4,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-08-02 16:23:48
+# @Last Modified time: 2018-08-02 16:24:42
 
 
 import os
@@ -85,6 +85,5 @@ if __name__ == "__main__":
                   'shearcnt': drv.loop_shear_cnt,
                   'mpbs': drv.mpbs,
                   'to': drv.trans_to,
-                  'cnt': drv.cnt_job,
-                  'copy': drv.copy}
+                  'cnt': drv.cnt_job}
     dispatcher[options.mtype.lower()]()
