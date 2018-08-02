@@ -4,7 +4,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-06-21 16:58:39
+# @Last Modified time: 2018-07-12 20:36:13
 
 
 import ase.lattice.hexagonal as Hexagonal
@@ -44,9 +44,7 @@ class cal_lattice(gn_pbs.gn_pbs, gn_config.gnStructure,
 
     def interpolate_lattice(self, filename='lat.dat'):
         data = np.loadtxt(filename)
-        print(data[:, 1])
-
-        lattice = np.abs(2 * data[:, 0])
+        lattice = np.abs(data[:, 0])
         energy = data[:, 1]
 
         InterPoints = np.linspace(lattice[0], lattice[-1], 101)

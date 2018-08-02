@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:11:49
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-05-16 22:17:32
+# @Last Modified time: 2018-07-13 22:54:00
 
 
 from numpy import sqrt, sin, cos, abs
@@ -37,13 +37,12 @@ class md_crack_uti(object):
 
     def gn_perf_plate(self):
         e1 = [1, 0, 0]
-        e2 = [0, -1, 1]
-        # e2 = [0, 1, -1]
+        e2 = [0, 1, -1]
         e3 = [0, 1, 1]
-        atoms = self.set_bcc_convention(
-            directions=[e2, e1, e3], size=(90, 105, 5))
         # atoms = self.set_bcc_convention(
-        #     directions=[e2, e3, e1], size=(100, 100, 5))
+        #     directions=[e2, e1, e3], size=(90, 105, 5))
+        atoms = self.set_bcc_convention(
+            directions=[e1, e2, e3], size=(100, 100, 5))
         return atoms
 
     def loop_211(self):
@@ -62,11 +61,11 @@ class md_crack_uti(object):
             C44=self.pot['c44'])
 
         e1 = [1, 0, 0]
-        e2 = [0, -1, 1]
+        e2 = [0, 1, -1]
         e3 = [0, 1, 1]
 
-        axes = np.array([e2, e1, e3])
-        # axes = np.array([e1, e2, e3])
+        # axes = np.array([e2, e1, e3])
+        axes = np.array([e1, e2, e3])
 
         burgers = self.pot["lattice"] / 2. * np.array([1., 1., -1.])
         burgers = axes_check.axes_check(axes).dot(burgers)

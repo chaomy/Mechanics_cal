@@ -2,7 +2,7 @@
 # @Author: chaomy
 # @Date:   2017-12-03 11:07:29
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-06-10 23:19:29
+# @Last Modified time: 2018-07-04 02:36:01
 
 import os
 from numpy import sqrt, arccos, arcsin, rad2deg
@@ -38,7 +38,7 @@ class md_gb_hcp_1100(object):
                     ags.append(ang)
                     while (ll < 0):
                         ll *= 2
-                    res.append([ang, 3 * ll, i, j])
+                    res.append([ang, ll, i, j])
 
         print(len(ags))
         (a, b) = unique(ags, return_index=True)

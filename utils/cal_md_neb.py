@@ -4,11 +4,12 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-06-27 01:52:07
+# @Last Modified time: 2018-07-11 01:58:52
 
 
 from optparse import OptionParser
 from itertools import cycle
+import matplotlib.ticker as ticker
 import os
 import re
 import glob
@@ -124,7 +125,6 @@ class lmps_neb_tools(get_data.get_data, gn_config.bcc, plt_drv.plt_drv):
         next(self.keysiter)
         x = np.linspace(0, 1, len(neb_energy))
         self.ax.plot(x, 1e3 * neb_energy, label='MEAMS', **next(self.keysiter))
-
         self.add_legends(*self.axls)
         # (110): -110  (11-2) -110
         xlabeliter = cycle(["Normalized reaction coordinate"])
@@ -134,6 +134,36 @@ class lmps_neb_tools(get_data.get_data, gn_config.bcc, plt_drv.plt_drv):
         self.add_y_labels(ylabeliter, *self.axls)
         self.set_tick_size(*self.axls)
         self.fig.savefig(figname, **self.figsave)
+
+    def plt_kink_stress(self):
+        self.set_111plt()
+        data = np.loadtxt("d00.txt")
+        # self.ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%1.f'))
+        self.ax.plot(data[:, 0], data[:, 1],
+                     label="NEB", **next(self.keysiter))
+        self.add_x_labels(
+            cycle(["Normalized reaction coordinate"]), *self.axls)
+        self.add_y_labels(cycle(['Energy [eV]']), *self.axls)
+        self.add_legends(*self.axls)
+        self.set_tick_size(*self.axls)
+        self.fig.savefig("FIG_NEB.png", **self.figsave)
+
+    def read_lmp_log_file_dis_kink(self, figname='neb.png'):
+        file_list = glob.glob("log.lammps.*")
+        nlogs = len(file_list)
+        neb_energy = []
+        for i in range(nlogs):
+            mfile = "log.lammps.{:02d}".format(i)
+            neb_energy.append(self.md_get_final_energy(mfile))
+        print(np.argmax(neb_energy))
+        neb_energy = np.array(neb_energy)
+        neb_energy -= np.min(neb_energy)
+        self.plot_neb_energy(neb_energy, figname)
+        data = np.ndarray([len(neb_energy), 2])
+        data[:, 0] = np.linspace(0, 1, len(neb_energy))
+        data[:, 1] = neb_energy
+        print("max_engy", np.max(data[:, 1]))
+        np.savetxt('data.txt', data)
 
     def read_lmp_log_file(self, figname='neb.png'):
         # mydir = os.getcwd().split('/')[-1]
@@ -236,7 +266,8 @@ if __name__ == '__main__':
                   'screen': drv.read_screen,
                   'rst': drv.restart_neb,
                   'adj': drv.create_final_screw,
-                  'inter': drv.interp}
+                  'inter': drv.interp,
+                  'kink': drv.plt_kink_stress}
 
     if options.fargs is not None:
         dispatcher[options.mtype.lower()](options.fargs)

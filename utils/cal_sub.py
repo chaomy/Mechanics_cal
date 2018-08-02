@@ -4,7 +4,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-06-30 02:08:01
+# @Last Modified time: 2018-08-02 16:23:48
 
 
 import os
@@ -51,7 +51,6 @@ class subjobs(object):
                 break
 
     def goandsub(self, mdir):
-        os.system("cp va.pbs {}".format(mdir))
         os.chdir(mdir)
         os.system("qsub va.pbs")
         os.chdir(os.pardir)
@@ -86,5 +85,6 @@ if __name__ == "__main__":
                   'shearcnt': drv.loop_shear_cnt,
                   'mpbs': drv.mpbs,
                   'to': drv.trans_to,
-                  'cnt': drv.cnt_job}
+                  'cnt': drv.cnt_job,
+                  'copy': drv.copy}
     dispatcher[options.mtype.lower()]()

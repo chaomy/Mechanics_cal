@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-06-08 22:17:04
+# @Last Modified time: 2018-07-25 16:58:16
 
 
 import os
@@ -47,10 +47,10 @@ class md_dislocation(gn_config.gnStructure,
                      cal_md_dis_crack.dis_init_crack):
 
     def __init__(self, pot=md_pot_data.md_pot.mg_kim):
-        # self.pot = pot
+        self.pot = pot
         # self.pot = md_pot_data.md_pot.Nb_eam
         # self.pot = md_pot_data.md_pot.mg_Poco
-        self.pot = self.load_data('../BASICS/pot.dat')
+        # self.pot = self.load_data('../BASICS/pot.dat')
         # self.pot = self.load_data('../BASICS_MO/pot.dat')
         plt_drv.plt_drv.__init__(self)
         gn_config.gnStructure.__init__(self, self.pot)
@@ -137,6 +137,7 @@ if __name__ == "__main__":
                   'ponly': drv.make_only_prec,
                   'r00': drv.make_prec,
                   'r60': drv.make_r60_prec,
+                  'd00': drv.make_double_prec,
                   'axes': drv.convert_axes}
 
     if options.fargs is not None:

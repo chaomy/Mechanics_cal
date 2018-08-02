@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-06-27 01:46:08
+# @Last Modified time: 2018-07-01 16:36:57
 
 
 import gn_lmp_infile
@@ -182,8 +182,8 @@ class cal_gsf(gn_config.gnStructure,
         dftgsf['x111z110'] = dftgsf['x111z110'] * 1.02
         dftgsf['x111z112'] = dftgsf['x111z112'] * 1.038
 
-        ylabes = {'x111z112': r"GSF [111](211) [meV/A$^2$]",
-                  'x111z110': r"GSF [111](110) [meV/A$^2$]"}
+        ylabes = {'x111z112': r"GSF [111]($\overline{2}$11) [meV/A$^2$]",
+                  'x111z110': r"GSF [111]($\overline{1}$10) [meV/A$^2$]"}
         dftdisp = np.linspace(0, 1, len(dftgsf[self.mgsf]))
         self.set_111plt()
         coeff = 16.021766208 * 1e3
@@ -265,7 +265,7 @@ if __name__ == '__main__':
                   'loop': drv.wrap_loop,
                   'clc': drv.wrap_clc,
                   'usf': drv.cal_usf,
-                  'plt': drv.loop_plt,
+                  'plt': drv.plt_gsf,
                   'plttol': drv.plt_tol,
                   'trans': drv.transdata,
                   'bcc110': drv.gn_bcc110,

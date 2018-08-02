@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-21 18:42:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-06-21 16:57:45
+# @Last Modified time: 2018-07-12 20:31:39
 
 
 import os
@@ -54,10 +54,8 @@ class cal_md_lattice(gn_config.bcc, gn_config.fcc, gn_config.hcp,
     def plt_lat(self):
         dat = np.loadtxt("out.txt")[50:150]
         da2 = np.loadtxt("ENG.log")
-
         idx = da2[:, 0].argsort()
         print(da2[:, 1][idx])
-
         self.set_111plt()
         self.ax.plot(dat[:, 0], dat[:, 3] - min(dat[:, 3]))
         self.ax.plot(da2[:, 0][idx], da2[:, 1][idx] - min(da2[:, 1]))

@@ -2,7 +2,7 @@
 # @Author: chaomy
 # @Date:   2018-02-20 14:11:07
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-06-06 16:09:59
+# @Last Modified time: 2018-07-25 18:19:21
 
 import ase.lattice.orthorhombic as otho
 import ase.lattice.cubic as cubic
@@ -200,6 +200,54 @@ class md_prec(object):
             cell[0, 0] * (cell[1, 1] - 40.0) * cell[2, 2])
         self.write_lmp_config_data(atoms, "lmp_init.txt", cml)
 
+    def make_double_prec(self):
+        ux, uy, uz = self.pot['ahcp'], self.pot[
+            'chcp'], self.pot['ahcp'] * sqrt(3.)
+
+        sz = [150, 90, 120]  # z = 60 gives around 30 nm  100->55. 194->100
+        atoms = othoHCP(latticeconstant=(ux, uy, uz),
+                        size=sz, symbol=self.pot['element'])
+        lata, latc = self.pot["ahcp"], self.pot["chcp"]
+        self.burger = self.pot["lattice"]
+        cell = atoms.get_cell()
+        lob = np.array([ux * (sz[0] - 68), 0.0 + 14 * uy,
+                        uz * (1. / 4. * sz[2] - 6)])
+        hib = np.array([ux * (sz[0] - 28), uy * sz[1] - 14 * uy,
+                        uz * (1. / 4. * sz[2] + 6)])
+        atoms = self.make_cubic("in", atoms, lob, hib)
+        atoms2 = self.buildd03()
+
+        pos = atoms2.get_positions()
+        pos += lob
+        atoms2.set_positions(pos)
+        atoms2 = self.make_cubic("out", atoms2, lob - 1.0, hib + 1.0)
+
+        lob = np.array([ux * (sz[0] - 68), 0.0 + 14 * uy,
+                        uz * (3. / 4. * sz[2] - 6)])
+        hib = np.array([ux * (sz[0] - 28), uy * sz[1] - 14 * uy,
+                        uz * (3. / 4. * sz[2] + 6)])
+        atoms = self.make_cubic("in", atoms, lob, hib)
+        atoms3 = self.buildd03()
+        tmpc = atoms3.get_cell()
+        atoms3.rotate(180, 'z', center=(0.5 * tmpc[0, 0], 0.5 * tmpc[1, 1], 0))
+        pos = atoms3.get_positions()
+        pos += lob
+        atoms3.set_positions(pos)
+        atoms3 = self.make_cubic("out", atoms3, lob - 1.0, hib + 1.0)
+
+        atoms = self.build_edge_basal_hcp_atoms(
+            atoms, center=[ux * 40, 0.5 * sz[1] * uy])
+
+        atoms = self.cut_y_normal_atoms(atoms)
+        atoms = self.cut_x_normal_atoms(atoms)
+        atoms = self.assign_ynormal_fixatoms(atoms)
+
+        atoms.extend(atoms2)
+        atoms.extend(atoms3)
+        cml = "volume = {}".format(
+            cell[0, 0] * (cell[1, 1] - 40.0) * cell[2, 2])
+        self.write_lmp_config_data(atoms, "lmp_init.txt", cml)
+
     def make_r60_prec(self):
         ux, uy, uz = self.pot['ahcp'], self.pot[
             'chcp'], self.pot['ahcp'] * sqrt(3.)
@@ -211,23 +259,23 @@ class md_prec(object):
         self.burger = self.pot["lattice"]
 
         cell = atoms.get_cell()
-        lob = np.array([ux * 84, 0.0 + 14 * uy, -50 * uz])
-        hib = np.array([ux * 104, uy * sz[1] - 14 * uy, -26 * uz])
+        lob = np.array([ux * 112, 0.0 + 14 * uy, -16 * uz])
+        hib = np.array([ux * 132, uy * sz[1] - 14 * uy, 10 * uz])
 
-        atoms.rotate(60, 'y')
+        atoms.rotate(30, 'y')
         atoms = self.make_cubic("in", atoms, lob, hib)
-        atoms.rotate(-60, 'y')
+        atoms.rotate(-30, 'y')
 
         # atoms = self.intro_single_edge_atoms(
         #     atoms, center=[ux * 30, 0.5 * sz[1] * uy, 15 * uz])
         atoms = self.build_edge_basal_hcp_atoms(
             atoms, center=[ux * 40, 0.5 * sz[1] * uy])
-        
+
         atoms = self.cut_y_normal_atoms(atoms)
         atoms = self.cut_x_normal_atoms(atoms)
         atoms = self.assign_ynormal_fixatoms(atoms)
 
-        atoms.rotate(60, 'y')
+        atoms.rotate(30, 'y')
         # make precipitates
         atoms2 = self.buildd03()
         atoms2.set_positions(atoms2.get_positions() + lob)
@@ -235,7 +283,7 @@ class md_prec(object):
         atoms.extend(atoms2)
 
         # self.write_lmp_config_data(atoms, "lmp_rotate.txt")
-        atoms.rotate(-60, 'y')
+        atoms.rotate(-30, 'y')
         self.write_lmp_config_data(atoms, "lmp_init.txt")
 
     def make_only_prec(self):
@@ -277,8 +325,7 @@ class md_prec(object):
         #               size=(1, 1, 18), symbol=('Mg', 'Nd'))
 
         # type C  x: [1, 1, 1], y[-1  1  0], z [-1 -1  2]
-        atoms = Mg3Nd(latticeconstant=(la * sqrt(3),
-                                       la * sqrt(2) / 2.,
+        atoms = Mg3Nd(latticeconstant=(la * sqrt(3), la * sqrt(2) / 2.,
                                        la * sqrt(6) / 2.), size=(18, 75, 20), symbol=('Mg', 'Nd'))
         # U = np.mat([[-1, 1, 0], [0, 0, 1], [0.5, 0.5, 0]])
         # Uinv = np.linalg.inv(U)

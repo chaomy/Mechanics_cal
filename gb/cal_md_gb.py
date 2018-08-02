@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-06-20 12:18:30
+# @Last Modified time: 2018-07-04 02:50:36
 
 
 import cal_md_gb_hcp
@@ -100,7 +100,8 @@ if __name__ == "__main__":
                   'loop': drv.loop_init_1100,
                   'del': drv.analysize_atomic_strain,
                   'usp': drv.loop_set_usp_run,
-                  'init': drv.loop_grand}
+                  'init': drv.loop_grand,
+                  'dft': drv.make_DFT}
 
     if options.fargs is not None:
         dispatcher[options.mtype.lower()](options.fargs)

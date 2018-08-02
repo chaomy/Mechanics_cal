@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-06-06 15:58:37
+# @Last Modified time: 2018-07-24 20:30:10
 
 import numpy as np
 import atomman as am
@@ -36,7 +36,8 @@ class md_dislocation_hcp(object):
     # x [1  1  -2 0], y [0, 0, 0, 1], z [1, -1, 0, 0]
     def hcp_edge_dislocation(self):
         sz = (40, 40, 10)
-        atoms = othoHCP(latticeconstant=(self.pot['ahcp'], self.pot['chcp'],
+        atoms = othoHCP(latticeconstant=(self.pot['ahcp'],
+                                         self.pot['chcp'],
                                          self.pot['ahcp'] * sqrt(3.)),
                         size=sz, symbol=self.pot['element'])
 
