@@ -3,9 +3,10 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-06-24 17:26:51
+# @Last Modified time: 2018-08-24 15:49:03
 
 import numpy as np
+import math
 
 
 class cal_cut_cell(object):
@@ -46,6 +47,35 @@ class cal_cut_cell(object):
                 atom.symbol = 'Nb'
                 ndn += 1
         print(("up = ", nup, "dn = ", ndn))
+        return atoms
+
+    def make_cylinder(self, opt, atoms, *args):
+        lob = args[0]
+        hib = args[1]
+
+        center = 0.5 * (hib + lob)
+        radius = hib - center
+
+        index = []
+        Invaa = 1. / (radius[0] * radius[0])
+        Invbb = 1. / (radius[1] * radius[1])
+        Invcc = 1. / (radius[2] * radius[2])
+
+        if opt in ["in"]:
+            for i in range(len(atoms)):
+                x = atoms[i].position[0] - center[0]
+                y = atoms[i].position[1] - center[1]
+                z = atoms[i].position[2] - center[2]
+                if (abs(y) < radius[1] and (x * x * Invaa + z * z * Invcc < 1)):
+                    index.append(atoms[i].index)
+        else:
+            for i in range(len(atoms)):
+                x = atoms[i].position[0] - center[0]
+                y = atoms[i].position[1] - center[1]
+                z = atoms[i].position[2] - center[2]
+                if (abs(y) >= radius[1] or (x * x * Invaa + z * z * Invcc >= 1)):
+                    index.append(atoms[i].index)
+        del atoms[index]
         return atoms
 
     def make_cubic(self, opt, atoms, *args):
@@ -147,8 +177,9 @@ class cal_cut_cell(object):
         #  x_crit = np.sqrt(3.) / 2.5 * lattice_constant
         # ratio = np.sqrt(3) / 2. * 1. / 3.    # for bcc Fe
         # x_crit = ratio * self.pot['lattice']
-        x_crit = np.sqrt(3) / 6 * 3.2
-
+        # x_crit = np.sqrt(3) / 6 * 3.2
+        numDis = 2
+        x_crit = np.sqrt(3) / 6 * 3.2 * numDis
         for i in range(len(atoms)):
             atom = atoms[i]
             if (atom.position[bdir] < x_crit):

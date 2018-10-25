@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2018-04-25 23:53:39
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-04-25 23:53:57
+# @Last Modified time: 2018-08-22 14:38:27
 
 
 import os
@@ -27,8 +27,8 @@ class md_precipitate(gn_config.bcc,
                      gn_lmp_infile.gn_md_infile):
 
     def __init__(self,
-                 element,
-                 structure='hcp'):
+                 element, structure='hcp'):
+    
         gn_pbs.gn_pbs.__init__(self)
 
         self._element = element

@@ -4,14 +4,13 @@
 # @Author: chaomy
 # @Date:   2018-03-13 23:59:29
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-05-01 23:04:07
+# @Last Modified time: 2018-08-31 11:13:15
 
 
 import atomman as am
 import atomman.lammps as lmp
 import get_data
 import gn_config
-import Intro_vasp
 import gn_pbs
 import gn_lmp_infile
 import os
@@ -21,10 +20,12 @@ import ase
 import md_pot_data
 import glob
 from optparse import OptionParser
-from . import cal_md_dis_schmid
+from utils import Intro_vasp
+import cal_md_dis_schmid
+import math
 
 
-class bcc_kink(gn_config.bcc,
+class bcc_kink(gn_config.gnStructure,
                get_data.get_data,
                gn_pbs.gn_pbs,
                Intro_vasp.vasp_change_box,
@@ -32,17 +33,16 @@ class bcc_kink(gn_config.bcc,
 
     def __init__(self, structure='bcc'):
         gn_pbs.gn_pbs.__init__(self)
-        self.pot = md_pot_data.md_pot.Nb_eam
-        self._alat = self.pot['lattice']  # Nb
-        Intro_vasp.vasp_change_box.__init__(self, self._alat)
+        # self.pot = md_pot_data.md_pot.Nb_meam
+        self.pot = md_pot_data.md_pot.Mo_meam
+        Intro_vasp.vasp_change_box.__init__(self)
         gn_lmp_infile.gn_md_infile.__init__(self)
-        self.shmid_drv = cal_md_dis_schmid.cal_bcc_schmid(self.pot)
+        self.shmid_drv = cal_md_dis_schmid.cal_bcc_schmid()
+        gn_config.gnStructure.__init__(self, self.pot)
 
-        ############################################################
         # cluster method  (large supercell) # make a plate # run some MD
-        ############################################################
     def construct_init_final(self):
-        alat = self._alat
+        alat = self.pot['lattice']
         move1 = [-alat * np.sqrt(6.) / 3., 0, 0]
         self.shmid_drv.make_screw_plate(size=[60, 84, 20],
                                         rad=[152, 160],
@@ -58,25 +58,30 @@ class bcc_kink(gn_config.bcc,
 
         # dipole method
     def cal_kink_pair_neb_pre(self):
-        dirname = "kink_0.004"
-        self.mymkdir(dirname)
-        os.chdir(dirname)
+        # e1 = [1. / 3.,  1. / 3., -2. / 3.]
+        # e2 = [-1 / 2., 1. / 2.,  0]
+        # e3 = [0.5,  0.5,  0.5]
 
-        e1 = 1. / 3. * np.array([1.,  1., -2.])
-        e2 = 1. / 2. * np.array([-1., 1.,  0])
-        e3 = np.array([0.5,  0.5,  0.5])
+        e1 = [1.,  1., -2.]
+        e2 = [-1, 1.,  0]
+        e3 = [1,  1,  1]
+
+        ux = np.sqrt(6) / 3. * self.pot['lattice']
+        uy = np.sqrt(2) / 2. * self.pot['lattice']
 
         Lx = 30  # Default 30
-        Ly = 15  # Default 30
-        Lz = 100
+        Ly = 30  # Default 30
+        Lz = 30
 
-        xc1 = (0.0 + (-2.56656)) / 2. + 1.5 * \
-            Lx * np.sqrt(6.) / 3. * self._alat
-        yc1 = (0.0 + (2.22271)) / 2. + 15 * np.sqrt(2.) * self._alat
-        H = np.sqrt(2. / 3.0) * self._alat
+        # (-2.56656)
+        # (2.22271)
+        xc1 = 1 / 2. * ux + 1.5 * Lx * ux
+        yc1 = Ly * uy
+        H = np.sqrt(2. / 3.0) * self.pot['lattice']
 
         npt1 = 8
         npt2 = 16
+
         delta = 1. / npt1
 
         neb_tag = "each"
@@ -110,10 +115,10 @@ class bcc_kink(gn_config.bcc,
                                                                0)
 
                 # Be careful which file lammps reads #
-                fname = "init_%d.data" % (i + 1)
-                coordn = "coord_%d" % (i + 1)
-                self.write_lmp_config_data(atoms, file_name=fname)
-                self.write_lmp_coords(atoms, file_name=coordn)
+                fname = "init_%d.data" % (i)
+                coordn = "coord_%d" % (i)
+                self.write_lmp_config_data(atoms, filename=fname)
+                self.write_lmp_coords(atoms, filename=coordn)
 
         elif (neb_tag == "final"):
             #  generate initial #
@@ -121,7 +126,7 @@ class bcc_kink(gn_config.bcc,
             atoms = self.intro_kink_screw_dislocations(
                 atoms, (xc1, yc1), (xc1 + H, yc1), 0)
             fname = "init.data"
-            self.write_lmp_config_data(atoms, file_name=fname)
+            self.write_lmp_config_data(atoms, filename=fname)
 
             # generate final #  atoms = self.set_bcc_convention([e1, e2, e3],
             # (30, 30, 100));
@@ -129,15 +134,15 @@ class bcc_kink(gn_config.bcc,
                 atoms, (xc1 + H, yc1), (xc1 + 2 * H, yc1), 0)
             fname = "final.data"
             coordn = "final.screw"
-            self.write_lmp_config_data(atoms, file_name=fname)
-            self.write_lmp_coords(atoms, file_name=coordn)
+            self.write_lmp_config_data(atoms, filename=fname)
+            self.write_lmp_coords(atoms, filename=coordn)
         else:
             h = 0.5 * H
             atoms = self.set_bcc_convention([e1, e2, e3], (Lx, Ly, Lz))
             atoms = self.intro_kink_screw_dislocations(
                 atoms, (xc1, yc1), (xc1 + H, yc1), h, 1. / 4.)
             fname = "init.data"
-            self.write_lmp_config_data(atoms, file_name=fname)
+            self.write_lmp_config_data(atoms, filename=fname)
 
         ############################################################
         # prepare for neb calculation of kink pair (disocation dipole)
@@ -155,7 +160,8 @@ class bcc_kink(gn_config.bcc,
         t_thick = 50
 
         atoms = ase.lattice.cubic.BodyCenteredCubic(directions=[e1, e2, e3],
-                                                    latticeconstant=self._alat,
+                                                    latticeconstant=self.pot[
+                                                        'lattice'],
                                                     size=(n, t_thick,  m),
                                                     symbol=self._element,
                                                     pbc=(1, 1, 1))
@@ -173,7 +179,7 @@ class bcc_kink(gn_config.bcc,
         atoms.set_cell(supercell)
         atoms.wrap(pbc=[1, 1, 1])
 
-        H = np.sqrt(2. / 3.0) * self._alat
+        H = np.sqrt(2. / 3.0) * self.pot['lattice']
         h = 0.5 * H
         tilpnt = 1. / 5.
 
@@ -194,7 +200,7 @@ class bcc_kink(gn_config.bcc,
 
         elif center_opt == 'cal':
             unit_a = H
-            unit_b = np.sqrt(2.) / 2. * self._alat
+            unit_b = np.sqrt(2.) / 2. * self.pot['lattice']
             print(unit_a, unit_b)
             yc1 = yc2 = (m / 2 + 0.5) * unit_b
             xc1 = (10 * times + 0.5) * unit_a
@@ -224,7 +230,7 @@ class bcc_kink(gn_config.bcc,
                                                        (xc2 + 2 * H, yc2),
                                                        h, tilpnt, -1)
             #  self.write_lmp_config_data(atoms, 'final.txt')
-            self.write_lmp_coords(atoms, file_name='final.coord')
+            self.write_lmp_coords(atoms, filename='final.coord')
             os.system("mv  final.coord  output")
 
         elif tag == "each_interp":
@@ -288,9 +294,9 @@ class bcc_kink(gn_config.bcc,
                 fname = "init_%d.data" % (i + 1)
                 coordn = "coord_%d" % (i + 1)
                 self.write_lmp_config_data(atoms,
-                                           file_name=fname)
+                                           filename=fname)
                 self.write_lmp_coords(atoms,
-                                      file_name=coordn)
+                                      filename=coordn)
 
             ##### transition to final ####
             init_pos = atoms_mid.get_positions()
@@ -304,8 +310,8 @@ class bcc_kink(gn_config.bcc,
 
                 fname = "init_%d.data" % (n1 + i + 1)
                 coordn = "coord_%d" % (n1 + i + 1)
-                self.write_lmp_config_data(atoms, file_name=fname)
-                self.write_lmp_coords(atoms, file_name=coordn)
+                self.write_lmp_config_data(atoms, filename=fname)
+                self.write_lmp_coords(atoms, filename=coordn)
 
         elif tag == "each_change_h":
             # this method is to change the h and tilpnt to generate the
@@ -371,8 +377,8 @@ class bcc_kink(gn_config.bcc,
                 ###### Be careful which file lammps reads ######
                 fname = "init_%d.data" % (i + 1)
                 coordn = "coord_%d" % (i + 1)
-                self.write_lmp_config_data(atoms, file_name=fname)
-                self.write_lmp_coords(atoms, file_name=coordn)
+                self.write_lmp_config_data(atoms, filename=fname)
+                self.write_lmp_coords(atoms, filename=coordn)
 
         #  elif tag == 'perf':
             #  self.write_lmp_config_data(atoms, 'lmp_init.txt')
@@ -384,7 +390,7 @@ class bcc_kink(gn_config.bcc,
         supercell_base = atoms.get_cell()
         atom_position = atoms.get_positions()
 
-        disp = 0.5 * np.sqrt(6.) / 3. * self._alat
+        disp = 0.5 * np.sqrt(6.) / 3. * self.pot['lattice']
 
         print(supercell_base[2, 2])
 
@@ -408,11 +414,11 @@ class bcc_kink(gn_config.bcc,
         # find how many layer of atoms #
         #  (layerList, distance) = \
         #  ase.utils.geometry.get_layers(atoms, [0, 0, 1], tolerance=0.01);
-        boundary = 'ppp'
+        boundary = 'not ppp'
 
         lxid = 0  # glide plane
-        lyid = 2  # y
-        lzid = 1  # dislocation line
+        lyid = 1  # y
+        lzid = 2  # dislocation line
 
         cell = atoms.get_cell()
         nleft = tilpnt * cell[lzid, lzid]
@@ -425,28 +431,29 @@ class bcc_kink(gn_config.bcc,
         xc0, yc0 = center1[0], center1[1]
 
         # cut atoms (do not need for peierodic boundary condition ) ###
-        if not boundary == 'ppp':
-            # not using the ppp bounary condition ####
-            # we have some other treaments ####
-            lowx = 5 * (0.5 * (2.56656))
-            higx = cell[0, 0] - lowx
+        # if not boundary == 'ppp':
+        # not using the ppp bounary condition ####
+        # we have some other treaments ####
+        # lowx = 5 * (0.5 * (2.56656))
+        # higx = cell[0, 0] - lowx
 
-            lowy = 5 * 2.22271
-            higy = cell[1, 1] - lowy
+        # lowy = 5 * 2.22271
+        # higy = cell[1, 1] - lowy
 
-            ##########################################################
-            # the vol I cut here is
-            # (lowx * y + (lowy * (x - 2 * lowx))) * 2 * z
-            ##########################################################
-            vol = np.linalg.det(cell)
-            areaxy = (cell[0, 0] - 2 * lowx) * cell[1, 1]
-            volcut = ((lowx * cell[1, 1] + lowy *
-                       (cell[0, 0] - 2 * lowx)) * 2 * cell[2, 2])
+        # ##########################################################
+        # # the vol I cut here is
+        # # (lowx * y + (lowy * (x - 2 * lowx))) * 2 * z
+        # ##########################################################
+        # vol = np.linalg.det(cell)
+        # areaxy = (cell[0, 0] - 2 * lowx) * cell[1, 1]
+        # volcut = ((lowx * cell[1, 1] + lowy *
+        #            (cell[0, 0] - 2 * lowx)) * 2 * cell[2, 2])
 
-            print(("vol[%f] - volcut[%f] = %f " % (vol, volcut, vol - volcut)))
-            print(("area is [%f]" % (areaxy)))  # 29094.182232  A^2
+        # print(("vol[%f] - volcut[%f] = %f " % (vol, volcut, vol - volcut)))
+        # print(("area is [%f]" % (areaxy)))  # 29094.182232  A^2
 
-            index_list = []
+        # index_list = []
+
         cut = None  # only cut y direction ####
         #  shift   = True;
         shift = False
@@ -490,9 +497,13 @@ class bcc_kink(gn_config.bcc,
             # assign the position ###
             atom.position = pos
 
-        if not boundary == 'ppp':
-            # delete boundary atoms ####
-            del atoms[index_list]
+        # if not boundary == 'ppp':
+        #     del atoms[index_list]
+        cell = atoms.get_cell()
+        cell[1, 1] += 20
+        cell[0, 0] += 20
+        atoms.translate(np.array([10, 10, 0.0]))
+        atoms.set_cell(cell)
         return atoms
 
 
@@ -508,7 +519,8 @@ if __name__ == "__main__":
 
     dispatcher = {'build': drv.construct_init_final,
                   'dipole': drv.cal_kink_pair_neb_pre,
-                  'dipoleneb': cal_kink_pair_neb_dipole}
+                  'dipoleneb': drv.cal_kink_pair_neb_dipole}
+
     if options.fargs is not None:
         dispatcher[options.mtype.lower()](options.fargs)
     else:

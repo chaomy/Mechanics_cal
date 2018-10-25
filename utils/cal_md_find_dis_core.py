@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2018-05-01 21:43:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-06-25 16:13:53
+# @Last Modified time: 2018-10-20 15:45:53
 
 
 import ase
@@ -23,9 +23,11 @@ class md_find_core(object):
         data = []
         init = [0.1, -0.01]
         initlist = np.loadtxt("dis_traj.txt.start")
+        
+        return 
 
         # init = initlist[0]
-        for i in range(1, 21):
+        for i in range(1, 20):
             init = initlist[i - 1]
             atoms_rlx = ase.io.read(
                 "dump.all.{}".format(i), format="lammps-dump")
@@ -62,9 +64,11 @@ class md_find_core(object):
             self.pos_prf = prfpos[cidx]
             self.cidx = cidx
 
-            # print(rs)
             print("pos perf ", self.pos_prf)
             print("pos relaxed ", self.pos_rlx)
+
+            print("rs is ", rs)
+            print("cidx ", cidx)
 
             res = minimize(self.cost_func, np.array(
                 init), method='Nelder-Mead', tol=5e-3)

@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-25 14:28:58
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-06-25 16:08:31
+# @Last Modified time: 2018-10-20 15:39:16
 
 from numpy import cos, sin, sqrt, mat
 from utils import stroh_solve
@@ -130,6 +130,7 @@ class cal_dis_dipole(object):
         c = tool_elastic_constants.elastic_constants(
             C11=self.pot['c11'], C12=self.pot['c12'], C44=self.pot['c44'])
         burgers = self.pot['lattice'] / 2 * np.array([1., 1., 1.])
+
         stroh = stroh_solve.Stroh(c, burgers, axes=axes)
 
         px = 10.5

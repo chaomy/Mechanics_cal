@@ -3,7 +3,7 @@
 # @Author: yang37
 # @Date:   2017-06-21 18:42:47
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-07-12 20:31:39
+# @Last Modified time: 2018-09-27 11:45:05
 
 
 import os
@@ -25,7 +25,7 @@ class cal_md_lattice(gn_config.bcc, gn_config.fcc, gn_config.hcp,
         plt_drv.plt_drv.__init__(self)
 
     def gn_temp_atoms(self):
-        atoms = self.set_bcc_convention(self.pot["latbcc"], in_size=(5, 5, 5))
+        atoms = self.set_bcc_convention(self.pot["latbcc"], size=(5, 5, 5))
         self.write_lmp_config_data(atoms)
         return atoms
 

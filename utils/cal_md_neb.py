@@ -1,10 +1,10 @@
-#!/usr/bin/env python
+#!/usr/bin/env Gython
 # encoding: utf-8
 # -*- coding: utf-8 -*-
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-07-11 01:58:52
+# @Last Modified time: 2018-09-11 12:28:06
 
 
 from optparse import OptionParser
@@ -124,11 +124,12 @@ class lmps_neb_tools(get_data.get_data, gn_config.bcc, plt_drv.plt_drv):
         next(self.keysiter)
         next(self.keysiter)
         x = np.linspace(0, 1, len(neb_energy))
-        self.ax.plot(x, 1e3 * neb_energy, label='MEAMS', **next(self.keysiter))
+        self.ax.plot(x, 1e3 * neb_energy, label='MEAM', **next(self.keysiter))
         self.add_legends(*self.axls)
         # (110): -110  (11-2) -110
         xlabeliter = cycle(["Normalized reaction coordinate"])
-        ylabeliter = cycle(['Energy per length [meV/|b|]'])
+        # ylabeliter = cycle(['Energy per length [meV/|b|]'])
+        ylabeliter = cycle(['Energy increment [meV]'])
         # ylabeliter = cycle(['Energy [meV]'])
         self.add_x_labels(xlabeliter, *self.axls)
         self.add_y_labels(ylabeliter, *self.axls)
@@ -165,6 +166,28 @@ class lmps_neb_tools(get_data.get_data, gn_config.bcc, plt_drv.plt_drv):
         print("max_engy", np.max(data[:, 1]))
         np.savetxt('data.txt', data)
 
+    def plot_two(self):
+        Nb_neb = np.loadtxt("data.nb.txt")
+        Mo_neb = np.loadtxt("data.mo.txt")
+
+        self.set_111plt()
+        next(self.keysiter)
+        next(self.keysiter)
+        self.ax.plot(Nb_neb[:, 0], 1e3 * Nb_neb[:, 1],
+                     label='Nb', **next(self.keysiter))
+        self.ax.plot(Mo_neb[:, 0], 1e3 * Mo_neb[:, 1],
+                     label='Mo', **next(self.keysiter))
+
+        self.add_legends(*self.axls)
+        # (110): -110  (11-2) -110
+        xlabeliter = cycle(["Normalized reaction coordinate"])
+        ylabeliter = cycle(['Energy per length [meV/|b|]'])
+        # ylabeliter = cycle(['Energy [meV]'])
+        self.add_x_labels(xlabeliter, *self.axls)
+        self.add_y_labels(ylabeliter, *self.axls)
+        self.set_tick_size(*self.axls)
+        self.fig.savefig("FIG_NEB.png", **self.figsave)
+
     def read_lmp_log_file(self, figname='neb.png'):
         # mydir = os.getcwd().split('/')[-1]
         # sshdir = "$FLUX:/home/chaomy/{}".format(mydir)
@@ -172,13 +195,18 @@ class lmps_neb_tools(get_data.get_data, gn_config.bcc, plt_drv.plt_drv):
         file_list = glob.glob("log.lammps.*")
         nlogs = len(file_list)
         neb_energy = []
-        for i in range(nlogs):
+        for i in range(1, nlogs):
             mfile = "log.lammps.%d" % (i)
             print(mfile)
             neb_energy.append(self.md_get_final_energy(mfile))
         print(np.argmax(neb_energy))
         neb_energy = np.array(neb_energy)
         neb_energy -= np.min(neb_energy)
+
+        # optional !!!
+        # area = 68.2737796696
+        # neb_energy /= area
+
         self.plot_neb_energy(neb_energy, figname)
         data = np.ndarray([len(neb_energy), 2])
         data[:, 0] = np.linspace(0, 1, len(neb_energy))
@@ -263,6 +291,7 @@ if __name__ == '__main__':
 
     drv = lmps_neb_tools()
     dispatcher = {'plt': drv.read_lmp_log_file,
+                  'plt2': drv.plot_two,
                   'screen': drv.read_screen,
                   'rst': drv.restart_neb,
                   'adj': drv.create_final_screw,

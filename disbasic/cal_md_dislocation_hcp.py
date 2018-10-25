@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-07-24 20:30:10
+# @Last Modified time: 2018-08-25 15:26:12
 
 import numpy as np
 import atomman as am
@@ -97,10 +97,10 @@ class md_dislocation_hcp(object):
         atoms.set_positions(pos + np.real(dispN))
         return atoms
 
-    def build_edge_basal_hcp_atoms(self, atoms, center):
+    def build_edge_basal_hcp_atoms(self, atoms, center, sign=1):
         # let the axes consistent with the elastic constants
         axes = np.array([[1, 0, 0], [0, 0, 1], [0, -1, 0]])
-        burgers = self.pot['lattice'] * np.array([1, 0, 0])
+        burgers = self.pot['lattice'] * np.array([1, 0, 0]) * sign
         c = am.ElasticConstants()
 
         # x - [1 -2 1 0]  y[1, 0, -1, 0] z [0, 0, 0, 1]
@@ -116,8 +116,7 @@ class md_dislocation_hcp(object):
         return atoms
 
     def build_screw_basal_hcp(self):
-        sz = (30, 30, 10)
-
+        sz = (100, 100, 5)
         ux = self.pot["ahcp"] * sqrt(3)
         uy = self.pot["chcp"]
         uz = self.pot['ahcp']
@@ -132,7 +131,9 @@ class md_dislocation_hcp(object):
 
         # the lattice constant has conventional direction as
         # x - [1 -2 1 0]  y[1, 0, -1, 0] z [0, 0, 0, 1]
-        c.hexagonal(C11=61.8, C33=67.5, C12=25.9, C13=21.9, C44=18.2)  # kim
+        # c.hexagonal(C11=61.8, C33=67.5, C12=25.9, C13=21.9, C44=18.2)
+        c.hexagonal(C11=62.807, C33=69.615, C12=25.974,
+                    C13=21.184, C44=17.138)                       # Kim
 
         stroh = stroh_solve.Stroh(c, burgers, axes=axes)
         pos = atoms.get_positions()
@@ -150,7 +151,7 @@ class md_dislocation_hcp(object):
         return atoms
 
     def build_edge_basal_hcp(self):
-        sz = (30, 30, 10)
+        sz = (200, 100, 3)
         atoms = othoHCP(latticeconstant=(self.pot['ahcp'], self.pot['chcp'],
                                          self.pot['ahcp'] * sqrt(3.)),
                         size=sz, symbol=self.pot['element'])
@@ -162,7 +163,13 @@ class md_dislocation_hcp(object):
 
         # the lattice constant has conventional direction as
         # x - [1 -2 1 0]  y[1, 0, -1, 0] z [0, 0, 0, 1]
-        c.hexagonal(C11=61.8, C33=67.5, C12=25.9, C13=21.9, C44=18.2)  # kim
+        # c.hexagonal(C11=61.8, C33=67.5, C12=25.9, C13=21.9, C44=18.2)  # kim
+        # c.hexagonal(C11=62.369, C33=67.788, C12=26.252,
+        #             C13=22.113, C44=18.274)  # Coco
+        # c.hexagonal(C11=62.807, C33=69.615, C12=25.974,
+        #             C13=21.184, C44=17.138)                       # Kim
+        c.hexagonal(C11=64.3556, C33=70.9849, C12=25.460289,
+                    C13=20.333408, C44=18.06331)                       # Curtin
 
         stroh = stroh_solve.Stroh(c, burgers, axes=axes)
         pos = atoms.get_positions()
@@ -174,7 +181,5 @@ class md_dislocation_hcp(object):
         shift = np.ones(pos.shape) * np.array([cx, cy, 0.0])
         disp = stroh.displacement(pos - shift)
         atoms.set_positions(pos + np.real(disp))
-
         self.write_lmp_config_data(atoms)
-        ase.io.write("EDGE.cfg", atoms, format="cfg")
         return atoms

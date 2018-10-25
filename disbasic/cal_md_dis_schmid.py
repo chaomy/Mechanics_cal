@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2018-02-06 14:17:35
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-06-24 15:43:04
+# @Last Modified time: 2018-08-30 13:13:39
 
 
 import ase
@@ -44,7 +44,9 @@ class cal_bcc_schmid(object):
         print("K (biKijbj)", stroh.K_coeff, "eV/A")
         print("pre-ln alpha = biKijbj/4pi", stroh.preln, "ev/A")
 
-    def make_screw_plate(self, size=[40, 60, 3], rad=[90, 100], move=[0., 0., 0.], filename="lmp_init.txt", opt=None):
+    # def make_screw_plate(self, size=[40, 60, 3], rad=[90, 100], move=[0.,
+    # 0., 0.], filename="lmp_init.txt", opt=None):
+    def make_screw_plate(self, size=[70, 90, 3], rad=[150, 160], move=[0., 0., 0.], filename="lmp_init.txt", opt=None):
         e1 = [1, -2, 1]
         e2 = [1, 0, -1]
         e3 = [1, 1, 1]
@@ -76,7 +78,8 @@ class cal_bcc_schmid(object):
             if r > radiusout2:
                 delindex.append(atom.index)
             if r < radius2:
-                atom.symbol = 'W'
+                # atom.symbol = 'W'
+                continue
         del atoms[delindex]
 
         pos = atoms.get_positions()
@@ -87,7 +90,6 @@ class cal_bcc_schmid(object):
         d1 = stroh.displacement(pos - shf)
 
         # before displace generate perfect atoms
-        ase.io.write("lmp_perf.cfg", images=atoms, format='cfg')
         self.write_lmp_config_data(atoms, 'lmp_perf.txt')
         atoms.set_positions(pos + np.real(d1))
         self.write_lmp_config_data(atoms, 'lmp_init.txt')

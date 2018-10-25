@@ -152,13 +152,15 @@ class cal_md_thermo(gn_config.gnStructure, gn_lmp_infile.gn_md_infile,
         self.ax.plot(data[:, 0], 1e2 * data[:, -1],
                      label='MEAM', **next(self.keysiter))
         next(self.keysiter)
-        p = np.polyfit(data[:, 0], data[:, -1], 2)
+        p = np.polyfit(data[:, 0] , data[:, -1], 2)
         print(p)
+        self.ax.plot(data[:, 0], 1e2 * (p[0] * data[:, 0]**2 + p[1] * data[:, 0] + p[2]),
+                     label='FITTING', linestyle='--', lw=2.5)
         # self.ax.plot(dft_vol[:npt], dft_press[:npt], label='PAW-PBE', **next(self.keysiter))
         self.add_legends(*self.axls)
         self.set_tick_size(*self.axls)
-        self.add_x_labels(cycle(['Temperature K']), *self.axls)
-        self.add_y_labels(cycle([r'[$\Delta$ L / L %]']), *self.axls)
+        self.add_x_labels(cycle(['Temperature [K]']), *self.axls)
+        self.add_y_labels(cycle([r'$\Delta$ $a_0$ / $a_0$ [%]']), *self.axls)
         self.fig.savefig("FIG_THERMO_EXPAND.png", **self.figsave)
 
     def check_exp(self):
@@ -167,7 +169,6 @@ class cal_md_thermo(gn_config.gnStructure, gn_lmp_infile.gn_md_infile,
         # this is Mo !!!
         data = np.array([[0.0, 291, 1126, 1162, 1327, 1510, 1639, 1819, 1968, 2073],
                          [3.142277, 3.1474, 3.1621, 3.1623, 3.1668, 3.1706, 3.1738, 3.1782, 3.1832, 3.1869]])
-        #
         # p = np.polyfit(data[0, :2], data[1, :2], 1)
         # print(p)
         coeff = (data[1, :] - data[1, 0]) / (data[1, 0])

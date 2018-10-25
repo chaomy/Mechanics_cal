@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-07-25 16:58:16
+# @Last Modified time: 2018-10-20 14:40:50
 
 
 import os
@@ -20,6 +20,7 @@ from utils import Intro_vasp
 from utils import cal_md_find_dis_core
 from prec import cal_md_prec
 from gb import cal_md_gb_hcp_dis
+from itertools import cycle
 import cal_md_dis_dipole
 import cal_md_dislocation_hcp
 import cal_md_dislocation_fcc
@@ -46,9 +47,9 @@ class md_dislocation(gn_config.gnStructure,
                      cal_md_find_dis_core.md_find_core,
                      cal_md_dis_crack.dis_init_crack):
 
-    def __init__(self, pot=md_pot_data.md_pot.mg_kim):
-        self.pot = pot
-        # self.pot = md_pot_data.md_pot.Nb_eam
+    def __init__(self, pot=md_pot_data.md_pot.mg_curtin):
+        # self.pot = pot
+        self.pot = md_pot_data.md_pot.Nb_meam
         # self.pot = md_pot_data.md_pot.mg_Poco
         # self.pot = self.load_data('../BASICS/pot.dat')
         # self.pot = self.load_data('../BASICS_MO/pot.dat')
@@ -103,6 +104,37 @@ class md_dislocation(gn_config.gnStructure,
         atoms.set_positions(pos)
         self.write_lmp_config_data(atoms, "dump.after")
 
+    def fit_Ecore(self):
+        burger = np.sqrt(3) / 2. * self.pot['lattice']
+        r0 = 2 * burger
+
+        data = np.loadtxt("data.txt")
+        xx = np.linspace(10, 150, len(data))
+        logx = np.log(xx / r0)
+
+        p = np.polyfit(logx, data, 1)
+        print(p)
+
+        self.set_111plt()
+        # next(self.keysiter)
+        # next(self.keysiter)
+        # plotx = np.linspace(0, 150, len(data))
+
+        self.ax.semilogx(xx, data, label='MEAM', **next(self.keysiter))
+        self.ax.semilogx(xx, p[0] * logx + p[1],
+                         label="FITTING", linestyle='--', lw=3)
+
+        self.add_legends(*self.axls)
+
+        # (110): -110  (11-2) -110
+        xlabeliter = cycle(['Outer cutoff radius R [A]'])
+        ylabeliter = cycle(['Energy inrement [eV/A]'])
+
+        self.add_x_labels(xlabeliter, *self.axls)
+        self.add_y_labels(ylabeliter, *self.axls)
+        self.set_tick_size(*self.axls)
+        self.fig.savefig("FIG_DIS_CORE_ENG.png", **self.figsave)
+
 
 if __name__ == "__main__":
     usage = "usage:%prog [options] arg1 [options] arg2"
@@ -111,8 +143,10 @@ if __name__ == "__main__":
                       type="string", dest="mtype")
     parser.add_option('-p', "--param", action="store",
                       type='string', dest="fargs")
+
     (options, args) = parser.parse_args()
     drv = md_dislocation()
+
     dispatcher = {'kink': drv.intro_kink_pair,
                   'bccedge': drv.cal_single_edge_dislocations,
                   'bccscrew': drv.cal_single_screw_dislocations,
@@ -124,7 +158,7 @@ if __name__ == "__main__":
                   'bscrew': drv.build_screw_basal_hcp,  # hcp basal
                   'thermo': drv.cal_thermo,
                   'sprec': drv.make_screw_prec,
-                  'd03': drv.buildd03small,
+                  'd03': drv.buildd03,
                   'hcp': drv.buildHCP,
                   'gb': drv.make_gb,
                   'peierls': drv.dipole_peierls_barrier,
@@ -138,7 +172,10 @@ if __name__ == "__main__":
                   'r00': drv.make_prec,
                   'r60': drv.make_r60_prec,
                   'd00': drv.make_double_prec,
-                  'axes': drv.convert_axes}
+                  'r00d2': drv.make_dipole_prec,
+                  'axes': drv.convert_axes,
+                  'fite': drv.fit_Ecore,
+                  'calk': drv.cal_screw_const}
 
     if options.fargs is not None:
         dispatcher[options.mtype.lower()](options.fargs)

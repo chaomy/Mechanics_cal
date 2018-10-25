@@ -26,7 +26,7 @@ from numpy import sqrt
 latd03 = 7.46627803307887
 area = 38.874109697935616
 
-
+# x [1, 0, 0], y[0, 1, 0], z[0, 0, 1]
 class D03Factory(cubic.SimpleCubicFactory):
     "A factory for creating Mg3Nd (D03) lattices."
     bravais_basis = [[0, 0, 0],

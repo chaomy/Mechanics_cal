@@ -2,7 +2,7 @@
 # @Author: chaomy
 # @Date:   2017-12-03 11:07:29
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-07-24 23:38:05
+# @Last Modified time: 2018-10-19 11:50:13
 
 import ase.lattice.orthorhombic as otho
 import ase.io
@@ -54,7 +54,6 @@ class md_gb_ase_1100(object):
             # os.system("cp POSCAR pos_{:02d}".format(cn))
             # os.system("cp INPUTS/* {}".format(mdir))
             os.system("mv lmp_init.txt {}".format(mdir))
-            os.system("mv lmp_org.txt {}".format(mdir))
             # os.system("mv POSCAR {}/".format(mdir))
             cn += 1
 
@@ -165,7 +164,8 @@ class md_gb_ase_1100(object):
 
         # the other grain
         atoms2 = othoHCPB(latticeconstant=(ux, uy, uz), size=(
-            140, 140, 2), symbol='Al')     # for 1100 72.877
+            140, 140, 2), symbol=self.pot['element'])     # for 1100 72.877
+
         # atoms2 = othoHCP(latticeconstant=(ux, uy, uz), size=(
         #     80, 80, 3), symbol='Nb')   # for 1100 58.361
 
@@ -189,29 +189,28 @@ class md_gb_ase_1100(object):
         assign_gb = 1
         if assign_gb == 1:
             for atom in atoms:
-                if atom.position[1] <= m - 20 or atom.position[1] >= m + 20:    # buff
-                    atom.symbol = 'Mo'
-                if atom.position[1] <= m - 30:
+                # if atom.position[1] <= m - 10 or atom.position[1] >= m + 10:    # buff
+                #     atom.symbol = 'Mo'
+                if atom.position[1] <= m - 40:
                     atom.symbol = 'Re'
-                if atom.position[1] >= m + 30:
+                if atom.position[1] >= m + 40:
                     atom.symbol = 'Ta'
+                if atom.position[1] >= m + 45 or atom.position[1] <= m - 45:
+                    atom.symbol = 'Mo'
 
-        vacumm = 1
+        vacumm = 0 
         if vacumm == 1:
             cell[1, 1] += 40.0
         atoms.set_cell(cell)
         if vacumm == 1:
             atoms.translate(np.array([0.0, 20.0, 0.0]))
 
-        atoms2 = atoms.copy()       # for fixed grain
-
         idx = []
-        for atom in atoms2:
-            if atom.symbol in ['Re', 'Ta']:
+        for atom in atoms:
+            if atom.symbol in ['Mo']:
                 idx.append(atom.index)
-        del atoms2[idx]
-        self.write_lmp_config_data(atoms, "lmp_org.txt")
-        self.write_lmp_config_data(atoms2, "lmp_init.txt")
+        del atoms[idx]
+        self.write_lmp_config_data(atoms, "lmp_init.txt")
 
     def write_1100_large(self, ag):
         ux = self.pot['ahcp']
