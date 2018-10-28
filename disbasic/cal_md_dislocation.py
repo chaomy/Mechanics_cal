@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-10-20 14:40:50
+# @Last Modified time: 2018-10-28 01:21:07
 
 
 import os
@@ -154,7 +154,7 @@ if __name__ == "__main__":
                   'cuau': drv.cal_cu3Au_dis,
                   'ani': drv.intro_ani_edge_fcc,
                   'hcpedge': drv.hcp_edge_dislocation,  # isotropic
-                  'bedge': drv.build_edge_basal_hcp,  # hcp basal
+                  'bedge': drv.build_edge_basal_hcp,    # hcp basal
                   'bscrew': drv.build_screw_basal_hcp,  # hcp basal
                   'thermo': drv.cal_thermo,
                   'sprec': drv.make_screw_prec,

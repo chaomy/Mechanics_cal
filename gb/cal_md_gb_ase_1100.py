@@ -2,7 +2,7 @@
 # @Author: chaomy
 # @Date:   2017-12-03 11:07:29
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-10-19 11:50:13
+# @Last Modified time: 2018-10-28 01:23:05
 
 import ase.lattice.orthorhombic as otho
 import ase.io
@@ -53,7 +53,7 @@ class md_gb_ase_1100(object):
             # self.write_1100_large(e)
             # os.system("cp POSCAR pos_{:02d}".format(cn))
             # os.system("cp INPUTS/* {}".format(mdir))
-            os.system("mv lmp_init.txt {}".format(mdir))
+            os.system("mv lmp.init {}".format(mdir))
             # os.system("mv POSCAR {}/".format(mdir))
             cn += 1
 
@@ -210,7 +210,7 @@ class md_gb_ase_1100(object):
             if atom.symbol in ['Mo']:
                 idx.append(atom.index)
         del atoms[idx]
-        self.write_lmp_config_data(atoms, "lmp_init.txt")
+        self.write_lmp_config_data(atoms, "lmp.init")
 
     def write_1100_large(self, ag):
         ux = self.pot['ahcp']
