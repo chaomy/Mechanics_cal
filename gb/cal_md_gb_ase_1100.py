@@ -2,7 +2,7 @@
 # @Author: chaomy
 # @Date:   2017-12-03 11:07:29
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-10-28 01:23:05
+# @Last Modified time: 2018-10-28 03:26:34
 
 import ase.lattice.orthorhombic as otho
 import ase.io
@@ -198,7 +198,7 @@ class md_gb_ase_1100(object):
                 if atom.position[1] >= m + 45 or atom.position[1] <= m - 45:
                     atom.symbol = 'Mo'
 
-        vacumm = 0 
+        vacumm = 0
         if vacumm == 1:
             cell[1, 1] += 40.0
         atoms.set_cell(cell)
@@ -210,6 +210,9 @@ class md_gb_ase_1100(object):
             if atom.symbol in ['Mo']:
                 idx.append(atom.index)
         del atoms[idx]
+
+        rep = int(np.ceil(50 / cell[0, 0])) 
+        atoms = atoms.repeat((rep, 1, 1))
         self.write_lmp_config_data(atoms, "lmp.init")
 
     def write_1100_large(self, ag):
