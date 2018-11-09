@@ -2,7 +2,7 @@
 # @Author: chaomy
 # @Date:   2017-12-03 11:07:29
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-10-28 03:26:34
+# @Last Modified time: 2018-11-08 00:58:04
 
 import ase.lattice.orthorhombic as otho
 import ase.io
@@ -14,6 +14,7 @@ from ase import Atoms
 from ase.lattice.orthorhombic import SimpleOrthorhombicFactory
 from numpy import sqrt, deg2rad, floor, cos, sin
 import md_pot_data
+import glob
 
 
 class othoHCPFractory(otho.SimpleOrthorhombicFactory):
@@ -41,14 +42,25 @@ class md_gb_ase_1100(object):
         # minimie
         self.intro_edge_dipole()
 
+    def loop_plot_energy(self):
+        files = glob.glob("*.txt")
+        for file in files:
+            tags = file.split('.')
+            data = np.loadtxt(file)
+            self.set_111plt()
+            self.ax.plot(data[:, 0], data[:, 1])
+            self.ax.plot(data[:, 0], data[:, 2], lw='4')
+            self.fig.savefig("fig_{}.png".format(tags[0] + tags[1] + tags[2]), **self.figsave)
+            self.closefig()
+
     def loop_init_1100(self):
         self.find_angles_1100()
         cn = 0
         for e in self.ag[:]:
             mdir = "1100_{:.2f}".format(e[0])
             self.mymkdir(mdir)
-            self.write_1100_small(e)
-            # self.write_1100_DFT(e)
+            # self.write_1100_small(e)
+            self.write_1100_DFT(e)
             # self.write_1100_DFT_Surf(e)
             # self.write_1100_large(e)
             # os.system("cp POSCAR pos_{:02d}".format(cn))
@@ -96,11 +108,12 @@ class md_gb_ase_1100(object):
 
         # angle, length, i, j
         atoms = othoHCP(latticeconstant=(ux, uy, uz), size=(
-            130, 130, 1), symbol=self.pot['element'])
+            140, 140, 1), symbol=self.pot['element'])
 
         atoms.rotate(ag[0], 'z')
         cell = atoms.get_cell()
-        cell[0, 0], cell[1, 1] = ag[1], 70
+        cell[0, 0], cell[1, 1] = ag[1], 120
+
         atoms.translate(
             np.array([cell[0, 0] - floor(15 * cos(deg2rad(ag[0]))) * ux,
                       -floor(47 * cos(deg2rad(ag[0]))) * uy, 0]))
@@ -111,13 +124,13 @@ class md_gb_ase_1100(object):
 
         # the other grain
         atoms2 = othoHCPB(latticeconstant=(ux, uy, uz), size=(
-            140, 140, 1), symbol=self.pot["element"])     # for 1100 72.877
+            140, 140, 1), symbol=self.pot['element'])     # for 1100 72.877
+
         # atoms2 = othoHCP(latticeconstant=(ux, uy, uz), size=(
         #     80, 80, 3), symbol='Nb')   # for 1100 58.361
 
         lob = np.array([0.0, 0.5 * cell[1, 1], 0.0])
         hib = np.array([cell[0, 0], cell[1, 1] - 0.2, cell[2, 2]])
-        # hib = np.array([cell[0, 0], cell[1, 1] - VACUMM, cell[2, 2]])
 
         atoms2.rotate(-ag[0], 'z')
         # atoms2.translate(np.array([-10 * ux, cell[1, 1], 0]))  # for
@@ -131,13 +144,31 @@ class md_gb_ase_1100(object):
         atoms.extend(atoms2)
 
         # assign low grain
-        vacumm = 1
+        m = 0.5 * cell[1, 1]
+        assign_gb = 1
+        if assign_gb == 1:
+            for atom in atoms:
+                if atom.position[1] <= m - 35:
+                    atom.symbol = 'Re'
+                if atom.position[1] >= m + 35:
+                    atom.symbol = 'Ta'
+                if atom.position[1] >= m + 40 or atom.position[1] <= m - 40:
+                    atom.symbol = 'Mo'
+
+        vacumm = 0
         if vacumm == 1:
-            cell[1, 1] += 20.0
+            cell[1, 1] += 40.0
         atoms.set_cell(cell)
         if vacumm == 1:
-            atoms.translate(np.array([0.0, 10.0, 0.0]))
-        self.write_lmp_config_data(atoms, "lmp_init.txt")
+            atoms.translate(np.array([0.0, 20.0, 0.0]))
+
+        idx = []
+        for atom in atoms:
+            if atom.symbol in ['Mo']:
+                idx.append(atom.index)
+        del atoms[idx]
+
+        self.write_lmp_config_data(atoms, "lmp.init")
 
     def write_1100_small(self, ag):
         ux = self.pot['ahcp']
@@ -164,7 +195,7 @@ class md_gb_ase_1100(object):
 
         # the other grain
         atoms2 = othoHCPB(latticeconstant=(ux, uy, uz), size=(
-            140, 140, 2), symbol=self.pot['element'])     # for 1100 72.877
+            130, 130, 2), symbol=self.pot['element'])     # for 1100 72.877
 
         # atoms2 = othoHCP(latticeconstant=(ux, uy, uz), size=(
         #     80, 80, 3), symbol='Nb')   # for 1100 58.361
@@ -211,8 +242,8 @@ class md_gb_ase_1100(object):
                 idx.append(atom.index)
         del atoms[idx]
 
-        rep = int(np.ceil(50 / cell[0, 0])) 
-        atoms = atoms.repeat((rep, 1, 1))
+        # rep = int(np.ceil(50 / cell[0, 0]))
+        # atoms = atoms.repeat((rep, 1, 1))
         self.write_lmp_config_data(atoms, "lmp.init")
 
     def write_1100_large(self, ag):
@@ -278,7 +309,7 @@ class md_gb_ase_1100(object):
         self.make_repeat(atoms)
 
     def build_hcp_ase_1100_small(self):  # to examine the GB structures
-        self.find_angles_1100(il=[[], [1]], jl=[2])   # 72.877    ABAB --
+        self.find_angles_1100(il=[[], [1]], jl=[2])    # 72.877    ABAB --
         self.write_1100_small(self.ag[0])
 
     def build_hcp_ase_1100(self):

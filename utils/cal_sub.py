@@ -4,7 +4,7 @@
 # @Author: yang37
 # @Date:   2017-06-12 17:03:43
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-10-31 20:04:50
+# @Last Modified time: 2018-11-09 01:17:24
 
 
 import os
@@ -19,9 +19,9 @@ class subjobs(object):
         self.get_dirs()
 
     def get_dirs(self):
-        # self.diriter = iter(glob.glob('dir[-_]*')) 
+        self.diriter = iter(glob.glob('dir[-_]*')) 
         # self.diriter = iter(glob.glob('DIR*'))
-        self.diriter = iter(glob.glob("FCC_*"))
+        # self.diriter = iter(glob.glob("FCC_*"))
 
     def trans_to(self):
         pth = "/scratch/qiliang_flux/chaomy/MD/Nb/MEAMS/THERMO"
