@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-06-21 00:41:59
+# @Last Modified time: 2018-11-09 11:21:58
 
 import os
 from glob import glob
@@ -20,8 +20,7 @@ class md_gb_run(object):
             os.system("cp in.min {}".format(mdir))
             os.chdir(mdir)
             self.mymkdir("dump")
-            self.mymkdir("restart")
-            os.system("mpirun -n 2 lmp_mpi -i in.min")
+            os.system("mpirun -n 1 lmp_mpi -i in.min")
             os.chdir(os.pardir)
 
     def loop_set_usp_run(self):

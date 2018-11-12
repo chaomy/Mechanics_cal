@@ -2,7 +2,7 @@
 # @Author: chaomy
 # @Date:   2017-12-03 11:07:29
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-11-08 00:58:04
+# @Last Modified time: 2018-11-12 17:07:13
 
 import ase.lattice.orthorhombic as otho
 import ase.io
@@ -42,16 +42,66 @@ class md_gb_ase_1100(object):
         # minimie
         self.intro_edge_dipole()
 
+    def loop_dup_structures(self):
+        files = glob.glob("STRUCT.*")
+        for i in range(len(files)):
+            atoms = ase.io.read("STRUCT.{}".format(i), format="lammps-dump")
+            rep = int(np.ceil(100 / atoms.get_cell()[0, 0]))
+            atoms = atoms.repeat((rep, 1, 1))
+            self.write_lmp_config_data(atoms, "CAND.{}".format(i))
+
+    def loop_clc_init_structures(self):
+        dirs = glob.glob("1100_*")
+        for i in range(len(dirs)):
+            mdir = dirs[i]
+            files = glob.glob("{}/dump/*".format(mdir))
+            os.system("cp {} ../GENS/CAND.{}".format(files[1], i))
+
     def loop_plot_energy(self):
+        data_evo = np.loadtxt('data_evo.txt')
+        # data_org = np.loadtxt('data_dirct.txt')
+        self.set_111plt((13, 10))
+        next(self.keysiter)
+        self.ax.plot(data_evo[:, 0], data_evo[:, 3], **next(self.keysiter))
+        # self.ax.plot(data_org[:, 0], data_org[:, 1], **next(self.keysiter))
+        self.fig.savefig("Fig_evo.png", **self.figsave)
+        self.closefig()
+
+    def loop_plt_each(self):
         files = glob.glob("*.txt")
         for file in files:
-            tags = file.split('.')
             data = np.loadtxt(file)
+            tags = file.split('.')
             self.set_111plt()
             self.ax.plot(data[:, 0], data[:, 1])
             self.ax.plot(data[:, 0], data[:, 2], lw='4')
-            self.fig.savefig("fig_{}.png".format(tags[0] + tags[1] + tags[2]), **self.figsave)
+            self.fig.savefig("fig_{}.png".format(
+                tags[1] + tags[2]), **self.figsave)
             self.closefig()
+
+    def loop_collect_energy(self):
+        files = glob.glob("*.txt")
+        total = np.ndarray([len(files) + 2, 4])
+        total[0, :] = 0
+        for i in range(len(files)):
+            file = files[i]
+            tags = file.split('.')
+            angle = float(tags[1].split('_')[1] + '.' + tags[2])
+            data = np.loadtxt(file)
+            print(angle)
+            print(data[-1])
+            total[i + 1, 0] = angle
+            total[i + 1, 1:] = data[-1]
+        total[-1, 0] = 90.0
+        total = total[total[:, 0].argsort()]
+        np.savetxt('data_evo.txt', total, fmt='%1.8f')
+        # for file in files:
+        # self.set_111plt()
+        # self.ax.plot(data[:, 0], data[:, 1])
+        # self.ax.plot(data[:, 0], data[:, 2], lw='4')
+        # self.fig.savefig("fig_{}.png".format(
+        #     tags[0] + tags[1] + tags[2]), **self.figsave)
+        # self.closefig()
 
     def loop_init_1100(self):
         self.find_angles_1100()
@@ -59,8 +109,8 @@ class md_gb_ase_1100(object):
         for e in self.ag[:]:
             mdir = "1100_{:.2f}".format(e[0])
             self.mymkdir(mdir)
-            # self.write_1100_small(e)
-            self.write_1100_DFT(e)
+            self.write_1100_small(e)
+            # self.write_1100_DFT(e)
             # self.write_1100_DFT_Surf(e)
             # self.write_1100_large(e)
             # os.system("cp POSCAR pos_{:02d}".format(cn))
@@ -242,8 +292,9 @@ class md_gb_ase_1100(object):
                 idx.append(atom.index)
         del atoms[idx]
 
-        # rep = int(np.ceil(50 / cell[0, 0]))
-        # atoms = atoms.repeat((rep, 1, 1))
+        rep = int(np.ceil(50 / cell[0, 0]))
+        if rep > 1:
+            atoms = atoms.repeat((rep, 1, 1))
         self.write_lmp_config_data(atoms, "lmp.init")
 
     def write_1100_large(self, ag):

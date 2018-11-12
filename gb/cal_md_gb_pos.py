@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-06-11 01:25:28
+# @Last Modified time: 2018-11-12 16:51:53
 
 from numpy import loadtxt, linspace
 import os
@@ -16,22 +16,29 @@ import numpy as np
 class md_gb_pos(object):
 
     def loop_plt_angle(self):
-
         self.find_angles_1100()
+
         dd = np.zeros([len(self.ag) + 2, 2])
         dd[0, 0], dd[0, 1] = 0.0, 0.0
         dd[-1, 0], dd[-1, 1] = 90.0, 0.0
 
+        total = np.ndarray([len(self.ag), 2])
+
         for e, i in zip(self.ag, range(len(self.ag))):
             mdir = "1100_{:.2f}".format(e[0])
             dd[i + 1, 0] = e[0]
-            dd[i + 1, 1] = np.loadtxt("{}/lmp.dat".format(mdir))
+            dd[i + 1, 1] = np.loadtxt("{}/lmp.dat".format(mdir)) 
+
+            total[i, 0] = e[0]
+            total[i, 1] = dd[i + 1, 1]   
+
+        np.savetxt('data_dirct.txt', total, fmt='%1.8f')
         print(dd)
 
         self.set_111plt((9, 6))
         self.set_keys()
         self.ax.plot(dd[:, 0], 1e3 * dd[:, 1], 'o--',
-                     markersize=14, label='<100> GB')
+                    markersize=14, label='<100> GB')
         # ddp **next(self.keysiter)
 
         self.add_legends(self.ax)

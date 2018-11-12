@@ -2,7 +2,7 @@
 # @Author: chaomy
 # @Date:   2017-12-03 11:07:29
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-07-04 02:36:01
+# @Last Modified time: 2018-11-09 11:45:37
 
 import os
 from numpy import sqrt, arccos, arcsin, rad2deg
@@ -12,12 +12,14 @@ from numpy import mat, unique
 
 class md_gb_hcp_1100(object):
 
-    def find_angles_1100(self, il=[[1, 2, 3, 4, 5, 6, 7, 8, 9],
-                                   [1, 2, 3, 4, 5, 6, 7, 8, 9],
-                                   [1, 2, 3, 4, 5, 6, 7, 8, 9],
-                                   [1, 2, 3, 4, 5, 6, 7, 8, 9],
-                                   [1, 2, 3, 4, 5, 6, 7, 8, 9]],
-                         jl=[1, 2, 3, 4]):
+    def find_angles_1100(self, il=[[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]],
+                         jl=[1, 2, 3, 4, 5, 6, 7]):
         ags = []
         res = []
         ux = self.pot["ahcp"]
