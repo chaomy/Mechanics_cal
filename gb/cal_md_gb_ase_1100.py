@@ -2,7 +2,7 @@
 # @Author: chaomy
 # @Date:   2017-12-03 11:07:29
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-11-12 19:06:16
+# @Last Modified time: 2018-11-19 11:32:38
 
 import ase.lattice.orthorhombic as otho
 import ase.io
@@ -49,6 +49,10 @@ class md_gb_ase_1100(object):
             rep = int(np.ceil(100 / atoms.get_cell()[0, 0]))
             atoms = atoms.repeat((rep, 1, 1))
             self.write_lmp_config_data(atoms, "CAND.{}".format(i))
+
+    def extend_along_y(self):
+        atoms = ase.io.read("CAND.12", format="lammps-data")
+        print(len(atoms))
 
     def loop_clc_init_structures(self):
         dirs = glob.glob("1100_*")
@@ -106,13 +110,14 @@ class md_gb_ase_1100(object):
     def loop_init_1100(self):
         self.find_angles_1100()
         cn = 0
-        for e in self.ag[:]:
+        for e in self.ag[28:]:
             mdir = "1100_{:.2f}".format(e[0])
             self.mymkdir(mdir)
-            self.write_1100_small(e)
+            # self.write_1100_small(e)
             # self.write_1100_DFT(e)
             # self.write_1100_DFT_Surf(e)
             # self.write_1100_large(e)
+            self.write_1100_long_thin(e)
             # os.system("cp POSCAR pos_{:02d}".format(cn))
             # os.system("cp INPUTS/* {}".format(mdir))
             os.system("mv lmp.init {}".format(mdir))
@@ -225,8 +230,6 @@ class md_gb_ase_1100(object):
         uy = self.pot['chcp']
         uz = self.pot['ahcp'] * sqrt(3.)
 
-        VACUMM = 10.0
-
         # angle, length, i, j
         atoms = othoHCP(latticeconstant=(ux, uy, uz), size=(
             130, 130, 2), symbol=self.pot['element'])
@@ -297,18 +300,19 @@ class md_gb_ase_1100(object):
             atoms = atoms.repeat((rep, 1, 1))
         self.write_lmp_config_data(atoms, "lmp.init")
 
-    def write_1100_large(self, ag):
+    def write_1100_long_thin(self, ag):
         ux = self.pot['ahcp']
         uy = self.pot['chcp']
         uz = self.pot['ahcp'] * sqrt(3.)
 
         # angle, length, i, j
         atoms = othoHCP(latticeconstant=(ux, uy, uz), size=(
-            400, 400, 1), symbol=self.pot['element'])
+            500, 500, 2), symbol=self.pot['element'])
 
         atoms.rotate(ag[0], 'z')
         cell = atoms.get_cell()
-        cell[0, 0], cell[1, 1] = 3 * ag[1], 280
+        cell[0, 0], cell[1, 1] = 2 * ag[1], 400
+
         atoms.translate(
             np.array([cell[0, 0] - floor(15 * cos(deg2rad(ag[0]))) * ux,
                       -floor(47 * cos(deg2rad(ag[0]))) * uy, 0]))
@@ -319,45 +323,104 @@ class md_gb_ase_1100(object):
 
         # the other grain
         atoms2 = othoHCPB(latticeconstant=(ux, uy, uz), size=(
-            400, 400, 1), symbol='Al')     # for 1100 72.877
-
-        # atoms2 = othoHCP(latticeconstant=(ux, uy, uz), size=(
-        #     80, 80, 3), symbol='Nb')   # for 1100 58.361
+            500, 500, 2), symbol=self.pot['element'])     # for 1100 72.877
 
         lob = np.array([0.0, 0.5 * cell[1, 1], 0.0])
         hib = np.array([cell[0, 0], cell[1, 1] - 0.2, cell[2, 2]])
-        # hib = np.array([cell[0, 0], cell[1, 1] - VACUMM, cell[2, 2]])
 
         atoms2.rotate(-ag[0], 'z')
-        # atoms2.translate(np.array([-10 * ux, cell[1, 1], 0]))  # for
-        # 72.877
         atoms2.translate(np.array(
             [floor(60 * cos(deg2rad(ag[0]))) * -ux,
-             cell[1, 1] - floor(12 * cos(deg2rad(ag[0]))) * uy, 0]))  # for 72.877
+             cell[1, 1] - floor(22 * cos(deg2rad(ag[0]))) * uy, 0]))  # for 72.877
 
         atoms2 = self.make_cubic('out', atoms2, lob, hib)
         atoms2.translate(np.array([0.0, 0.2, 0.25 * uz]))
         atoms.extend(atoms2)
 
-        # lob = np.array([0.0, 40, 0.0])
-        # hib = np.array([cell[0, 0], cell[1, 1] - 40, cell[2, 2]])
-        # atoms = self.assign_cubic(atoms, 'out', 'W', lob, hib)
-
-        # assign gb region
+        # assign low grain
+        m = 0.5 * cell[1, 1]
         assign_gb = 1
         if assign_gb == 1:
             for atom in atoms:
-                if atom.position[1] <= 17:
-                    atom.symbol = 'W'
-                if atom.position[1] >= cell[1, 1] - 17:
+                if atom.position[1] <= m - 40:
+                    atom.symbol = 'Re'
+                if atom.position[1] >= m + 40:
+                    atom.symbol = 'Ta'
+                if atom.position[1] >= m + 180 or atom.position[1] <= m - 180:
                     atom.symbol = 'Mo'
 
-        # to add vacancy optional
-        cell[1, 1] += 30
-        atoms.translate(np.array([0.0, 15, 0.0]))
         atoms.set_cell(cell)
-        self.write_lmp_config_data(atoms, "lmp_init.txt")
-        self.make_repeat(atoms)
+        idx = []
+        for atom in atoms:
+            if atom.symbol in ['Mo']:
+                idx.append(atom.index)
+        del atoms[idx]
+
+        # rep = int(np.ceil(50 / cell[0, 0]))
+        # if rep > 1:
+        #     atoms = atoms.repeat((rep, 1, 1))
+        self.write_lmp_config_data(atoms, "lmp.init")
+
+    # def write_1100_large(self, ag):
+    #     ux = self.pot['ahcp']
+    #     uy = self.pot['chcp']
+    #     uz = self.pot['ahcp'] * sqrt(3.)
+
+    #     # angle, length, i, j
+    #     atoms = othoHCP(latticeconstant=(ux, uy, uz), size=(
+    #         400, 400, 1), symbol=self.pot['element'])
+
+    #     atoms.rotate(ag[0], 'z')
+    #     cell = atoms.get_cell()
+    #     cell[0, 0], cell[1, 1] = 1 * ag[1], 280
+    #     atoms.translate(
+    #         np.array([cell[0, 0] - floor(15 * cos(deg2rad(ag[0]))) * ux,
+    #                   -floor(47 * cos(deg2rad(ag[0]))) * uy, 0]))
+
+    #     lob = np.array([0.0, 0.0, 0.0])
+    #     hib = np.array([cell[0, 0], 0.5 * cell[1, 1], cell[2, 2]])
+    #     atoms = self.make_cubic('out', atoms, lob, hib)
+
+    #     # the other grain
+    #     atoms2 = othoHCPB(latticeconstant=(ux, uy, uz), size=(
+    #         400, 400, 1), symbol='Al')     # for 1100 72.877
+
+    #     # atoms2 = othoHCP(latticeconstant=(ux, uy, uz), size=(
+    #     #     80, 80, 3), symbol='Nb')   # for 1100 58.361
+
+    #     lob = np.array([0.0, 0.5 * cell[1, 1], 0.0])
+    #     hib = np.array([cell[0, 0], cell[1, 1] - 0.2, cell[2, 2]])
+
+    #     atoms2.rotate(-ag[0], 'z')
+    #     # atoms2.translate(np.array([-10 * ux, cell[1, 1], 0]))  # for
+    #     # 72.877
+    #     atoms2.translate(np.array(
+    #         [floor(60 * cos(deg2rad(ag[0]))) * -ux,
+    # cell[1, 1] - floor(12 * cos(deg2rad(ag[0]))) * uy, 0]))  # for 72.877
+
+    #     atoms2 = self.make_cubic('out', atoms2, lob, hib)
+    #     atoms2.translate(np.array([0.0, 0.2, 0.25 * uz]))
+    #     atoms.extend(atoms2)
+
+    #     # lob = np.array([0.0, 40, 0.0])
+    #     # hib = np.array([cell[0, 0], cell[1, 1] - 40, cell[2, 2]])
+    #     # atoms = self.assign_cubic(atoms, 'out', 'W', lob, hib)
+
+    #     # assign gb region
+    #     assign_gb = 1
+    #     if assign_gb == 1:
+    #         for atom in atoms:
+    #             if atom.position[1] <= 17:
+    #                 atom.symbol = 'W'
+    #             if atom.position[1] >= cell[1, 1] - 17:
+    #                 atom.symbol = 'Mo'
+
+    #     # to add vacancy optional
+    #     cell[1, 1] += 30
+    #     atoms.translate(np.array([0.0, 15, 0.0]))
+    #     atoms.set_cell(cell)
+    #     self.write_lmp_config_data(atoms, "lmp_init.txt")
+    #     self.make_repeat(atoms)
 
     def build_hcp_ase_1100_small(self):  # to examine the GB structures
         self.find_angles_1100(il=[[], [1]], jl=[2])    # 72.877    ABAB --

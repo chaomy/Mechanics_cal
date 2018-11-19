@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2018-04-25 23:53:39
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-08-22 14:38:27
+# @Last Modified time: 2018-11-19 02:00:00
 
 
 import os
@@ -80,6 +80,5 @@ if __name__ == "__main__":
     Job = md_precipitate(element='Mg', structure='hcp')
     if options.mtype == "bulk":
         Job.bulk()
-
     if options.mtype.lower() == "inter":
         Job.interface()

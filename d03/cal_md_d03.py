@@ -132,8 +132,8 @@ class cal_d03(get_data.get_data,
     def buildd03(self):
         la = self.pot["lattice"]
         # unit cell
-        # atoms = Mg3Nd(latticeconstant=latd03, size=(1, 1, 1),
-        #               symbol=('Mg', 'Nd'))
+        atoms = Mg3Nd(latticeconstant=latd03, size=(1, 1, 1),
+                      symbol=('Mg', 'Nd'))
 
         # type A
         # atoms = Mg3Nd(latticeconstant=(la * sqrt(2), la,
@@ -141,9 +141,9 @@ class cal_d03(get_data.get_data,
         #               size=(1, 1, 18), symbol=('Mg', 'Nd'))
 
         # type B  x: [-1, 1, 0]  y:[0, 0, 1] z: [1, 1, 0]
-        atoms = Mg3Nd(latticeconstant=(la * sqrt(2) / 2, la,
-                                       la * sqrt(2) / 2.),
-                      size=(1, 1, 18), symbol=('Mg', 'Nd'))
+        # atoms = Mg3Nd(latticeconstant=(la * sqrt(2) / 2, la,
+        #                                la * sqrt(2) / 2.),
+        #               size=(1, 1, 18), symbol=('Mg', 'Nd'))
 
         # U = np.mat([[-1, 1, 0], [0, 0, 1], [0.5, 0.5, 0]])
         # Uinv = np.linalg.inv(U)

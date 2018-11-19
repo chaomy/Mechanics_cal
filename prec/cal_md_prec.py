@@ -2,7 +2,7 @@
 # @Author: chaomy
 # @Date:   2018-02-20 14:11:07
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-08-24 16:07:51
+# @Last Modified time: 2018-11-19 09:48:39
 
 import ase.lattice.orthorhombic as otho
 import ase.lattice.cubic as cubic
@@ -121,7 +121,7 @@ class D03FactoryP211B(otho.SimpleOrthorhombicFactory):
                      0, 0, 1, 0)
 
 # Mg3Nd = D03Factory()
-# Mg3Nd = D03FactoryP110B()
+
 Mg3Nd = D03FactoryP211()
 Mg3NdB = D03FactoryP211B()
 
@@ -210,8 +210,8 @@ class md_prec(object):
         ux, uy, uz = self.pot['ahcp'], self.pot[
             'chcp'], self.pot['ahcp'] * sqrt(3.)
 
-        # sz = [150, 90, 60]  # z = 60 gives around 30 nm  100->55. 194->100
-        sz = [2000, 100, 5]  # z = 60 gives around 30 nm  100->55. 194->100
+        sz = [150, 90, 60]  # z = 60 gives around 30 nm  100->55. 194->100
+        # sz = [200, 100, 5]  # z = 60 gives around 30 nm  100->55. 194->100
 
         atoms = othoHCP(latticeconstant=(ux, uy, uz),
                         size=sz, symbol=self.pot['element'])
@@ -223,22 +223,23 @@ class md_prec(object):
                         uz * (1. / 2. * sz[2] - 6)])
         hib = np.array([ux * (sz[0] - 28), uy * sz[1] - 14 * uy,
                         uz * (1. / 2. * sz[2] + 6)])
-        # atoms = self.make_cubic("in", atoms, lob, hib)
-        # atoms2 = self.buildd03()
 
-        # pos = atoms2.get_positions()
-        # pos += lob
-        # atoms2.set_positions(pos)
-        # atoms2 = self.make_cubic("out", atoms2, lob - 1.0, hib + 1.0)
+        atoms = self.make_cubic("in", atoms, lob, hib)
+        atoms2 = self.buildd03()
 
-        # atoms = self.build_edge_basal_hcp_atoms(
-        #     atoms, center=[ux * 40, 0.5 * sz[1] * uy])
+        pos = atoms2.get_positions()
+        pos += lob
+        atoms2.set_positions(pos)
+        atoms2 = self.make_cubic("out", atoms2, lob - 1.0, hib + 1.0)
 
-        # atoms = self.cut_y_normal_atoms(atoms)
-        # atoms = self.cut_x_normal_atoms(atoms)
-        # atoms = self.assign_ynormal_fixatoms(atoms)
+        atoms = self.build_edge_basal_hcp_atoms(
+            atoms, center=[ux * 40, 0.5 * sz[1] * uy])
 
-        # atoms.extend(atoms2)
+        atoms = self.cut_y_normal_atoms(atoms)
+        atoms = self.cut_x_normal_atoms(atoms)
+        atoms = self.assign_ynormal_fixatoms(atoms)
+
+        atoms.extend(atoms2)
 
         cml = "volume = {}".format(
             cell[0, 0] * (cell[1, 1] - 40.0) * cell[2, 2])
@@ -358,10 +359,11 @@ class md_prec(object):
         self.write_lmp_config_data(atoms, "lmp_init.txt")
 
     def buildd03(self):
-        la = latd03 = 7.46627803307887
+        # la = 7.46627803307887
+        la = self.pot['d03']
         SZ = (120, 110, 30)
-        # unit cell
-        # atoms = Mg3Nd(latticeconstant=latd03, size=(1, 1, 1),
+        # type A unit cell
+        # atoms = Mg3Nd(latticeconstant=la, size=(1, 1, 1),
         #               symbol=('Mg', 'Nd'))
 
         # type B  x: [-1, 1, 0]  y:[0, 0, 1] z: [1, 1, 0]
@@ -409,7 +411,6 @@ class md_prec(object):
         sz = (10, 10, 10)
         atoms = othoHCP(latticeconstant=(ux, uy, uz),
                         size=sz, symbol=self.pot['element'])
-
         lata, latc = self.pot["ahcp"], self.pot["chcp"]
         self.burger = self.pot["lattice"]
         self.write_lmp_config_data(atoms, "thermo2.txt")

@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-10-28 01:21:07
+# @Last Modified time: 2018-11-19 09:38:45
 
 
 import os
@@ -48,8 +48,8 @@ class md_dislocation(gn_config.gnStructure,
                      cal_md_dis_crack.dis_init_crack):
 
     def __init__(self, pot=md_pot_data.md_pot.mg_curtin):
-        # self.pot = pot
-        self.pot = md_pot_data.md_pot.Nb_meam
+        self.pot = pot
+        # self.pot = md_pot_data.md_pot.Nb_meam
         # self.pot = md_pot_data.md_pot.mg_Poco
         # self.pot = self.load_data('../BASICS/pot.dat')
         # self.pot = self.load_data('../BASICS_MO/pot.dat')
