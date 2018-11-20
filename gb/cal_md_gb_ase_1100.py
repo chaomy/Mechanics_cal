@@ -2,7 +2,7 @@
 # @Author: chaomy
 # @Date:   2017-12-03 11:07:29
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-11-19 11:32:38
+# @Last Modified time: 2018-11-19 22:45:28
 
 import ase.lattice.orthorhombic as otho
 import ase.io
@@ -46,8 +46,8 @@ class md_gb_ase_1100(object):
         files = glob.glob("STRUCT.*")
         for i in range(len(files)):
             atoms = ase.io.read("STRUCT.{}".format(i), format="lammps-dump")
-            rep = int(np.ceil(100 / atoms.get_cell()[0, 0]))
-            atoms = atoms.repeat((rep, 1, 1))
+            # rep = int(np.ceil(50.0 / atoms.get_cell()[0, 0]))
+            # atoms = atoms.repeat((rep, 1, 1))
             self.write_lmp_config_data(atoms, "CAND.{}".format(i))
 
     def extend_along_y(self):
@@ -107,17 +107,31 @@ class md_gb_ase_1100(object):
         #     tags[0] + tags[1] + tags[2]), **self.figsave)
         # self.closefig()
 
+    def loop_combine(self):
+        self.find_angles_1100()
+        for e in self.ag[:]:
+            mdir = "1100_{:.2f}".format(e[0])
+            os.chdir(mdir)
+            os.system("gb_bound.exe -p ../../gb.param")
+            os.chdir(os.pardir)
+
+    def print_angles(self):
+        self.find_angles_1100()
+        for e in self.ag:
+            print(e[0], e[1], e[2], e[3])
+
     def loop_init_1100(self):
         self.find_angles_1100()
         cn = 0
-        for e in self.ag[28:]:
+        for e in self.ag[:29]:
             mdir = "1100_{:.2f}".format(e[0])
+            print(mdir)
             self.mymkdir(mdir)
-            # self.write_1100_small(e)
+            self.write_1100_small(e)
             # self.write_1100_DFT(e)
             # self.write_1100_DFT_Surf(e)
             # self.write_1100_large(e)
-            self.write_1100_long_thin(e)
+            # self.write_1100_long_thin(e)
             # os.system("cp POSCAR pos_{:02d}".format(cn))
             # os.system("cp INPUTS/* {}".format(mdir))
             os.system("mv lmp.init {}".format(mdir))
@@ -236,7 +250,7 @@ class md_gb_ase_1100(object):
 
         atoms.rotate(ag[0], 'z')
         cell = atoms.get_cell()
-        cell[0, 0], cell[1, 1] = 2 * ag[1], 160
+        cell[0, 0], cell[1, 1] = ag[1], 160
 
         atoms.translate(
             np.array([cell[0, 0] - floor(15 * cos(deg2rad(ag[0]))) * ux,
@@ -547,40 +561,79 @@ class md_gb_ase_1100(object):
         self.write_lmp_config_data(atoms, "pos.txt")
 
     def intro_edge_dipole(self):
-        self.find_angles_1100(il=[[1], [1]], jl=[1])    # 58.361
         ux = self.pot['ahcp']
         uy = self.pot['chcp']
         uz = self.pot['ahcp'] * sqrt(3.)
-        atoms = ase.io.read("dump_twin/dump.00002", format='lammps-dump')
 
-        atoms.rotate(self.ag[0][0], 'z')  # rotate
-        atoms.translate(np.array([80 * ux, 0.0, 0]))
+        angle = 67.66901744178166
+
+        atoms = ase.io.read("dump.save", format='lammps-dump')
+        cell = atoms.get_cell()
+
+        # before rotate, mark the center
+        upper = cell[1, 1] * 0.5 + 2
+        lower = cell[1, 1] * 0.5 - 2
+        left = cell[0, 0] * 0.3
+        right = cell[0, 0] * 0.3 + 4
+
+        for atm in atoms:
+            if (atm.position[1] > lower and atm.position[1] < upper and atm.position[0] >= left and atm.position[0] <= right):
+                print(atm.position)
+                atm.symbol = 'Nb'
+
+        atoms.rotate(angle, 'z')  # rotate
+        shift = cell[1, 1] * np.sin(np.deg2rad(angle))
+        atoms.translate(np.array([shift, 0.0, 0]))
+
+        # check line after rotation
+        for atm in atoms:
+            if (atm.symbol == 'Nb'):
+                print(atm.position)
+                dis_core_pos = atm.position
 
         axes = np.array([[1, 0, 0], [0, 0, 1], [0, -1, 0]])
         burgers = self.pot['lattice'] * np.array([1, 0, 0])
+
         c = am.ElasticConstants()
         c.hexagonal(C11=self.pot['C11'], C12=self.pot['C12'], C33=self.pot[
                     'C33'], C13=self.pot['C13'], C44=self.pot['C44'])
         stroh = stroh_solve.Stroh(c, burgers, axes=axes)
         pos = atoms.get_positions()
-        sh1 = np.ones(pos.shape) * \
-            np.array([ux + 0.01, 80 * uy + 0.01, 0.0])
-        sh2 = np.ones(pos.shape) * \
-            np.array([ux + 0.01, 100 * uy + 0.01, 0.0])
+
+        dis_core_pos[2] = 0
+        sh1 = dis_core_pos
+        sh2 = np.copy(dis_core_pos)
+        sh2[0] = sh2[0] - 80
+        sh1[1] += 0.01
+        sh2[1] += 0.01
+
+        print(sh1, sh2)
+
+        sh1 = np.ones(pos.shape) * sh1
+        sh2 = np.ones(pos.shape) * sh2
+
+        org_sh1 = np.ones(pos.shape) * \
+            np.array([50 * ux + 0.01, 40 * uy + 0.01, 0.0])
+        org_sh2 = np.ones(pos.shape) * \
+            np.array([50 * ux + 0.01, 50 * uy + 0.01, 0.0])
+
+        # print(sh1, org_sh1)
         d1 = stroh.displacement(pos - sh1)
         d2 = stroh.displacement(pos - sh2)
+
         atoms.set_positions(pos + np.real(d1) - np.real(d2))
 
-        atoms.translate(np.array([-80 * ux, 0.0, 0]))
-        atoms.rotate(-self.ag[0][0], 'z')  # rotate back
+        atoms.translate(np.array([-shift, 0.0, 0]))
+        atoms.rotate(-angle, 'z')  # rotate back
 
-        idx = []
-        cy = 699
-        for i in range(len(atoms)):
-            if atoms[i].position[1] >= cy:
-                idx.append(atoms[i].index)
-        del atoms[idx]
         self.write_lmp_config_data(atoms, "lmp_init.txt")
+
+        # idx = []
+        # cy = 699
+        # for i in range(len(atoms)):
+        #     if atoms[i].position[1] >= cy:
+        #         idx.append(atoms[i].index)
+        # del atoms[idx]
 
     def intro_edge(self):
         self.find_angles_1100(il=[[1], [1]], jl=[1])    # 58.361

@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-11-19 09:39:54
+# @Last Modified time: 2018-11-19 22:45:45
 
 
 import cal_md_gb_hcp
@@ -46,7 +46,8 @@ class md_gb(cal_md_gb_pre.md_gb_pre,
             gn_config.gnStructure):
 
     def __init__(self):
-        self.pot = md_pot.mg_Poco
+        # self.pot = md_pot.mg_Poco
+        self.pot = md_pot.Ti_Ackland
         # self.pot = md_pot.mg_sun
         cal_md_gb_pre.md_gb_pre.__init__(self)
         cal_md_gb_pos.md_gb_pos.__init__(self)
@@ -103,11 +104,13 @@ if __name__ == "__main__":
                   'usp': drv.loop_set_usp_run,
                   'init': drv.loop_grand,
                   'dft': drv.make_DFT,
+                  'loopprint': drv.print_angles,
                   'loopclc': drv.loop_collect_energy,
                   'looppre': drv.loop_clc_init_structures,
                   'loopplt': drv.loop_plot_energy,
                   'plteach': drv.loop_plt_each,
-                  'loopdup': drv.loop_dup_structures, 
+                  'loopcmb': drv.loop_combine,
+                  'loopdup': drv.loop_dup_structures,
                   'makedup': drv.extend_along_y}
 
     if options.fargs is not None:

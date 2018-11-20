@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-11-12 16:51:53
+# @Last Modified time: 2018-11-19 22:16:21
 
 from numpy import loadtxt, linspace
 import os
@@ -37,7 +37,7 @@ class md_gb_pos(object):
 
         self.set_111plt((9, 6))
         self.set_keys()
-        self.ax.plot(dd[:, 0], 1e3 * dd[:, 1], 'o--',
+        self.ax.plot(dd[1:-1, 0], 1e3 * dd[1:-1, 1], 'o--',
                     markersize=14, label='<100> GB')
         # ddp **next(self.keysiter)
 
