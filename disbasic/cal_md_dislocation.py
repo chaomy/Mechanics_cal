@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-11-19 09:38:45
+# @Last Modified time: 2018-12-14 19:26:06
 
 
 import os
@@ -47,7 +47,7 @@ class md_dislocation(gn_config.gnStructure,
                      cal_md_find_dis_core.md_find_core,
                      cal_md_dis_crack.dis_init_crack):
 
-    def __init__(self, pot=md_pot_data.md_pot.mg_curtin):
+    def __init__(self, pot=md_pot_data.md_pot.mg_kim):
         self.pot = pot
         # self.pot = md_pot_data.md_pot.Nb_meam
         # self.pot = md_pot_data.md_pot.mg_Poco
@@ -157,8 +157,11 @@ if __name__ == "__main__":
                   'bedge': drv.build_edge_basal_hcp,    # hcp basal
                   'bscrew': drv.build_screw_basal_hcp,  # hcp basal
                   'thermo': drv.cal_thermo,
-                  'sprec': drv.make_screw_prec,
-                  'd03': drv.buildd03,
+                  'screwprec': drv.make_prec_read_screw,
+                  'd03': drv.buildd03small,
+                  'hcpd03': drv.buildHCP_D03_Interface,
+                  'd03apb': drv.buildd03small_apb,
+                  'hcpd03gsf': drv.calculateGSFInterface,
                   'hcp': drv.buildHCP,
                   'gb': drv.make_gb,
                   'peierls': drv.dipole_peierls_barrier,

@@ -2,7 +2,7 @@
 # @Author: chaomy
 # @Date:   2017-12-03 11:07:29
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-11-09 11:45:37
+# @Last Modified time: 2018-12-17 15:14:21
 
 import os
 from numpy import sqrt, arccos, arcsin, rad2deg
@@ -25,6 +25,7 @@ class md_gb_hcp_1100(object):
         ux = self.pot["ahcp"]
         uy = self.pot["chcp"]
         cnt = 0
+        
         for j in jl:
             for i in il[j - 1]:
                 idx = i

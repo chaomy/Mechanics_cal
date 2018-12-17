@@ -2,7 +2,7 @@
 # @Author: chaomy
 # @Date:   2017-12-03 11:07:29
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-11-19 22:45:28
+# @Last Modified time: 2018-12-03 14:12:22
 
 import ase.lattice.orthorhombic as otho
 import ase.io
@@ -123,7 +123,7 @@ class md_gb_ase_1100(object):
     def loop_init_1100(self):
         self.find_angles_1100()
         cn = 0
-        for e in self.ag[:29]:
+        for e in self.ag:
             mdir = "1100_{:.2f}".format(e[0])
             print(mdir)
             self.mymkdir(mdir)
@@ -265,7 +265,7 @@ class md_gb_ase_1100(object):
             130, 130, 2), symbol=self.pot['element'])     # for 1100 72.877
 
         # atoms2 = othoHCP(latticeconstant=(ux, uy, uz), size=(
-        #     80, 80, 3), symbol='Nb')   # for 1100 58.361
+        #     130, 130, 2), symbol=self.pot['element'])   # for 1100 58.361
 
         lob = np.array([0.0, 0.5 * cell[1, 1], 0.0])
         hib = np.array([cell[0, 0], cell[1, 1] - 0.2, cell[2, 2]])

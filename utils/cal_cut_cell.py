@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-08-24 15:49:03
+# @Last Modified time: 2018-12-12 14:24:11
 
 import numpy as np
 import math
@@ -30,9 +30,8 @@ class cal_cut_cell(object):
                     atoms[i].symbol = symbol
         return atoms
 
-    def assign_ynormal_fixatoms(self, atoms, gp_n=1):
+    def assign_ynormal_fixatoms(self, atoms, gp_n=1, dh=20):
         cell = atoms.get_cell()
-        dh = 28.
         y_above = cell[gp_n, gp_n] - dh
         y_below = dh
         nup = 0
@@ -178,7 +177,7 @@ class cal_cut_cell(object):
         # ratio = np.sqrt(3) / 2. * 1. / 3.    # for bcc Fe
         # x_crit = ratio * self.pot['lattice']
         # x_crit = np.sqrt(3) / 6 * 3.2
-        numDis = 2
+        numDis = 1
         x_crit = np.sqrt(3) / 6 * 3.2 * numDis
         for i in range(len(atoms)):
             atom = atoms[i]

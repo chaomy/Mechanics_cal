@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-11-19 22:45:45
+# @Last Modified time: 2018-11-21 23:36:46
 
 
 import cal_md_gb_hcp
@@ -47,7 +47,8 @@ class md_gb(cal_md_gb_pre.md_gb_pre,
 
     def __init__(self):
         # self.pot = md_pot.mg_Poco
-        self.pot = md_pot.Ti_Ackland
+        # self.pot = md_pot.Ti_Ackland
+        self.pot = md_pot.ti_zope
         # self.pot = md_pot.mg_sun
         cal_md_gb_pre.md_gb_pre.__init__(self)
         cal_md_gb_pos.md_gb_pos.__init__(self)
