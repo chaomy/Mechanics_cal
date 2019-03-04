@@ -112,7 +112,6 @@ class vasp_dislocation(gn_config.bcc,
         os.system("cp POSCAR POSCAR_nofix")
         self.write_config_with_fix(atoms)
         self.prepare_dislocation_vasp_infiles()
-        return
 
     def cal_dipo_dislocations(self):
         e1 = np.array([1., 1., -2.])

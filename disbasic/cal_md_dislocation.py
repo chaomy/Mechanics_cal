@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-12-14 19:26:06
+# @Last Modified time: 2019-01-19 12:02:09
 
 
 import os
@@ -47,8 +47,9 @@ class md_dislocation(gn_config.gnStructure,
                      cal_md_find_dis_core.md_find_core,
                      cal_md_dis_crack.dis_init_crack):
 
-    def __init__(self, pot=md_pot_data.md_pot.mg_kim):
-        self.pot = pot
+    def __init__(self, pot=md_pot_data.md_pot.mg_curtin):
+        # self.pot = md_pot_data.va_pot.Mg_pbe
+        self.pot = md_pot_data.md_pot.mg_curtin
         # self.pot = md_pot_data.md_pot.Nb_meam
         # self.pot = md_pot_data.md_pot.mg_Poco
         # self.pot = self.load_data('../BASICS/pot.dat')
@@ -157,11 +158,12 @@ if __name__ == "__main__":
                   'bedge': drv.build_edge_basal_hcp,    # hcp basal
                   'bscrew': drv.build_screw_basal_hcp,  # hcp basal
                   'thermo': drv.cal_thermo,
-                  'screwprec': drv.make_prec_read_screw,
+                  'screwprec': drv.make_prec_read_screw_rotate_60,
                   'd03': drv.buildd03small,
                   'hcpd03': drv.buildHCP_D03_Interface,
-                  'd03apb': drv.buildd03small_apb,
+                  'd03apb': drv.buildd03small_apb_vasp,
                   'hcpd03gsf': drv.calculateGSFInterface,
+                  'd03gsf': drv.buildd03small_apb, 
                   'hcp': drv.buildHCP,
                   'gb': drv.make_gb,
                   'peierls': drv.dipole_peierls_barrier,
@@ -171,7 +173,7 @@ if __name__ == "__main__":
                   'mrss': drv.prep_mrss,
                   'find': drv.cost_method_find_core,
                   'pimage': drv.aniso_dipole_peierls_barrier_image,
-                  'ponly': drv.make_only_prec,
+                  # 'ponly': drv.make_only_prec,
                   'r00': drv.make_prec,
                   'r60': drv.make_r60_prec,
                   'd00': drv.make_double_prec,

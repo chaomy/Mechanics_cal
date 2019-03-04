@@ -2,7 +2,7 @@
 # @Author: chaomy
 # @Date:   2018-02-20 14:11:07
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-12-16 20:24:56
+# @Last Modified time: 2019-01-19 12:06:29
 
 import ase
 import ase.lattice.orthorhombic as otho
@@ -96,6 +96,37 @@ class D03FactoryP211(otho.SimpleOrthorhombicFactory):
                      0, 1, 0, 0,
                      0, 0, 1, 0)
 
+# x [1, 1, 1], y[-1, 1, 0], z[1, 1, -2] mirror of the type C
+
+
+class D03FactoryP211M(otho.SimpleOrthorhombicFactory):
+    bravais_basis = [[0.0, 0.0, 0.0], [0.25, 0.0, 0.0],
+                     [0.5, 0.0, 0.0], [0.75, 0.0, 0.0],
+
+                     [0.0 + dx, 0.5, 5 * dz], [0.25 + dx, 0.5, 5 * dz],
+                     [0.5 + dx, 0.5, 5 * dz], [0.75 + dx, 0.5, 5 * dz],
+
+                     [0.0 + 2 * dx, 0.0, 4 * dz], [0.25 + 2 * dx, 0.0, 4 * dz],
+                     [0.5 + 2 * dx, 0.0, 4 * dz], [0.75 + 2 * dx, 0.0, 4 * dz],
+
+                     [0.0, 0.5, 3 * dz], [0.25, 0.5, 3 * dz],
+                     [0.5, 0.5, 3 * dz], [0.75, 0.5, 3 * dz],
+
+                     [0.0 + dx, 0.0, 2 * dz], [0.25 + dx, 0.0, 2 * dz],
+                     [0.5 + dx, 0.0, 2 * dz], [0.75 + dx, 0.0, 2 * dz],
+
+                     [0.0 + 2 * dx, 0.5, dz], [0.25 + 2 * dx, 0.5, dz],
+                     [0.5 + 2 * dx, 0.5, dz], [0.75 + 2 * dx, 0.5, dz]]
+
+    element_basis = (1, 0, 0, 0,
+                     0, 1, 0, 0,
+                     0, 0, 1, 0,
+                     1, 0, 0, 0,
+                     0, 1, 0, 0,
+                     0, 0, 1, 0)
+
+# change along x [1, 1, 1] to z[1, 1, 1]
+
 
 class D03FactoryP211B(otho.SimpleOrthorhombicFactory):
     bravais_basis = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.25],
@@ -124,7 +155,9 @@ class D03FactoryP211B(otho.SimpleOrthorhombicFactory):
                      0, 0, 1, 0)
 
 Mg3NdCubic = D03Factory()
+
 Mg3Nd = D03FactoryP211()
+Mg3NdM = D03FactoryP211M()
 Mg3NdB = D03FactoryP211B()
 
 # vol = (342.169 - 20.276) = 321.893 * 55.582636 * 449.269099
@@ -228,7 +261,35 @@ class md_prec(object):
             cell[0, 0] * (cell[1, 1] - 40.0) * cell[2, 2])
         self.write_lmp_config_data(atoms, "lmp_init.txt", cml)
 
-    def make_prec_read_screw(self):
+    def make_prec_read_screw_rotate_60(self):
+        atoms = ase.io.read("dump.434", format="lammps-dump")
+        ux, uy, uz = self.pot['ahcp'] * sqrt(3.), self.pot[
+            'chcp'], self.pot['ahcp']
+
+        sz = [84, 90, 104]
+        cell = atoms.get_cell()
+
+        lob = np.array([ux * (sz[0] - 46), 0.0 + 14 * uy,
+                        uz * (1. / 2. * sz[2] - 12)])
+
+        hib = np.array([ux * (sz[0] - 24), cell[1, 1] - 14 * uy,
+                        uz * (1. / 2. * sz[2] + 12)])
+
+        atoms = self.make_cubic("in", atoms, lob, hib)
+
+        atoms2 = self.buildd03B_rotate()
+        atoms2.set_positions(lob + atoms2.get_positions())
+        atoms2 = self.make_cubic("out", atoms2, lob - 1.0, hib + 1.0)
+
+        atoms.extend(atoms2)
+
+        # calculate volume
+        atoms = self.assign_ynormal_fixatoms(atoms, 1, 20)
+        cml = "volume = {}".format(
+            cell[0, 0] * (cell[1, 1] - 20 * 2) * cell[2, 2])
+        self.write_lmp_config_data(atoms, "lmp_init.txt", cml)
+
+    def make_prec_read_screw_org(self):
         atoms = ase.io.read("dump.422", format="lammps-dump")
         ux, uy, uz = self.pot['ahcp'] * sqrt(3.), self.pot[
             'chcp'], self.pot['ahcp']
@@ -277,8 +338,8 @@ class md_prec(object):
                         uz * (1. / 2. * sz[2] + 6)])
 
         atoms = self.make_cubic("in", atoms, lob, hib)
-        atoms2 = self.buildd03()
 
+        atoms2 = self.buildd03()
         pos = atoms2.get_positions()
         pos += lob
         atoms2.set_positions(pos)
@@ -299,74 +360,61 @@ class md_prec(object):
             cell[0, 0] * (cell[1, 1] - 40.0) * cell[2, 2])
         self.write_lmp_config_data(atoms, "lmp_init.txt", cml)
 
-    def make_double_prec_test(self):
-        ux, uy, uz = self.pot['ahcp'], self.pot[
-            'chcp'], self.pot['ahcp'] * sqrt(3.)
-
-        sz = [150, 90, 120]  # z = 60 gives around 30 nm  100->55. 194->100
-        lata, latc = self.pot["ahcp"], self.pot["chcp"]
-
-        atoms3 = self.buildd03()
-        tmpc = atoms3.get_cell()
-        self.write_lmp_config_data(atoms3, "atm3_1.txt")
-
-        # mirrow along z direction
-        image = tmpc[2, 2]
-        for atom in atoms3:
-            atom.position[2] = image - atom.position[2]
-        self.write_lmp_config_data(atoms3, "atm3_2.txt")
+    # def make_double_prec_test(self):
 
     def make_double_prec(self):
         ux, uy, uz = self.pot['ahcp'], self.pot[
             'chcp'], self.pot['ahcp'] * sqrt(3.)
-
         sz = [150, 90, 120]  # z = 60 gives around 30 nm  100->55. 194->100
+
         atoms = othoHCP(latticeconstant=(ux, uy, uz),
                         size=sz, symbol=self.pot['element'])
         lata, latc = self.pot["ahcp"], self.pot["chcp"]
         self.burger = self.pot["lattice"]
         cell = atoms.get_cell()
+
         lob = np.array([ux * (sz[0] - 68), 0.0 + 14 * uy,
                         uz * (1. / 4. * sz[2] - 6)])
         hib = np.array([ux * (sz[0] - 28), uy * sz[1] - 14 * uy,
                         uz * (1. / 4. * sz[2] + 6)])
-        atoms = self.make_cubic("in", atoms, lob, hib)
-        atoms2 = self.buildd03()
-        atoms2.translate(lob)
-        # pos = atoms2.get_positions()
-        # pos += lob
-        # atoms2.set_positions(pos)
-        atoms2 = self.make_cubic("out", atoms2, lob - 1.0, hib + 1.0)
 
         lob2 = np.array([ux * (sz[0] - 68), 0.0 + 14 * uy,
                          uz * (3. / 4. * sz[2] - 6)])
         hib2 = np.array([ux * (sz[0] - 28), uy * sz[1] - 14 * uy,
                          uz * (3. / 4. * sz[2] + 6)])
-        atoms = self.make_cubic("in", atoms, lob2, hib2)
-        atoms3 = self.buildd03()
-        tmpc = atoms3.get_cell()
 
-        # mirror along z direction
-        image = tmpc[2, 2]
-        for atom in atoms3:
-            atom.position[2] = image - atom.position[2]
+        lob3 = np.array([ux * (sz[0] - 68), 0.0 + 14 * uy,
+                         uz * (3. / 4. * sz[2] - 6) + 1.0])
+        hib3 = np.array([ux * (sz[0] - 28), uy * sz[1] - 14 * uy,
+                         uz * (3. / 4. * sz[2] + 6) + 1.0])
+
+        atoms = self.make_cubic("in", atoms, lob, hib)
+        atoms = self.make_cubic("in", atoms, lob3, hib3)
+
+        atoms2 = self.buildd03()
+        atoms2.translate(lob)
+        atoms2 = self.make_cubic("out", atoms2, lob - 1.0, hib + 1.0)
+
+        atoms3 = self.buildd03_Mirror()
         atoms3.translate(lob2)
-        # pos = atoms3.get_positions()
-        # pos += lob2
-        # atoms3.set_positions(pos)
-        atoms3 = self.make_cubic("out", atoms3, lob2 - 1.0, hib2 + 1.0)
+        atoms3 = self.make_cubic("out", atoms3, lob3 - 1.0, hib3 + 1.0)
+
+        # atoms2.extend(atoms3)
+        # self.write_lmp_config_data(atoms2, "lmp_init.txt")
 
         atoms = self.build_edge_basal_hcp_atoms(
             atoms, center=[ux * 40, 0.5 * sz[1] * uy])
 
         atoms = self.cut_y_normal_atoms(atoms)
         atoms = self.cut_x_normal_atoms(atoms)
-        atoms = self.assign_ynormal_fixatoms(atoms)
+        
+        atoms = self.assign_ynormal_fixatoms(atoms, 1, 28)
 
         atoms.extend(atoms2)
         atoms.extend(atoms3)
+
         cml = "volume = {}".format(
-            cell[0, 0] * (cell[1, 1] - 40.0) * cell[2, 2])
+            cell[0, 0] * (cell[1, 1] - 20.0) * cell[2, 2])
         self.write_lmp_config_data(atoms, "lmp_init.txt", cml)
 
     def make_r60_prec(self):
@@ -394,7 +442,7 @@ class md_prec(object):
 
         atoms = self.cut_y_normal_atoms(atoms)
         atoms = self.cut_x_normal_atoms(atoms)
-        atoms = self.assign_ynormal_fixatoms(atoms)
+        atoms = self.assign_ynormal_fixatoms(atoms, 1, 28)
 
         atoms.rotate(30, 'y')
         # make precipitates
@@ -407,36 +455,43 @@ class md_prec(object):
         atoms.rotate(-30, 'y')
         self.write_lmp_config_data(atoms, "lmp_init.txt")
 
-    def make_only_prec(self):
-        ux, uy, uz = self.pot['ahcp'], self.pot[
-            'chcp'], self.pot['ahcp'] * sqrt(3.)
+    # def make_only_prec(self):
+        # ux, uy, uz = self.pot['ahcp'], self.pot[
+        #     'chcp'], self.pot['ahcp'] * sqrt(3.)
 
-        sz = (40, 10, 10)
-        atoms = othoHCP(latticeconstant=(ux, uy, uz),
-                        size=sz, symbol=self.pot['element'])
-        lata, latc = self.pot["ahcp"], self.pot["chcp"]
-        self.burger = self.pot["lattice"]
+        # sz = (40, 10, 10)
+        # atoms = othoHCP(latticeconstant=(ux, uy, uz),
+        #                 size=sz, symbol=self.pot['element'])
+        # lata, latc = self.pot["ahcp"], self.pot["chcp"]
+        # self.burger = self.pot["lattice"]
 
-        cell = atoms.get_cell()
-        lob = np.array([ux * 15, 0.0, -13 * uz])
-        hib = np.array([ux * 23, uy * 10, -8 * uz])
+        # cell = atoms.get_cell()
+        # lob = np.array([ux * 15, 0.0, -13 * uz])
+        # hib = np.array([ux * 23, uy * 10, -8 * uz])
 
-        atoms.rotate(60, 'y')
-        atoms = self.make_cubic("in", atoms, lob, hib)
+        # atoms.rotate(60, 'y')
+        # atoms = self.make_cubic("in", atoms, lob, hib)
 
-        # make precipitates
-        atoms2 = self.buildd03()
-        atoms2.set_positions(atoms2.get_positions() + lob)
-        atoms2 = self.make_cubic("out", atoms2, lob - 1.0, hib + 1.0)
+        # # make precipitates
+        # atoms2 = self.buildd03()
+        # atoms2.set_positions(atoms2.get_positions() + lob)
+        # atoms2 = self.make_cubic("out", atoms2, lob - 1.0, hib + 1.0)
 
-        atoms.extend(atoms2)
-        self.write_lmp_config_data(atoms, "lmp_rotate.txt")
-        atoms.rotate(-60, 'y')
-        self.write_lmp_config_data(atoms, "lmp_init.txt")
+        # atoms.extend(atoms2)
+        # self.write_lmp_config_data(atoms, "lmp_rotate.txt")
+        # atoms.rotate(-60, 'y')
+        # self.write_lmp_config_data(atoms, "lmp_init.txt")
+
+    def buildd03_Mirror(self):
+        la = self.pot['latD03']
+        SZ = (16, 90, 10)
+        atoms = Mg3NdM(latticeconstant=(la * sqrt(3), la * sqrt(2) / 2.,
+                                        la * sqrt(6) / 2.), size=SZ, symbol=('Mg', 'Nd'))
+        return atoms
 
     def buildd03(self):
         la = self.pot['latD03']
-        SZ = (30, 110, 30)
+        SZ = (16, 90, 10)
         # SZ = (30, 5, 30)
         # type A unit cell
         # atoms = Mg3Nd(latticeconstant=la, size=(1, 1, 1),
@@ -450,10 +505,23 @@ class md_prec(object):
         # type C  x: [1, 1, 1], y[-1  1  0], z [-1 -1  2]
         atoms = Mg3Nd(latticeconstant=(la * sqrt(3), la * sqrt(2) / 2.,
                                        la * sqrt(6) / 2.), size=SZ, symbol=('Mg', 'Nd'))
+        cell = atoms.get_cell()
+        print(cell)
         # U = np.mat([[-1, 1, 0], [0, 0, 1], [0.5, 0.5, 0]])
         # Uinv = np.linalg.inv(U)
         # pos = atoms.get_scaled_positions()
         # print np.linalg.det(U)
+        return atoms
+
+    def buildd03B_rotate(self): 
+        la = self.pot["latD03"] 
+        # type C  x: [1, 1, 1], y[-1  1  0], z [-1 -1  2]
+        atoms = Mg3NdB(latticeconstant=(la * sqrt(6) / 2.,
+                                        la * sqrt(2) / 2.,
+                                        la * sqrt(3)), size=(40, 100, 30), symbol=('Mg', 'Nd'))
+        cell = atoms.get_cell()
+        atoms.rotate(120, 'y', center=(0.5 * cell[0, 0], 0, 0.5 * cell[2, 2]))  
+        atoms.translate([-110, 0.0, -90])
         self.write_lmp_config_data(atoms, "lmp_d03.txt")
         return atoms
 
@@ -469,31 +537,36 @@ class md_prec(object):
     def buildHCP(self):
         ux, uy, uz = self.pot['ahcp'], self.pot[
             'chcp'], self.pot['ahcp'] * sqrt(3.)
-        sz = [1, 1, 16]
+        sz = [20, 1, 16]
         atoms = othoHCP(latticeconstant=(ux, uy, uz),
                         size=sz, symbol=self.pot['element'])
+
         cell = atoms.get_cell()
         print(cell[2, 2])
-        cell[2, 2] = cell[2, 2] + 20
-        atoms.translate([0, 0, 10])
-        atoms.set_cell(cell)
-        cryticalLen = 0.5 * cell[2, 2]
+        # cell[2, 2] = cell[2, 2] + 20
+        # atoms.translate([0, 0, 10])
+        # atoms.set_cell(cell)
+        cryticalLen = 0.5 * cell[1, 1] 
+        for atom in atoms: 
+            if (atom.position[1] > 0.05): 
+                atom.symbol = "Al" 
 
         fname = "lmp_init{:03d}.txt".format(0)
         self.write_lmp_config_data(atoms, fname)
-        os.system("cp {} lmp_init.txt".format(fname))
-        os.system("lmp_mpi -i in.min_hcp")
 
-        numP = 20
-        for i in range(numP):
-            for atom in atoms:
-                if (atom.position[2] > cryticalLen):
-                    atom.position[1] = atom.position[
-                        1] + (1. / numP) * cell[1, 1]
-                fname = "lmp_init{:03d}.txt".format(i + 1)
-                self.write_lmp_config_data(atoms, fname)
-            os.system("cp {} lmp_init.txt".format(fname))
-            os.system("lmp_mpi -i in.min_hcp")
+        # os.system("cp {} lmp_init.txt".format(fname))
+        # os.system("lmp_mpi -i in.min_hcp")
+
+        # numP = 20
+        # for i in range(numP):
+        #     for atom in atoms:
+        #         if (atom.position[2] > cryticalLen):
+        #             atom.position[1] = atom.position[
+        #                 1] + (1. / numP) * cell[1, 1]
+        #         fname = "lmp_init{:03d}.txt".format(i + 1)
+        #         self.write_lmp_config_data(atoms, fname)
+        #     os.system("cp {} lmp_init.txt".format(fname))
+        #     os.system("lmp_mpi -i in.min_hcp")
 
     def calculateGSFInterface(self):
         atoms = ase.io.read("dump.rst", format='lammps-dump')
@@ -539,86 +612,140 @@ class md_prec(object):
     def buildd03small(self):
         la = latd03 = self.pot["latD03"]
         # atoms = Mg3NdCubic(latticeconstant=la, size=(1, 1, 1),
-        #                    symbol=('Mg', 'Nd')) 
+        #                    symbol=('Mg', 'Nd'))
         # x [1, 1, 1],  z[1, 1, 2]
         atoms = Mg3Nd(latticeconstant=(la * sqrt(3), la * sqrt(2) / 2.,
-                                       la * sqrt(6) / 2.), size=(2, 1, 2), symbol=('Mg', 'Nd'))
-        cell = atoms.get_cell() 
-        for atm in atoms: 
-            if (atm.position[1] < 0.5 * cell[1, 1]): 
-                if (atm.symbol == 'Mg'):
-                    atm.symbol = 'Al' 
-                else:
-                    atm.symbol = 'Y'  
+                                       la * sqrt(6) / 2.), size=(1, 1, 1), symbol=('Mg', 'Nd'))
+        cell = atoms.get_cell()
+        shifts = []
+        # for atm in atoms:
+        #     if (atm.position[1] < 0.5 * cell[1, 1]):
+        #         shifts.append(atm.position)
+        #         if (atm.symbol == 'Mg'):
+        #             atm.symbol = 'Al'
+        #         else:
+        #             atm.symbol = 'Y' 
         self.write_lmp_config_data(atoms, "lmp_d03.txt")
+
+        cnt = 0
+        # apply translate
+        for shift in shifts:
+            atoms_tmp = atoms.copy()
+            for atm in atoms_tmp:
+                if (atm.position[1] < 0.5 * cell[1, 1]):
+                    atm.position = atm.position + shift
+            atoms_tmp.wrap()
+            # self.write_lmp_config_data(atoms_tmp, "lmp_d03_{}.txt".format(cnt))
+            cnt += 1
 
     def genGSF2D(self, atoms, org_atoms):
         la = latd03 = self.pot["latD03"]
 
         unitx = la * sqrt(3)
-        unity = la * la * sqrt(2) / 2. 
-        unitz = la * sqrt(6) / 2. 
-        delta = 1. / 24  
+        unity = la * la * sqrt(2) / 2.
+        unitz = la * sqrt(6) / 2.
+        delta = 1. / 24
 
-        cell = atoms.get_cell() 
-        
+        cell = atoms.get_cell()
+
         for j in range(25):
             for i in range(25):
-                jobid = j * 25 + i 
-                fname = "lmp_gsf_{}.txt".format(jobid) 
+                jobid = j * 25 + i
+                fname = "lmp_gsf_{}.txt".format(jobid)
                 self.write_lmp_config_data(atoms, "CONFIGS/" + fname)
 
-                for k in range(len(atoms)):  
-                    if (atoms[k].position[1] < 0.5 * cell[1, 1]): 
-                        atoms[k].position[0] = org_atoms[k].position[0] + i * delta * unitx 
-                        atoms[k].position[2] = org_atoms[k].position[2] + j * delta * unitz
+                for k in range(len(atoms)):
+                    if (atoms[k].position[1] < 0.5 * cell[1, 1]):
+                        atoms[k].position[0] = org_atoms[
+                            k].position[0] + i * delta * unitx
+                        atoms[k].position[2] = org_atoms[
+                            k].position[2] + j * delta * unitz
 
-                os.system("cp CONFIGS/{} lmp_init.txt".format(fname)) 
-                os.system("lmp_mpi -i in.init")  
+                os.system("cp CONFIGS/{} lmp_init.txt".format(fname))
+                # os.system("lmp_mpi -i in.init")
 
     def genGSF1D(self):
         la = latd03 = self.pot["latD03"]
 
         unitx = la * sqrt(3)
-        unity = la * la * sqrt(2) / 2. 
-        unitz = la * sqrt(6) / 2. 
-        delta = 1. / 24  
+        unity = la * la * sqrt(2) / 2.
+        unitz = la * sqrt(6) / 2.
+        delta = 1. / 24
 
         # gen1D
-        delta = 1. / 12 
+        delta = 1. / 12
         for i in range(13):
             self.write_lmp_config_data(atoms, "lmp_gsf_{}.txt".format(i))
-            for atm in atoms: 
-                if (atm.position[1] < 0.5 * cell[1, 1]): 
-                    atm.position[0] += delta * unitx 
+            for atm in atoms:
+                if (atm.position[1] < 0.5 * cell[1, 1]):
+                    atm.position[0] += delta * unitx
 
-                    # atm.position[0] += np.sqrt(3) / 2. * burg 
-                    # atm.position[2] += 1./2. * burg      
+                    # atm.position[0] += np.sqrt(3) / 2. * burg
+                    # atm.position[2] += 1./2. * burg
+
+    def buildd03small_apb_vasp(self):
+        la = latd03 = self.pot["latD03"]
+        unitx = la * sqrt(3)
+        unity = la * la * sqrt(2) / 2.
+        unitz = la * sqrt(6) / 2.
+
+        atoms = Mg3Nd(latticeconstant=(la * sqrt(3), la * sqrt(2) / 2.,
+                                       la * sqrt(6) / 2.), size=(1, 12, 1), symbol=('Mg', 'Nd'))
+
+        shifts = []
+        for atm in atoms:
+            if (atm.position[1] < 1.0):
+                shifts.append(atm.position)
+                print(atm.position)
+
+        cell = atoms.get_cell()
+
+        midy = cell[1, 1] * 0.5
+
+        cell[1, 1] += 20.0
+        print(len(atoms))
+
+        cnt = 0
+        # apply translate
+        for shift in shifts:
+            atoms_tmp = atoms.copy()
+            for atm in atoms_tmp:
+                if (atm.position[1] < midy):
+                    atm.position = atm.position + shift
+
+            atoms_tmp.set_cell(cell)
+            atoms_tmp.translate([0.0, 10.0, 0.0])
+
+            self.mymkdir("APB_{:02}".format())
+
+            # atoms_tmp.wrap()
+            self.write_lmp_config_data(atoms_tmp, "lmp_d03_{}.txt".format(cnt))
+            # ase.io.write(atoms_tmp, format="vasp", "POSCAR.{}".format(cnt))
+            cnt += 1
 
     def buildd03small_apb(self):
         la = latd03 = self.pot["latD03"]
         unitx = la * sqrt(3)
-        unity = la * la * sqrt(2) / 2. 
-        unitz = la * sqrt(6) / 2. 
+        unity = la * la * sqrt(2) / 2.
+        unitz = la * sqrt(6) / 2.
 
         atoms = Mg3Nd(latticeconstant=(la * sqrt(3), la * sqrt(2) / 2.,
-                                       la * sqrt(6) / 2.), size=(2, 12, 2), symbol=('Mg', 'Nd')) 
+                                       la * sqrt(6) / 2.), size=(1, 16, 1), symbol=('Mg', 'Nd'))
 
         burg = self.pot["ahcp"]
 
-        cell = atoms.get_cell() 
-        cell[1, 1] += 20.0  
+        cell = atoms.get_cell()
+        cell[1, 1] += 20.0
         atoms.set_cell(cell)
         atoms.translate([0.0, 10.0, 0.0])
+        self.genGSF2D(atoms, atoms.copy())
 
-        self.genGSF2D(atoms, atoms.copy()) 
-        
-        # run 1 D  
-        # for i in range(13): 
-        #     os.system("cp lmp_gsf_{}.txt lmp_init.txt".format(i))  
-        #     os.system("lmp_mpi -i in.init") 
+        # run 1 D
+        # for i in range(13):
+        #     os.system("cp lmp_gsf_{}.txt lmp_init.txt".format(i))
+        #     os.system("lmp_mpi -i in.init")
 
-        # run 2 D 
+        # run 2 D
 
     def cal_thermo(self):
         ux, uy, uz = self.pot['ahcp'], self.pot[

@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-06-28 00:35:14
 # @Last Modified by:   chaomy
-# @Last Modified time: 2017-09-20 01:37:00
+# @Last Modified time: 2019-03-03 21:57:02
 
 
 from optparse import OptionParser
@@ -95,12 +95,11 @@ class cal_va_surface(object):
         return
 
     def loop_sub_jobs(self):
-        dir_list = glob.glob("dir-*")
+        dir_list = glob.glob("dir[_-]*")
         for i in range(len(dir_list)):
             os.chdir(dir_list[i])
             os.system("qsub va.pbs")
             os.chdir(os.pardir)
-        return
 
 
 if __name__ == '__main__':

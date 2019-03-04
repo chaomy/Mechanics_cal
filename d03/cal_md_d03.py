@@ -129,11 +129,11 @@ class cal_d03(get_data.get_data,
             os.chdir(os.pardir)
         np.savetxt('lat.dat', data)
 
-    def buildd03(self):
-        la = self.pot["lattice"]
-        # unit cell
-        atoms = Mg3Nd(latticeconstant=latd03, size=(1, 1, 1),
-                      symbol=('Mg', 'Nd'))
+    # def buildd03(self):
+    #     la = self.pot["lattice"]
+    #     # unit cell
+    #     atoms = Mg3Nd(latticeconstant=latd03, size=(1, 1, 1),
+    #                   symbol=('Mg', 'Nd'))
 
         # type A
         # atoms = Mg3Nd(latticeconstant=(la * sqrt(2), la,
@@ -149,7 +149,7 @@ class cal_d03(get_data.get_data,
         # Uinv = np.linalg.inv(U)
         # pos = atoms.get_scaled_positions()
         # print np.linalg.det(U)
-        return atoms
+        # return atoms
 
     def clc_data(self):
         disps = self.disps
