@@ -16,24 +16,24 @@ import numpy as np
 class md_gb_pos(object):
     
     def loop_aft_angle(self):
-        self.find_angles_1210()
+        self.find_angles_0001()
         total = np.ndarray([len(self.ag), 2])
         os.system("mkdir result_1")
         os.system("mkdir result_2")
         dd = np.zeros([len(self.ag) + 2, 2])
         dd[0, 0], dd[0, 1] = 0.0, 0.0
-        dd[-1, 0], dd[-1, 1] = 90.0, 0.0
+        dd[-1, 0], dd[-1, 1] = 60.0, 0.0
         grep="tail -n 1 log | awk \'{print $11}\' > final_gb_eng.txt"
         cc="cp data.20.txt ../result_1/"
         cc_2="cp data.20.txt ../result_2/"
         for e, i in zip(self.ag, range(len(self.ag))):
             e_rest=90.0-e[0]
-            mdir = "1210_{:.2f}".format(e_rest)
+            mdir = "0001_{:.2f}".format(e_rest)
             os.chdir(mdir)
             os.system(grep)
             os.system(cc+str(i)+".txt")
             os.system(cc_2+mdir+".lmp")
-            dd[i + 1, 0] = e_rest
+            dd[i + 1, 0] = e_rest*2
             dd[i + 1, 1] = np.loadtxt("final_gb_eng.txt")
 
             total[i, 0] = e_rest
@@ -44,7 +44,7 @@ class md_gb_pos(object):
         np.savetxt('data_opt_conv.txt', dd, fmt='%1.8f')
             
     def loop_plt_angle(self):
-        self.find_angles_1210()
+        self.find_angles_0001()
 
         dd = np.zeros([len(self.ag) + 2, 2])
         dd[0, 0], dd[0, 1] = 0.0, 0.0
@@ -54,7 +54,7 @@ class md_gb_pos(object):
 
         for e, i in zip(self.ag, range(len(self.ag))):
             e_rest=90.0-e[0]
-            mdir = "1210_{:.2f}".format(e_rest)
+            mdir = "0001_{:.2f}".format(e_rest)
             dd[i + 1, 0] = e_rest
             dd[i + 1, 1] = np.loadtxt("{}/lmp.dat".format(mdir)) 
 
@@ -67,12 +67,12 @@ class md_gb_pos(object):
         self.set_111plt((9, 6))
         self.set_keys()
         self.ax.plot(dd[1:-1, 0], 1e3 * dd[1:-1, 1], 'o--',
-                    markersize=14, label='<1210> GB')
+                    markersize=14, label='<0001> GB')
         # ddp **next(self.keysiter)
 
         self.add_legends(self.ax)
 
-        ylb = cycle(['GB[1210] mJ/m^2'])
+        ylb = cycle(['GB[0001] mJ/m^2'])
         xlb = cycle(['Angle (deg)'])
 
         self.add_y_labels(ylb, self.ax)

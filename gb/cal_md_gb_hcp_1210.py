@@ -2,11 +2,11 @@
 # @Author: chaomy
 # @Date:   2017-12-03 11:07:29
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-05-10 17:02:53
+# @Last Modified time: 2018-12-17 15:14:21
 
 import os
 from numpy import sqrt, arccos, arcsin, rad2deg
-from numpy import ndarray, loadtxt
+from numpy import ndarray, loadtxt, savetxt
 from numpy import mat, unique
 
 
@@ -15,17 +15,17 @@ class md_gb_hcp_1210(object):
     def find_angles_1210(self, il=[[1, 2, 3, 4, 5, 6, 7, 8],
                                    [1, 2, 3, 4, 5, 6, 7, 8],
                                    [1, 2, 3, 4, 5, 6, 7, 8],
+                                   [1, 2, 3, 4, 5, 6, 7, 8],
+                                   [1, 2, 3, 4, 5, 6, 7, 8],
+                                   [1, 2, 3, 4, 5, 6, 7, 8],
                                    [1, 2, 3, 4, 5, 6, 7, 8]],
-                         jl=[1, 2, 3, 4]):
+                         jl=[1, 2, 3, 4, 5, 6, 7]):
         ags = []
         res = []
-
-        # npts = 7
-        ux = sqrt(3) * self.pot["ahcp"]
-        uy = self.pot["chcp"]
-
+        ux = self.pot["chcp"]
+        uy = self.pot["ahcp"]*sqrt(3.0)
         cnt = 0
-
+        
         for j in jl:
             for i in il[j - 1]:
                 idx = i
@@ -34,24 +34,77 @@ class md_gb_hcp_1210(object):
                 ly = idy * uy
 
                 ll = sqrt(lx**2 + ly**2)
-                ang = rad2deg(arcsin(ly / ll))
-
-                if (ang <= 90):
+                ang = rad2deg(arcsin(lx / ll))
+                ang_rest=90.0-ang
+                if (ang < 90):
                     cnt += 1
                     ags.append(ang)
                     while (ll < 0):
                         ll *= 2
-                    res.append([ang, ll, i, j])
+                    res.append([ang_rest, ll, i, j])
 
         print(len(ags))
         (a, b) = unique(ags, return_index=True)
+
+        print(len(a), len(b))
         self.ag = []
+
         for ee in b:
             self.ag.append(res[ee])
-        print(self.ag)
+
+    def give_angle_1210(self, opt='run'):
+        self.find_angles_1210(il=[[], [1]], jl=[2])   # 72.877
+        # self.find_angles_1100(il=[[1], [1]], jl=[1])    # 58.361
+
+        npts = 2
+        j = 0
+        self.gbdat = ndarray([2, npts])
+        self.gbdat[0, 0], self.gbdat[0, 1] = 0, 0
+
+        ux = self.pot["chcp"]
+        uz = self.pot["ahcp"]
+
+        for m in range(npts):
+            for n in range(npts):
+                for ee in self.ag:
+                    dx = m / (npts + 1) * ux
+                    dz = n / (npts + 1) * uz
+                    mdir = "dir_{:02.03f}_{:02d}_{:02d}_{:02d}_{:02d}".format(
+                        ee[0], ee[2], ee[3], m, n)
+
+                    if opt in ['prep']:
+                        self.mymkdir(mdir)
+                        self.build_hcp_gb_lmp(
+                            ee[0], ee[1], (50, 60), (dx, 0.0, dz), '1210')
+                        os.system('mv in.gb {}'.format(mdir))
+                        self.mymkdir('{}/out'.format(mdir))
+
+                    elif opt in ['run']:
+                        os.chdir(mdir)
+                        os.system('mpirun lmp_mpi -i in.gb')
+                        os.chdir(os.pardir)
+
+                    elif opt in ['read']:
+                        os.chdir(mdir)
+                        self.gbdat[0, j] = j
+                        self.gbdat[1, j] = loadtxt('lmp.dat')
+                        j += 1
+                        os.chdir(os.pardir)
+
+                    elif opt in ["move"]:
+                        os.system(
+                            "cp {}/out/rel.chkpt.0 hcp.gb.{:03}".format(mdir, j))
+                        j += 1
+
+        if opt in ['read']:
+            self.set_111plt()
+            print(self.gbdat[1, :])
+            self.ax.plot(self.gbdat[0, :], self.gbdat[1, :])
+            self.fig.savefig("fig_gb.png")
 
     def loop_angle_1210(self, opt='prep'):
         self.find_angles_1210()
+
         npts = len(self.ag)
 
         j = 0
@@ -63,7 +116,8 @@ class md_gb_hcp_1210(object):
 
             if opt in ['prep']:
                 self.mymkdir(mdir)
-                self.build_hcp_gb_lmp(ee[0], ee[1], (40, 50), (0.0, 0.0, 0.0))
+                self.build_hcp_gb_lmp(
+                    ee[0], ee[1], (40, 50), (0.0, 0.0, 0.0), '1210')
                 os.system('mv in.gb {}'.format(mdir))
                 self.mymkdir('{}/out'.format(mdir))
 

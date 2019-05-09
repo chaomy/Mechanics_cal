@@ -2,7 +2,7 @@
 # @Author: chaomy
 # @Date:   2017-12-03 11:07:29
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-12-17 15:42:52
+# @Last Modified time: 2018-12-17 15:14:21
 
 import os
 from numpy import sqrt, arccos, arcsin, rad2deg
@@ -30,7 +30,6 @@ class md_gb_hcp_1100(object):
             for i in il[j - 1]:
                 idx = i
                 idy = j
-
                 lx = idx * ux
                 ly = idy * uy
 

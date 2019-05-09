@@ -19,30 +19,30 @@ import glob
 
 class othoHCPFractory(otho.SimpleOrthorhombicFactory):
     bravais_basis = [[0.0, 0.0, 0.0],
-                     [0.0, 0.5, 0.5],
-                     [0.5, 1. / 3., 0.0],
+                     [0.5, 0.5, 0.0],
+                     [0.0, 1. / 3., 0.5],
                      [0.5, 5. / 6., 0.5]]
 othoHCP = othoHCPFractory()
 
 
 class othoHCPFractoryB(otho.SimpleOrthorhombicFactory):
     bravais_basis = [[0.0, 0.0, 0.0],
-                     [0.0, 0.5, 0.5],
-                     [0.5, 2. / 3., 0.0],
+                     [0.5, 0.5, 0.0],
+                     [0.0, 2. / 3., 0.5],
                      [0.5, 1. / 6., 0.5]]
 othoHCPB = othoHCPFractoryB()
 
 
-class md_gb_ase_1210(object):
+class md_gb_ase_0001(object):
 
     def auto(self):
-        self.build_hcp_ase_1210_small()
+        self.build_hcp_ase_0001_small()
         # minimie
         self.make_perf()
         # minimie
         self.intro_edge_dipole()
 
-    def loop_dup_structures_1210(self):
+    def loop_dup_structures(self):
         files = glob.glob("STRUCT.*")
         for i in range(len(files)):
             atoms = ase.io.read("STRUCT.{}".format(i), format="lammps-dump")
@@ -54,8 +54,8 @@ class md_gb_ase_1210(object):
         atoms = ase.io.read("CAND.12", format="lammps-data")
         print(len(atoms))
 
-    def loop_clc_init_structures_1210(self):
-        dirs = glob.glob("1210_*")
+    def loop_clc_init_structures(self):
+        dirs = glob.glob("0001_*")
         for i in range(len(dirs)):
             mdir = dirs[i]
             files = glob.glob("{}/dump/*".format(mdir))
@@ -108,31 +108,31 @@ class md_gb_ase_1210(object):
         # self.closefig()
 
     def loop_combine(self):
-        self.find_angles_1210()
+        self.find_angles_0001()
         for e in self.ag[:]:
-            mdir = "1210_{:.2f}".format(e[0])
+            mdir = "0001_{:.2f}".format(e[0])
             os.chdir(mdir)
             os.system("gb_bound.exe -p ../../gb.param")
             os.chdir(os.pardir)
 
     def print_angles(self):
-        self.find_angles_1210()
+        self.find_angles_0001()
         for e in self.ag:
             print(e[0], e[1], e[2], e[3])
 
-    def loop_init_1210(self):
-        self.find_angles_1210()
+    def loop_init_0001(self):
+        self.find_angles_0001()
         cn = 0
         ag_list=np.array(self.ag)
         ag_list[:,0]=90.0-ag_list[:,0]
         np.savetxt('gb_angle_list.txt', ag_list, fmt='%1.8f')
         for e in self.ag:
             e_rest=90.0-e[0]
-            mdir = "1210_{:.2f}".format(e_rest) #orginial
-            #mdir = "1210_{:.2f}_{:02d}_{:02d}".format(e[0],e[2],e[3]) # yongjie
+            mdir = "0001_{:.2f}".format(e_rest) #orginial
+            #mdir = "0001_{:.2f}_{:02d}_{:02d}".format(e[0],e[2],e[3]) # yongjie
             print(mdir)
             self.mymkdir(mdir)
-            self.write_1210_small(e)
+            self.write_0001_small(e)
             # self.write_1100_DFT(e)
             # self.write_1100_DFT_Surf(e)
             # self.write_1100_large(e)
@@ -144,9 +144,9 @@ class md_gb_ase_1210(object):
             cn += 1
 
     # to generate surfaces
-    def write_1210_DFT_Surf(self, ag):
-        uz = self.pot['ahcp']
-        ux = self.pot['chcp']
+    def write_0001_DFT_Surf(self, ag):
+        ux = self.pot['ahcp']
+        uz = self.pot['chcp']
         uy = self.pot['ahcp'] * sqrt(3.)
 
         # angle, length, i, j
@@ -173,9 +173,9 @@ class md_gb_ase_1210(object):
             atoms.translate(np.array([0.0, 10.0, 0.0]))
         ase.io.write("POSCAR", images=atoms, format="vasp")
 
-    def write_1210_DFT(self, ag):
-        uz = self.pot['ahcp']
-        ux = self.pot['chcp']
+    def write_0001_DFT(self, ag):
+        ux = self.pot['ahcp']
+        uz = self.pot['chcp']
         uy = self.pot['ahcp'] * sqrt(3.)
 
         VACUMM = 10.0
@@ -244,9 +244,9 @@ class md_gb_ase_1210(object):
 
         self.write_lmp_config_data(atoms, "lmp.init")
 
-    def write_1210_small(self, ag):
-        uz = self.pot['ahcp']
-        ux = self.pot['chcp']
+    def write_0001_small(self, ag):
+        ux = self.pot['ahcp']
+        uz = self.pot['chcp']
         uy = self.pot['ahcp'] * sqrt(3.)
 
         # angle, length, i, j
@@ -320,9 +320,9 @@ class md_gb_ase_1210(object):
             atoms = atoms.repeat((rep, 1, 1))
         self.write_lmp_config_data(atoms, "lmp.init")
 
-    def write_1210_long_thin(self, ag):
-        uz = self.pot['ahcp']
-        ux = self.pot['chcp']
+    def write_0001_long_thin(self, ag):
+        ux = self.pot['ahcp']
+        uz = self.pot['chcp']
         uy = self.pot['ahcp'] * sqrt(3.)
 
         # angle, length, i, j
@@ -442,18 +442,18 @@ class md_gb_ase_1210(object):
     #     self.write_lmp_config_data(atoms, "lmp_init.txt")
     #     self.make_repeat(atoms)
 
-    def build_hcp_ase_1210_small(self):  # to examine the GB structures
-        self.find_angles_1210(il=[[], [1]], jl=[2])    # 72.877    ABAB --
-        self.write_1210_small(self.ag[0])
+    def build_hcp_ase_0001_small(self):  # to examine the GB structures
+        self.find_angles_0001(il=[[], [1]], jl=[2])    # 72.877    ABAB --
+        self.write_0001_small(self.ag[0])
 
-    def build_hcp_ase_1210(self):
-        self.find_angles_1210(il=[[1], [1]], jl=[1])    # 58.361
-        self.write_1210_large(self.ag[0])
+    def build_hcp_ase_0001(self):
+        self.find_angles_0001(il=[[1], [1]], jl=[1])    # 58.361
+        self.write_0001_large(self.ag[0])
 
-    def build_hcp_ase_1210_3ABA(self):
-        self.find_angles_1210(il=[[1], [1]], jl=[1])    # 58.361
-        uz = self.pot['ahcp']
-        ux = self.pot['chcp']
+    def build_hcp_ase_0001_3ABA(self):
+        self.find_angles_0001(il=[[1], [1]], jl=[1])    # 58.361
+        ux = self.pot['ahcp']
+        uz = self.pot['chcp']
         uy = self.pot['ahcp'] * sqrt(3.)
 
         atoms = othoHCP(latticeconstant=(ux, uy, uz), size=(
