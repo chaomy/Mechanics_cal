@@ -2,7 +2,7 @@
 # @Author: chaomy
 # @Date:   2017-12-03 11:07:29
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-04-26 13:27:26
+# @Last Modified time: 2019-05-09 16:37:57
 
 import os
 from numpy import sqrt, arccos, arcsin, rad2deg
@@ -11,7 +11,6 @@ from numpy import mat, unique
 
 
 class md_gb_loop(object):
-
     def find_angles_0001(self, il=[[1, 2, 3, 4, 5, 6, 7],
                                    [1, 2, 3, 4, 5, 6, 7, 8]],
                          jl=[1, 2]):
