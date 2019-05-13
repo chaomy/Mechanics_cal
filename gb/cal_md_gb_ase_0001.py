@@ -2,7 +2,7 @@
 # @Author: chaomy
 # @Date:   2017-12-03 11:07:29
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-12-03 14:12:22
+# @Last Modified time: 2019-05-10 18:11:17
 
 import ase.lattice.orthorhombic as otho
 import ase.io
@@ -123,20 +123,19 @@ class md_gb_ase_0001(object):
     def loop_init_0001(self):
         self.find_angles_0001()
         cn = 0
-        ag_list=np.array(self.ag)
-        ag_list[:,0]=90.0-ag_list[:,0]
+        ag_list = np.array(self.ag)
+        ag_list[:, 0] = 90.0 - ag_list[:, 0]
         np.savetxt('gb_angle_list.txt', ag_list, fmt='%1.8f')
-        for e in self.ag:
-            e_rest=90.0-e[0]
-            mdir = "0001_{:.2f}".format(e_rest) #orginial
-            #mdir = "0001_{:.2f}_{:02d}_{:02d}".format(e[0],e[2],e[3]) # yongjie
+        for e in self.ag[:1]:
+            e_rest = 90.0 - e[0]
+            mdir = "0001_{:.2f}".format(e_rest)  # orginial
+            # mdir = "0001_{:.2f}_{:02d}_{:02d}".format(e[0],e[2],e[3]) #
             print(mdir)
             self.mymkdir(mdir)
-            self.write_0001_small(e)
+            # self.write_0001_small(e)
             # self.write_1100_DFT(e)
             # self.write_1100_DFT_Surf(e)
-            # self.write_1100_large(e)
-            # self.write_1100_long_thin(e)
+            self.write_1100_large(e)
             # os.system("cp POSCAR pos_{:02d}".format(cn))
             # os.system("cp INPUTS/* {}".format(mdir))
             os.system("mv lmp.init {}".format(mdir))
@@ -284,8 +283,8 @@ class md_gb_ase_0001(object):
              cell[1, 1] - floor(12 * cos(deg2rad(ag[0]))) * uy, 0]))  # for 72.877
 
         atoms2 = self.make_cubic('out', atoms2, lob, hib)
-        atoms2.translate(np.array([0.0, 0.2, 0.25 * uz])) # chaomy original
-        #atoms2.translate(np.array([0.0, 0.2, 0.0])) #yongjie
+        atoms2.translate(np.array([0.0, 0.2, 0.25 * uz]))  # chaomy original
+        # atoms2.translate(np.array([0.0, 0.2, 0.0])) #yongjie
         atoms.extend(atoms2)
 
         # assign low grain
@@ -320,7 +319,7 @@ class md_gb_ase_0001(object):
             atoms = atoms.repeat((rep, 1, 1))
         self.write_lmp_config_data(atoms, "lmp.init")
 
-    def write_0001_long_thin(self, ag):
+    def write_1100_large(self, ag):
         ux = self.pot['ahcp']
         uz = self.pot['chcp']
         uy = self.pot['ahcp'] * sqrt(3.)
@@ -331,7 +330,7 @@ class md_gb_ase_0001(object):
 
         atoms.rotate(ag[0], 'z')
         cell = atoms.get_cell()
-        cell[0, 0], cell[1, 1] = 2 * ag[1], 400
+        cell[0, 0], cell[1, 1] = ag[1], 400 
 
         atoms.translate(
             np.array([cell[0, 0] - floor(15 * cos(deg2rad(ag[0]))) * ux,
@@ -347,14 +346,16 @@ class md_gb_ase_0001(object):
 
         lob = np.array([0.0, 0.5 * cell[1, 1], 0.0])
         hib = np.array([cell[0, 0], cell[1, 1] - 0.2, cell[2, 2]])
+        # hib = np.array([cell[0, 0], cell[1, 1] - VACUMM, cell[2, 2]])
 
         atoms2.rotate(-ag[0], 'z')
         atoms2.translate(np.array(
             [floor(60 * cos(deg2rad(ag[0]))) * -ux,
-             cell[1, 1] - floor(22 * cos(deg2rad(ag[0]))) * uy, 0]))  # for 72.877
+             cell[1, 1] - floor(12 * cos(deg2rad(ag[0]))) * uy, 0]))  # for 72.877
 
         atoms2 = self.make_cubic('out', atoms2, lob, hib)
-        atoms2.translate(np.array([0.0, 0.2, 0.25 * uz]))
+        atoms2.translate(np.array([0.0, 0.2, 0.25 * uz]))  # chaomy original
+        # atoms2.translate(np.array([0.0, 0.2, 0.0])) #yongjie
         atoms.extend(atoms2)
 
         # assign low grain
@@ -369,86 +370,23 @@ class md_gb_ase_0001(object):
                 if atom.position[1] >= m + 180 or atom.position[1] <= m - 180:
                     atom.symbol = 'Mo'
 
+        vacumm = 0
+        if vacumm == 1:
+            cell[1, 1] += 40.0
         atoms.set_cell(cell)
+        if vacumm == 1:
+            atoms.translate(np.array([0.0, 20.0, 0.0]))
+
         idx = []
         for atom in atoms:
             if atom.symbol in ['Mo']:
                 idx.append(atom.index)
         del atoms[idx]
 
-        # rep = int(np.ceil(50 / cell[0, 0]))
-        # if rep > 1:
-        #     atoms = atoms.repeat((rep, 1, 1))
+        rep = int(np.ceil(50 / cell[0, 0]))
+        if rep > 1:
+            atoms = atoms.repeat((rep, 1, 1))
         self.write_lmp_config_data(atoms, "lmp.init")
-
-    # def write_1100_large(self, ag):
-    #     ux = self.pot['ahcp']
-    #     uy = self.pot['chcp']
-    #     uz = self.pot['ahcp'] * sqrt(3.)
-
-    #     # angle, length, i, j
-    #     atoms = othoHCP(latticeconstant=(ux, uy, uz), size=(
-    #         400, 400, 1), symbol=self.pot['element'])
-
-    #     atoms.rotate(ag[0], 'z')
-    #     cell = atoms.get_cell()
-    #     cell[0, 0], cell[1, 1] = 1 * ag[1], 280
-    #     atoms.translate(
-    #         np.array([cell[0, 0] - floor(15 * cos(deg2rad(ag[0]))) * ux,
-    #                   -floor(47 * cos(deg2rad(ag[0]))) * uy, 0]))
-
-    #     lob = np.array([0.0, 0.0, 0.0])
-    #     hib = np.array([cell[0, 0], 0.5 * cell[1, 1], cell[2, 2]])
-    #     atoms = self.make_cubic('out', atoms, lob, hib)
-
-    #     # the other grain
-    #     atoms2 = othoHCPB(latticeconstant=(ux, uy, uz), size=(
-    #         400, 400, 1), symbol='Al')     # for 1100 72.877
-
-    #     # atoms2 = othoHCP(latticeconstant=(ux, uy, uz), size=(
-    #     #     80, 80, 3), symbol='Nb')   # for 1100 58.361
-
-    #     lob = np.array([0.0, 0.5 * cell[1, 1], 0.0])
-    #     hib = np.array([cell[0, 0], cell[1, 1] - 0.2, cell[2, 2]])
-
-    #     atoms2.rotate(-ag[0], 'z')
-    #     # atoms2.translate(np.array([-10 * ux, cell[1, 1], 0]))  # for
-    #     # 72.877
-    #     atoms2.translate(np.array(
-    #         [floor(60 * cos(deg2rad(ag[0]))) * -ux,
-    # cell[1, 1] - floor(12 * cos(deg2rad(ag[0]))) * uy, 0]))  # for 72.877
-
-    #     atoms2 = self.make_cubic('out', atoms2, lob, hib)
-    #     atoms2.translate(np.array([0.0, 0.2, 0.25 * uz]))
-    #     atoms.extend(atoms2)
-
-    #     # lob = np.array([0.0, 40, 0.0])
-    #     # hib = np.array([cell[0, 0], cell[1, 1] - 40, cell[2, 2]])
-    #     # atoms = self.assign_cubic(atoms, 'out', 'W', lob, hib)
-
-    #     # assign gb region
-    #     assign_gb = 1
-    #     if assign_gb == 1:
-    #         for atom in atoms:
-    #             if atom.position[1] <= 17:
-    #                 atom.symbol = 'W'
-    #             if atom.position[1] >= cell[1, 1] - 17:
-    #                 atom.symbol = 'Mo'
-
-    #     # to add vacancy optional
-    #     cell[1, 1] += 30
-    #     atoms.translate(np.array([0.0, 15, 0.0]))
-    #     atoms.set_cell(cell)
-    #     self.write_lmp_config_data(atoms, "lmp_init.txt")
-    #     self.make_repeat(atoms)
-
-    def build_hcp_ase_0001_small(self):  # to examine the GB structures
-        self.find_angles_0001(il=[[], [1]], jl=[2])    # 72.877    ABAB --
-        self.write_0001_small(self.ag[0])
-
-    def build_hcp_ase_0001(self):
-        self.find_angles_0001(il=[[1], [1]], jl=[1])    # 58.361
-        self.write_0001_large(self.ag[0])
 
     def build_hcp_ase_0001_3ABA(self):
         self.find_angles_0001(il=[[1], [1]], jl=[1])    # 58.361
@@ -538,6 +476,22 @@ class md_gb_ase_0001(object):
         del atoms[idx]
         ase.io.write("POSCAR1", images=atoms, format="vasp")
         self.write_lmp_config_data(atoms, "lmp_init.txt")
+
+    def introduce_sphere(self):
+        files = glob.glob("dump/*")
+        atoms = ase.io.read(files[-1], format="lammps-dump")
+        cell = atoms.get_cell(); 
+        xc = 0.5 * cell[0, 0]
+        yc = 0.25 * cell[1, 1]
+        zc = 0.5 * cell[2, 2]
+        center = np.array([xc, yc, zc])
+        rc = 10.0
+        idx = [] 
+        for atom in atoms:
+            if np.linalg.norm(atom.position - center) < rc:
+                idx.append(atom.index)
+        del atoms[idx]
+        self.write_lmp_config_data(atoms, "setup.txt", "setup-dis-gb")
 
     def make_repeat(self, atoms):
         if atoms is None:

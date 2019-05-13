@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
-# @Last Modified by:   chaomingyang
-# @Last Modified time: 2019-05-09 16:35:59
+# @Last Modified by:   chaomy
+# @Last Modified time: 2019-05-10 18:06:22
 
 
 import cal_md_gb_hcp
@@ -113,7 +113,7 @@ if __name__ == "__main__":
                   'fml': drv.formular_make_edge,
                   'scnt': drv.shift_make_edge_cnt,
                   'shear': drv.add_shear,
-                  'dup': drv.duplicate_make_edge,
+                  'sphere': drv.introduce_sphere,
                   'rep': drv.make_repeat,
                   'loop': drv.loop_init_1100,
                   'loop_fcc_100': drv.loop_init_fcc100,  # -1mingfei

@@ -2,7 +2,7 @@
 # @Author: chaomy
 # @Date:   2017-12-03 11:07:29
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-12-03 14:12:22
+# @Last Modified time: 2019-05-13 12:05:11
 
 import ase.lattice.orthorhombic as otho
 import ase.io
@@ -58,8 +58,9 @@ class md_gb_ase_1210(object):
         dirs = glob.glob("1210_*")
         for i in range(len(dirs)):
             mdir = dirs[i]
-            files = glob.glob("{}/dump/*".format(mdir))
-            os.system("cp {} ../GENS/STRUCT.{}".format(files[1], i))
+            files = glob.glob("{}/dump.*".format(mdir))
+            print(files[-1])
+            os.system("cp {} GENS/STRUCT.{}".format(files[-1], i))
 
     def loop_plot_energy(self):
         data_evo = np.loadtxt('data_evo.txt')

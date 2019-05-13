@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2018-11-09 11:21:58
+# @Last Modified time: 2019-05-13 11:56:48
 
 import os
 from glob import glob
@@ -13,14 +13,14 @@ from ase import Atom
 
 
 class md_gb_run(object):
-
-    def loop_gb_run(self):
+    
+    def loop_gb_run(self):  
         dlist = glob("1210_*")
         for mdir in dlist:
             os.system("cp in.min {}".format(mdir))
             os.chdir(mdir)
             self.mymkdir("dump")
-            os.system("mpirun -n 1 /home/huyo/software/lammps/lmp_mpi -i in.min")
+            os.system("mpirun -n 1 lmp_mpi -i in.min")
             os.chdir(os.pardir)
 
     def loop_set_usp_run(self):
