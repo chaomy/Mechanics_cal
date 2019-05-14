@@ -21,6 +21,8 @@ import cal_md_gb_ase_1210
 # add FCC 100 modules -1mingfei 12/19/2018
 import cal_md_gb_fcc_100
 import cal_md_gb_ase_fcc_100
+import cal_md_gb_bcc_100
+import cal_md_gb_ase_bcc_100
 import cal_md_gb_ase_0001
 import cal_md_edge_shift
 import get_data
@@ -47,6 +49,8 @@ class md_gb(cal_md_gb_pre.md_gb_pre,
             # add fcc moduli -1mingfei 12/19/2018
             cal_md_gb_fcc_100.md_gb_fcc_100,
             cal_md_gb_ase_fcc_100.md_gb_ase_fcc_100,
+            cal_md_gb_bcc_100.md_gb_bcc_100,
+            cal_md_gb_ase_bcc_100.md_gb_ase_bcc_100,
 
             Intro_vasp.vasp_change_box,
             cal_md_edge_shift.md_edge_shift,
@@ -70,10 +74,12 @@ class md_gb(cal_md_gb_pre.md_gb_pre,
         cal_md_gb_hcp.md_gb_hcp.__init__(self)
         cal_md_gb_hcp_1100.md_gb_hcp_1100.__init__(self)
         cal_md_gb_fcc_100.md_gb_fcc_100.__init__(self)  # -1mingfei
+        cal_md_gb_bcc_100.md_gb_bcc_100.__init__(self)  # -1mingfei
         cal_md_gb_hcp_0001.md_gb_hcp_0001.__init__(self)  # yongjie
         cal_md_gb_hcp_1210.md_gb_hcp_1210.__init__(self)
         cal_md_gb_ase_1100.md_gb_ase_1100.__init__(self)
         cal_md_gb_ase_fcc_100.md_gb_ase_fcc_100.__init__(self)  # -1mingfei
+        cal_md_gb_ase_bcc_100.md_gb_ase_bcc_100.__init__(self)  # -1mingfei
         cal_md_gb_ase_0001.md_gb_ase_0001.__init__(self)  # yongjie
         cal_md_gb_ase_1210.md_gb_ase_1210.__init__(self)
         cal_md_edge_shift.md_edge_shift.__init__(self)
@@ -117,6 +123,7 @@ if __name__ == "__main__":
                   'rep': drv.make_repeat,
                   'loop': drv.loop_init_1100,
                   'loop_fcc_100': drv.loop_init_fcc100,  # -1mingfei
+                  'loop_bcc_100': drv.loop_init_bcc100,  # -1mingfei
                   'loop_hcp_0001': drv.loop_init_0001,  # yongjie
                   'loop_hcp_1210': drv.loop_init_1210,  # yongjie
                   'del': drv.analysize_atomic_strain,
