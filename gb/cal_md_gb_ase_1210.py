@@ -2,7 +2,7 @@
 # @Author: chaomy
 # @Date:   2017-12-03 11:07:29
 # @Last Modified by:   chaomy
-# @Last Modified time: 2019-05-13 12:05:11
+# @Last Modified time: 2019-05-13 17:09:56
 
 import ase.lattice.orthorhombic as otho
 import ase.io
@@ -316,6 +316,7 @@ class md_gb_ase_1210(object):
                 idx.append(atom.index)
         del atoms[idx]
 
+        # the width along X direction is at least 50 A
         rep = int(np.ceil(50 / cell[0, 0]))
         if rep > 1:
             atoms = atoms.repeat((rep, 1, 1))
