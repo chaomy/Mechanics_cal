@@ -12,12 +12,11 @@ from numpy import mat, unique
 
 class md_gb_bcc_100(object):
 
-    def find_angles_100(self, il=[[1, 2, 3, 4, 5, 6, 7,],
-                                  [1, 2, 3, 4, 5, 6, 7,],
-                                  [1, 2, 3, 4, 5, 6, 7,],
-                                  [1, 2, 3, 4, 5, 6, 7,],
-                                  [1, 2, 3, 4, 5, 6, 7,]],
-                         jl=[1, 2, 3, 4, 5]):
+    def find_angles_100(self, il=[[1, 2, 3, 4, 5, 6, 7, 8, 9],
+                                  [1, 2, 3, 4, 5, 6, 7, 8, 9],
+                                  [1, 2, 3, 4, 5, 6, 7, 8, 9],
+                                  [1, 2, 3, 4, 5, 6, 7, 8, 9]],
+                         jl=[1, 2, 3, 4]):
         ags = []
         res = []
         ux = self.pot["lattice"]
@@ -34,21 +33,21 @@ class md_gb_bcc_100(object):
                 ll = sqrt(lx**2 + ly**2)
                 ang = rad2deg(arccos(lx / ll))
 
-                ang_rest=90.0-ang
-                if (ang*2 < 90):
-                    cnt += 1
-                    ags.append(ang)
-                    while (ll < 0):
-                        ll *= 2
-                    res.append([ang_rest, ll, i, j])
-
-
-#                if (ang <= 90):
+#                ang_rest=90.0-ang
+#                if (ang*2 < 90):
 #                    cnt += 1
 #                    ags.append(ang)
 #                    while (ll < 0):
 #                        ll *= 2
-#                    res.append([ang, ll, i, j])
+#                    res.append([ang_rest, ll, i, j])
+
+
+                if (ang <= 90):
+                    cnt += 1
+                    ags.append(ang)
+                    while (ll < 0):
+                        ll *= 2
+                    res.append([ang, ll, i, j])
 
         print(len(ags))
         (a, b) = unique(ags, return_index=True)

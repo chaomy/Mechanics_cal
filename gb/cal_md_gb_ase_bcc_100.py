@@ -123,6 +123,7 @@ class md_gb_ase_bcc_100(object):
             cn += 1
 
     # to generate surfaces
+    '''
     def write_100_DFT_Surf(self, ag):
         ux = self.pot['lattice']
         uy = self.pot['lattice']
@@ -152,7 +153,6 @@ class md_gb_ase_bcc_100(object):
         if vacumm == 1:
             atoms.translate(np.array([0.0, 10.0, 0.0]))
         ase.io.write("POSCAR", images=atoms, format="vasp")
-    '''
     def write_100_DFT(self, ag):
         ux = self.pot['lattice']
         uy = self.pot['lattice']
@@ -228,7 +228,7 @@ class md_gb_ase_bcc_100(object):
     def write_100_small(self, ag):
         ux = self.pot['lattice']
         uy = self.pot['lattice']
-        uz = self.pot['lattice'] #check this -1mingfei
+        uz = self.pot['lattice'] 
 
         # angle, length, i, j
         atoms = BodyCenteredCubic(latticeconstant=self.pot['lattice'], size=(
@@ -248,10 +248,7 @@ class md_gb_ase_bcc_100(object):
 
         # the other grain
         atoms2 = BodyCenteredCubic(latticeconstant=self.pot['lattice'], size=(
-            130, 130, 2), symbol=self.pot['element'])     # for 1100 72.877
-
-        # atoms2 = othoHCP(latticeconstant=(ux, uy, uz), size=(
-        #     130, 130, 2), symbol=self.pot['element'])   # for 1100 58.361
+            130, 130, 2), symbol=self.pot['element'])     
 
         lob = np.array([0.0, 0.5 * cell[1, 1], 0.0])
         hib = np.array([cell[0, 0], cell[1, 1] - 0.2, cell[2, 2]])
@@ -264,6 +261,7 @@ class md_gb_ase_bcc_100(object):
             [floor(60 * cos(deg2rad(ag[0]))) * -ux,
              cell[1, 1] - floor(12 * cos(deg2rad(ag[0]))) * uy, 0]))  # for 72.877
 
+        atoms2.translate(np.array([-cell[0,0]*2.0, -cell[1,1]*0.1, 0.0]))
         atoms2 = self.make_cubic('out', atoms2, lob, hib)
         #atoms2.translate(np.array([0.0, 0.2, 0.25 * uz]))
         atoms2.translate(np.array([0.0, 0.2, 0.0]))
