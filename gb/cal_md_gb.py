@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2019-05-15 12:02:43
+# @Last Modified time: 2019-05-15 16:44:10
 
 
 import cal_md_gb_hcp
@@ -22,12 +22,9 @@ import cal_md_gb_ase_1210
 import cal_md_gb_fcc_100
 import cal_md_gb_bcc_110
 import cal_md_gb_ase_fcc_100
-<<<<<<< HEAD
 import cal_md_gb_ase_bcc_110
-=======
 import cal_md_gb_bcc_100
 import cal_md_gb_ase_bcc_100
->>>>>>> ab1fd522949c1c04d9551ecc5fa8ae415c665c6c
 import cal_md_gb_ase_0001
 import cal_md_edge_shift
 import get_data
@@ -52,18 +49,14 @@ class md_gb(cal_md_gb_pre.md_gb_pre,
             cal_md_gb_ase_1100.md_gb_ase_1100,
             cal_md_gb_ase_1210.md_gb_ase_1210,
             # add fcc moduli -1mingfei 12/19/2018
-<<<<<<< HEAD
             cal_md_gb_fcc_100.md_gb_fcc_100,
             cal_md_gb_ase_fcc_100.md_gb_ase_fcc_100,
             cal_md_gb_bcc_110.md_gb_bcc_110, 
             cal_md_gb_ase_bcc_110.md_gb_ase_bcc_110, 
-=======
             #cal_md_gb_fcc_100.md_gb_fcc_100,
             #cal_md_gb_ase_fcc_100.md_gb_ase_fcc_100,
             cal_md_gb_bcc_100.md_gb_bcc_100,
             cal_md_gb_ase_bcc_100.md_gb_ase_bcc_100,
-
->>>>>>> ab1fd522949c1c04d9551ecc5fa8ae415c665c6c
             Intro_vasp.vasp_change_box,
             cal_md_edge_shift.md_edge_shift,
             plt_drv.plt_drv,
@@ -85,13 +78,10 @@ class md_gb(cal_md_gb_pre.md_gb_pre,
         # cal_md_gb_hcp_0001.md_gb_loop.__init__(self) yongjie
         cal_md_gb_hcp.md_gb_hcp.__init__(self)
         cal_md_gb_hcp_1100.md_gb_hcp_1100.__init__(self)
-<<<<<<< HEAD
         cal_md_gb_fcc_100.md_gb_fcc_100.__init__(self)  # -1mingfei
         cal_md_gb_bcc_110.md_gb_bcc_110.__init__(self)
-=======
         #cal_md_gb_fcc_100.md_gb_fcc_100.__init__(self)  # -1mingfei
         cal_md_gb_bcc_100.md_gb_bcc_100.__init__(self)  # -1mingfei
->>>>>>> ab1fd522949c1c04d9551ecc5fa8ae415c665c6c
         cal_md_gb_hcp_0001.md_gb_hcp_0001.__init__(self)  # yongjie
         cal_md_gb_hcp_1210.md_gb_hcp_1210.__init__(self)
         cal_md_gb_ase_1100.md_gb_ase_1100.__init__(self)
