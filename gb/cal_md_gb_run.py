@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2019-05-13 11:56:48
+# @Last Modified time: 2019-05-16 16:24:08
 
 import os
 from glob import glob
@@ -15,7 +15,7 @@ from ase import Atom
 class md_gb_run(object):
     
     def loop_gb_run(self):  
-        dlist = glob("1210_*")
+        dlist = glob("110_*")
         for mdir in dlist:
             os.system("cp in.min {}".format(mdir))
             os.chdir(mdir)

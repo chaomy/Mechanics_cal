@@ -2,7 +2,7 @@
 # @Author: chaomy
 # @Date:   2017-12-03 11:07:29
 # @Last Modified by:   chaomy
-# @Last Modified time: 2019-05-15 16:06:30
+# @Last Modified time: 2019-05-16 16:28:59
 
 import ase.lattice.orthorhombic as otho
 # from ase.lattice.cubic import BodyCenteredCubic
@@ -38,8 +38,8 @@ class md_gb_ase_bcc_110(object):
         atoms = ase.io.read("CAND.12", format="lammps-data")
         print(len(atoms))
 
-    def loop_clc_init_structures(self):
-        dirs = glob.glob("1100_*")
+    def loop_clc_init_bcc_110_structures(self):
+        dirs = glob.glob("110_*")
         for i in range(len(dirs)):
             mdir = dirs[i]
             files = glob.glob("{}/dump/*".format(mdir))

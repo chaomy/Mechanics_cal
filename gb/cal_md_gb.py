@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2019-05-15 16:44:10
+# @Last Modified time: 2019-05-16 12:07:39
 
 
 import cal_md_gb_hcp
@@ -64,7 +64,8 @@ class md_gb(cal_md_gb_pre.md_gb_pre,
             gn_config.gnStructure):
 
     def __init__(self):
-        self.pot = md_pot.w_zhou
+        # self.pot = md_pot.w_zhou
+        self.pot = md_pot.mg_Poco
         # self.pot = md_pot.Ti_Ackland
         #self.pot = md_pot.ti_zope
         #self.pot = md_pot.Ag_Williams

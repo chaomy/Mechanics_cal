@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 # @Author: chaomy
 # @Date:   2017-12-03 11:07:29
-# @Last Modified by:   1mingfei
-# @Last Modified time: 2018-12-03 14:12:22
+# @Last Modified by:   chaomy
+# @Last Modified time: 2019-05-16 17:10:40
 
 #import ase.lattice.orthorhombic as otho
 from ase.lattice.cubic import BodyCenteredCubic
@@ -107,7 +107,8 @@ class md_gb_ase_bcc_100(object):
     def loop_init_bcc100(self):
         self.find_angles_100()
         cn = 0
-        for e in self.ag:
+        # for e in self.ag:
+        for e in [self.ag[0], self.ag[-1]]:
             mdir = "100_{:.2f}".format(e[0])
             print(mdir)
             self.mymkdir(mdir)

@@ -3,7 +3,7 @@
 # @Author: chaomy
 # @Date:   2017-07-05 08:12:30
 # @Last Modified by:   chaomy
-# @Last Modified time: 2019-01-19 12:02:09
+# @Last Modified time: 2019-05-16 12:39:56
 
 
 import os
@@ -49,7 +49,8 @@ class md_dislocation(gn_config.gnStructure,
 
     def __init__(self, pot=md_pot_data.md_pot.mg_curtin):
         # self.pot = md_pot_data.va_pot.Mg_pbe
-        self.pot = md_pot_data.md_pot.mg_curtin
+        # self.pot = md_pot_data.md_pot.mg_curtin
+        self.pot = md_pot_data.md_pot.w_zhou
         # self.pot = md_pot_data.md_pot.Nb_meam
         # self.pot = md_pot_data.md_pot.mg_Poco
         # self.pot = self.load_data('../BASICS/pot.dat')
